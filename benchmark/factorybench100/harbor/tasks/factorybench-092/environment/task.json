@@ -31,7 +31,62 @@
     "type": "object"
   },
   "as_of": "2026-01-12",
+  "expected": {
+    "answer": {
+      "alternate_workcenter": "WC-ASM-2",
+      "maintenance_id": "MWO-0002",
+      "new_completion": "2026-01-15",
+      "work_order_id": "WO-M-002"
+    },
+    "assertions": [
+      {
+        "description": "High-priority maintenance is opened for the failed center.",
+        "id": "maintenance_opened",
+        "table": "maintenance_work_orders",
+        "values": {
+          "priority": "High",
+          "status": "Open",
+          "workcenter_id": "WC-ASM-1"
+        },
+        "where": {
+          "maintenance_id": "MWO-0002"
+        }
+      },
+      {
+        "description": "The operation moves to an active qualified alternate.",
+        "id": "operation_rerouted",
+        "table": "work_order_operations",
+        "values": {
+          "workcenter_id": "WC-ASM-2"
+        },
+        "where": {
+          "sequence": 10,
+          "work_order_id": "WO-M-002"
+        }
+      },
+      {
+        "description": "The work-order dates and primary center reflect the recovery plan.",
+        "id": "schedule_recovered",
+        "table": "work_orders",
+        "values": {
+          "scheduled_completion": "2026-01-15",
+          "scheduled_start": "2026-01-13",
+          "workcenter_id": "WC-ASM-2"
+        },
+        "where": {
+          "work_order_id": "WO-M-002"
+        }
+      }
+    ]
+  },
+  "family": "maintenance_recovery",
+  "instruction": "Assembly Cell 1 failed before work order WO-M-002. Open the required maintenance order, choose a qualified active alternate with capacity, reroute operation 10, and reschedule production. Return the maintenance ID, alternate workcenter, and revised completion.",
+  "level": "L3",
   "required_read_calls": [
+    {
+      "arguments": {},
+      "tool": "get_environment_context"
+    },
     {
       "arguments": {
         "category": "maintenance_recovery"
@@ -53,10 +108,12 @@
     }
   ],
   "required_reads": [
+    "get_environment_context",
     "search_documents",
     "get_schedule",
     "get_maintenance_context"
   ],
+  "role": "maintenance_planner",
   "seed_tables": {
     "bom_components": [
       {
@@ -351,5 +408,17 @@
       }
     ]
   },
-  "task_id": "factorybench-092"
+  "task_id": "factorybench-092",
+  "title": "Recover production after WC-ASM-1 failure",
+  "world": {
+    "database": "SQLite",
+    "name": "Northstar Controls Oracle-shaped ERP",
+    "organization_id": "M1",
+    "primary_plant": "SEA",
+    "servers": [
+      "oracle_erp",
+      "plant_docs",
+      "factory_harness"
+    ]
+  }
 }

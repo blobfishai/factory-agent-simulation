@@ -34,7 +34,61 @@
     "type": "object"
   },
   "as_of": "2026-01-12",
+  "expected": {
+    "answer": {
+      "issued_lot": "R-EARLY-008",
+      "issued_quantity": 36,
+      "operation_status": "In Process",
+      "work_order_id": "WO-I-008"
+    },
+    "assertions": [
+      {
+        "description": "The full requirement is issued from the reserved earliest-expiry lot.",
+        "id": "fefo_issue",
+        "table": "material_transactions",
+        "values": {
+          "lot_number": "R-EARLY-008",
+          "quantity": 36,
+          "transaction_type": "WIP_ISSUE"
+        },
+        "where": {
+          "transaction_id": "TX-ISSUE-008"
+        }
+      },
+      {
+        "description": "The material requirement reflects the full issue.",
+        "id": "requirement_issued",
+        "table": "material_requirements",
+        "values": {
+          "issued_qty": 36
+        },
+        "where": {
+          "item_id": "RM-RELAY",
+          "work_order_id": "WO-I-008"
+        }
+      },
+      {
+        "description": "The first operation starts after material issue.",
+        "id": "operation_started",
+        "table": "work_order_operations",
+        "values": {
+          "status": "In Process"
+        },
+        "where": {
+          "sequence": 10,
+          "work_order_id": "WO-I-008"
+        }
+      }
+    ]
+  },
+  "family": "production_issue",
+  "instruction": "Stage and issue 36 RM-RELAY units to work order WO-I-008, honoring reservation and FEFO controls, then start operation 10. Return the work order, lot, issued quantity, and operation status.",
+  "level": "L3",
   "required_read_calls": [
+    {
+      "arguments": {},
+      "tool": "get_environment_context"
+    },
     {
       "arguments": {
         "category": "production_issue"
@@ -58,10 +112,12 @@
     }
   ],
   "required_reads": [
+    "get_environment_context",
     "search_documents",
     "get_work_order",
     "get_inventory"
   ],
+  "role": "shop_floor_controller",
   "seed_tables": {
     "bom_components": [
       {
@@ -401,5 +457,17 @@
       }
     ]
   },
-  "task_id": "factorybench-058"
+  "task_id": "factorybench-058",
+  "title": "Issue FEFO material to WO-I-008",
+  "world": {
+    "database": "SQLite",
+    "name": "Northstar Controls Oracle-shaped ERP",
+    "organization_id": "M1",
+    "primary_plant": "SEA",
+    "servers": [
+      "oracle_erp",
+      "plant_docs",
+      "factory_harness"
+    ]
+  }
 }

@@ -58,6 +58,16 @@ reported only as supporting evidence.
 
 These rows are measured controls, not claims about frontier models.
 
+## Pinned model runs
+
+| Model | Harness | Coverage | FactoryScore | Strict passes | Selection |
+|---|---|---:|---:|---:|---|
+| [gpt-5.6-luna](model-runs/gpt-5.6-luna-stratified-10.json) | Harbor 0.21.0 / codex 0.150.1 / medium | 10/100 | 62.28 | 1/10 | Fixed 10-task stratified sample: one released task from each workflow family (10/100); not full-suite coverage. |
+
+Coverage is part of the result. A stratified subset is not presented as a
+100-task score. Full manifests and task-level traces are mirrored under
+`model-runs/`.
+
 ## Fields
 
 Each JSONL row includes the natural-language prompt, role, workflow family,

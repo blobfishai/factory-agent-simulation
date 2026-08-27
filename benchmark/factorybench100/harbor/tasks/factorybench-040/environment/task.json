@@ -34,7 +34,64 @@
     "type": "object"
   },
   "as_of": "2026-01-12",
+  "expected": {
+    "answer": {
+      "inspection_id": "INSP-R-010",
+      "lot_number": "LOT-R-0010",
+      "receipt_id": "RCV-0010",
+      "released_quantity": 34
+    },
+    "assertions": [
+      {
+        "description": "The approved PO quantity is received into a traceable lot.",
+        "id": "receipt_complete",
+        "table": "receipts",
+        "values": {
+          "purchase_order_id": "PO-R-010",
+          "status": "Inspected"
+        },
+        "where": {
+          "receipt_id": "RCV-0010"
+        }
+      },
+      {
+        "description": "The full receipt has a passing inspection.",
+        "id": "inspection_passed",
+        "table": "quality_inspections",
+        "values": {
+          "accepted_qty": 34,
+          "rejected_qty": 0,
+          "result": "Pass"
+        },
+        "where": {
+          "inspection_id": "INSP-R-010"
+        }
+      },
+      {
+        "description": "Accepted stock is released to stores.",
+        "id": "accepted_stock_released",
+        "table": "inventory_on_hand",
+        "values": {
+          "quantity": 34,
+          "status": "Unrestricted"
+        },
+        "where": {
+          "item_id": "RM-RELAY",
+          "lot_number": "LOT-R-0010",
+          "plant_id": "SEA",
+          "subinventory": "STORES"
+        }
+      }
+    ]
+  },
+  "family": "inbound_receipt",
+  "instruction": "Receive the full 34-unit RM-RELAY shipment for approved PO PO-R-010, lot LOT-R-0010. Record the required inspection, release only accepted quantity, and return the receipt, inspection, released quantity, and lot identifiers.",
+  "level": "L2",
   "required_read_calls": [
+    {
+      "arguments": {},
+      "tool": "get_environment_context"
+    },
     {
       "arguments": {
         "category": "inbound_receipt"
@@ -49,9 +106,11 @@
     }
   ],
   "required_reads": [
+    "get_environment_context",
     "search_documents",
     "get_purchase_order"
   ],
+  "role": "receiving_agent",
   "seed_tables": {
     "bom_components": [
       {
@@ -343,5 +402,17 @@
       }
     ]
   },
-  "task_id": "factorybench-040"
+  "task_id": "factorybench-040",
+  "title": "Receive and inspect PO-R-010",
+  "world": {
+    "database": "SQLite",
+    "name": "Northstar Controls Oracle-shaped ERP",
+    "organization_id": "M1",
+    "primary_plant": "SEA",
+    "servers": [
+      "oracle_erp",
+      "plant_docs",
+      "factory_harness"
+    ]
+  }
 }

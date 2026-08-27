@@ -29,7 +29,59 @@
     "type": "object"
   },
   "as_of": "2026-01-12",
+  "expected": {
+    "answer": {
+      "completion_date": "2026-01-23",
+      "released_quantity": 12,
+      "work_order_id": "WO-0008"
+    },
+    "assertions": [
+      {
+        "description": "A released discrete work order links to the sales order.",
+        "id": "work_order_released",
+        "table": "work_orders",
+        "values": {
+          "quantity": 12,
+          "sales_order_id": "SO-0008",
+          "status": "Released"
+        },
+        "where": {
+          "work_order_id": "WO-0008"
+        }
+      },
+      {
+        "count": 3,
+        "description": "All three BOM components are reserved.",
+        "id": "all_components_reserved",
+        "table": "material_reservations",
+        "where": {
+          "status": "Active",
+          "work_order_id": "WO-0008"
+        }
+      },
+      {
+        "description": "The two-per-assembly relay requirement is fully reserved.",
+        "id": "relay_requirement_reserved",
+        "table": "material_requirements",
+        "values": {
+          "required_qty": 24,
+          "reserved_qty": 24
+        },
+        "where": {
+          "item_id": "RM-RELAY",
+          "work_order_id": "WO-0008"
+        }
+      }
+    ]
+  },
+  "family": "order_release",
+  "instruction": "Release sales order SO-0008 for 12 FG-PANEL units into production at SEA. Check the governing policy, credit status, effective BOM, and component availability; create and fully reserve the work order. Return the work-order ID, released quantity, and scheduled completion date.",
+  "level": "L2",
   "required_read_calls": [
+    {
+      "arguments": {},
+      "tool": "get_environment_context"
+    },
     {
       "arguments": {
         "category": "order_release"
@@ -62,11 +114,13 @@
     }
   ],
   "required_reads": [
+    "get_environment_context",
     "search_documents",
     "get_sales_order",
     "get_bom",
     "get_inventory"
   ],
+  "role": "production_planner",
   "seed_tables": {
     "bom_components": [
       {
@@ -387,5 +441,17 @@
       }
     ]
   },
-  "task_id": "factorybench-008"
+  "task_id": "factorybench-008",
+  "title": "Release SO-0008 to manufacturing",
+  "world": {
+    "database": "SQLite",
+    "name": "Northstar Controls Oracle-shaped ERP",
+    "organization_id": "M1",
+    "primary_plant": "SEA",
+    "servers": [
+      "oracle_erp",
+      "plant_docs",
+      "factory_harness"
+    ]
+  }
 }

@@ -49,10 +49,11 @@ python3.12 -m factorybench.evaluation
 python3.12 -m factorybench.release
 ```
 
-Run one task through the MCP-compatible JSON-RPC server:
+Run one task through the actual stdio MCP server (the `factorybench-server`
+name remains as a compatibility alias):
 
 ```sh
-factorybench-server \
+factorybench-mcp \
   --task factorybench-001 \
   --db /tmp/factorybench-001.db \
   --fresh
@@ -62,6 +63,8 @@ The server accepts `initialize`, `tools/list`, and `tools/call` JSON-RPC message
 on stdin. The generated Harbor tasks also expose a terminal-friendly `tool` CLI.
 Inside Harbor, the agent container has no database, runtime, verifier, or gold
 state; it can reach the private ERP sidecar only through the declared tools.
+The checked-in `benchmark/factorybench100/environment/mcp.json` can be copied
+directly into Codex, Claude Desktop, or another stdio MCP client.
 
 ## Release outputs
 

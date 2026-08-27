@@ -26,7 +26,51 @@
     "type": "object"
   },
   "as_of": "2026-01-12",
+  "expected": {
+    "answer": {
+      "net_shortage": 31,
+      "requisition_id": "REQ-0008",
+      "supplier_id": "SUP-A"
+    },
+    "assertions": [
+      {
+        "description": "The shortage is covered by an approved requisition.",
+        "id": "requisition_approved",
+        "table": "purchase_requisitions",
+        "values": {
+          "approved_by": "U-MANAGER",
+          "status": "Approved",
+          "supplier_id": "SUP-A",
+          "total_amount": 2194.8
+        },
+        "where": {
+          "requisition_id": "REQ-0008"
+        }
+      },
+      {
+        "description": "The requisition line equals net requirement after available stock.",
+        "id": "net_quantity_ordered",
+        "table": "requisition_lines",
+        "values": {
+          "item_id": "RM-COPPER",
+          "quantity": 31,
+          "unit_price": 70.8
+        },
+        "where": {
+          "line_no": 1,
+          "requisition_id": "REQ-0008"
+        }
+      }
+    ]
+  },
+  "family": "material_shortage",
+  "instruction": "Work order WO-S-008 is short RM-COPPER. Net the 34 required units against available SEA stock, select a valid approved quote that meets the need-by date 2026-02-07, create the requisition, and obtain any required approval. Return the requisition ID, net shortage, and supplier.",
+  "level": "L3",
   "required_read_calls": [
+    {
+      "arguments": {},
+      "tool": "get_environment_context"
+    },
     {
       "arguments": {
         "category": "material_shortage"
@@ -58,11 +102,13 @@
     }
   ],
   "required_reads": [
+    "get_environment_context",
     "search_documents",
     "get_work_order",
     "get_inventory",
     "get_supplier_quotes"
   ],
+  "role": "material_planner",
   "seed_tables": {
     "bom_components": [
       {
@@ -391,5 +437,17 @@
       }
     ]
   },
-  "task_id": "factorybench-018"
+  "task_id": "factorybench-018",
+  "title": "Cover material shortage for WO-S-008",
+  "world": {
+    "database": "SQLite",
+    "name": "Northstar Controls Oracle-shaped ERP",
+    "organization_id": "M1",
+    "primary_plant": "SEA",
+    "servers": [
+      "oracle_erp",
+      "plant_docs",
+      "factory_harness"
+    ]
+  }
 }
