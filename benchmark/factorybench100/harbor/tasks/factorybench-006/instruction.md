@@ -1,0 +1,1 @@
+Release sales order SO-0006 for 10 FG-PANEL units into production at SEA. Check the governing policy, credit status, effective BOM, and component availability; create and fully reserve the work order. Return the work-order ID, released quantity, and scheduled completion date.

@@ -1,0 +1,516 @@
+{
+  "checks": [
+    {
+      "description": "Required policy and ERP reads completed before the first write.",
+      "evidence": {
+        "missing": []
+      },
+      "id": "read_before_write",
+      "passed": true
+    },
+    {
+      "description": "The donor-plant transfer is completed for the shortage quantity.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "transfer_completed",
+      "passed": true
+    },
+    {
+      "description": "Transferred stock is available at the receiving plant.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "receiving_inventory_created",
+      "passed": true
+    },
+    {
+      "description": "The work order starts on arrival and has a feasible completion date.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "work_order_rescheduled",
+      "passed": true
+    },
+    {
+      "description": "Submitted answer fields exactly match the ground truth.",
+      "evidence": {
+        "expected": {
+          "new_completion": "2026-01-17",
+          "new_start": "2026-01-14",
+          "transfer_id": "TRF-0010",
+          "work_order_id": "WO-T-010"
+        },
+        "submitted": {
+          "new_completion": "2026-01-17",
+          "new_start": "2026-01-14",
+          "transfer_id": "TRF-0010",
+          "work_order_id": "WO-T-010"
+        }
+      },
+      "id": "exact_answer",
+      "passed": true
+    },
+    {
+      "description": "All successful writes stay inside the task's allowed tables.",
+      "evidence": {
+        "disallowed": [],
+        "written_tables": [
+          "answers",
+          "inventory_on_hand",
+          "inventory_transfers",
+          "work_orders"
+        ]
+      },
+      "id": "write_scope",
+      "passed": true
+    },
+    {
+      "description": "The episode completes without a rejected or malformed tool call.",
+      "evidence": {
+        "errors": []
+      },
+      "id": "error_free",
+      "passed": true
+    }
+  ],
+  "metric": "FactoryScore",
+  "passed_checks": 7,
+  "policy": "oracle",
+  "score": 100.0,
+  "state_diff": {
+    "answers": {
+      "after": [
+        {
+          "field": "new_completion",
+          "task_id": "factorybench-090",
+          "value": "2026-01-17"
+        },
+        {
+          "field": "new_start",
+          "task_id": "factorybench-090",
+          "value": "2026-01-14"
+        },
+        {
+          "field": "transfer_id",
+          "task_id": "factorybench-090",
+          "value": "TRF-0010"
+        },
+        {
+          "field": "work_order_id",
+          "task_id": "factorybench-090",
+          "value": "WO-T-010"
+        }
+      ],
+      "after_count": 4,
+      "before": [],
+      "before_count": 0
+    },
+    "audit_log": {
+      "after": [
+        {
+          "action": "insert",
+          "audit_id": 1,
+          "payload": "{\"from_plant\": \"PDX\", \"from_subinventory\": \"STORES\", \"item_id\": \"RM-COPPER\", \"lot_number\": \"PDX-C-010\", \"quantity\": 17, \"status\": \"In Transit\", \"task_id\": \"factorybench-090\", \"to_plant\": \"SEA\", \"to_subinventory\": \"STORES\", \"transfer_id\": \"TRF-0010\", \"transferred_at\": \"2026-01-12\"}",
+          "record_id": "TRF-0010",
+          "table_name": "inventory_transfers",
+          "task_id": "factorybench-090",
+          "tool": "create_transfer"
+        },
+        {
+          "action": "update",
+          "audit_id": 2,
+          "payload": "{\"quantity_delta\": -17}",
+          "record_id": "PDX:STORES:RM-COPPER:PDX-C-010",
+          "table_name": "inventory_on_hand",
+          "task_id": "factorybench-090",
+          "tool": "create_transfer"
+        },
+        {
+          "action": "update",
+          "audit_id": 3,
+          "payload": "{\"arrival_date\": \"2026-01-14\", \"status\": \"Completed\"}",
+          "record_id": "TRF-0010",
+          "table_name": "inventory_transfers",
+          "task_id": "factorybench-090",
+          "tool": "complete_transfer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 4,
+          "payload": "{\"quantity_delta\": 17.0}",
+          "record_id": "SEA:STORES:RM-COPPER:PDX-C-010",
+          "table_name": "inventory_on_hand",
+          "task_id": "factorybench-090",
+          "tool": "complete_transfer"
+        },
+        {
+          "action": "update",
+          "audit_id": 5,
+          "payload": "{\"scheduled_completion\": \"2026-01-17\", \"scheduled_start\": \"2026-01-14\", \"workcenter_id\": \"WC-ASM-1\"}",
+          "record_id": "WO-T-010",
+          "table_name": "work_orders",
+          "task_id": "factorybench-090",
+          "tool": "reschedule_work_order"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 6,
+          "payload": "{\"value\": \"TRF-0010\"}",
+          "record_id": "factorybench-090:transfer_id",
+          "table_name": "answers",
+          "task_id": "factorybench-090",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 7,
+          "payload": "{\"value\": \"WO-T-010\"}",
+          "record_id": "factorybench-090:work_order_id",
+          "table_name": "answers",
+          "task_id": "factorybench-090",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 8,
+          "payload": "{\"value\": \"2026-01-14\"}",
+          "record_id": "factorybench-090:new_start",
+          "table_name": "answers",
+          "task_id": "factorybench-090",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 9,
+          "payload": "{\"value\": \"2026-01-17\"}",
+          "record_id": "factorybench-090:new_completion",
+          "table_name": "answers",
+          "task_id": "factorybench-090",
+          "tool": "submit_answer"
+        }
+      ],
+      "after_count": 9,
+      "before": [],
+      "before_count": 0
+    },
+    "inventory_on_hand": {
+      "after": [
+        {
+          "expiration_date": null,
+          "item_id": "RM-COPPER",
+          "lot_number": "PDX-C-010",
+          "plant_id": "PDX",
+          "quantity": 12.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        },
+        {
+          "expiration_date": null,
+          "item_id": "RM-COPPER",
+          "lot_number": "PDX-C-010",
+          "plant_id": "SEA",
+          "quantity": 17.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        },
+        {
+          "expiration_date": null,
+          "item_id": "RM-COPPER",
+          "lot_number": "SEA-C-010",
+          "plant_id": "SEA",
+          "quantity": 1.0,
+          "reserved_qty": 1.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        }
+      ],
+      "after_count": 3,
+      "before": [
+        {
+          "expiration_date": null,
+          "item_id": "RM-COPPER",
+          "lot_number": "PDX-C-010",
+          "plant_id": "PDX",
+          "quantity": 29.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        },
+        {
+          "expiration_date": null,
+          "item_id": "RM-COPPER",
+          "lot_number": "SEA-C-010",
+          "plant_id": "SEA",
+          "quantity": 1.0,
+          "reserved_qty": 1.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        }
+      ],
+      "before_count": 2
+    },
+    "inventory_transfers": {
+      "after": [
+        {
+          "from_plant": "PDX",
+          "from_subinventory": "STORES",
+          "item_id": "RM-COPPER",
+          "lot_number": "PDX-C-010",
+          "quantity": 17.0,
+          "status": "Completed",
+          "task_id": "factorybench-090",
+          "to_plant": "SEA",
+          "to_subinventory": "STORES",
+          "transfer_id": "TRF-0010",
+          "transferred_at": "2026-01-14"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "work_orders": {
+      "after": [
+        {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 17.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-17",
+          "scheduled_start": "2026-01-14",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-090",
+          "work_order_id": "WO-T-010",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 17.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-13",
+          "scheduled_start": "2026-01-12",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-090",
+          "work_order_id": "WO-T-010",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "before_count": 1
+    }
+  },
+  "strict_pass": true,
+  "task_id": "factorybench-090",
+  "total_checks": 7,
+  "trace": [
+    {
+      "arguments": {
+        "category": "transfer_reschedule"
+      },
+      "index": 0,
+      "result": {
+        "documents": [
+          {
+            "body": "Use unrestricted surplus from the donor plant, complete the interplant transfer, and reschedule the receiving work order no earlier than the transfer arrival date.",
+            "category": "transfer_reschedule",
+            "doc_id": "POL-09",
+            "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
+            "title": "Interplant recovery policy"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "work_order_id": "WO-T-010"
+      },
+      "index": 1,
+      "result": {
+        "header": {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 17.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-13",
+          "scheduled_start": "2026-01-12",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-090",
+          "work_order_id": "WO-T-010",
+          "workcenter_id": "WC-ASM-1"
+        },
+        "operations": [],
+        "requirements": [
+          {
+            "issued_qty": 0.0,
+            "item_id": "RM-COPPER",
+            "need_by": "2026-01-12",
+            "required_qty": 17.0,
+            "reserved_qty": 0.0,
+            "work_order_id": "WO-T-010"
+          }
+        ],
+        "reservations": []
+      },
+      "success": true,
+      "tool": "get_work_order"
+    },
+    {
+      "arguments": {
+        "item_ids": [
+          "RM-COPPER"
+        ],
+        "plant_id": "PDX"
+      },
+      "index": 2,
+      "result": {
+        "lots": [
+          {
+            "available_qty": 29.0,
+            "expiration_date": null,
+            "item_id": "RM-COPPER",
+            "lot_number": "PDX-C-010",
+            "plant_id": "PDX",
+            "quantity": 29.0,
+            "reserved_qty": 0.0,
+            "status": "Unrestricted",
+            "subinventory": "STORES"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_inventory"
+    },
+    {
+      "arguments": {
+        "plant_id": "SEA",
+        "work_order_id": "WO-T-010"
+      },
+      "index": 3,
+      "result": {
+        "operations": [],
+        "work_order": {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 17.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-13",
+          "scheduled_start": "2026-01-12",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-090",
+          "work_order_id": "WO-T-010",
+          "workcenter_id": "WC-ASM-1"
+        },
+        "workcenters": [
+          {
+            "capacity_hours": 80.0,
+            "name": "Assembly Cell 1",
+            "plant_id": "SEA",
+            "qualified_item_class": "control_panel",
+            "status": "Active",
+            "workcenter_id": "WC-ASM-1"
+          },
+          {
+            "capacity_hours": 64.0,
+            "name": "Assembly Cell 2",
+            "plant_id": "SEA",
+            "qualified_item_class": "control_panel",
+            "status": "Active",
+            "workcenter_id": "WC-ASM-2"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_schedule"
+    },
+    {
+      "arguments": {
+        "from_plant": "PDX",
+        "from_subinventory": "STORES",
+        "item_id": "RM-COPPER",
+        "lot_number": "PDX-C-010",
+        "quantity": 17,
+        "to_plant": "SEA",
+        "to_subinventory": "STORES",
+        "transfer_id": "TRF-0010",
+        "transferred_at": "2026-01-12"
+      },
+      "index": 4,
+      "result": {
+        "status": "In Transit",
+        "transfer_id": "TRF-0010"
+      },
+      "success": true,
+      "tool": "create_transfer"
+    },
+    {
+      "arguments": {
+        "arrival_date": "2026-01-14",
+        "transfer_id": "TRF-0010"
+      },
+      "index": 5,
+      "result": {
+        "arrival_date": "2026-01-14",
+        "status": "Completed",
+        "transfer_id": "TRF-0010"
+      },
+      "success": true,
+      "tool": "complete_transfer"
+    },
+    {
+      "arguments": {
+        "scheduled_completion": "2026-01-17",
+        "scheduled_start": "2026-01-14",
+        "work_order_id": "WO-T-010",
+        "workcenter_id": "WC-ASM-1"
+      },
+      "index": 6,
+      "result": {
+        "scheduled_completion": "2026-01-17",
+        "scheduled_start": "2026-01-14",
+        "work_order_id": "WO-T-010",
+        "workcenter_id": "WC-ASM-1"
+      },
+      "success": true,
+      "tool": "reschedule_work_order"
+    },
+    {
+      "arguments": {
+        "new_completion": "2026-01-17",
+        "new_start": "2026-01-14",
+        "transfer_id": "TRF-0010",
+        "work_order_id": "WO-T-010"
+      },
+      "index": 7,
+      "result": {
+        "submitted": {
+          "new_completion": "2026-01-17",
+          "new_start": "2026-01-14",
+          "transfer_id": "TRF-0010",
+          "work_order_id": "WO-T-010"
+        },
+        "task_id": "factorybench-090"
+      },
+      "success": true,
+      "tool": "submit_answer"
+    }
+  ]
+}

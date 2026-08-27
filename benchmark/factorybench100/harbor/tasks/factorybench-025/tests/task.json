@@ -1,0 +1,101 @@
+{
+  "allowed_write_tables": [
+    "purchase_orders",
+    "purchase_order_lines",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "purchase_order_id": {
+        "type": "string"
+      },
+      "supplier_id": {
+        "type": "string"
+      },
+      "total_amount": {
+        "multipleOf": 0.01,
+        "type": "number"
+      }
+    },
+    "required": [
+      "purchase_order_id",
+      "supplier_id",
+      "total_amount"
+    ],
+    "type": "object"
+  },
+  "expected": {
+    "answer": {
+      "purchase_order_id": "PO-0005",
+      "supplier_id": "SUP-B",
+      "total_amount": 1940.0
+    },
+    "assertions": [
+      {
+        "description": "The purchase order is awarded to the best eligible supplier, meets the need-by date, and is approved.",
+        "id": "po_approved",
+        "table": "purchase_orders",
+        "values": {
+          "approved_by": "U-MANAGER",
+          "promised_date": "2026-01-16",
+          "requisition_id": "REQ-A-005",
+          "status": "Approved",
+          "supplier_id": "SUP-B",
+          "total_amount": 1940.0
+        },
+        "where": {
+          "purchase_order_id": "PO-0005"
+        }
+      },
+      {
+        "description": "The PO line preserves the approved requisition quantity.",
+        "id": "po_line_exact",
+        "table": "purchase_order_lines",
+        "values": {
+          "item_id": "RM-RELAY",
+          "ordered_qty": 40,
+          "unit_price": 48.5
+        },
+        "where": {
+          "line_no": 1,
+          "purchase_order_id": "PO-0005"
+        }
+      }
+    ]
+  },
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "supplier_selection"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "requisition_id": "REQ-A-005"
+      },
+      "tool": "get_requisition"
+    },
+    {
+      "arguments": {
+        "item_id": "RM-RELAY",
+        "need_by": "2026-01-31",
+        "task_id": "factorybench-025"
+      },
+      "tool": "get_supplier_quotes"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_requisition",
+    "get_supplier_quotes"
+  ],
+  "task_id": "factorybench-025",
+  "write_tools": [
+    "approve_purchase_order",
+    "create_purchase_order",
+    "submit_answer"
+  ]
+}

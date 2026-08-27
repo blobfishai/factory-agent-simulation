@@ -1,0 +1,110 @@
+{
+  "allowed_write_tables": [
+    "purchase_orders",
+    "purchase_order_lines",
+    "receipts",
+    "receipt_lines",
+    "quality_inspections",
+    "inventory_on_hand",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "inspection_id": {
+        "type": "string"
+      },
+      "lot_number": {
+        "type": "string"
+      },
+      "receipt_id": {
+        "type": "string"
+      },
+      "released_quantity": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "inspection_id",
+      "lot_number",
+      "receipt_id",
+      "released_quantity"
+    ],
+    "type": "object"
+  },
+  "expected": {
+    "answer": {
+      "inspection_id": "INSP-R-001",
+      "lot_number": "LOT-R-0001",
+      "receipt_id": "RCV-0001",
+      "released_quantity": 25
+    },
+    "assertions": [
+      {
+        "description": "The approved PO quantity is received into a traceable lot.",
+        "id": "receipt_complete",
+        "table": "receipts",
+        "values": {
+          "purchase_order_id": "PO-R-001",
+          "status": "Inspected"
+        },
+        "where": {
+          "receipt_id": "RCV-0001"
+        }
+      },
+      {
+        "description": "The full receipt has a passing inspection.",
+        "id": "inspection_passed",
+        "table": "quality_inspections",
+        "values": {
+          "accepted_qty": 25,
+          "rejected_qty": 0,
+          "result": "Pass"
+        },
+        "where": {
+          "inspection_id": "INSP-R-001"
+        }
+      },
+      {
+        "description": "Accepted stock is released to stores.",
+        "id": "accepted_stock_released",
+        "table": "inventory_on_hand",
+        "values": {
+          "quantity": 25,
+          "status": "Unrestricted"
+        },
+        "where": {
+          "item_id": "RM-RELAY",
+          "lot_number": "LOT-R-0001",
+          "plant_id": "SEA",
+          "subinventory": "STORES"
+        }
+      }
+    ]
+  },
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "inbound_receipt"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "purchase_order_id": "PO-R-001"
+      },
+      "tool": "get_purchase_order"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_purchase_order"
+  ],
+  "task_id": "factorybench-031",
+  "write_tools": [
+    "receive_purchase_order",
+    "record_inspection",
+    "submit_answer"
+  ]
+}

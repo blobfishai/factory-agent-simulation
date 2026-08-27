@@ -1,0 +1,1 @@
+Recover the RM-COPPER shortage on work order WO-T-005 using unrestricted surplus at PDX. Transfer 12 units from lot PDX-C-005, then reschedule the SEA work order no earlier than arrival on 2026-01-14. Return the transfer and revised dates.

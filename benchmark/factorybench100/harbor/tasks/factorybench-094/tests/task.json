@@ -1,0 +1,114 @@
+{
+  "allowed_write_tables": [
+    "maintenance_work_orders",
+    "work_order_operations",
+    "work_orders",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "alternate_workcenter": {
+        "type": "string"
+      },
+      "maintenance_id": {
+        "type": "string"
+      },
+      "new_completion": {
+        "type": "string"
+      },
+      "work_order_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "alternate_workcenter",
+      "maintenance_id",
+      "new_completion",
+      "work_order_id"
+    ],
+    "type": "object"
+  },
+  "expected": {
+    "answer": {
+      "alternate_workcenter": "WC-ASM-2",
+      "maintenance_id": "MWO-0004",
+      "new_completion": "2026-01-15",
+      "work_order_id": "WO-M-004"
+    },
+    "assertions": [
+      {
+        "description": "High-priority maintenance is opened for the failed center.",
+        "id": "maintenance_opened",
+        "table": "maintenance_work_orders",
+        "values": {
+          "priority": "High",
+          "status": "Open",
+          "workcenter_id": "WC-ASM-1"
+        },
+        "where": {
+          "maintenance_id": "MWO-0004"
+        }
+      },
+      {
+        "description": "The operation moves to an active qualified alternate.",
+        "id": "operation_rerouted",
+        "table": "work_order_operations",
+        "values": {
+          "workcenter_id": "WC-ASM-2"
+        },
+        "where": {
+          "sequence": 10,
+          "work_order_id": "WO-M-004"
+        }
+      },
+      {
+        "description": "The work-order dates and primary center reflect the recovery plan.",
+        "id": "schedule_recovered",
+        "table": "work_orders",
+        "values": {
+          "scheduled_completion": "2026-01-15",
+          "scheduled_start": "2026-01-13",
+          "workcenter_id": "WC-ASM-2"
+        },
+        "where": {
+          "work_order_id": "WO-M-004"
+        }
+      }
+    ]
+  },
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "maintenance_recovery"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "plant_id": "SEA",
+        "work_order_id": "WO-M-004"
+      },
+      "tool": "get_schedule"
+    },
+    {
+      "arguments": {
+        "workcenter_id": "WC-ASM-1"
+      },
+      "tool": "get_maintenance_context"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_schedule",
+    "get_maintenance_context"
+  ],
+  "task_id": "factorybench-094",
+  "write_tools": [
+    "create_maintenance_work_order",
+    "reroute_operation",
+    "reschedule_work_order",
+    "submit_answer"
+  ]
+}

@@ -1,0 +1,1 @@
+Assembly Cell 1 failed before work order WO-M-003. Open the required maintenance order, choose a qualified active alternate with capacity, reroute operation 10, and reschedule production. Return the maintenance ID, alternate workcenter, and revised completion.

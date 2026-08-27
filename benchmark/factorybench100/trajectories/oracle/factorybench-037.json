@@ -1,0 +1,437 @@
+{
+  "checks": [
+    {
+      "description": "Required policy and ERP reads completed before the first write.",
+      "evidence": {
+        "missing": []
+      },
+      "id": "read_before_write",
+      "passed": true
+    },
+    {
+      "description": "The approved PO quantity is received into a traceable lot.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "receipt_complete",
+      "passed": true
+    },
+    {
+      "description": "The full receipt has a passing inspection.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "inspection_passed",
+      "passed": true
+    },
+    {
+      "description": "Accepted stock is released to stores.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "accepted_stock_released",
+      "passed": true
+    },
+    {
+      "description": "Submitted answer fields exactly match the ground truth.",
+      "evidence": {
+        "expected": {
+          "inspection_id": "INSP-R-007",
+          "lot_number": "LOT-R-0007",
+          "receipt_id": "RCV-0007",
+          "released_quantity": "31"
+        },
+        "submitted": {
+          "inspection_id": "INSP-R-007",
+          "lot_number": "LOT-R-0007",
+          "receipt_id": "RCV-0007",
+          "released_quantity": "31"
+        }
+      },
+      "id": "exact_answer",
+      "passed": true
+    },
+    {
+      "description": "All successful writes stay inside the task's allowed tables.",
+      "evidence": {
+        "disallowed": [],
+        "written_tables": [
+          "answers",
+          "inventory_on_hand",
+          "purchase_order_lines",
+          "quality_inspections",
+          "receipt_lines",
+          "receipts"
+        ]
+      },
+      "id": "write_scope",
+      "passed": true
+    },
+    {
+      "description": "The episode completes without a rejected or malformed tool call.",
+      "evidence": {
+        "errors": []
+      },
+      "id": "error_free",
+      "passed": true
+    }
+  ],
+  "metric": "FactoryScore",
+  "passed_checks": 7,
+  "policy": "oracle",
+  "score": 100.0,
+  "state_diff": {
+    "answers": {
+      "after": [
+        {
+          "field": "inspection_id",
+          "task_id": "factorybench-037",
+          "value": "INSP-R-007"
+        },
+        {
+          "field": "lot_number",
+          "task_id": "factorybench-037",
+          "value": "LOT-R-0007"
+        },
+        {
+          "field": "receipt_id",
+          "task_id": "factorybench-037",
+          "value": "RCV-0007"
+        },
+        {
+          "field": "released_quantity",
+          "task_id": "factorybench-037",
+          "value": "31"
+        }
+      ],
+      "after_count": 4,
+      "before": [],
+      "before_count": 0
+    },
+    "audit_log": {
+      "after": [
+        {
+          "action": "insert",
+          "audit_id": 1,
+          "payload": "{\"purchase_order_id\": \"PO-R-007\", \"receipt_id\": \"RCV-0007\", \"received_at\": \"2026-01-12\", \"receiver_id\": \"U-PLANNER\", \"status\": \"Pending Inspection\", \"task_id\": \"factorybench-037\"}",
+          "record_id": "RCV-0007",
+          "table_name": "receipts",
+          "task_id": "factorybench-037",
+          "tool": "receive_purchase_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 2,
+          "payload": "{\"accepted_qty\": 0, \"item_id\": \"RM-RELAY\", \"line_no\": 1, \"lot_number\": \"LOT-R-0007\", \"quantity\": 31, \"receipt_id\": \"RCV-0007\", \"rejected_qty\": 0}",
+          "record_id": "RCV-0007:1",
+          "table_name": "receipt_lines",
+          "task_id": "factorybench-037",
+          "tool": "receive_purchase_order"
+        },
+        {
+          "action": "update",
+          "audit_id": 3,
+          "payload": "{\"received_delta\": 31}",
+          "record_id": "PO-R-007:1",
+          "table_name": "purchase_order_lines",
+          "task_id": "factorybench-037",
+          "tool": "receive_purchase_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 4,
+          "payload": "{\"quantity\": 31, \"status\": \"Inspection\"}",
+          "record_id": "SEA:RECEIVING:RM-RELAY:LOT-R-0007",
+          "table_name": "inventory_on_hand",
+          "task_id": "factorybench-037",
+          "tool": "receive_purchase_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 5,
+          "payload": "{\"accepted_qty\": 31, \"inspected_qty\": 31, \"inspection_id\": \"INSP-R-007\", \"inspector_id\": \"U-INSPECTOR\", \"item_id\": \"RM-RELAY\", \"lot_number\": \"LOT-R-0007\", \"rejected_qty\": 0, \"result\": \"Pass\", \"source_id\": \"RCV-0007\", \"source_type\": \"receipt\", \"task_id\": \"factorybench-037\"}",
+          "record_id": "INSP-R-007",
+          "table_name": "quality_inspections",
+          "task_id": "factorybench-037",
+          "tool": "record_inspection"
+        },
+        {
+          "action": "update",
+          "audit_id": 6,
+          "payload": "{\"accepted_qty\": 31, \"rejected_qty\": 0}",
+          "record_id": "RCV-0007:1",
+          "table_name": "receipt_lines",
+          "task_id": "factorybench-037",
+          "tool": "record_inspection"
+        },
+        {
+          "action": "update",
+          "audit_id": 7,
+          "payload": "{\"status\": \"Inspected\"}",
+          "record_id": "RCV-0007",
+          "table_name": "receipts",
+          "task_id": "factorybench-037",
+          "tool": "record_inspection"
+        },
+        {
+          "action": "move",
+          "audit_id": 8,
+          "payload": "{\"accepted_qty\": 31, \"rejected_qty\": 0}",
+          "record_id": "SEA:RM-RELAY:LOT-R-0007",
+          "table_name": "inventory_on_hand",
+          "task_id": "factorybench-037",
+          "tool": "record_inspection"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 9,
+          "payload": "{\"value\": \"RCV-0007\"}",
+          "record_id": "factorybench-037:receipt_id",
+          "table_name": "answers",
+          "task_id": "factorybench-037",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 10,
+          "payload": "{\"value\": \"INSP-R-007\"}",
+          "record_id": "factorybench-037:inspection_id",
+          "table_name": "answers",
+          "task_id": "factorybench-037",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 11,
+          "payload": "{\"value\": \"31\"}",
+          "record_id": "factorybench-037:released_quantity",
+          "table_name": "answers",
+          "task_id": "factorybench-037",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 12,
+          "payload": "{\"value\": \"LOT-R-0007\"}",
+          "record_id": "factorybench-037:lot_number",
+          "table_name": "answers",
+          "task_id": "factorybench-037",
+          "tool": "submit_answer"
+        }
+      ],
+      "after_count": 12,
+      "before": [],
+      "before_count": 0
+    },
+    "inventory_on_hand": {
+      "after": [
+        {
+          "expiration_date": null,
+          "item_id": "RM-RELAY",
+          "lot_number": "LOT-R-0007",
+          "plant_id": "SEA",
+          "quantity": 31.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "purchase_order_lines": {
+      "after": [
+        {
+          "item_id": "RM-RELAY",
+          "line_no": 1,
+          "ordered_qty": 31.0,
+          "purchase_order_id": "PO-R-007",
+          "received_qty": 31.0,
+          "unit_price": 48.5
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "item_id": "RM-RELAY",
+          "line_no": 1,
+          "ordered_qty": 31.0,
+          "purchase_order_id": "PO-R-007",
+          "received_qty": 0.0,
+          "unit_price": 48.5
+        }
+      ],
+      "before_count": 1
+    },
+    "quality_inspections": {
+      "after": [
+        {
+          "accepted_qty": 31.0,
+          "inspected_qty": 31.0,
+          "inspection_id": "INSP-R-007",
+          "inspector_id": "U-INSPECTOR",
+          "item_id": "RM-RELAY",
+          "lot_number": "LOT-R-0007",
+          "rejected_qty": 0.0,
+          "result": "Pass",
+          "source_id": "RCV-0007",
+          "source_type": "receipt",
+          "task_id": "factorybench-037"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "receipt_lines": {
+      "after": [
+        {
+          "accepted_qty": 31.0,
+          "item_id": "RM-RELAY",
+          "line_no": 1,
+          "lot_number": "LOT-R-0007",
+          "quantity": 31.0,
+          "receipt_id": "RCV-0007",
+          "rejected_qty": 0.0
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "receipts": {
+      "after": [
+        {
+          "purchase_order_id": "PO-R-007",
+          "receipt_id": "RCV-0007",
+          "received_at": "2026-01-12",
+          "receiver_id": "U-PLANNER",
+          "status": "Inspected",
+          "task_id": "factorybench-037"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    }
+  },
+  "strict_pass": true,
+  "task_id": "factorybench-037",
+  "total_checks": 7,
+  "trace": [
+    {
+      "arguments": {
+        "category": "inbound_receipt"
+      },
+      "index": 0,
+      "result": {
+        "documents": [
+          {
+            "body": "Receive only against an approved purchase order. Put the lot in inspection status, record accepted and rejected quantities, and release only accepted quantity to stores.",
+            "category": "inbound_receipt",
+            "doc_id": "POL-04",
+            "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
+            "title": "Receiving and inspection policy"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "purchase_order_id": "PO-R-007"
+      },
+      "index": 1,
+      "result": {
+        "header": {
+          "approved_by": "U-MANAGER",
+          "buyer_id": "U-BUYER",
+          "promised_date": "2026-01-12",
+          "purchase_order_id": "PO-R-007",
+          "requisition_id": null,
+          "status": "Approved",
+          "supplier_id": "SUP-B",
+          "task_id": "factorybench-037",
+          "total_amount": 1503.5
+        },
+        "lines": [
+          {
+            "item_id": "RM-RELAY",
+            "line_no": 1,
+            "ordered_qty": 31.0,
+            "purchase_order_id": "PO-R-007",
+            "received_qty": 0.0,
+            "unit_price": 48.5
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_purchase_order"
+    },
+    {
+      "arguments": {
+        "item_id": "RM-RELAY",
+        "lot_number": "LOT-R-0007",
+        "purchase_order_id": "PO-R-007",
+        "quantity": 31,
+        "receipt_id": "RCV-0007",
+        "received_at": "2026-01-12",
+        "receiver_id": "U-PLANNER"
+      },
+      "index": 2,
+      "result": {
+        "receipt_id": "RCV-0007",
+        "status": "Pending Inspection"
+      },
+      "success": true,
+      "tool": "receive_purchase_order"
+    },
+    {
+      "arguments": {
+        "accepted_qty": 31,
+        "inspected_qty": 31,
+        "inspection_id": "INSP-R-007",
+        "inspector_id": "U-INSPECTOR",
+        "item_id": "RM-RELAY",
+        "lot_number": "LOT-R-0007",
+        "rejected_qty": 0,
+        "result": "Pass",
+        "source_id": "RCV-0007",
+        "source_type": "receipt"
+      },
+      "index": 3,
+      "result": {
+        "inspection_id": "INSP-R-007",
+        "released_quantity": 31,
+        "result": "Pass"
+      },
+      "success": true,
+      "tool": "record_inspection"
+    },
+    {
+      "arguments": {
+        "inspection_id": "INSP-R-007",
+        "lot_number": "LOT-R-0007",
+        "receipt_id": "RCV-0007",
+        "released_quantity": 31
+      },
+      "index": 4,
+      "result": {
+        "submitted": {
+          "inspection_id": "INSP-R-007",
+          "lot_number": "LOT-R-0007",
+          "receipt_id": "RCV-0007",
+          "released_quantity": "31"
+        },
+        "task_id": "factorybench-037"
+      },
+      "success": true,
+      "tool": "submit_answer"
+    }
+  ]
+}

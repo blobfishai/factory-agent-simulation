@@ -1,0 +1,1 @@
+Receive the full 26-unit RM-RELAY shipment for approved PO PO-R-002, lot LOT-R-0002. Record the required inspection, release only accepted quantity, and return the receipt, inspection, released quantity, and lot identifiers.
