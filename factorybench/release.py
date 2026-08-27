@@ -8,6 +8,7 @@ import json
 import shutil
 import statistics
 import tempfile
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -111,11 +112,12 @@ def _harbor_dataset_manifest(tasks_root: Path) -> str:
         "",
     ]
     for task_dir in sorted(path for path in tasks_root.iterdir() if path.is_dir()):
+        task_config = tomllib.loads((task_dir / "task.toml").read_text(encoding="utf-8"))
         lines.extend(
             [
                 "",
                 "[[tasks]]",
-                f'name = "blobfishai/{task_dir.name}"',
+                f'name = "{task_config["task"]["name"]}"',
                 f'digest = "{_harbor_task_digest(task_dir)}"',
             ]
         )
@@ -419,6 +421,9 @@ def _website_data(
 
 
 def _harbor_task(root: Path, task: dict[str, Any]) -> None:
+    harbor_task_name = f"blobfishai/{task['task_id']}"
+    if harbor_task_name == "blobfishai/factorybench-100":
+        harbor_task_name = "blobfishai/factorybench-task-100"
     task_dir = root / "tasks" / task["task_id"]
     environment = task_dir / "environment"
     tests = task_dir / "tests"
@@ -516,7 +521,7 @@ volumes:
         f'''schema_version = "1.4"
 
 [task]
-name = "blobfishai/{task['task_id']}"
+name = "{harbor_task_name}"
 version = "{BENCHMARK_VERSION}"
 description = {description}
 authors = [{{ name = "Blobfish AI" }}]

@@ -34,6 +34,9 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
     assert len(harbor_tasks) == 100
     assert len(harbor_manifest["tasks"]) == 100
     assert all(reference["digest"].startswith("sha256:") for reference in harbor_manifest["tasks"])
+    harbor_names = {reference["name"] for reference in harbor_manifest["tasks"]}
+    assert "blobfishai/factorybench-task-100" in harbor_names
+    assert "blobfishai/factorybench-100" not in harbor_names
     assert {row["rank"] for row in website["leaderboard"]} == {"REF", "CTL"}
     assert json.loads((RELEASE / "reports" / "build.json").read_text())["harbor_python_image"] == HARBOR_PYTHON_IMAGE
     assert "Creative Commons Attribution 4.0" in (RELEASE / "LICENSE-DATA").read_text()
