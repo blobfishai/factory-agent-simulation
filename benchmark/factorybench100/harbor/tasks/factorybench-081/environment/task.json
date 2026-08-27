@@ -31,7 +31,63 @@
     "type": "object"
   },
   "as_of": "2026-01-12",
+  "expected": {
+    "answer": {
+      "new_completion": "2026-01-17",
+      "new_start": "2026-01-14",
+      "transfer_id": "TRF-0001",
+      "work_order_id": "WO-T-001"
+    },
+    "assertions": [
+      {
+        "description": "The donor-plant transfer is completed for the shortage quantity.",
+        "id": "transfer_completed",
+        "table": "inventory_transfers",
+        "values": {
+          "quantity": 8,
+          "status": "Completed"
+        },
+        "where": {
+          "transfer_id": "TRF-0001"
+        }
+      },
+      {
+        "description": "Transferred stock is available at the receiving plant.",
+        "id": "receiving_inventory_created",
+        "table": "inventory_on_hand",
+        "values": {
+          "quantity": 8,
+          "status": "Unrestricted"
+        },
+        "where": {
+          "item_id": "RM-COPPER",
+          "lot_number": "PDX-C-001",
+          "plant_id": "SEA",
+          "subinventory": "STORES"
+        }
+      },
+      {
+        "description": "The work order starts on arrival and has a feasible completion date.",
+        "id": "work_order_rescheduled",
+        "table": "work_orders",
+        "values": {
+          "scheduled_completion": "2026-01-17",
+          "scheduled_start": "2026-01-14"
+        },
+        "where": {
+          "work_order_id": "WO-T-001"
+        }
+      }
+    ]
+  },
+  "family": "transfer_reschedule",
+  "instruction": "Recover the RM-COPPER shortage on work order WO-T-001 using unrestricted surplus at PDX. Transfer 8 units from lot PDX-C-001, then reschedule the SEA work order no earlier than arrival on 2026-01-14. Return the transfer and revised dates.",
+  "level": "L3",
   "required_read_calls": [
+    {
+      "arguments": {},
+      "tool": "get_environment_context"
+    },
     {
       "arguments": {
         "category": "transfer_reschedule"
@@ -62,11 +118,13 @@
     }
   ],
   "required_reads": [
+    "get_environment_context",
     "search_documents",
     "get_work_order",
     "get_inventory",
     "get_schedule"
   ],
+  "role": "supply_chain_planner",
   "seed_tables": {
     "bom_components": [
       {
@@ -383,5 +441,17 @@
       }
     ]
   },
-  "task_id": "factorybench-081"
+  "task_id": "factorybench-081",
+  "title": "Transfer material and recover WO-T-001",
+  "world": {
+    "database": "SQLite",
+    "name": "Northstar Controls Oracle-shaped ERP",
+    "organization_id": "M1",
+    "primary_plant": "SEA",
+    "servers": [
+      "oracle_erp",
+      "plant_docs",
+      "factory_harness"
+    ]
+  }
 }

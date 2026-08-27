@@ -27,7 +27,53 @@
     "type": "object"
   },
   "as_of": "2026-01-12",
+  "expected": {
+    "answer": {
+      "purchase_order_id": "PO-0006",
+      "supplier_id": "SUP-B",
+      "total_amount": 2041.2
+    },
+    "assertions": [
+      {
+        "description": "The purchase order is awarded to the best eligible supplier, meets the need-by date, and is approved.",
+        "id": "po_approved",
+        "table": "purchase_orders",
+        "values": {
+          "approved_by": "U-MANAGER",
+          "promised_date": "2026-01-16",
+          "requisition_id": "REQ-A-006",
+          "status": "Approved",
+          "supplier_id": "SUP-B",
+          "total_amount": 2041.2
+        },
+        "where": {
+          "purchase_order_id": "PO-0006"
+        }
+      },
+      {
+        "description": "The PO line preserves the approved requisition quantity.",
+        "id": "po_line_exact",
+        "table": "purchase_order_lines",
+        "values": {
+          "item_id": "RM-RELAY",
+          "ordered_qty": 42,
+          "unit_price": 48.6
+        },
+        "where": {
+          "line_no": 1,
+          "purchase_order_id": "PO-0006"
+        }
+      }
+    ]
+  },
+  "family": "supplier_selection",
+  "instruction": "Source requisition REQ-A-006 for 42 RM-RELAY units by 2026-02-01. Compare current quotes, exclude ineligible suppliers, award the purchase order, and obtain the approval required by policy. Return the PO ID, chosen supplier, and total amount.",
+  "level": "L3",
   "required_read_calls": [
+    {
+      "arguments": {},
+      "tool": "get_environment_context"
+    },
     {
       "arguments": {
         "category": "supplier_selection"
@@ -50,10 +96,12 @@
     }
   ],
   "required_reads": [
+    "get_environment_context",
     "search_documents",
     "get_requisition",
     "get_supplier_quotes"
   ],
+  "role": "buyer",
   "seed_tables": {
     "bom_components": [
       {
@@ -376,5 +424,17 @@
       }
     ]
   },
-  "task_id": "factorybench-026"
+  "task_id": "factorybench-026",
+  "title": "Award sourcing event REQ-A-006",
+  "world": {
+    "database": "SQLite",
+    "name": "Northstar Controls Oracle-shaped ERP",
+    "organization_id": "M1",
+    "primary_plant": "SEA",
+    "servers": [
+      "oracle_erp",
+      "plant_docs",
+      "factory_harness"
+    ]
+  }
 }

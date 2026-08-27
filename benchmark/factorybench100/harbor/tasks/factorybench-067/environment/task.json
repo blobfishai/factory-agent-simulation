@@ -31,7 +31,65 @@
     "type": "object"
   },
   "as_of": "2026-01-12",
+  "expected": {
+    "answer": {
+      "disposition": "REWORK",
+      "hold_id": "HOLD-0007",
+      "inspection_id": "INSP-Q-007",
+      "nonconformance_id": "NC-0007"
+    },
+    "assertions": [
+      {
+        "description": "The failed lot is on an active quality hold.",
+        "id": "lot_held",
+        "table": "quality_holds",
+        "values": {
+          "lot_number": "FG-LOT-007",
+          "reason_code": "FUNCTIONAL_TEST_FAIL",
+          "status": "Active"
+        },
+        "where": {
+          "hold_id": "HOLD-0007"
+        }
+      },
+      {
+        "description": "A recoverable nonconformance is assigned for rework.",
+        "id": "nonconformance_opened",
+        "table": "nonconformances",
+        "values": {
+          "disposition": "REWORK",
+          "inspection_id": "INSP-Q-007",
+          "owner_id": "U-QUALITY",
+          "status": "Open"
+        },
+        "where": {
+          "nonconformance_id": "NC-0007"
+        }
+      },
+      {
+        "description": "The affected inventory remains quarantined.",
+        "id": "inventory_quarantined",
+        "table": "inventory_on_hand",
+        "values": {
+          "status": "Quality Hold"
+        },
+        "where": {
+          "item_id": "FG-PANEL",
+          "lot_number": "FG-LOT-007",
+          "plant_id": "SEA",
+          "subinventory": "FG"
+        }
+      }
+    ]
+  },
+  "family": "quality_exception",
+  "instruction": "Inspection INSP-Q-007 failed for lot FG-LOT-007, with 2 of 15 units rejected. Contain the lot and open the policy-correct quality record. Return the inspection, hold, nonconformance, and disposition.",
+  "level": "L2",
   "required_read_calls": [
+    {
+      "arguments": {},
+      "tool": "get_environment_context"
+    },
     {
       "arguments": {
         "category": "quality_exception"
@@ -46,9 +104,11 @@
     }
   ],
   "required_reads": [
+    "get_environment_context",
     "search_documents",
     "get_quality_context"
   ],
+  "role": "quality_engineer",
   "seed_tables": {
     "bom_components": [
       {
@@ -344,5 +404,17 @@
       }
     ]
   },
-  "task_id": "factorybench-067"
+  "task_id": "factorybench-067",
+  "title": "Contain failed lot FG-LOT-007",
+  "world": {
+    "database": "SQLite",
+    "name": "Northstar Controls Oracle-shaped ERP",
+    "organization_id": "M1",
+    "primary_plant": "SEA",
+    "servers": [
+      "oracle_erp",
+      "plant_docs",
+      "factory_harness"
+    ]
+  }
 }

@@ -43,7 +43,9 @@ def test_preflight_reads_are_bound_to_task_arguments(tasks, tmp_path: Path) -> N
     with FactoryWorld.fresh(task, tmp_path / "wrong-preflight.db") as world:
         wrong_policy = world.call_tool("search_documents", {"category": "supplier_selection"})
         assert "error" not in wrong_policy
-        for step in control_steps[1:]:
+        for step in control_steps:
+            if step["tool"] == "search_documents":
+                continue
             assert "error" not in world.call_tool(step["tool"], step["arguments"])
         result = world.call_tool(first_write["tool"], first_write["arguments"])
     assert "search_documents" in result["error"]

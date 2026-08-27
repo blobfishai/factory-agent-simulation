@@ -96,6 +96,17 @@ def _write_verdict(verdict: dict[str, Any]) -> None:
     (logdir / "reward.txt").write_text(f"{score:.8f}\n", encoding="utf-8")
 
 
+def _write_trace(task_id: str, trace: list[dict[str, Any]]) -> None:
+    """Publish only interactions the agent already observed, never hidden state."""
+
+    logdir = Path(os.environ.get("VERIFIER_LOG_DIR", "/logs/verifier"))
+    logdir.mkdir(parents=True, exist_ok=True)
+    (logdir / "trace.json").write_text(
+        json.dumps({"task_id": task_id, "trace": trace}, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
 def main() -> None:
     task = json.loads((HERE / "task.json").read_text(encoding="utf-8"))
     evidence = _fetch_evidence()
@@ -187,6 +198,7 @@ def main() -> None:
         "strict_pass": passed == len(checks),
         "checks": checks,
     }
+    _write_trace(task["task_id"], trace)
     _write_verdict(verdict)
     print(json.dumps(verdict, indent=2, sort_keys=True))
 

@@ -19,11 +19,13 @@ from .world import READ_TOOLS
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = REPO_ROOT / "benchmark" / "factorybench100"
+MODEL_RUNS_ROOT = REPO_ROOT / "model_runs"
 SOURCE_URL = "https://github.com/blobfishai/factory-agent-simulation"
 HF_URL = "https://huggingface.co/datasets/SamuelChien821/factorybench-100"
 HARBOR_URL = "https://hub.harborframework.com/datasets/blobfishai/factorybench-100/latest"
 PAGE_URL = "https://blobfish.ai/benchmarks/factorybench-100"
 HARBOR_PYTHON_IMAGE = "python:3.12-slim@sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17"
+MCP_CONFIG_PATH = "environment/mcp.json"
 
 FAMILY_LABELS = {
     "order_release": "Order release",
@@ -65,6 +67,34 @@ def _write_json(path: Path, value: Any) -> None:
 
 def _write_jsonl(path: Path, values: list[dict[str, Any]]) -> None:
     _write_text(path, "".join(json.dumps(value, sort_keys=True) + "\n" for value in values))
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError(f"expected JSON object: {path}")
+    return value
+
+
+def _load_model_runs() -> list[dict[str, Any]]:
+    if not MODEL_RUNS_ROOT.exists():
+        return []
+    runs = []
+    for path in sorted(MODEL_RUNS_ROOT.glob("*.json")):
+        run = _read_json(path)
+        if run.get("schema_version") != "factorybench.model-run.v1":
+            raise ValueError(f"unsupported model-run schema: {path}")
+        if run.get("benchmark_version") != BENCHMARK_VERSION:
+            raise ValueError(f"model run does not match {BENCHMARK_VERSION}: {path}")
+        trials = run.get("trials")
+        if not isinstance(trials, list) or len(trials) != run.get("aggregate", {}).get("tasks"):
+            raise ValueError(f"model-run trial count mismatch: {path}")
+        for trial in trials:
+            artifact = MODEL_RUNS_ROOT / str(trial["artifact"])
+            if not artifact.is_file():
+                raise ValueError(f"missing model-run trial artifact: {artifact}")
+        runs.append(run)
+    return runs
 
 
 def _sha256(path: Path) -> str:
@@ -160,6 +190,8 @@ def _public_task(task: dict[str, Any]) -> dict[str, Any]:
 
 
 def _stage_for_tool(tool: str) -> str:
+    if tool == "get_environment_context":
+        return "discover"
     if tool == "search_documents":
         return "policy"
     if tool in READ_TOOLS:
@@ -174,6 +206,7 @@ def _website_data(
     qualification: dict[str, Any],
     representative_episodes: dict[str, dict[str, Any]],
     release_root: Path,
+    model_runs: list[dict[str, Any]],
 ) -> dict[str, Any]:
     tools = tool_definitions()
     tool_server = {
@@ -195,6 +228,34 @@ def _website_data(
         "no_control": "Measured ablation that skips all policy and preflight reads; the environment rejects its writes.",
     }
     leaderboard = []
+    ranked_runs = sorted(
+        model_runs,
+        key=lambda run: (-run["aggregate"]["mean_factory_score"], run["model"]["name"]),
+    )
+    for rank, run in enumerate(ranked_runs, start=1):
+        aggregate = run["aggregate"]
+        model = run["model"]
+        harness = run["harness"]
+        leaderboard.append(
+            {
+                "rank": rank,
+                "name": model["name"],
+                "harness": (
+                    f"{harness['name']} {harness['version']} · {model['agent']} "
+                    f"{model['agent_version']} · {model['reasoning_effort']} reasoning"
+                ),
+                "kind": "model",
+                "tasks": aggregate["tasks"],
+                "score": aggregate["mean_factory_score"],
+                "strictPassRate": aggregate["strict_pass_rate"],
+                "categoryScores": {"factory_score": aggregate["mean_factory_score"]},
+                "averageCalls": aggregate["average_tool_calls"],
+                "averageCost": aggregate["average_cost_usd"],
+                "note": run["selection"],
+                "runUrl": run.get("run_url")
+                or f"{SOURCE_URL}/blob/main/model_runs/{run['run_slug']}.json",
+            }
+        )
     for rank, policy in enumerate(POLICIES, start=1):
         result = result_by_policy[policy]
         call_counts = [len(policy_steps(task, policy)) for task in tasks]
@@ -288,6 +349,70 @@ def _website_data(
         }
 
     trajectories = []
+    for run in ranked_runs:
+        featured_task_id = run["featured_task_id"]
+        trial_summary = next(
+            trial for trial in run["trials"] if trial["task_id"] == featured_task_id
+        )
+        trial = _read_json(MODEL_RUNS_ROOT / trial_summary["artifact"])
+        task = next(item for item in tasks if item["task_id"] == featured_task_id)
+        events: list[dict[str, Any]] = [
+            {"index": 0, "kind": "message", "text": task["instruction"]}
+        ]
+        for call_number, entry in enumerate(trial["trace"], start=1):
+            result = json.dumps(entry["result"], sort_keys=True)
+            events.append(
+                {
+                    "index": len(events),
+                    "kind": "tool",
+                    "stage": _stage_for_tool(entry["tool"]),
+                    "call": call_number,
+                    "tool": entry["tool"],
+                    "arguments": entry["arguments"],
+                    "outcome": "ok" if entry["success"] else "error",
+                    "result": result[:360] + ("…" if len(result) > 360 else ""),
+                }
+            )
+        events.append(
+            {
+                "index": len(events),
+                "kind": "message",
+                "text": (
+                    f"Verifier: FactoryScore {trial['score']:.2f}; "
+                    f"strict pass {'yes' if trial['strict_pass'] else 'no'}."
+                ),
+            }
+        )
+        artifact_url = f"{SOURCE_URL}/blob/main/model_runs/{trial_summary['artifact']}"
+        model = run["model"]
+        harness = run["harness"]
+        trajectories.append(
+            {
+                "taskId": featured_task_id,
+                "model": model["name"],
+                "harness": (
+                    f"{harness['name']} {harness['version']} · {model['agent']} "
+                    f"{model['agent_version']} · {model['reasoning_effort']} reasoning"
+                ),
+                "kind": "model",
+                "passed": trial["strict_pass"],
+                "score": trial["score"],
+                "categoryScores": {"factory_score": trial["score"]},
+                "toolCalls": trial["tool_calls"],
+                "costUsd": trial["cost_usd"],
+                "tokens": trial["tokens"],
+                "transcriptUrl": artifact_url,
+                "verifierUrl": artifact_url,
+                "stages": [
+                    {"key": "discover", "label": "Discover"},
+                    {"key": "policy", "label": "Policy"},
+                    {"key": "inspect", "label": "Inspect"},
+                    {"key": "transact", "label": "Transact"},
+                    {"key": "submit", "label": "Submit"},
+                ],
+                "events": events,
+            }
+        )
     for family in FAMILIES:
         episode = representative_episodes[family]
         task = next(item for item in tasks if item["task_id"] == episode["task_id"])
@@ -330,6 +455,7 @@ def _website_data(
                 "transcriptUrl": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/trajectories/oracle/{task_id}.json",
                 "verifierUrl": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/verifiers/{task_id}.json",
                 "stages": [
+                    {"key": "discover", "label": "Discover"},
                     {"key": "policy", "label": "Policy"},
                     {"key": "inspect", "label": "Inspect"},
                     {"key": "transact", "label": "Transact"},
@@ -352,7 +478,17 @@ def _website_data(
             "world": {"tools": len(tools), "tables": 33, "documents": 10},
             "referenceCalls": {"min": min(reference_calls), "median": statistics.median(reference_calls), "max": max(reference_calls)},
             "deterministicVerifier": True,
-            "mcp": {"package": "factory-agent-simulation", "version": BENCHMARK_VERSION, "protocolVersion": "2025-03-26", "serverName": "factorybench"},
+            "mcp": {
+                "package": "factory-agent-simulation",
+                "version": BENCHMARK_VERSION,
+                "protocolVersion": "2025-03-26",
+                "serverName": "factorybench",
+                "command": f"uvx --from git+{SOURCE_URL}@v{BENCHMARK_VERSION} factorybench-mcp --task factorybench-001 --db .factorybench/factorybench-001.db --fresh",
+                "configUrl": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/{MCP_CONFIG_PATH}",
+                "demoTaskId": "factorybench-001",
+                "sandboxUrl": "/api/v1/benchmarks/factorybench-100/sandbox/mcp",
+                "sandboxSessionUrl": "/api/v1/benchmarks/factorybench-100/sandbox/sessions",
+            },
             "contractPins": [
                 {"name": "World", "value": "northstar-controls-erp-v1"},
                 {"name": "Database", "value": "SQLite task snapshot"},
@@ -441,12 +577,19 @@ def _harbor_task(root: Path, task: dict[str, Any]) -> None:
         environment / "task.json",
         {
             "task_id": task["task_id"],
+            "title": task["title"],
+            "instruction": task["instruction"],
+            "family": task["family"],
+            "role": task["role"],
+            "level": task["level"],
             "as_of": task["as_of"],
+            "world": task["world"],
             "seed_tables": task["seed_tables"],
             "required_reads": task["required_reads"],
             "required_read_calls": task["required_read_calls"],
             "answer_schema": task["answer_schema"],
             "allowed_write_tables": task["allowed_write_tables"],
+            "expected": task["expected"],
         },
     )
     _write_json(environment / "tools.json", tool_definitions(task))
@@ -490,7 +633,7 @@ CMD ["python3", "/opt/factorybench/service.py"]
         condition: service_healthy
     environment:
       FACTORYBENCH_SERVICE_URL: http://erp:8765/call
-    networks: [factorybench]
+    networks: [agent-egress, factorybench]
     volumes:
       - factorybench-evidence:/var/lib/factorybench-evidence:ro
   erp:
@@ -508,13 +651,18 @@ CMD ["python3", "/opt/factorybench/service.py"]
     volumes:
       - factorybench-evidence:/var/lib/factorybench-evidence
 networks:
+  agent-egress: {}
   factorybench:
     internal: true
 volumes:
   factorybench-evidence:
 """,
     )
-    _write_text(task_dir / "instruction.md", task["instruction"] + "\n")
+    _write_text(
+        task_dir / "instruction.md",
+        task["instruction"]
+        + "\n\nUse `tool list`, `tool schema NAME`, and `tool call NAME JSON` to inspect and operate the ERP world. Start with `get_environment_context`; it returns the scoped task identity, available policy category, and mounted tool servers. Finish by calling `submit_answer` with the requested fields.\n",
+    )
     description = json.dumps(task["instruction"])
     _write_text(
         task_dir / "task.toml",
@@ -593,7 +741,32 @@ for step in plan:
     _write_text(solution / "solve.sh", "#!/bin/bash\nset -euo pipefail\npython3 \"$(dirname \"$0\")/solve.py\"\n", executable=True)
 
 
-def _dataset_card(tasks: list[dict[str, Any]], qualification: dict[str, Any]) -> str:
+def _model_run_markdown(model_runs: list[dict[str, Any]]) -> str:
+    if not model_runs:
+        return "No version-pinned model run is published for this release."
+    rows = "\n".join(
+        (
+            f"| [{run['model']['name']}](model-runs/{run['run_slug']}.json) | "
+            f"{run['harness']['name']} {run['harness']['version']} / {run['model']['agent']} "
+            f"{run['model']['agent_version']} / {run['model']['reasoning_effort']} | "
+            f"{run['aggregate']['tasks']}/100 | {run['aggregate']['mean_factory_score']:.2f} | "
+            f"{run['aggregate']['strict_passes']}/{run['aggregate']['tasks']} | {run['selection']} |"
+        )
+        for run in model_runs
+    )
+    return (
+        "| Model | Harness | Coverage | FactoryScore | Strict passes | Selection |\n"
+        "|---|---|---:|---:|---:|---|\n"
+        f"{rows}"
+    )
+
+
+def _dataset_card(
+    tasks: list[dict[str, Any]],
+    qualification: dict[str, Any],
+    model_runs: list[dict[str, Any]],
+) -> str:
+    model_run_table = _model_run_markdown(model_runs)
     return f"""---
 license: cc-by-4.0
 task_categories:
@@ -654,6 +827,14 @@ reported only as supporting evidence.
 
 These rows are measured controls, not claims about frontier models.
 
+## Pinned model runs
+
+{model_run_table}
+
+Coverage is part of the result. A stratified subset is not presented as a
+100-task score. Full manifests and task-level traces are mirrored under
+`model-runs/`.
+
 ## Fields
 
 Each JSONL row includes the natural-language prompt, role, workflow family,
@@ -678,11 +859,15 @@ records and implementations in FactoryBench are independently authored.
 """
 
 
-def _release_readme(qualification: dict[str, Any]) -> str:
+def _release_readme(
+    qualification: dict[str, Any],
+    model_runs: list[dict[str, Any]],
+) -> str:
     rows = "\n".join(
         f"| {result['policy'].replace('_', ' ').title()} | {result['mean_score']:.2f} | {result['strict_passes']}/100 |"
         for result in qualification["results"]
     )
+    model_run_table = _model_run_markdown(model_runs)
     return f"""# FactoryBench-100 release
 
 FactoryBench-100 contains 100 executable manufacturing ERP tasks across ten
@@ -707,12 +892,19 @@ partially complete, read-only, and control-skipping behavior.
 Release qualification also removes every reference mutation individually. All
 {qualification['mutation_omissions']['detected']} of {qualification['mutation_omissions']['total']} omissions reduce the score and fail strict completion.
 
+## Pinned model runs
+
+{model_run_table}
+
+Subset coverage is explicit and is never extrapolated to all 100 tasks.
+
 ## Layout
 
 - `tasks/`: full public task specifications
 - `assets/`: governing policy, starting state, and expected check contract
 - `environment/`: schema and MCP-style tool contracts
 - `trajectories/oracle/`: real replayed tool traces and state diffs
+- `model-runs/`: pinned model manifests and task-level traces
 - `verifiers/`: per-task criterion results from release qualification
 - `reports/`: build and qualification evidence
 - `huggingface/`: upload-ready dataset mirror
@@ -728,6 +920,7 @@ proprietary code, UI, or customer data.
 def build_release(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
     tasks = build_catalog()
     qualification = qualify(tasks)
+    model_runs = _load_model_runs()
     if not qualification["qualification_passed"]:
         raise RuntimeError("qualification failed; release was not emitted")
     if output.exists():
@@ -735,9 +928,29 @@ def build_release(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
     output.mkdir(parents=True)
     tools = tool_definitions()
 
-    _write_text(output / "README.md", _release_readme(qualification))
+    _write_text(output / "README.md", _release_readme(qualification, model_runs))
     _write_json(output / "reports" / "qualification.json", qualification)
     _write_json(output / "environment" / "tool-contracts.json", {"servers": [{"server": "factorybench", "tools": tools}]})
+    _write_json(
+        output / MCP_CONFIG_PATH,
+        {
+            "mcpServers": {
+                "factorybench": {
+                    "command": "uvx",
+                    "args": [
+                        "--from",
+                        f"git+{SOURCE_URL}@v{BENCHMARK_VERSION}",
+                        "factorybench-mcp",
+                        "--task",
+                        "factorybench-001",
+                        "--db",
+                        ".factorybench/factorybench-001.db",
+                        "--fresh",
+                    ],
+                }
+            }
+        },
+    )
     shutil.copy2(REPO_ROOT / "factorybench" / "schema.sql", output / "environment" / "schema.sql")
 
     public_rows: list[dict[str, Any]] = []
@@ -760,18 +973,39 @@ def build_release(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
                 representative_episodes[task["family"]] = episode
             _harbor_task(output / "harbor", task)
 
+    demo_harbor_task = output / "harbor" / "tasks" / "factorybench-001"
+    sandbox_bundle = output / "sandbox" / "factorybench-001"
+    sandbox_bundle.mkdir(parents=True)
+    for name in ("runtime.py", "schema.sql", "task.json", "tools.json"):
+        shutil.copy2(demo_harbor_task / "environment" / name, sandbox_bundle / name)
+    shutil.copy2(REPO_ROOT / "factorybench" / "sandbox_bridge.py", sandbox_bundle / "bridge.py")
+    _write_text(
+        sandbox_bundle / "README.md",
+        """# FactoryBench live sandbox bundle
+
+This bundle powers the public benchmark-page MCP demo. Each browser session
+receives a private SQLite database and trace. `bridge.py` executes only the
+checked-in FactoryWorld tools in `runtime.py`; it does not accept source code,
+shell commands, package installation, or arbitrary paths.
+""",
+    )
+
     _write_jsonl(output / "tasks" / "tasks.jsonl", public_rows)
-    _write_text(output / "huggingface" / "README.md", _dataset_card(tasks, qualification))
+    _write_text(output / "huggingface" / "README.md", _dataset_card(tasks, qualification, model_runs))
     _write_jsonl(output / "huggingface" / "data" / "tasks.jsonl", public_rows)
     _write_json(output / "huggingface" / "contracts" / "tool-contracts.json", {"servers": [{"server": "factorybench", "tools": tools}]})
+    shutil.copy2(output / MCP_CONFIG_PATH, output / "huggingface" / "contracts" / "mcp.json")
     shutil.copytree(output / "assets", output / "huggingface" / "assets")
+    if MODEL_RUNS_ROOT.exists():
+        shutil.copytree(MODEL_RUNS_ROOT, output / "model-runs")
+        shutil.copytree(MODEL_RUNS_ROOT, output / "huggingface" / "model-runs")
     _write_text(output / "huggingface" / ".gitattributes", "*.jsonl filter=lfs diff=lfs merge=lfs -text\n")
 
     _write_text(
         output / "harbor" / "dataset.toml",
         _harbor_dataset_manifest(output / "harbor" / "tasks"),
     )
-    _write_text(output / "harbor" / "README.md", _dataset_card(tasks, qualification))
+    _write_text(output / "harbor" / "README.md", _dataset_card(tasks, qualification, model_runs))
 
     shutil.copy2(REPO_ROOT / "LICENSE", output / "LICENSE")
     shutil.copy2(REPO_ROOT / "NOTICE", output / "NOTICE")
@@ -782,7 +1016,7 @@ def build_release(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
     shutil.copy2(REPO_ROOT / "NOTICE", output / "harbor" / "NOTICE")
     shutil.copy2(REPO_ROOT / "LICENSE-DATA", output / "harbor" / "LICENSE-DATA")
 
-    website = _website_data(tasks, qualification, representative_episodes, output)
+    website = _website_data(tasks, qualification, representative_episodes, output, model_runs)
     _write_json(output / "website-data.json", website)
 
     artifact_files = sorted(path for path in output.rglob("*") if path.is_file())
@@ -793,6 +1027,7 @@ def build_release(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         "family_count": len(FAMILIES),
         "tool_count": len(tools),
         "metric": "FactoryScore",
+        "model_run_count": len(model_runs),
         "harbor_python_image": HARBOR_PYTHON_IMAGE,
         "qualification_passed": True,
         "artifact_file_count_before_report": len(artifact_files),

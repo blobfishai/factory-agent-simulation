@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 READ_TOOLS = {
+    "get_environment_context",
     "search_documents",
     "get_sales_order",
     "get_bom",
@@ -64,6 +65,19 @@ TOOL_CONTRACTS = {
         "description": "Submit exact answer fields for deterministic verification.",
         "tools": ["submit_answer"],
     },
+}
+
+TOOL_DESCRIPTIONS = {
+    "get_environment_context": (
+        "Start here. Discover the current task identity, ERP scope, available policy documents, "
+        "mounted tool servers, and valid reference-record identifiers before making task-specific calls."
+    ),
+    "search_documents": (
+        "Read the governing policy for an exact category returned by get_environment_context."
+    ),
+    "submit_answer": (
+        "Finish the workflow by submitting exactly the task-specific answer fields in this schema."
+    ),
 }
 
 _SCHEMA_PATH = Path(__file__).with_name("schema.sql")
@@ -289,6 +303,55 @@ class FactoryWorld:
         if not rows:
             raise ValueError(f"no documents found for category {category}")
         return {"documents": rows}
+
+    def _tool_get_environment_context(self) -> dict[str, Any]:
+        documents = self._all(
+            "SELECT doc_id, title, category, sha256 FROM documents WHERE task_id = ? ORDER BY doc_id",
+            (self.task["task_id"],),
+        )
+        return {
+            "task": {
+                "task_id": self.task["task_id"],
+                "family": self.task["family"],
+                "role": self.task["role"],
+                "as_of": self.task["as_of"],
+            },
+            "organization": {
+                "organization_id": self.task["world"]["organization_id"],
+                "primary_plant": self.task["world"]["primary_plant"],
+                "world": self.task["world"]["name"],
+            },
+            "state": {
+                "scope": "isolated task snapshot",
+                "persistence": "episode-local SQLite",
+            },
+            "reference_data": {
+                "plants": self._all(
+                    "SELECT plant_id, organization_id, name, timezone FROM plants ORDER BY plant_id"
+                ),
+                "users": self._all(
+                    "SELECT user_id, display_name, role, plant_id, approval_limit FROM users ORDER BY user_id"
+                ),
+                "items": self._all(
+                    "SELECT item_id, description, item_type, uom, make_buy, status FROM items ORDER BY item_id"
+                ),
+                "suppliers": self._all(
+                    "SELECT supplier_id, name, approved, quality_score, on_time_rate, payment_terms FROM suppliers ORDER BY supplier_id"
+                ),
+                "workcenters": self._all(
+                    "SELECT workcenter_id, plant_id, name, status, capacity_hours, qualified_item_class FROM workcenters ORDER BY workcenter_id"
+                ),
+            },
+            "available_documents": documents,
+            "tool_servers": [
+                {
+                    "name": name,
+                    "description": contract["description"],
+                    "tools": contract["tools"],
+                }
+                for name, contract in TOOL_CONTRACTS.items()
+            ],
+        }
 
     def _tool_get_sales_order(self, sales_order_id: str) -> dict[str, Any]:
         header = self._one("SELECT * FROM sales_orders WHERE sales_order_id = ?", (sales_order_id,))

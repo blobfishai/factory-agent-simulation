@@ -32,7 +32,61 @@
     "type": "object"
   },
   "as_of": "2026-01-12",
+  "expected": {
+    "answer": {
+      "completed_quantity": 15,
+      "scrap_quantity": 2,
+      "variance_id": "VAR-0005",
+      "work_order_id": "WO-C-005"
+    },
+    "assertions": [
+      {
+        "count": 2,
+        "description": "All work-order operations are complete.",
+        "id": "operation_completed",
+        "table": "work_order_operations",
+        "where": {
+          "status": "Complete",
+          "work_order_id": "WO-C-005"
+        }
+      },
+      {
+        "description": "Finished and scrap quantities reconcile to the order quantity.",
+        "id": "work_order_completed",
+        "table": "work_orders",
+        "values": {
+          "completed_qty": 15,
+          "scrap_qty": 2,
+          "status": "Completed"
+        },
+        "where": {
+          "work_order_id": "WO-C-005"
+        }
+      },
+      {
+        "description": "WIP variance is posted for finance review.",
+        "id": "variance_posted",
+        "table": "wip_variances",
+        "values": {
+          "labor_variance": -18.0,
+          "material_variance": 0.0,
+          "overhead_variance": 7.5,
+          "status": "Posted"
+        },
+        "where": {
+          "variance_id": "VAR-0005"
+        }
+      }
+    ]
+  },
+  "family": "completion_costing",
+  "instruction": "Close work order WO-C-005 after completing its remaining operation. Record 15 finished units and 2 scrap, post the supplied WIP variance amounts from the costing packet, and return the closure summary.",
+  "level": "L3",
   "required_read_calls": [
+    {
+      "arguments": {},
+      "tool": "get_environment_context"
+    },
     {
       "arguments": {
         "category": "completion_costing"
@@ -47,9 +101,11 @@
     }
   ],
   "required_reads": [
+    "get_environment_context",
     "search_documents",
     "get_work_order"
   ],
+  "role": "production_cost_accountant",
   "seed_tables": {
     "bom_components": [
       {
@@ -352,5 +408,17 @@
       }
     ]
   },
-  "task_id": "factorybench-075"
+  "task_id": "factorybench-075",
+  "title": "Complete and cost WO-C-005",
+  "world": {
+    "database": "SQLite",
+    "name": "Northstar Controls Oracle-shaped ERP",
+    "organization_id": "M1",
+    "primary_plant": "SEA",
+    "servers": [
+      "oracle_erp",
+      "plant_docs",
+      "factory_harness"
+    ]
+  }
 }

@@ -13,7 +13,7 @@ from datetime import date, timedelta
 from typing import Any
 
 BENCHMARK_NAME = "FactoryBench-100"
-BENCHMARK_VERSION = "1.0.0"
+BENCHMARK_VERSION = "1.1.0"
 AS_OF_DATE = date(2026, 1, 12)
 
 FAMILIES = (
@@ -238,6 +238,11 @@ def _task(
     level: str,
 ) -> dict[str, Any]:
     task_id = f"factorybench-{number:03d}"
+    required_reads = ["get_environment_context", *required_reads]
+    oracle_steps = [
+        {"tool": "get_environment_context", "arguments": {}, "control": True},
+        *oracle_steps,
+    ]
     answer_schema = _answer_schema(answer)
     typed_answer = _typed_answer(answer, answer_schema)
     for step in oracle_steps:

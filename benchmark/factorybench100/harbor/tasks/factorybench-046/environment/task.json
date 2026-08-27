@@ -26,7 +26,35 @@
     "type": "object"
   },
   "as_of": "2026-01-12",
+  "expected": {
+    "answer": {
+      "decision": "Hold",
+      "invoice_id": "INV-0006",
+      "variance_percent": 3.5
+    },
+    "assertions": [
+      {
+        "description": "The invoice receives the policy-correct three-way-match decision.",
+        "id": "invoice_decision",
+        "table": "ap_invoices",
+        "values": {
+          "hold_reason": "AMOUNT_VARIANCE",
+          "status": "Hold"
+        },
+        "where": {
+          "invoice_id": "INV-0006"
+        }
+      }
+    ]
+  },
+  "family": "invoice_match",
+  "instruction": "Perform three-way match for invoice INV-0006 against PO PO-I-006 and receipt RCV-I-006. The invoice is $1937.52; apply the variance policy, update the invoice, and return the decision and variance percentage.",
+  "level": "L2",
   "required_read_calls": [
+    {
+      "arguments": {},
+      "tool": "get_environment_context"
+    },
     {
       "arguments": {
         "category": "invoice_match"
@@ -53,11 +81,13 @@
     }
   ],
   "required_reads": [
+    "get_environment_context",
     "search_documents",
     "get_purchase_order",
     "get_receipt",
     "get_invoice_match"
   ],
+  "role": "accounts_payable_specialist",
   "seed_tables": {
     "ap_invoices": [
       {
@@ -382,5 +412,17 @@
       }
     ]
   },
-  "task_id": "factorybench-046"
+  "task_id": "factorybench-046",
+  "title": "Resolve three-way match for INV-0006",
+  "world": {
+    "database": "SQLite",
+    "name": "Northstar Controls Oracle-shaped ERP",
+    "organization_id": "M1",
+    "primary_plant": "SEA",
+    "servers": [
+      "oracle_erp",
+      "plant_docs",
+      "factory_harness"
+    ]
+  }
 }

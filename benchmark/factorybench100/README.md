@@ -25,12 +25,21 @@ partially complete, read-only, and control-skipping behavior.
 Release qualification also removes every reference mutation individually. All
 240 of 240 omissions reduce the score and fail strict completion.
 
+## Pinned model runs
+
+| Model | Harness | Coverage | FactoryScore | Strict passes | Selection |
+|---|---|---:|---:|---:|---|
+| [gpt-5.6-luna](model-runs/gpt-5.6-luna-stratified-10.json) | Harbor 0.21.0 / codex 0.150.1 / medium | 10/100 | 62.28 | 1/10 | Fixed 10-task stratified sample: one released task from each workflow family (10/100); not full-suite coverage. |
+
+Subset coverage is explicit and is never extrapolated to all 100 tasks.
+
 ## Layout
 
 - `tasks/`: full public task specifications
 - `assets/`: governing policy, starting state, and expected check contract
 - `environment/`: schema and MCP-style tool contracts
 - `trajectories/oracle/`: real replayed tool traces and state diffs
+- `model-runs/`: pinned model manifests and task-level traces
 - `verifiers/`: per-task criterion results from release qualification
 - `reports/`: build and qualification evidence
 - `huggingface/`: upload-ready dataset mirror
