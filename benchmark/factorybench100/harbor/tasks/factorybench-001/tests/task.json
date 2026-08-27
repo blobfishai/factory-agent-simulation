@@ -1,0 +1,120 @@
+{
+  "allowed_write_tables": [
+    "work_orders",
+    "work_order_operations",
+    "material_requirements",
+    "material_reservations",
+    "inventory_on_hand",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "completion_date": {
+        "type": "string"
+      },
+      "released_quantity": {
+        "type": "integer"
+      },
+      "work_order_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "completion_date",
+      "released_quantity",
+      "work_order_id"
+    ],
+    "type": "object"
+  },
+  "expected": {
+    "answer": {
+      "completion_date": "2026-01-16",
+      "released_quantity": 5,
+      "work_order_id": "WO-0001"
+    },
+    "assertions": [
+      {
+        "description": "A released discrete work order links to the sales order.",
+        "id": "work_order_released",
+        "table": "work_orders",
+        "values": {
+          "quantity": 5,
+          "sales_order_id": "SO-0001",
+          "status": "Released"
+        },
+        "where": {
+          "work_order_id": "WO-0001"
+        }
+      },
+      {
+        "count": 3,
+        "description": "All three BOM components are reserved.",
+        "id": "all_components_reserved",
+        "table": "material_reservations",
+        "where": {
+          "status": "Active",
+          "work_order_id": "WO-0001"
+        }
+      },
+      {
+        "description": "The two-per-assembly relay requirement is fully reserved.",
+        "id": "relay_requirement_reserved",
+        "table": "material_requirements",
+        "values": {
+          "required_qty": 10,
+          "reserved_qty": 10
+        },
+        "where": {
+          "item_id": "RM-RELAY",
+          "work_order_id": "WO-0001"
+        }
+      }
+    ]
+  },
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "order_release"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "sales_order_id": "SO-0001"
+      },
+      "tool": "get_sales_order"
+    },
+    {
+      "arguments": {
+        "as_of": "2026-01-12",
+        "item_id": "FG-PANEL"
+      },
+      "tool": "get_bom"
+    },
+    {
+      "arguments": {
+        "item_ids": [
+          "RM-HOUSING",
+          "RM-RELAY",
+          "RM-COPPER"
+        ],
+        "plant_id": "SEA"
+      },
+      "tool": "get_inventory"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_sales_order",
+    "get_bom",
+    "get_inventory"
+  ],
+  "task_id": "factorybench-001",
+  "write_tools": [
+    "create_work_order",
+    "reserve_material",
+    "submit_answer"
+  ]
+}

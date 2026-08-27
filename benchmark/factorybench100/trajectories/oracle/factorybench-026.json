@@ -1,0 +1,351 @@
+{
+  "checks": [
+    {
+      "description": "Required policy and ERP reads completed before the first write.",
+      "evidence": {
+        "missing": []
+      },
+      "id": "read_before_write",
+      "passed": true
+    },
+    {
+      "description": "The purchase order is awarded to the best eligible supplier, meets the need-by date, and is approved.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "po_approved",
+      "passed": true
+    },
+    {
+      "description": "The PO line preserves the approved requisition quantity.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "po_line_exact",
+      "passed": true
+    },
+    {
+      "description": "Submitted answer fields exactly match the ground truth.",
+      "evidence": {
+        "expected": {
+          "purchase_order_id": "PO-0006",
+          "supplier_id": "SUP-B",
+          "total_amount": "2041.20"
+        },
+        "submitted": {
+          "purchase_order_id": "PO-0006",
+          "supplier_id": "SUP-B",
+          "total_amount": "2041.20"
+        }
+      },
+      "id": "exact_answer",
+      "passed": true
+    },
+    {
+      "description": "All successful writes stay inside the task's allowed tables.",
+      "evidence": {
+        "disallowed": [],
+        "written_tables": [
+          "answers",
+          "purchase_order_lines",
+          "purchase_orders"
+        ]
+      },
+      "id": "write_scope",
+      "passed": true
+    },
+    {
+      "description": "The episode completes without a rejected or malformed tool call.",
+      "evidence": {
+        "errors": []
+      },
+      "id": "error_free",
+      "passed": true
+    }
+  ],
+  "metric": "FactoryScore",
+  "passed_checks": 6,
+  "policy": "oracle",
+  "score": 100.0,
+  "state_diff": {
+    "answers": {
+      "after": [
+        {
+          "field": "purchase_order_id",
+          "task_id": "factorybench-026",
+          "value": "PO-0006"
+        },
+        {
+          "field": "supplier_id",
+          "task_id": "factorybench-026",
+          "value": "SUP-B"
+        },
+        {
+          "field": "total_amount",
+          "task_id": "factorybench-026",
+          "value": "2041.20"
+        }
+      ],
+      "after_count": 3,
+      "before": [],
+      "before_count": 0
+    },
+    "audit_log": {
+      "after": [
+        {
+          "action": "insert",
+          "audit_id": 1,
+          "payload": "{\"approved_by\": null, \"buyer_id\": \"U-BUYER\", \"promised_date\": \"2026-01-16\", \"purchase_order_id\": \"PO-0006\", \"requisition_id\": \"REQ-A-006\", \"status\": \"Pending Approval\", \"supplier_id\": \"SUP-B\", \"task_id\": \"factorybench-026\", \"total_amount\": 2041.2}",
+          "record_id": "PO-0006",
+          "table_name": "purchase_orders",
+          "task_id": "factorybench-026",
+          "tool": "create_purchase_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 2,
+          "payload": "{\"item_id\": \"RM-RELAY\", \"line_no\": 1, \"ordered_qty\": 42, \"purchase_order_id\": \"PO-0006\", \"received_qty\": 0, \"unit_price\": 48.6}",
+          "record_id": "PO-0006:1",
+          "table_name": "purchase_order_lines",
+          "task_id": "factorybench-026",
+          "tool": "create_purchase_order"
+        },
+        {
+          "action": "update",
+          "audit_id": 3,
+          "payload": "{\"approved_by\": \"U-MANAGER\", \"status\": \"Approved\"}",
+          "record_id": "PO-0006",
+          "table_name": "purchase_orders",
+          "task_id": "factorybench-026",
+          "tool": "approve_purchase_order"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 4,
+          "payload": "{\"value\": \"PO-0006\"}",
+          "record_id": "factorybench-026:purchase_order_id",
+          "table_name": "answers",
+          "task_id": "factorybench-026",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 5,
+          "payload": "{\"value\": \"SUP-B\"}",
+          "record_id": "factorybench-026:supplier_id",
+          "table_name": "answers",
+          "task_id": "factorybench-026",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 6,
+          "payload": "{\"value\": \"2041.20\"}",
+          "record_id": "factorybench-026:total_amount",
+          "table_name": "answers",
+          "task_id": "factorybench-026",
+          "tool": "submit_answer"
+        }
+      ],
+      "after_count": 6,
+      "before": [],
+      "before_count": 0
+    },
+    "purchase_order_lines": {
+      "after": [
+        {
+          "item_id": "RM-RELAY",
+          "line_no": 1,
+          "ordered_qty": 42.0,
+          "purchase_order_id": "PO-0006",
+          "received_qty": 0.0,
+          "unit_price": 48.6
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "purchase_orders": {
+      "after": [
+        {
+          "approved_by": "U-MANAGER",
+          "buyer_id": "U-BUYER",
+          "promised_date": "2026-01-16",
+          "purchase_order_id": "PO-0006",
+          "requisition_id": "REQ-A-006",
+          "status": "Approved",
+          "supplier_id": "SUP-B",
+          "task_id": "factorybench-026",
+          "total_amount": 2041.2
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    }
+  },
+  "strict_pass": true,
+  "task_id": "factorybench-026",
+  "total_checks": 6,
+  "trace": [
+    {
+      "arguments": {
+        "category": "supplier_selection"
+      },
+      "index": 0,
+      "result": {
+        "documents": [
+          {
+            "body": "Choose an approved supplier. Minimize landed price while meeting the need-by date; break ties by higher quality score, then higher on-time rate. Purchase orders above the buyer's limit require plant-manager approval.",
+            "category": "supplier_selection",
+            "doc_id": "POL-03",
+            "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
+            "title": "Supplier award policy"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "requisition_id": "REQ-A-006"
+      },
+      "index": 1,
+      "result": {
+        "header": {
+          "approved_by": "U-MANAGER",
+          "need_by": "2026-02-01",
+          "requester_id": "U-PLANNER",
+          "requisition_id": "REQ-A-006",
+          "status": "Approved",
+          "supplier_id": null,
+          "task_id": "factorybench-026",
+          "total_amount": 0.0,
+          "work_order_id": null
+        },
+        "lines": [
+          {
+            "item_id": "RM-RELAY",
+            "line_no": 1,
+            "quantity": 42.0,
+            "requisition_id": "REQ-A-006",
+            "unit_price": 0.0
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_requisition"
+    },
+    {
+      "arguments": {
+        "item_id": "RM-RELAY",
+        "need_by": "2026-02-01",
+        "task_id": "factorybench-026"
+      },
+      "index": 2,
+      "result": {
+        "quotes": [
+          {
+            "approved": 0,
+            "item_id": "RM-RELAY",
+            "lead_days": 2,
+            "minimum_qty": 10.0,
+            "name": "Frontier Supply",
+            "on_time_rate": 0.99,
+            "quality_score": 99.1,
+            "quote_id": "SQC-006",
+            "supplier_id": "SUP-C",
+            "task_id": "factorybench-026",
+            "unit_price": 44.6,
+            "valid_until": "2026-02-02"
+          },
+          {
+            "approved": 1,
+            "item_id": "RM-RELAY",
+            "lead_days": 4,
+            "minimum_qty": 10.0,
+            "name": "Rainier Components",
+            "on_time_rate": 0.98,
+            "quality_score": 95.8,
+            "quote_id": "SQB-006",
+            "supplier_id": "SUP-B",
+            "task_id": "factorybench-026",
+            "unit_price": 48.6,
+            "valid_until": "2026-02-02"
+          },
+          {
+            "approved": 1,
+            "item_id": "RM-RELAY",
+            "lead_days": 6,
+            "minimum_qty": 10.0,
+            "name": "Cascade Industrial",
+            "on_time_rate": 0.94,
+            "quality_score": 97.2,
+            "quote_id": "SQA-006",
+            "supplier_id": "SUP-A",
+            "task_id": "factorybench-026",
+            "unit_price": 50.1,
+            "valid_until": "2026-02-02"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_supplier_quotes"
+    },
+    {
+      "arguments": {
+        "buyer_id": "U-BUYER",
+        "item_id": "RM-RELAY",
+        "promised_date": "2026-01-16",
+        "purchase_order_id": "PO-0006",
+        "quantity": 42,
+        "requisition_id": "REQ-A-006",
+        "supplier_id": "SUP-B",
+        "unit_price": 48.6
+      },
+      "index": 3,
+      "result": {
+        "purchase_order_id": "PO-0006",
+        "status": "Pending Approval",
+        "total_amount": 2041.2
+      },
+      "success": true,
+      "tool": "create_purchase_order"
+    },
+    {
+      "arguments": {
+        "approver_id": "U-MANAGER",
+        "purchase_order_id": "PO-0006"
+      },
+      "index": 4,
+      "result": {
+        "purchase_order_id": "PO-0006",
+        "status": "Approved"
+      },
+      "success": true,
+      "tool": "approve_purchase_order"
+    },
+    {
+      "arguments": {
+        "purchase_order_id": "PO-0006",
+        "supplier_id": "SUP-B",
+        "total_amount": 2041.2
+      },
+      "index": 5,
+      "result": {
+        "submitted": {
+          "purchase_order_id": "PO-0006",
+          "supplier_id": "SUP-B",
+          "total_amount": "2041.20"
+        },
+        "task_id": "factorybench-026"
+      },
+      "success": true,
+      "tool": "submit_answer"
+    }
+  ]
+}

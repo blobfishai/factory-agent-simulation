@@ -1,0 +1,1 @@
+Source requisition REQ-A-009 for 48 RM-RELAY units by 2026-02-04. Compare current quotes, exclude ineligible suppliers, award the purchase order, and obtain the approval required by policy. Return the PO ID, chosen supplier, and total amount.

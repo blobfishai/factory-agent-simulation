@@ -1,0 +1,117 @@
+{
+  "allowed_write_tables": [
+    "inventory_on_hand",
+    "material_reservations",
+    "material_requirements",
+    "material_transactions",
+    "work_order_operations",
+    "work_orders",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "issued_lot": {
+        "type": "string"
+      },
+      "issued_quantity": {
+        "type": "integer"
+      },
+      "operation_status": {
+        "type": "string"
+      },
+      "work_order_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "issued_lot",
+      "issued_quantity",
+      "operation_status",
+      "work_order_id"
+    ],
+    "type": "object"
+  },
+  "expected": {
+    "answer": {
+      "issued_lot": "R-EARLY-009",
+      "issued_quantity": 38,
+      "operation_status": "In Process",
+      "work_order_id": "WO-I-009"
+    },
+    "assertions": [
+      {
+        "description": "The full requirement is issued from the reserved earliest-expiry lot.",
+        "id": "fefo_issue",
+        "table": "material_transactions",
+        "values": {
+          "lot_number": "R-EARLY-009",
+          "quantity": 38,
+          "transaction_type": "WIP_ISSUE"
+        },
+        "where": {
+          "transaction_id": "TX-ISSUE-009"
+        }
+      },
+      {
+        "description": "The material requirement reflects the full issue.",
+        "id": "requirement_issued",
+        "table": "material_requirements",
+        "values": {
+          "issued_qty": 38
+        },
+        "where": {
+          "item_id": "RM-RELAY",
+          "work_order_id": "WO-I-009"
+        }
+      },
+      {
+        "description": "The first operation starts after material issue.",
+        "id": "operation_started",
+        "table": "work_order_operations",
+        "values": {
+          "status": "In Process"
+        },
+        "where": {
+          "sequence": 10,
+          "work_order_id": "WO-I-009"
+        }
+      }
+    ]
+  },
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "production_issue"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "work_order_id": "WO-I-009"
+      },
+      "tool": "get_work_order"
+    },
+    {
+      "arguments": {
+        "item_ids": [
+          "RM-RELAY"
+        ],
+        "plant_id": "SEA"
+      },
+      "tool": "get_inventory"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_work_order",
+    "get_inventory"
+  ],
+  "task_id": "factorybench-059",
+  "write_tools": [
+    "issue_material",
+    "start_operation",
+    "submit_answer"
+  ]
+}

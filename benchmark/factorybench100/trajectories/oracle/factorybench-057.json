@@ -1,0 +1,567 @@
+{
+  "checks": [
+    {
+      "description": "Required policy and ERP reads completed before the first write.",
+      "evidence": {
+        "missing": []
+      },
+      "id": "read_before_write",
+      "passed": true
+    },
+    {
+      "description": "The full requirement is issued from the reserved earliest-expiry lot.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "fefo_issue",
+      "passed": true
+    },
+    {
+      "description": "The material requirement reflects the full issue.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "requirement_issued",
+      "passed": true
+    },
+    {
+      "description": "The first operation starts after material issue.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "operation_started",
+      "passed": true
+    },
+    {
+      "description": "Submitted answer fields exactly match the ground truth.",
+      "evidence": {
+        "expected": {
+          "issued_lot": "R-EARLY-007",
+          "issued_quantity": "34",
+          "operation_status": "In Process",
+          "work_order_id": "WO-I-007"
+        },
+        "submitted": {
+          "issued_lot": "R-EARLY-007",
+          "issued_quantity": "34",
+          "operation_status": "In Process",
+          "work_order_id": "WO-I-007"
+        }
+      },
+      "id": "exact_answer",
+      "passed": true
+    },
+    {
+      "description": "All successful writes stay inside the task's allowed tables.",
+      "evidence": {
+        "disallowed": [],
+        "written_tables": [
+          "answers",
+          "inventory_on_hand",
+          "material_requirements",
+          "material_reservations",
+          "material_transactions",
+          "work_order_operations",
+          "work_orders"
+        ]
+      },
+      "id": "write_scope",
+      "passed": true
+    },
+    {
+      "description": "The episode completes without a rejected or malformed tool call.",
+      "evidence": {
+        "errors": []
+      },
+      "id": "error_free",
+      "passed": true
+    }
+  ],
+  "metric": "FactoryScore",
+  "passed_checks": 7,
+  "policy": "oracle",
+  "score": 100.0,
+  "state_diff": {
+    "answers": {
+      "after": [
+        {
+          "field": "issued_lot",
+          "task_id": "factorybench-057",
+          "value": "R-EARLY-007"
+        },
+        {
+          "field": "issued_quantity",
+          "task_id": "factorybench-057",
+          "value": "34"
+        },
+        {
+          "field": "operation_status",
+          "task_id": "factorybench-057",
+          "value": "In Process"
+        },
+        {
+          "field": "work_order_id",
+          "task_id": "factorybench-057",
+          "value": "WO-I-007"
+        }
+      ],
+      "after_count": 4,
+      "before": [],
+      "before_count": 0
+    },
+    "audit_log": {
+      "after": [
+        {
+          "action": "insert",
+          "audit_id": 1,
+          "payload": "{\"item_id\": \"RM-RELAY\", \"lot_number\": \"R-EARLY-007\", \"occurred_at\": \"2026-01-12\", \"plant_id\": \"SEA\", \"quantity\": 34, \"reference\": \"RES-I-007\", \"subinventory\": \"STORES\", \"task_id\": \"factorybench-057\", \"transaction_id\": \"TX-ISSUE-007\", \"transaction_type\": \"WIP_ISSUE\", \"work_order_id\": \"WO-I-007\"}",
+          "record_id": "TX-ISSUE-007",
+          "table_name": "material_transactions",
+          "task_id": "factorybench-057",
+          "tool": "issue_material"
+        },
+        {
+          "action": "update",
+          "audit_id": 2,
+          "payload": "{\"quantity_delta\": -34, \"reserved_delta\": -34}",
+          "record_id": "SEA:STORES:RM-RELAY:R-EARLY-007",
+          "table_name": "inventory_on_hand",
+          "task_id": "factorybench-057",
+          "tool": "issue_material"
+        },
+        {
+          "action": "update",
+          "audit_id": 3,
+          "payload": "{\"status\": \"Consumed\"}",
+          "record_id": "RES-I-007",
+          "table_name": "material_reservations",
+          "task_id": "factorybench-057",
+          "tool": "issue_material"
+        },
+        {
+          "action": "update",
+          "audit_id": 4,
+          "payload": "{\"issued_delta\": 34}",
+          "record_id": "WO-I-007:RM-RELAY",
+          "table_name": "material_requirements",
+          "task_id": "factorybench-057",
+          "tool": "issue_material"
+        },
+        {
+          "action": "update",
+          "audit_id": 5,
+          "payload": "{\"status\": \"In Process\"}",
+          "record_id": "WO-I-007:10",
+          "table_name": "work_order_operations",
+          "task_id": "factorybench-057",
+          "tool": "start_operation"
+        },
+        {
+          "action": "update",
+          "audit_id": 6,
+          "payload": "{\"status\": \"In Process\"}",
+          "record_id": "WO-I-007",
+          "table_name": "work_orders",
+          "task_id": "factorybench-057",
+          "tool": "start_operation"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 7,
+          "payload": "{\"value\": \"WO-I-007\"}",
+          "record_id": "factorybench-057:work_order_id",
+          "table_name": "answers",
+          "task_id": "factorybench-057",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 8,
+          "payload": "{\"value\": \"R-EARLY-007\"}",
+          "record_id": "factorybench-057:issued_lot",
+          "table_name": "answers",
+          "task_id": "factorybench-057",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 9,
+          "payload": "{\"value\": \"34\"}",
+          "record_id": "factorybench-057:issued_quantity",
+          "table_name": "answers",
+          "task_id": "factorybench-057",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 10,
+          "payload": "{\"value\": \"In Process\"}",
+          "record_id": "factorybench-057:operation_status",
+          "table_name": "answers",
+          "task_id": "factorybench-057",
+          "tool": "submit_answer"
+        }
+      ],
+      "after_count": 10,
+      "before": [],
+      "before_count": 0
+    },
+    "inventory_on_hand": {
+      "after": [
+        {
+          "expiration_date": "2026-06-30",
+          "item_id": "RM-RELAY",
+          "lot_number": "R-EARLY-007",
+          "plant_id": "SEA",
+          "quantity": 0.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        },
+        {
+          "expiration_date": "2027-06-30",
+          "item_id": "RM-RELAY",
+          "lot_number": "R-LATE-007",
+          "plant_id": "SEA",
+          "quantity": 44.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        }
+      ],
+      "after_count": 2,
+      "before": [
+        {
+          "expiration_date": "2026-06-30",
+          "item_id": "RM-RELAY",
+          "lot_number": "R-EARLY-007",
+          "plant_id": "SEA",
+          "quantity": 34.0,
+          "reserved_qty": 34.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        },
+        {
+          "expiration_date": "2027-06-30",
+          "item_id": "RM-RELAY",
+          "lot_number": "R-LATE-007",
+          "plant_id": "SEA",
+          "quantity": 44.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        }
+      ],
+      "before_count": 2
+    },
+    "material_requirements": {
+      "after": [
+        {
+          "issued_qty": 34.0,
+          "item_id": "RM-RELAY",
+          "need_by": "2026-01-12",
+          "required_qty": 34.0,
+          "reserved_qty": 34.0,
+          "work_order_id": "WO-I-007"
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "issued_qty": 0.0,
+          "item_id": "RM-RELAY",
+          "need_by": "2026-01-12",
+          "required_qty": 34.0,
+          "reserved_qty": 34.0,
+          "work_order_id": "WO-I-007"
+        }
+      ],
+      "before_count": 1
+    },
+    "material_reservations": {
+      "after": [
+        {
+          "item_id": "RM-RELAY",
+          "lot_number": "R-EARLY-007",
+          "plant_id": "SEA",
+          "quantity": 34.0,
+          "reservation_id": "RES-I-007",
+          "status": "Consumed",
+          "subinventory": "STORES",
+          "task_id": "factorybench-057",
+          "work_order_id": "WO-I-007"
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "item_id": "RM-RELAY",
+          "lot_number": "R-EARLY-007",
+          "plant_id": "SEA",
+          "quantity": 34.0,
+          "reservation_id": "RES-I-007",
+          "status": "Active",
+          "subinventory": "STORES",
+          "task_id": "factorybench-057",
+          "work_order_id": "WO-I-007"
+        }
+      ],
+      "before_count": 1
+    },
+    "material_transactions": {
+      "after": [
+        {
+          "item_id": "RM-RELAY",
+          "lot_number": "R-EARLY-007",
+          "occurred_at": "2026-01-12",
+          "plant_id": "SEA",
+          "quantity": 34.0,
+          "reference": "RES-I-007",
+          "subinventory": "STORES",
+          "task_id": "factorybench-057",
+          "transaction_id": "TX-ISSUE-007",
+          "transaction_type": "WIP_ISSUE",
+          "work_order_id": "WO-I-007"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "work_order_operations": {
+      "after": [
+        {
+          "actual_hours": 0.0,
+          "planned_hours": 8.5,
+          "sequence": 10,
+          "status": "In Process",
+          "work_order_id": "WO-I-007",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "actual_hours": 0.0,
+          "planned_hours": 8.5,
+          "sequence": 10,
+          "status": "Ready",
+          "work_order_id": "WO-I-007",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "before_count": 1
+    },
+    "work_orders": {
+      "after": [
+        {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 17.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-14",
+          "scheduled_start": "2026-01-12",
+          "scrap_qty": 0.0,
+          "status": "In Process",
+          "task_id": "factorybench-057",
+          "work_order_id": "WO-I-007",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 17.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-14",
+          "scheduled_start": "2026-01-12",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-057",
+          "work_order_id": "WO-I-007",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "before_count": 1
+    }
+  },
+  "strict_pass": true,
+  "task_id": "factorybench-057",
+  "total_checks": 7,
+  "trace": [
+    {
+      "arguments": {
+        "category": "production_issue"
+      },
+      "index": 0,
+      "result": {
+        "documents": [
+          {
+            "body": "Issue only reserved, unrestricted stock. Use FEFO across eligible lots and start the operation only after the full required quantity has been issued.",
+            "category": "production_issue",
+            "doc_id": "POL-06",
+            "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
+            "title": "Material issue policy"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "work_order_id": "WO-I-007"
+      },
+      "index": 1,
+      "result": {
+        "header": {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 17.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-14",
+          "scheduled_start": "2026-01-12",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-057",
+          "work_order_id": "WO-I-007",
+          "workcenter_id": "WC-ASM-1"
+        },
+        "operations": [
+          {
+            "actual_hours": 0.0,
+            "planned_hours": 8.5,
+            "sequence": 10,
+            "status": "Ready",
+            "work_order_id": "WO-I-007",
+            "workcenter_id": "WC-ASM-1"
+          }
+        ],
+        "requirements": [
+          {
+            "issued_qty": 0.0,
+            "item_id": "RM-RELAY",
+            "need_by": "2026-01-12",
+            "required_qty": 34.0,
+            "reserved_qty": 34.0,
+            "work_order_id": "WO-I-007"
+          }
+        ],
+        "reservations": [
+          {
+            "item_id": "RM-RELAY",
+            "lot_number": "R-EARLY-007",
+            "plant_id": "SEA",
+            "quantity": 34.0,
+            "reservation_id": "RES-I-007",
+            "status": "Active",
+            "subinventory": "STORES",
+            "task_id": "factorybench-057",
+            "work_order_id": "WO-I-007"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_work_order"
+    },
+    {
+      "arguments": {
+        "item_ids": [
+          "RM-RELAY"
+        ],
+        "plant_id": "SEA"
+      },
+      "index": 2,
+      "result": {
+        "lots": [
+          {
+            "available_qty": 0.0,
+            "expiration_date": "2026-06-30",
+            "item_id": "RM-RELAY",
+            "lot_number": "R-EARLY-007",
+            "plant_id": "SEA",
+            "quantity": 34.0,
+            "reserved_qty": 34.0,
+            "status": "Unrestricted",
+            "subinventory": "STORES"
+          },
+          {
+            "available_qty": 44.0,
+            "expiration_date": "2027-06-30",
+            "item_id": "RM-RELAY",
+            "lot_number": "R-LATE-007",
+            "plant_id": "SEA",
+            "quantity": 44.0,
+            "reserved_qty": 0.0,
+            "status": "Unrestricted",
+            "subinventory": "STORES"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_inventory"
+    },
+    {
+      "arguments": {
+        "item_id": "RM-RELAY",
+        "lot_number": "R-EARLY-007",
+        "occurred_at": "2026-01-12",
+        "plant_id": "SEA",
+        "quantity": 34,
+        "subinventory": "STORES",
+        "transaction_id": "TX-ISSUE-007",
+        "work_order_id": "WO-I-007"
+      },
+      "index": 3,
+      "result": {
+        "lot_number": "R-EARLY-007",
+        "quantity": 34,
+        "transaction_id": "TX-ISSUE-007"
+      },
+      "success": true,
+      "tool": "issue_material"
+    },
+    {
+      "arguments": {
+        "sequence": 10,
+        "work_order_id": "WO-I-007"
+      },
+      "index": 4,
+      "result": {
+        "sequence": 10,
+        "status": "In Process",
+        "work_order_id": "WO-I-007"
+      },
+      "success": true,
+      "tool": "start_operation"
+    },
+    {
+      "arguments": {
+        "issued_lot": "R-EARLY-007",
+        "issued_quantity": 34,
+        "operation_status": "In Process",
+        "work_order_id": "WO-I-007"
+      },
+      "index": 5,
+      "result": {
+        "submitted": {
+          "issued_lot": "R-EARLY-007",
+          "issued_quantity": "34",
+          "operation_status": "In Process",
+          "work_order_id": "WO-I-007"
+        },
+        "task_id": "factorybench-057"
+      },
+      "success": true,
+      "tool": "submit_answer"
+    }
+  ]
+}

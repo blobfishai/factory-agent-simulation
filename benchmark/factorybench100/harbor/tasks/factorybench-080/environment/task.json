@@ -1,0 +1,356 @@
+{
+  "allowed_write_tables": [
+    "work_order_operations",
+    "work_orders",
+    "wip_variances",
+    "inventory_on_hand",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "completed_quantity": {
+        "type": "integer"
+      },
+      "scrap_quantity": {
+        "type": "integer"
+      },
+      "variance_id": {
+        "type": "string"
+      },
+      "work_order_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "completed_quantity",
+      "scrap_quantity",
+      "variance_id",
+      "work_order_id"
+    ],
+    "type": "object"
+  },
+  "as_of": "2026-01-12",
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "completion_costing"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "work_order_id": "WO-C-010"
+      },
+      "tool": "get_work_order"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_work_order"
+  ],
+  "seed_tables": {
+    "bom_components": [
+      {
+        "bom_id": "BOM-PANEL-C",
+        "component_item_id": "RM-HOUSING",
+        "operation_sequence": 10,
+        "quantity_per": 1,
+        "yield_factor": 1
+      },
+      {
+        "bom_id": "BOM-PANEL-C",
+        "component_item_id": "RM-RELAY",
+        "operation_sequence": 20,
+        "quantity_per": 2,
+        "yield_factor": 1
+      },
+      {
+        "bom_id": "BOM-PANEL-C",
+        "component_item_id": "RM-COPPER",
+        "operation_sequence": 20,
+        "quantity_per": 1,
+        "yield_factor": 1
+      }
+    ],
+    "bom_headers": [
+      {
+        "assembly_item_id": "FG-PANEL",
+        "bom_id": "BOM-PANEL-C",
+        "effective_on": "2025-10-01",
+        "revision": "C",
+        "status": "Active"
+      }
+    ],
+    "documents": [
+      {
+        "body": "Release only when the customer is not on credit hold, an effective BOM exists, and every component has enough available stock. Reserve the exact BOM quantity.",
+        "category": "order_release",
+        "doc_id": "POL-01",
+        "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
+        "task_id": "factorybench-080",
+        "title": "Order release control"
+      },
+      {
+        "body": "Net requirements against unreserved on-hand. Use an approved supplier quote that is valid through the need-by date. Requisitions over the requester's limit require the plant manager's approval.",
+        "category": "material_shortage",
+        "doc_id": "POL-02",
+        "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
+        "task_id": "factorybench-080",
+        "title": "Shortage requisition control"
+      },
+      {
+        "body": "Choose an approved supplier. Minimize landed price while meeting the need-by date; break ties by higher quality score, then higher on-time rate. Purchase orders above the buyer's limit require plant-manager approval.",
+        "category": "supplier_selection",
+        "doc_id": "POL-03",
+        "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
+        "task_id": "factorybench-080",
+        "title": "Supplier award policy"
+      },
+      {
+        "body": "Receive only against an approved purchase order. Put the lot in inspection status, record accepted and rejected quantities, and release only accepted quantity to stores.",
+        "category": "inbound_receipt",
+        "doc_id": "POL-04",
+        "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
+        "task_id": "factorybench-080",
+        "title": "Receiving and inspection policy"
+      },
+      {
+        "body": "Compare invoice, approved PO, and accepted receipt. Approve when quantity is covered and the amount variance is at most 2 percent; otherwise place a variance hold.",
+        "category": "invoice_match",
+        "doc_id": "POL-05",
+        "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
+        "task_id": "factorybench-080",
+        "title": "Three-way match policy"
+      },
+      {
+        "body": "Issue only reserved, unrestricted stock. Use FEFO across eligible lots and start the operation only after the full required quantity has been issued.",
+        "category": "production_issue",
+        "doc_id": "POL-06",
+        "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
+        "task_id": "factorybench-080",
+        "title": "Material issue policy"
+      },
+      {
+        "body": "A failed inspection requires an immediate lot hold and an open nonconformance. Use REWORK when the defect is recoverable and assign it to the quality engineer.",
+        "category": "quality_exception",
+        "doc_id": "POL-07",
+        "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
+        "task_id": "factorybench-080",
+        "title": "Nonconformance policy"
+      },
+      {
+        "body": "Complete all operations before closing the work order. Record finished quantity and scrap, then post material, labor, and overhead variance for finance review.",
+        "category": "completion_costing",
+        "doc_id": "POL-08",
+        "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
+        "task_id": "factorybench-080",
+        "title": "Work-order close policy"
+      },
+      {
+        "body": "Use unrestricted surplus from the donor plant, complete the interplant transfer, and reschedule the receiving work order no earlier than the transfer arrival date.",
+        "category": "transfer_reschedule",
+        "doc_id": "POL-09",
+        "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
+        "task_id": "factorybench-080",
+        "title": "Interplant recovery policy"
+      },
+      {
+        "body": "Open a high-priority maintenance work order for the failed workcenter. Reroute production only to a qualified active alternate and reschedule within that center's capacity.",
+        "category": "maintenance_recovery",
+        "doc_id": "POL-10",
+        "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
+        "task_id": "factorybench-080",
+        "title": "Unplanned downtime policy"
+      }
+    ],
+    "items": [
+      {
+        "description": "Industrial control panel",
+        "item_id": "FG-PANEL",
+        "item_type": "finished_good",
+        "make_buy": "MAKE",
+        "organization_id": "M1",
+        "status": "Active",
+        "unit_cost": 910,
+        "uom": "EA"
+      },
+      {
+        "description": "Powder-coated enclosure",
+        "item_id": "RM-HOUSING",
+        "item_type": "component",
+        "make_buy": "BUY",
+        "organization_id": "M1",
+        "status": "Active",
+        "unit_cost": 210,
+        "uom": "EA"
+      },
+      {
+        "description": "Safety relay",
+        "item_id": "RM-RELAY",
+        "item_type": "component",
+        "make_buy": "BUY",
+        "organization_id": "M1",
+        "status": "Active",
+        "unit_cost": 48,
+        "uom": "EA"
+      },
+      {
+        "description": "Copper busbar set",
+        "item_id": "RM-COPPER",
+        "item_type": "component",
+        "make_buy": "BUY",
+        "organization_id": "M1",
+        "status": "Active",
+        "unit_cost": 72,
+        "uom": "EA"
+      }
+    ],
+    "organizations": [
+      {
+        "ledger_currency": "USD",
+        "name": "Northstar Controls Manufacturing",
+        "organization_id": "M1"
+      }
+    ],
+    "plants": [
+      {
+        "name": "Seattle Assembly",
+        "organization_id": "M1",
+        "plant_id": "SEA",
+        "timezone": "America/Los_Angeles"
+      },
+      {
+        "name": "Portland Components",
+        "organization_id": "M1",
+        "plant_id": "PDX",
+        "timezone": "America/Los_Angeles"
+      }
+    ],
+    "suppliers": [
+      {
+        "approved": 1,
+        "name": "Cascade Industrial",
+        "on_time_rate": 0.94,
+        "payment_terms": "NET30",
+        "quality_score": 97.2,
+        "supplier_id": "SUP-A"
+      },
+      {
+        "approved": 1,
+        "name": "Rainier Components",
+        "on_time_rate": 0.98,
+        "payment_terms": "NET45",
+        "quality_score": 95.8,
+        "supplier_id": "SUP-B"
+      },
+      {
+        "approved": 0,
+        "name": "Frontier Supply",
+        "on_time_rate": 0.99,
+        "payment_terms": "NET30",
+        "quality_score": 99.1,
+        "supplier_id": "SUP-C"
+      }
+    ],
+    "users": [
+      {
+        "approval_limit": 0,
+        "display_name": "Maya Chen",
+        "plant_id": "SEA",
+        "role": "production_planner",
+        "user_id": "U-PLANNER"
+      },
+      {
+        "approval_limit": 1000,
+        "display_name": "Diego Ruiz",
+        "plant_id": "SEA",
+        "role": "buyer",
+        "user_id": "U-BUYER"
+      },
+      {
+        "approval_limit": 250000,
+        "display_name": "Avery Morgan",
+        "plant_id": "SEA",
+        "role": "plant_manager",
+        "user_id": "U-MANAGER"
+      },
+      {
+        "approval_limit": 0,
+        "display_name": "Priya Shah",
+        "plant_id": "SEA",
+        "role": "quality_inspector",
+        "user_id": "U-INSPECTOR"
+      },
+      {
+        "approval_limit": 0,
+        "display_name": "Noah Williams",
+        "plant_id": "SEA",
+        "role": "quality_engineer",
+        "user_id": "U-QUALITY"
+      }
+    ],
+    "work_order_operations": [
+      {
+        "actual_hours": 12.100000000000001,
+        "planned_hours": 11.0,
+        "sequence": 10,
+        "status": "Complete",
+        "work_order_id": "WO-C-010",
+        "workcenter_id": "WC-ASM-1"
+      },
+      {
+        "actual_hours": 17.6,
+        "planned_hours": 16.5,
+        "sequence": 20,
+        "status": "In Process",
+        "work_order_id": "WO-C-010",
+        "workcenter_id": "WC-ASM-1"
+      }
+    ],
+    "work_orders": [
+      {
+        "completed_qty": 0,
+        "item_id": "FG-PANEL",
+        "parent_work_order_id": null,
+        "quantity": 22,
+        "sales_order_id": null,
+        "scheduled_completion": "2026-01-12",
+        "scheduled_start": "2026-01-10",
+        "scrap_qty": 0,
+        "status": "In Process",
+        "task_id": "factorybench-080",
+        "work_order_id": "WO-C-010",
+        "workcenter_id": "WC-ASM-1"
+      }
+    ],
+    "workcenters": [
+      {
+        "capacity_hours": 80,
+        "name": "Assembly Cell 1",
+        "plant_id": "SEA",
+        "qualified_item_class": "control_panel",
+        "status": "Active",
+        "workcenter_id": "WC-ASM-1"
+      },
+      {
+        "capacity_hours": 64,
+        "name": "Assembly Cell 2",
+        "plant_id": "SEA",
+        "qualified_item_class": "control_panel",
+        "status": "Active",
+        "workcenter_id": "WC-ASM-2"
+      },
+      {
+        "capacity_hours": 72,
+        "name": "Portland Fabrication",
+        "plant_id": "PDX",
+        "qualified_item_class": "control_panel",
+        "status": "Active",
+        "workcenter_id": "WC-PDX-1"
+      }
+    ]
+  },
+  "task_id": "factorybench-080"
+}

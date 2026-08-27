@@ -1,0 +1,677 @@
+{
+  "checks": [
+    {
+      "description": "Required policy and ERP reads completed before the first write.",
+      "evidence": {
+        "missing": []
+      },
+      "id": "read_before_write",
+      "passed": true
+    },
+    {
+      "description": "A released discrete work order links to the sales order.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "work_order_released",
+      "passed": true
+    },
+    {
+      "description": "All three BOM components are reserved.",
+      "evidence": {
+        "expected_count": 3,
+        "matching_rows": 3
+      },
+      "id": "all_components_reserved",
+      "passed": true
+    },
+    {
+      "description": "The two-per-assembly relay requirement is fully reserved.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "relay_requirement_reserved",
+      "passed": true
+    },
+    {
+      "description": "Submitted answer fields exactly match the ground truth.",
+      "evidence": {
+        "expected": {
+          "completion_date": "2026-01-24",
+          "released_quantity": "13",
+          "work_order_id": "WO-0009"
+        },
+        "submitted": {
+          "completion_date": "2026-01-24",
+          "released_quantity": "13",
+          "work_order_id": "WO-0009"
+        }
+      },
+      "id": "exact_answer",
+      "passed": true
+    },
+    {
+      "description": "All successful writes stay inside the task's allowed tables.",
+      "evidence": {
+        "disallowed": [],
+        "written_tables": [
+          "answers",
+          "inventory_on_hand",
+          "material_requirements",
+          "material_reservations",
+          "work_order_operations",
+          "work_orders"
+        ]
+      },
+      "id": "write_scope",
+      "passed": true
+    },
+    {
+      "description": "The episode completes without a rejected or malformed tool call.",
+      "evidence": {
+        "errors": []
+      },
+      "id": "error_free",
+      "passed": true
+    }
+  ],
+  "metric": "FactoryScore",
+  "passed_checks": 7,
+  "policy": "oracle",
+  "score": 100.0,
+  "state_diff": {
+    "answers": {
+      "after": [
+        {
+          "field": "completion_date",
+          "task_id": "factorybench-009",
+          "value": "2026-01-24"
+        },
+        {
+          "field": "released_quantity",
+          "task_id": "factorybench-009",
+          "value": "13"
+        },
+        {
+          "field": "work_order_id",
+          "task_id": "factorybench-009",
+          "value": "WO-0009"
+        }
+      ],
+      "after_count": 3,
+      "before": [],
+      "before_count": 0
+    },
+    "audit_log": {
+      "after": [
+        {
+          "action": "insert",
+          "audit_id": 1,
+          "payload": "{\"completed_qty\": 0, \"item_id\": \"FG-PANEL\", \"parent_work_order_id\": null, \"quantity\": 13, \"sales_order_id\": \"SO-0009\", \"scheduled_completion\": \"2026-01-24\", \"scheduled_start\": \"2026-01-21\", \"scrap_qty\": 0, \"status\": \"Released\", \"task_id\": \"factorybench-009\", \"work_order_id\": \"WO-0009\", \"workcenter_id\": \"WC-ASM-1\"}",
+          "record_id": "WO-0009",
+          "table_name": "work_orders",
+          "task_id": "factorybench-009",
+          "tool": "create_work_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 2,
+          "payload": "{\"actual_hours\": 0, \"planned_hours\": 16.25, \"sequence\": 10, \"status\": \"Ready\", \"work_order_id\": \"WO-0009\", \"workcenter_id\": \"WC-ASM-1\"}",
+          "record_id": "WO-0009:10",
+          "table_name": "work_order_operations",
+          "task_id": "factorybench-009",
+          "tool": "create_work_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 3,
+          "payload": "{\"issued_qty\": 0, \"item_id\": \"RM-COPPER\", \"need_by\": \"2026-01-21\", \"required_qty\": 13.0, \"reserved_qty\": 0, \"work_order_id\": \"WO-0009\"}",
+          "record_id": "WO-0009:RM-COPPER",
+          "table_name": "material_requirements",
+          "task_id": "factorybench-009",
+          "tool": "create_work_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 4,
+          "payload": "{\"issued_qty\": 0, \"item_id\": \"RM-HOUSING\", \"need_by\": \"2026-01-21\", \"required_qty\": 13.0, \"reserved_qty\": 0, \"work_order_id\": \"WO-0009\"}",
+          "record_id": "WO-0009:RM-HOUSING",
+          "table_name": "material_requirements",
+          "task_id": "factorybench-009",
+          "tool": "create_work_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 5,
+          "payload": "{\"issued_qty\": 0, \"item_id\": \"RM-RELAY\", \"need_by\": \"2026-01-21\", \"required_qty\": 26.0, \"reserved_qty\": 0, \"work_order_id\": \"WO-0009\"}",
+          "record_id": "WO-0009:RM-RELAY",
+          "table_name": "material_requirements",
+          "task_id": "factorybench-009",
+          "tool": "create_work_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 6,
+          "payload": "{\"item_id\": \"RM-HOUSING\", \"lot_number\": \"H-009\", \"plant_id\": \"SEA\", \"quantity\": 13, \"reservation_id\": \"RES-H-009\", \"status\": \"Active\", \"subinventory\": \"STORES\", \"task_id\": \"factorybench-009\", \"work_order_id\": \"WO-0009\"}",
+          "record_id": "RES-H-009",
+          "table_name": "material_reservations",
+          "task_id": "factorybench-009",
+          "tool": "reserve_material"
+        },
+        {
+          "action": "update",
+          "audit_id": 7,
+          "payload": "{\"reserved_delta\": 13}",
+          "record_id": "SEA:STORES:RM-HOUSING:H-009",
+          "table_name": "inventory_on_hand",
+          "task_id": "factorybench-009",
+          "tool": "reserve_material"
+        },
+        {
+          "action": "update",
+          "audit_id": 8,
+          "payload": "{\"reserved_delta\": 13}",
+          "record_id": "WO-0009:RM-HOUSING",
+          "table_name": "material_requirements",
+          "task_id": "factorybench-009",
+          "tool": "reserve_material"
+        },
+        {
+          "action": "insert",
+          "audit_id": 9,
+          "payload": "{\"item_id\": \"RM-RELAY\", \"lot_number\": \"R-009\", \"plant_id\": \"SEA\", \"quantity\": 26, \"reservation_id\": \"RES-R-009\", \"status\": \"Active\", \"subinventory\": \"STORES\", \"task_id\": \"factorybench-009\", \"work_order_id\": \"WO-0009\"}",
+          "record_id": "RES-R-009",
+          "table_name": "material_reservations",
+          "task_id": "factorybench-009",
+          "tool": "reserve_material"
+        },
+        {
+          "action": "update",
+          "audit_id": 10,
+          "payload": "{\"reserved_delta\": 26}",
+          "record_id": "SEA:STORES:RM-RELAY:R-009",
+          "table_name": "inventory_on_hand",
+          "task_id": "factorybench-009",
+          "tool": "reserve_material"
+        },
+        {
+          "action": "update",
+          "audit_id": 11,
+          "payload": "{\"reserved_delta\": 26}",
+          "record_id": "WO-0009:RM-RELAY",
+          "table_name": "material_requirements",
+          "task_id": "factorybench-009",
+          "tool": "reserve_material"
+        },
+        {
+          "action": "insert",
+          "audit_id": 12,
+          "payload": "{\"item_id\": \"RM-COPPER\", \"lot_number\": \"C-009\", \"plant_id\": \"SEA\", \"quantity\": 13, \"reservation_id\": \"RES-C-009\", \"status\": \"Active\", \"subinventory\": \"STORES\", \"task_id\": \"factorybench-009\", \"work_order_id\": \"WO-0009\"}",
+          "record_id": "RES-C-009",
+          "table_name": "material_reservations",
+          "task_id": "factorybench-009",
+          "tool": "reserve_material"
+        },
+        {
+          "action": "update",
+          "audit_id": 13,
+          "payload": "{\"reserved_delta\": 13}",
+          "record_id": "SEA:STORES:RM-COPPER:C-009",
+          "table_name": "inventory_on_hand",
+          "task_id": "factorybench-009",
+          "tool": "reserve_material"
+        },
+        {
+          "action": "update",
+          "audit_id": 14,
+          "payload": "{\"reserved_delta\": 13}",
+          "record_id": "WO-0009:RM-COPPER",
+          "table_name": "material_requirements",
+          "task_id": "factorybench-009",
+          "tool": "reserve_material"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 15,
+          "payload": "{\"value\": \"WO-0009\"}",
+          "record_id": "factorybench-009:work_order_id",
+          "table_name": "answers",
+          "task_id": "factorybench-009",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 16,
+          "payload": "{\"value\": \"13\"}",
+          "record_id": "factorybench-009:released_quantity",
+          "table_name": "answers",
+          "task_id": "factorybench-009",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 17,
+          "payload": "{\"value\": \"2026-01-24\"}",
+          "record_id": "factorybench-009:completion_date",
+          "table_name": "answers",
+          "task_id": "factorybench-009",
+          "tool": "submit_answer"
+        }
+      ],
+      "after_count": 17,
+      "before": [],
+      "before_count": 0
+    },
+    "inventory_on_hand": {
+      "after": [
+        {
+          "expiration_date": null,
+          "item_id": "RM-COPPER",
+          "lot_number": "C-009",
+          "plant_id": "SEA",
+          "quantity": 15.0,
+          "reserved_qty": 13.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        },
+        {
+          "expiration_date": null,
+          "item_id": "RM-HOUSING",
+          "lot_number": "H-009",
+          "plant_id": "SEA",
+          "quantity": 16.0,
+          "reserved_qty": 13.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        },
+        {
+          "expiration_date": "2027-06-30",
+          "item_id": "RM-RELAY",
+          "lot_number": "R-009",
+          "plant_id": "SEA",
+          "quantity": 30.0,
+          "reserved_qty": 26.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        }
+      ],
+      "after_count": 3,
+      "before": [
+        {
+          "expiration_date": null,
+          "item_id": "RM-COPPER",
+          "lot_number": "C-009",
+          "plant_id": "SEA",
+          "quantity": 15.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        },
+        {
+          "expiration_date": null,
+          "item_id": "RM-HOUSING",
+          "lot_number": "H-009",
+          "plant_id": "SEA",
+          "quantity": 16.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        },
+        {
+          "expiration_date": "2027-06-30",
+          "item_id": "RM-RELAY",
+          "lot_number": "R-009",
+          "plant_id": "SEA",
+          "quantity": 30.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "STORES"
+        }
+      ],
+      "before_count": 3
+    },
+    "material_requirements": {
+      "after": [
+        {
+          "issued_qty": 0.0,
+          "item_id": "RM-COPPER",
+          "need_by": "2026-01-21",
+          "required_qty": 13.0,
+          "reserved_qty": 13.0,
+          "work_order_id": "WO-0009"
+        },
+        {
+          "issued_qty": 0.0,
+          "item_id": "RM-HOUSING",
+          "need_by": "2026-01-21",
+          "required_qty": 13.0,
+          "reserved_qty": 13.0,
+          "work_order_id": "WO-0009"
+        },
+        {
+          "issued_qty": 0.0,
+          "item_id": "RM-RELAY",
+          "need_by": "2026-01-21",
+          "required_qty": 26.0,
+          "reserved_qty": 26.0,
+          "work_order_id": "WO-0009"
+        }
+      ],
+      "after_count": 3,
+      "before": [],
+      "before_count": 0
+    },
+    "material_reservations": {
+      "after": [
+        {
+          "item_id": "RM-COPPER",
+          "lot_number": "C-009",
+          "plant_id": "SEA",
+          "quantity": 13.0,
+          "reservation_id": "RES-C-009",
+          "status": "Active",
+          "subinventory": "STORES",
+          "task_id": "factorybench-009",
+          "work_order_id": "WO-0009"
+        },
+        {
+          "item_id": "RM-HOUSING",
+          "lot_number": "H-009",
+          "plant_id": "SEA",
+          "quantity": 13.0,
+          "reservation_id": "RES-H-009",
+          "status": "Active",
+          "subinventory": "STORES",
+          "task_id": "factorybench-009",
+          "work_order_id": "WO-0009"
+        },
+        {
+          "item_id": "RM-RELAY",
+          "lot_number": "R-009",
+          "plant_id": "SEA",
+          "quantity": 26.0,
+          "reservation_id": "RES-R-009",
+          "status": "Active",
+          "subinventory": "STORES",
+          "task_id": "factorybench-009",
+          "work_order_id": "WO-0009"
+        }
+      ],
+      "after_count": 3,
+      "before": [],
+      "before_count": 0
+    },
+    "work_order_operations": {
+      "after": [
+        {
+          "actual_hours": 0.0,
+          "planned_hours": 16.25,
+          "sequence": 10,
+          "status": "Ready",
+          "work_order_id": "WO-0009",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "work_orders": {
+      "after": [
+        {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 13.0,
+          "sales_order_id": "SO-0009",
+          "scheduled_completion": "2026-01-24",
+          "scheduled_start": "2026-01-21",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-009",
+          "work_order_id": "WO-0009",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    }
+  },
+  "strict_pass": true,
+  "task_id": "factorybench-009",
+  "total_checks": 7,
+  "trace": [
+    {
+      "arguments": {
+        "category": "order_release"
+      },
+      "index": 0,
+      "result": {
+        "documents": [
+          {
+            "body": "Release only when the customer is not on credit hold, an effective BOM exists, and every component has enough available stock. Reserve the exact BOM quantity.",
+            "category": "order_release",
+            "doc_id": "POL-01",
+            "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
+            "title": "Order release control"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "sales_order_id": "SO-0009"
+      },
+      "index": 1,
+      "result": {
+        "header": {
+          "credit_hold": 0,
+          "customer_name": "Atlas Systems 9",
+          "priority": "High",
+          "requested_date": "2026-01-24",
+          "sales_order_id": "SO-0009",
+          "status": "Booked",
+          "task_id": "factorybench-009"
+        },
+        "lines": [
+          {
+            "item_id": "FG-PANEL",
+            "line_no": 1,
+            "ordered_qty": 13.0,
+            "sales_order_id": "SO-0009",
+            "shipped_qty": 0.0
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_sales_order"
+    },
+    {
+      "arguments": {
+        "as_of": "2026-01-12",
+        "item_id": "FG-PANEL"
+      },
+      "index": 2,
+      "result": {
+        "components": [
+          {
+            "bom_id": "BOM-PANEL-C",
+            "component_item_id": "RM-HOUSING",
+            "operation_sequence": 10,
+            "quantity_per": 1.0,
+            "yield_factor": 1.0
+          },
+          {
+            "bom_id": "BOM-PANEL-C",
+            "component_item_id": "RM-COPPER",
+            "operation_sequence": 20,
+            "quantity_per": 1.0,
+            "yield_factor": 1.0
+          },
+          {
+            "bom_id": "BOM-PANEL-C",
+            "component_item_id": "RM-RELAY",
+            "operation_sequence": 20,
+            "quantity_per": 2.0,
+            "yield_factor": 1.0
+          }
+        ],
+        "header": {
+          "assembly_item_id": "FG-PANEL",
+          "bom_id": "BOM-PANEL-C",
+          "effective_on": "2025-10-01",
+          "revision": "C",
+          "status": "Active"
+        }
+      },
+      "success": true,
+      "tool": "get_bom"
+    },
+    {
+      "arguments": {
+        "item_ids": [
+          "RM-HOUSING",
+          "RM-RELAY",
+          "RM-COPPER"
+        ],
+        "plant_id": "SEA"
+      },
+      "index": 3,
+      "result": {
+        "lots": [
+          {
+            "available_qty": 15.0,
+            "expiration_date": null,
+            "item_id": "RM-COPPER",
+            "lot_number": "C-009",
+            "plant_id": "SEA",
+            "quantity": 15.0,
+            "reserved_qty": 0.0,
+            "status": "Unrestricted",
+            "subinventory": "STORES"
+          },
+          {
+            "available_qty": 16.0,
+            "expiration_date": null,
+            "item_id": "RM-HOUSING",
+            "lot_number": "H-009",
+            "plant_id": "SEA",
+            "quantity": 16.0,
+            "reserved_qty": 0.0,
+            "status": "Unrestricted",
+            "subinventory": "STORES"
+          },
+          {
+            "available_qty": 30.0,
+            "expiration_date": "2027-06-30",
+            "item_id": "RM-RELAY",
+            "lot_number": "R-009",
+            "plant_id": "SEA",
+            "quantity": 30.0,
+            "reserved_qty": 0.0,
+            "status": "Unrestricted",
+            "subinventory": "STORES"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_inventory"
+    },
+    {
+      "arguments": {
+        "item_id": "FG-PANEL",
+        "quantity": 13,
+        "sales_order_id": "SO-0009",
+        "scheduled_completion": "2026-01-24",
+        "scheduled_start": "2026-01-21",
+        "work_order_id": "WO-0009",
+        "workcenter_id": "WC-ASM-1"
+      },
+      "index": 4,
+      "result": {
+        "requirements_created": 3,
+        "status": "Released",
+        "work_order_id": "WO-0009"
+      },
+      "success": true,
+      "tool": "create_work_order"
+    },
+    {
+      "arguments": {
+        "item_id": "RM-HOUSING",
+        "lot_number": "H-009",
+        "plant_id": "SEA",
+        "quantity": 13,
+        "reservation_id": "RES-H-009",
+        "subinventory": "STORES",
+        "work_order_id": "WO-0009"
+      },
+      "index": 5,
+      "result": {
+        "reservation_id": "RES-H-009",
+        "status": "Active"
+      },
+      "success": true,
+      "tool": "reserve_material"
+    },
+    {
+      "arguments": {
+        "item_id": "RM-RELAY",
+        "lot_number": "R-009",
+        "plant_id": "SEA",
+        "quantity": 26,
+        "reservation_id": "RES-R-009",
+        "subinventory": "STORES",
+        "work_order_id": "WO-0009"
+      },
+      "index": 6,
+      "result": {
+        "reservation_id": "RES-R-009",
+        "status": "Active"
+      },
+      "success": true,
+      "tool": "reserve_material"
+    },
+    {
+      "arguments": {
+        "item_id": "RM-COPPER",
+        "lot_number": "C-009",
+        "plant_id": "SEA",
+        "quantity": 13,
+        "reservation_id": "RES-C-009",
+        "subinventory": "STORES",
+        "work_order_id": "WO-0009"
+      },
+      "index": 7,
+      "result": {
+        "reservation_id": "RES-C-009",
+        "status": "Active"
+      },
+      "success": true,
+      "tool": "reserve_material"
+    },
+    {
+      "arguments": {
+        "completion_date": "2026-01-24",
+        "released_quantity": 13,
+        "work_order_id": "WO-0009"
+      },
+      "index": 8,
+      "result": {
+        "submitted": {
+          "completion_date": "2026-01-24",
+          "released_quantity": "13",
+          "work_order_id": "WO-0009"
+        },
+        "task_id": "factorybench-009"
+      },
+      "success": true,
+      "tool": "submit_answer"
+    }
+  ]
+}

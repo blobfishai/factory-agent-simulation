@@ -1,0 +1,108 @@
+{
+  "allowed_write_tables": [
+    "quality_holds",
+    "nonconformances",
+    "inventory_on_hand",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "disposition": {
+        "type": "string"
+      },
+      "hold_id": {
+        "type": "string"
+      },
+      "inspection_id": {
+        "type": "string"
+      },
+      "nonconformance_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "disposition",
+      "hold_id",
+      "inspection_id",
+      "nonconformance_id"
+    ],
+    "type": "object"
+  },
+  "expected": {
+    "answer": {
+      "disposition": "REWORK",
+      "hold_id": "HOLD-0009",
+      "inspection_id": "INSP-Q-009",
+      "nonconformance_id": "NC-0009"
+    },
+    "assertions": [
+      {
+        "description": "The failed lot is on an active quality hold.",
+        "id": "lot_held",
+        "table": "quality_holds",
+        "values": {
+          "lot_number": "FG-LOT-009",
+          "reason_code": "FUNCTIONAL_TEST_FAIL",
+          "status": "Active"
+        },
+        "where": {
+          "hold_id": "HOLD-0009"
+        }
+      },
+      {
+        "description": "A recoverable nonconformance is assigned for rework.",
+        "id": "nonconformance_opened",
+        "table": "nonconformances",
+        "values": {
+          "disposition": "REWORK",
+          "inspection_id": "INSP-Q-009",
+          "owner_id": "U-QUALITY",
+          "status": "Open"
+        },
+        "where": {
+          "nonconformance_id": "NC-0009"
+        }
+      },
+      {
+        "description": "The affected inventory remains quarantined.",
+        "id": "inventory_quarantined",
+        "table": "inventory_on_hand",
+        "values": {
+          "status": "Quality Hold"
+        },
+        "where": {
+          "item_id": "FG-PANEL",
+          "lot_number": "FG-LOT-009",
+          "plant_id": "SEA",
+          "subinventory": "FG"
+        }
+      }
+    ]
+  },
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "quality_exception"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "inspection_id": "INSP-Q-009"
+      },
+      "tool": "get_quality_context"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_quality_context"
+  ],
+  "task_id": "factorybench-069",
+  "write_tools": [
+    "create_nonconformance",
+    "place_quality_hold",
+    "submit_answer"
+  ]
+}

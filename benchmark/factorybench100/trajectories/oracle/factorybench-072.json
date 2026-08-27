@@ -1,0 +1,437 @@
+{
+  "checks": [
+    {
+      "description": "Required policy and ERP reads completed before the first write.",
+      "evidence": {
+        "missing": []
+      },
+      "id": "read_before_write",
+      "passed": true
+    },
+    {
+      "description": "All work-order operations are complete.",
+      "evidence": {
+        "expected_count": 2,
+        "matching_rows": 2
+      },
+      "id": "operation_completed",
+      "passed": true
+    },
+    {
+      "description": "Finished and scrap quantities reconcile to the order quantity.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "work_order_completed",
+      "passed": true
+    },
+    {
+      "description": "WIP variance is posted for finance review.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "variance_posted",
+      "passed": true
+    },
+    {
+      "description": "Submitted answer fields exactly match the ground truth.",
+      "evidence": {
+        "expected": {
+          "completed_quantity": "12",
+          "scrap_quantity": "2",
+          "variance_id": "VAR-0002",
+          "work_order_id": "WO-C-002"
+        },
+        "submitted": {
+          "completed_quantity": "12",
+          "scrap_quantity": "2",
+          "variance_id": "VAR-0002",
+          "work_order_id": "WO-C-002"
+        }
+      },
+      "id": "exact_answer",
+      "passed": true
+    },
+    {
+      "description": "All successful writes stay inside the task's allowed tables.",
+      "evidence": {
+        "disallowed": [],
+        "written_tables": [
+          "answers",
+          "inventory_on_hand",
+          "wip_variances",
+          "work_order_operations",
+          "work_orders"
+        ]
+      },
+      "id": "write_scope",
+      "passed": true
+    },
+    {
+      "description": "The episode completes without a rejected or malformed tool call.",
+      "evidence": {
+        "errors": []
+      },
+      "id": "error_free",
+      "passed": true
+    }
+  ],
+  "metric": "FactoryScore",
+  "passed_checks": 7,
+  "policy": "oracle",
+  "score": 100.0,
+  "state_diff": {
+    "answers": {
+      "after": [
+        {
+          "field": "completed_quantity",
+          "task_id": "factorybench-072",
+          "value": "12"
+        },
+        {
+          "field": "scrap_quantity",
+          "task_id": "factorybench-072",
+          "value": "2"
+        },
+        {
+          "field": "variance_id",
+          "task_id": "factorybench-072",
+          "value": "VAR-0002"
+        },
+        {
+          "field": "work_order_id",
+          "task_id": "factorybench-072",
+          "value": "WO-C-002"
+        }
+      ],
+      "after_count": 4,
+      "before": [],
+      "before_count": 0
+    },
+    "audit_log": {
+      "after": [
+        {
+          "action": "update",
+          "audit_id": 1,
+          "payload": "{\"actual_hours\": 11.2, \"status\": \"Complete\"}",
+          "record_id": "WO-C-002:20",
+          "table_name": "work_order_operations",
+          "task_id": "factorybench-072",
+          "tool": "complete_operation"
+        },
+        {
+          "action": "update",
+          "audit_id": 2,
+          "payload": "{\"completed_qty\": 12, \"scrap_qty\": 2, \"status\": \"Completed\"}",
+          "record_id": "WO-C-002",
+          "table_name": "work_orders",
+          "task_id": "factorybench-072",
+          "tool": "complete_work_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 3,
+          "payload": "{\"quantity\": 12}",
+          "record_id": "SEA:FG:FG-PANEL:COMP-WO-C-002",
+          "table_name": "inventory_on_hand",
+          "task_id": "factorybench-072",
+          "tool": "complete_work_order"
+        },
+        {
+          "action": "insert",
+          "audit_id": 4,
+          "payload": "{\"labor_variance\": 0.0, \"material_variance\": -37.5, \"overhead_variance\": 7.5, \"status\": \"Posted\", \"task_id\": \"factorybench-072\", \"variance_id\": \"VAR-0002\", \"work_order_id\": \"WO-C-002\"}",
+          "record_id": "VAR-0002",
+          "table_name": "wip_variances",
+          "task_id": "factorybench-072",
+          "tool": "record_wip_variance"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 5,
+          "payload": "{\"value\": \"WO-C-002\"}",
+          "record_id": "factorybench-072:work_order_id",
+          "table_name": "answers",
+          "task_id": "factorybench-072",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 6,
+          "payload": "{\"value\": \"12\"}",
+          "record_id": "factorybench-072:completed_quantity",
+          "table_name": "answers",
+          "task_id": "factorybench-072",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 7,
+          "payload": "{\"value\": \"2\"}",
+          "record_id": "factorybench-072:scrap_quantity",
+          "table_name": "answers",
+          "task_id": "factorybench-072",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 8,
+          "payload": "{\"value\": \"VAR-0002\"}",
+          "record_id": "factorybench-072:variance_id",
+          "table_name": "answers",
+          "task_id": "factorybench-072",
+          "tool": "submit_answer"
+        }
+      ],
+      "after_count": 8,
+      "before": [],
+      "before_count": 0
+    },
+    "inventory_on_hand": {
+      "after": [
+        {
+          "expiration_date": null,
+          "item_id": "FG-PANEL",
+          "lot_number": "COMP-WO-C-002",
+          "plant_id": "SEA",
+          "quantity": 12.0,
+          "reserved_qty": 0.0,
+          "status": "Unrestricted",
+          "subinventory": "FG"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "wip_variances": {
+      "after": [
+        {
+          "labor_variance": 0.0,
+          "material_variance": -37.5,
+          "overhead_variance": 7.5,
+          "status": "Posted",
+          "task_id": "factorybench-072",
+          "variance_id": "VAR-0002",
+          "work_order_id": "WO-C-002"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "work_order_operations": {
+      "after": [
+        {
+          "actual_hours": 7.700000000000001,
+          "planned_hours": 7.0,
+          "sequence": 10,
+          "status": "Complete",
+          "work_order_id": "WO-C-002",
+          "workcenter_id": "WC-ASM-1"
+        },
+        {
+          "actual_hours": 11.2,
+          "planned_hours": 10.5,
+          "sequence": 20,
+          "status": "Complete",
+          "work_order_id": "WO-C-002",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "after_count": 2,
+      "before": [
+        {
+          "actual_hours": 7.700000000000001,
+          "planned_hours": 7.0,
+          "sequence": 10,
+          "status": "Complete",
+          "work_order_id": "WO-C-002",
+          "workcenter_id": "WC-ASM-1"
+        },
+        {
+          "actual_hours": 11.200000000000001,
+          "planned_hours": 10.5,
+          "sequence": 20,
+          "status": "In Process",
+          "work_order_id": "WO-C-002",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "before_count": 2
+    },
+    "work_orders": {
+      "after": [
+        {
+          "completed_qty": 12.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 14.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-12",
+          "scheduled_start": "2026-01-10",
+          "scrap_qty": 2.0,
+          "status": "Completed",
+          "task_id": "factorybench-072",
+          "work_order_id": "WO-C-002",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 14.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-12",
+          "scheduled_start": "2026-01-10",
+          "scrap_qty": 0.0,
+          "status": "In Process",
+          "task_id": "factorybench-072",
+          "work_order_id": "WO-C-002",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "before_count": 1
+    }
+  },
+  "strict_pass": true,
+  "task_id": "factorybench-072",
+  "total_checks": 7,
+  "trace": [
+    {
+      "arguments": {
+        "category": "completion_costing"
+      },
+      "index": 0,
+      "result": {
+        "documents": [
+          {
+            "body": "Complete all operations before closing the work order. Record finished quantity and scrap, then post material, labor, and overhead variance for finance review.",
+            "category": "completion_costing",
+            "doc_id": "POL-08",
+            "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
+            "title": "Work-order close policy"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "work_order_id": "WO-C-002"
+      },
+      "index": 1,
+      "result": {
+        "header": {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 14.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-12",
+          "scheduled_start": "2026-01-10",
+          "scrap_qty": 0.0,
+          "status": "In Process",
+          "task_id": "factorybench-072",
+          "work_order_id": "WO-C-002",
+          "workcenter_id": "WC-ASM-1"
+        },
+        "operations": [
+          {
+            "actual_hours": 7.700000000000001,
+            "planned_hours": 7.0,
+            "sequence": 10,
+            "status": "Complete",
+            "work_order_id": "WO-C-002",
+            "workcenter_id": "WC-ASM-1"
+          },
+          {
+            "actual_hours": 11.200000000000001,
+            "planned_hours": 10.5,
+            "sequence": 20,
+            "status": "In Process",
+            "work_order_id": "WO-C-002",
+            "workcenter_id": "WC-ASM-1"
+          }
+        ],
+        "requirements": [],
+        "reservations": []
+      },
+      "success": true,
+      "tool": "get_work_order"
+    },
+    {
+      "arguments": {
+        "actual_hours": 11.2,
+        "sequence": 20,
+        "work_order_id": "WO-C-002"
+      },
+      "index": 2,
+      "result": {
+        "sequence": 20,
+        "status": "Complete",
+        "work_order_id": "WO-C-002"
+      },
+      "success": true,
+      "tool": "complete_operation"
+    },
+    {
+      "arguments": {
+        "completed_qty": 12,
+        "scrap_qty": 2,
+        "work_order_id": "WO-C-002"
+      },
+      "index": 3,
+      "result": {
+        "completed_qty": 12,
+        "scrap_qty": 2,
+        "status": "Completed",
+        "work_order_id": "WO-C-002"
+      },
+      "success": true,
+      "tool": "complete_work_order"
+    },
+    {
+      "arguments": {
+        "labor_variance": 0.0,
+        "material_variance": -37.5,
+        "overhead_variance": 7.5,
+        "variance_id": "VAR-0002",
+        "work_order_id": "WO-C-002"
+      },
+      "index": 4,
+      "result": {
+        "status": "Posted",
+        "variance_id": "VAR-0002"
+      },
+      "success": true,
+      "tool": "record_wip_variance"
+    },
+    {
+      "arguments": {
+        "completed_quantity": 12,
+        "scrap_quantity": 2,
+        "variance_id": "VAR-0002",
+        "work_order_id": "WO-C-002"
+      },
+      "index": 5,
+      "result": {
+        "submitted": {
+          "completed_quantity": "12",
+          "scrap_quantity": "2",
+          "variance_id": "VAR-0002",
+          "work_order_id": "WO-C-002"
+        },
+        "task_id": "factorybench-072"
+      },
+      "success": true,
+      "tool": "submit_answer"
+    }
+  ]
+}

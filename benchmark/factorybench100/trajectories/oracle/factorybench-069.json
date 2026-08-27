@@ -1,0 +1,353 @@
+{
+  "checks": [
+    {
+      "description": "Required policy and ERP reads completed before the first write.",
+      "evidence": {
+        "missing": []
+      },
+      "id": "read_before_write",
+      "passed": true
+    },
+    {
+      "description": "The failed lot is on an active quality hold.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "lot_held",
+      "passed": true
+    },
+    {
+      "description": "A recoverable nonconformance is assigned for rework.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "nonconformance_opened",
+      "passed": true
+    },
+    {
+      "description": "The affected inventory remains quarantined.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "inventory_quarantined",
+      "passed": true
+    },
+    {
+      "description": "Submitted answer fields exactly match the ground truth.",
+      "evidence": {
+        "expected": {
+          "disposition": "REWORK",
+          "hold_id": "HOLD-0009",
+          "inspection_id": "INSP-Q-009",
+          "nonconformance_id": "NC-0009"
+        },
+        "submitted": {
+          "disposition": "REWORK",
+          "hold_id": "HOLD-0009",
+          "inspection_id": "INSP-Q-009",
+          "nonconformance_id": "NC-0009"
+        }
+      },
+      "id": "exact_answer",
+      "passed": true
+    },
+    {
+      "description": "All successful writes stay inside the task's allowed tables.",
+      "evidence": {
+        "disallowed": [],
+        "written_tables": [
+          "answers",
+          "inventory_on_hand",
+          "nonconformances",
+          "quality_holds"
+        ]
+      },
+      "id": "write_scope",
+      "passed": true
+    },
+    {
+      "description": "The episode completes without a rejected or malformed tool call.",
+      "evidence": {
+        "errors": []
+      },
+      "id": "error_free",
+      "passed": true
+    }
+  ],
+  "metric": "FactoryScore",
+  "passed_checks": 7,
+  "policy": "oracle",
+  "score": 100.0,
+  "state_diff": {
+    "answers": {
+      "after": [
+        {
+          "field": "disposition",
+          "task_id": "factorybench-069",
+          "value": "REWORK"
+        },
+        {
+          "field": "hold_id",
+          "task_id": "factorybench-069",
+          "value": "HOLD-0009"
+        },
+        {
+          "field": "inspection_id",
+          "task_id": "factorybench-069",
+          "value": "INSP-Q-009"
+        },
+        {
+          "field": "nonconformance_id",
+          "task_id": "factorybench-069",
+          "value": "NC-0009"
+        }
+      ],
+      "after_count": 4,
+      "before": [],
+      "before_count": 0
+    },
+    "audit_log": {
+      "after": [
+        {
+          "action": "insert",
+          "audit_id": 1,
+          "payload": "{\"hold_id\": \"HOLD-0009\", \"item_id\": \"FG-PANEL\", \"lot_number\": \"FG-LOT-009\", \"reason_code\": \"FUNCTIONAL_TEST_FAIL\", \"source_id\": \"INSP-Q-009\", \"status\": \"Active\", \"task_id\": \"factorybench-069\"}",
+          "record_id": "HOLD-0009",
+          "table_name": "quality_holds",
+          "task_id": "factorybench-069",
+          "tool": "place_quality_hold"
+        },
+        {
+          "action": "update",
+          "audit_id": 2,
+          "payload": "{\"status\": \"Quality Hold\"}",
+          "record_id": "FG-PANEL:FG-LOT-009",
+          "table_name": "inventory_on_hand",
+          "task_id": "factorybench-069",
+          "tool": "place_quality_hold"
+        },
+        {
+          "action": "insert",
+          "audit_id": 3,
+          "payload": "{\"disposition\": \"REWORK\", \"inspection_id\": \"INSP-Q-009\", \"nonconformance_id\": \"NC-0009\", \"owner_id\": \"U-QUALITY\", \"status\": \"Open\", \"task_id\": \"factorybench-069\"}",
+          "record_id": "NC-0009",
+          "table_name": "nonconformances",
+          "task_id": "factorybench-069",
+          "tool": "create_nonconformance"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 4,
+          "payload": "{\"value\": \"INSP-Q-009\"}",
+          "record_id": "factorybench-069:inspection_id",
+          "table_name": "answers",
+          "task_id": "factorybench-069",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 5,
+          "payload": "{\"value\": \"HOLD-0009\"}",
+          "record_id": "factorybench-069:hold_id",
+          "table_name": "answers",
+          "task_id": "factorybench-069",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 6,
+          "payload": "{\"value\": \"NC-0009\"}",
+          "record_id": "factorybench-069:nonconformance_id",
+          "table_name": "answers",
+          "task_id": "factorybench-069",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 7,
+          "payload": "{\"value\": \"REWORK\"}",
+          "record_id": "factorybench-069:disposition",
+          "table_name": "answers",
+          "task_id": "factorybench-069",
+          "tool": "submit_answer"
+        }
+      ],
+      "after_count": 7,
+      "before": [],
+      "before_count": 0
+    },
+    "inventory_on_hand": {
+      "after": [
+        {
+          "expiration_date": null,
+          "item_id": "FG-PANEL",
+          "lot_number": "FG-LOT-009",
+          "plant_id": "SEA",
+          "quantity": 17.0,
+          "reserved_qty": 0.0,
+          "status": "Quality Hold",
+          "subinventory": "FG"
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "expiration_date": null,
+          "item_id": "FG-PANEL",
+          "lot_number": "FG-LOT-009",
+          "plant_id": "SEA",
+          "quantity": 17.0,
+          "reserved_qty": 0.0,
+          "status": "Inspection",
+          "subinventory": "FG"
+        }
+      ],
+      "before_count": 1
+    },
+    "nonconformances": {
+      "after": [
+        {
+          "disposition": "REWORK",
+          "inspection_id": "INSP-Q-009",
+          "nonconformance_id": "NC-0009",
+          "owner_id": "U-QUALITY",
+          "status": "Open",
+          "task_id": "factorybench-069"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "quality_holds": {
+      "after": [
+        {
+          "hold_id": "HOLD-0009",
+          "item_id": "FG-PANEL",
+          "lot_number": "FG-LOT-009",
+          "reason_code": "FUNCTIONAL_TEST_FAIL",
+          "source_id": "INSP-Q-009",
+          "status": "Active",
+          "task_id": "factorybench-069"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    }
+  },
+  "strict_pass": true,
+  "task_id": "factorybench-069",
+  "total_checks": 7,
+  "trace": [
+    {
+      "arguments": {
+        "category": "quality_exception"
+      },
+      "index": 0,
+      "result": {
+        "documents": [
+          {
+            "body": "A failed inspection requires an immediate lot hold and an open nonconformance. Use REWORK when the defect is recoverable and assign it to the quality engineer.",
+            "category": "quality_exception",
+            "doc_id": "POL-07",
+            "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
+            "title": "Nonconformance policy"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "inspection_id": "INSP-Q-009"
+      },
+      "index": 1,
+      "result": {
+        "inspection": {
+          "accepted_qty": 16.0,
+          "inspected_qty": 17.0,
+          "inspection_id": "INSP-Q-009",
+          "inspector_id": "U-INSPECTOR",
+          "item_id": "FG-PANEL",
+          "lot_number": "FG-LOT-009",
+          "rejected_qty": 1.0,
+          "result": "Fail",
+          "source_id": "WO-Q-009",
+          "source_type": "work_order",
+          "task_id": "factorybench-069"
+        },
+        "inventory": [
+          {
+            "expiration_date": null,
+            "item_id": "FG-PANEL",
+            "lot_number": "FG-LOT-009",
+            "plant_id": "SEA",
+            "quantity": 17.0,
+            "reserved_qty": 0.0,
+            "status": "Inspection",
+            "subinventory": "FG"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_quality_context"
+    },
+    {
+      "arguments": {
+        "hold_id": "HOLD-0009",
+        "inspection_id": "INSP-Q-009",
+        "item_id": "FG-PANEL",
+        "lot_number": "FG-LOT-009",
+        "reason_code": "FUNCTIONAL_TEST_FAIL"
+      },
+      "index": 2,
+      "result": {
+        "hold_id": "HOLD-0009",
+        "status": "Active"
+      },
+      "success": true,
+      "tool": "place_quality_hold"
+    },
+    {
+      "arguments": {
+        "disposition": "REWORK",
+        "inspection_id": "INSP-Q-009",
+        "nonconformance_id": "NC-0009",
+        "owner_id": "U-QUALITY"
+      },
+      "index": 3,
+      "result": {
+        "disposition": "REWORK",
+        "nonconformance_id": "NC-0009",
+        "status": "Open"
+      },
+      "success": true,
+      "tool": "create_nonconformance"
+    },
+    {
+      "arguments": {
+        "disposition": "REWORK",
+        "hold_id": "HOLD-0009",
+        "inspection_id": "INSP-Q-009",
+        "nonconformance_id": "NC-0009"
+      },
+      "index": 4,
+      "result": {
+        "submitted": {
+          "disposition": "REWORK",
+          "hold_id": "HOLD-0009",
+          "inspection_id": "INSP-Q-009",
+          "nonconformance_id": "NC-0009"
+        },
+        "task_id": "factorybench-069"
+      },
+      "success": true,
+      "tool": "submit_answer"
+    }
+  ]
+}

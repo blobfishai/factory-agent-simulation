@@ -1,0 +1,434 @@
+{
+  "checks": [
+    {
+      "description": "Required policy and ERP reads completed before the first write.",
+      "evidence": {
+        "missing": []
+      },
+      "id": "read_before_write",
+      "passed": true
+    },
+    {
+      "description": "High-priority maintenance is opened for the failed center.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "maintenance_opened",
+      "passed": true
+    },
+    {
+      "description": "The operation moves to an active qualified alternate.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "operation_rerouted",
+      "passed": true
+    },
+    {
+      "description": "The work-order dates and primary center reflect the recovery plan.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "schedule_recovered",
+      "passed": true
+    },
+    {
+      "description": "Submitted answer fields exactly match the ground truth.",
+      "evidence": {
+        "expected": {
+          "alternate_workcenter": "WC-ASM-2",
+          "maintenance_id": "MWO-0002",
+          "new_completion": "2026-01-15",
+          "work_order_id": "WO-M-002"
+        },
+        "submitted": {
+          "alternate_workcenter": "WC-ASM-2",
+          "maintenance_id": "MWO-0002",
+          "new_completion": "2026-01-15",
+          "work_order_id": "WO-M-002"
+        }
+      },
+      "id": "exact_answer",
+      "passed": true
+    },
+    {
+      "description": "All successful writes stay inside the task's allowed tables.",
+      "evidence": {
+        "disallowed": [],
+        "written_tables": [
+          "answers",
+          "maintenance_work_orders",
+          "work_order_operations",
+          "work_orders"
+        ]
+      },
+      "id": "write_scope",
+      "passed": true
+    },
+    {
+      "description": "The episode completes without a rejected or malformed tool call.",
+      "evidence": {
+        "errors": []
+      },
+      "id": "error_free",
+      "passed": true
+    }
+  ],
+  "metric": "FactoryScore",
+  "passed_checks": 7,
+  "policy": "oracle",
+  "score": 100.0,
+  "state_diff": {
+    "answers": {
+      "after": [
+        {
+          "field": "alternate_workcenter",
+          "task_id": "factorybench-092",
+          "value": "WC-ASM-2"
+        },
+        {
+          "field": "maintenance_id",
+          "task_id": "factorybench-092",
+          "value": "MWO-0002"
+        },
+        {
+          "field": "new_completion",
+          "task_id": "factorybench-092",
+          "value": "2026-01-15"
+        },
+        {
+          "field": "work_order_id",
+          "task_id": "factorybench-092",
+          "value": "WO-M-002"
+        }
+      ],
+      "after_count": 4,
+      "before": [],
+      "before_count": 0
+    },
+    "audit_log": {
+      "after": [
+        {
+          "action": "insert",
+          "audit_id": 1,
+          "payload": "{\"expected_finish\": \"2026-01-13\", \"failure_code\": \"UNPLANNED_DOWNTIME\", \"maintenance_id\": \"MWO-0002\", \"priority\": \"High\", \"scheduled_start\": \"2026-01-12\", \"status\": \"Open\", \"task_id\": \"factorybench-092\", \"workcenter_id\": \"WC-ASM-1\"}",
+          "record_id": "MWO-0002",
+          "table_name": "maintenance_work_orders",
+          "task_id": "factorybench-092",
+          "tool": "create_maintenance_work_order"
+        },
+        {
+          "action": "update",
+          "audit_id": 2,
+          "payload": "{\"workcenter_id\": \"WC-ASM-2\"}",
+          "record_id": "WO-M-002:10",
+          "table_name": "work_order_operations",
+          "task_id": "factorybench-092",
+          "tool": "reroute_operation"
+        },
+        {
+          "action": "update",
+          "audit_id": 3,
+          "payload": "{\"scheduled_completion\": \"2026-01-15\", \"scheduled_start\": \"2026-01-13\", \"workcenter_id\": \"WC-ASM-2\"}",
+          "record_id": "WO-M-002",
+          "table_name": "work_orders",
+          "task_id": "factorybench-092",
+          "tool": "reschedule_work_order"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 4,
+          "payload": "{\"value\": \"MWO-0002\"}",
+          "record_id": "factorybench-092:maintenance_id",
+          "table_name": "answers",
+          "task_id": "factorybench-092",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 5,
+          "payload": "{\"value\": \"WO-M-002\"}",
+          "record_id": "factorybench-092:work_order_id",
+          "table_name": "answers",
+          "task_id": "factorybench-092",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 6,
+          "payload": "{\"value\": \"WC-ASM-2\"}",
+          "record_id": "factorybench-092:alternate_workcenter",
+          "table_name": "answers",
+          "task_id": "factorybench-092",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 7,
+          "payload": "{\"value\": \"2026-01-15\"}",
+          "record_id": "factorybench-092:new_completion",
+          "table_name": "answers",
+          "task_id": "factorybench-092",
+          "tool": "submit_answer"
+        }
+      ],
+      "after_count": 7,
+      "before": [],
+      "before_count": 0
+    },
+    "maintenance_work_orders": {
+      "after": [
+        {
+          "expected_finish": "2026-01-13",
+          "failure_code": "UNPLANNED_DOWNTIME",
+          "maintenance_id": "MWO-0002",
+          "priority": "High",
+          "scheduled_start": "2026-01-12",
+          "status": "Open",
+          "task_id": "factorybench-092",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "work_order_operations": {
+      "after": [
+        {
+          "actual_hours": 0.0,
+          "planned_hours": 12.0,
+          "sequence": 10,
+          "status": "Ready",
+          "work_order_id": "WO-M-002",
+          "workcenter_id": "WC-ASM-2"
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "actual_hours": 0.0,
+          "planned_hours": 12.0,
+          "sequence": 10,
+          "status": "Ready",
+          "work_order_id": "WO-M-002",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "before_count": 1
+    },
+    "work_orders": {
+      "after": [
+        {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 8.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-15",
+          "scheduled_start": "2026-01-13",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-092",
+          "work_order_id": "WO-M-002",
+          "workcenter_id": "WC-ASM-2"
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 8.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-14",
+          "scheduled_start": "2026-01-12",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-092",
+          "work_order_id": "WO-M-002",
+          "workcenter_id": "WC-ASM-1"
+        }
+      ],
+      "before_count": 1
+    }
+  },
+  "strict_pass": true,
+  "task_id": "factorybench-092",
+  "total_checks": 7,
+  "trace": [
+    {
+      "arguments": {
+        "category": "maintenance_recovery"
+      },
+      "index": 0,
+      "result": {
+        "documents": [
+          {
+            "body": "Open a high-priority maintenance work order for the failed workcenter. Reroute production only to a qualified active alternate and reschedule within that center's capacity.",
+            "category": "maintenance_recovery",
+            "doc_id": "POL-10",
+            "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
+            "title": "Unplanned downtime policy"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "plant_id": "SEA",
+        "work_order_id": "WO-M-002"
+      },
+      "index": 1,
+      "result": {
+        "operations": [
+          {
+            "actual_hours": 0.0,
+            "planned_hours": 12.0,
+            "sequence": 10,
+            "status": "Ready",
+            "work_order_id": "WO-M-002",
+            "workcenter_id": "WC-ASM-1"
+          }
+        ],
+        "work_order": {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 8.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-01-14",
+          "scheduled_start": "2026-01-12",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-092",
+          "work_order_id": "WO-M-002",
+          "workcenter_id": "WC-ASM-1"
+        },
+        "workcenters": [
+          {
+            "capacity_hours": 80.0,
+            "name": "Assembly Cell 1",
+            "plant_id": "SEA",
+            "qualified_item_class": "control_panel",
+            "status": "Down",
+            "workcenter_id": "WC-ASM-1"
+          },
+          {
+            "capacity_hours": 64.0,
+            "name": "Assembly Cell 2",
+            "plant_id": "SEA",
+            "qualified_item_class": "control_panel",
+            "status": "Active",
+            "workcenter_id": "WC-ASM-2"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_schedule"
+    },
+    {
+      "arguments": {
+        "workcenter_id": "WC-ASM-1"
+      },
+      "index": 2,
+      "result": {
+        "failed_workcenter": {
+          "capacity_hours": 80.0,
+          "name": "Assembly Cell 1",
+          "plant_id": "SEA",
+          "qualified_item_class": "control_panel",
+          "status": "Down",
+          "workcenter_id": "WC-ASM-1"
+        },
+        "qualified_alternates": [
+          {
+            "capacity_hours": 64.0,
+            "name": "Assembly Cell 2",
+            "plant_id": "SEA",
+            "qualified_item_class": "control_panel",
+            "status": "Active",
+            "workcenter_id": "WC-ASM-2"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_maintenance_context"
+    },
+    {
+      "arguments": {
+        "expected_finish": "2026-01-13",
+        "failure_code": "UNPLANNED_DOWNTIME",
+        "maintenance_id": "MWO-0002",
+        "priority": "High",
+        "scheduled_start": "2026-01-12",
+        "workcenter_id": "WC-ASM-1"
+      },
+      "index": 3,
+      "result": {
+        "maintenance_id": "MWO-0002",
+        "status": "Open"
+      },
+      "success": true,
+      "tool": "create_maintenance_work_order"
+    },
+    {
+      "arguments": {
+        "sequence": 10,
+        "work_order_id": "WO-M-002",
+        "workcenter_id": "WC-ASM-2"
+      },
+      "index": 4,
+      "result": {
+        "sequence": 10,
+        "work_order_id": "WO-M-002",
+        "workcenter_id": "WC-ASM-2"
+      },
+      "success": true,
+      "tool": "reroute_operation"
+    },
+    {
+      "arguments": {
+        "scheduled_completion": "2026-01-15",
+        "scheduled_start": "2026-01-13",
+        "work_order_id": "WO-M-002",
+        "workcenter_id": "WC-ASM-2"
+      },
+      "index": 5,
+      "result": {
+        "scheduled_completion": "2026-01-15",
+        "scheduled_start": "2026-01-13",
+        "work_order_id": "WO-M-002",
+        "workcenter_id": "WC-ASM-2"
+      },
+      "success": true,
+      "tool": "reschedule_work_order"
+    },
+    {
+      "arguments": {
+        "alternate_workcenter": "WC-ASM-2",
+        "maintenance_id": "MWO-0002",
+        "new_completion": "2026-01-15",
+        "work_order_id": "WO-M-002"
+      },
+      "index": 6,
+      "result": {
+        "submitted": {
+          "alternate_workcenter": "WC-ASM-2",
+          "maintenance_id": "MWO-0002",
+          "new_completion": "2026-01-15",
+          "work_order_id": "WO-M-002"
+        },
+        "task_id": "factorybench-092"
+      },
+      "success": true,
+      "tool": "submit_answer"
+    }
+  ]
+}

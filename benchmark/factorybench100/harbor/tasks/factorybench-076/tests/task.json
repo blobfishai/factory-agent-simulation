@@ -1,0 +1,106 @@
+{
+  "allowed_write_tables": [
+    "work_order_operations",
+    "work_orders",
+    "wip_variances",
+    "inventory_on_hand",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "completed_quantity": {
+        "type": "integer"
+      },
+      "scrap_quantity": {
+        "type": "integer"
+      },
+      "variance_id": {
+        "type": "string"
+      },
+      "work_order_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "completed_quantity",
+      "scrap_quantity",
+      "variance_id",
+      "work_order_id"
+    ],
+    "type": "object"
+  },
+  "expected": {
+    "answer": {
+      "completed_quantity": 18,
+      "scrap_quantity": 0,
+      "variance_id": "VAR-0006",
+      "work_order_id": "WO-C-006"
+    },
+    "assertions": [
+      {
+        "count": 2,
+        "description": "All work-order operations are complete.",
+        "id": "operation_completed",
+        "table": "work_order_operations",
+        "where": {
+          "status": "Complete",
+          "work_order_id": "WO-C-006"
+        }
+      },
+      {
+        "description": "Finished and scrap quantities reconcile to the order quantity.",
+        "id": "work_order_completed",
+        "table": "work_orders",
+        "values": {
+          "completed_qty": 18,
+          "scrap_qty": 0,
+          "status": "Completed"
+        },
+        "where": {
+          "work_order_id": "WO-C-006"
+        }
+      },
+      {
+        "description": "WIP variance is posted for finance review.",
+        "id": "variance_posted",
+        "table": "wip_variances",
+        "values": {
+          "labor_variance": 0.0,
+          "material_variance": 12.5,
+          "overhead_variance": -7.5,
+          "status": "Posted"
+        },
+        "where": {
+          "variance_id": "VAR-0006"
+        }
+      }
+    ]
+  },
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "completion_costing"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "work_order_id": "WO-C-006"
+      },
+      "tool": "get_work_order"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_work_order"
+  ],
+  "task_id": "factorybench-076",
+  "write_tools": [
+    "complete_operation",
+    "complete_work_order",
+    "record_wip_variance",
+    "submit_answer"
+  ]
+}

@@ -1,0 +1,1 @@
+Perform three-way match for invoice INV-0005 against PO PO-I-005 and receipt RCV-I-005. The invoice is $1818.00; apply the variance policy, update the invoice, and return the decision and variance percentage.

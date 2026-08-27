@@ -1,0 +1,305 @@
+{
+  "checks": [
+    {
+      "description": "Required policy and ERP reads completed before the first write.",
+      "evidence": {
+        "missing": []
+      },
+      "id": "read_before_write",
+      "passed": true
+    },
+    {
+      "description": "The invoice receives the policy-correct three-way-match decision.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "invoice_decision",
+      "passed": true
+    },
+    {
+      "description": "Submitted answer fields exactly match the ground truth.",
+      "evidence": {
+        "expected": {
+          "decision": "Approved",
+          "invoice_id": "INV-0009",
+          "variance_percent": "1.00"
+        },
+        "submitted": {
+          "decision": "Approved",
+          "invoice_id": "INV-0009",
+          "variance_percent": "1.00"
+        }
+      },
+      "id": "exact_answer",
+      "passed": true
+    },
+    {
+      "description": "All successful writes stay inside the task's allowed tables.",
+      "evidence": {
+        "disallowed": [],
+        "written_tables": [
+          "answers",
+          "ap_invoices"
+        ]
+      },
+      "id": "write_scope",
+      "passed": true
+    },
+    {
+      "description": "The episode completes without a rejected or malformed tool call.",
+      "evidence": {
+        "errors": []
+      },
+      "id": "error_free",
+      "passed": true
+    }
+  ],
+  "metric": "FactoryScore",
+  "passed_checks": 5,
+  "policy": "oracle",
+  "score": 100.0,
+  "state_diff": {
+    "answers": {
+      "after": [
+        {
+          "field": "decision",
+          "task_id": "factorybench-049",
+          "value": "Approved"
+        },
+        {
+          "field": "invoice_id",
+          "task_id": "factorybench-049",
+          "value": "INV-0009"
+        },
+        {
+          "field": "variance_percent",
+          "task_id": "factorybench-049",
+          "value": "1.00"
+        }
+      ],
+      "after_count": 3,
+      "before": [],
+      "before_count": 0
+    },
+    "ap_invoices": {
+      "after": [
+        {
+          "hold_reason": null,
+          "invoice_amount": 2108.88,
+          "invoice_id": "INV-0009",
+          "purchase_order_id": "PO-I-009",
+          "receipt_id": "RCV-I-009",
+          "status": "Approved",
+          "supplier_id": "SUP-A",
+          "task_id": "factorybench-049"
+        }
+      ],
+      "after_count": 1,
+      "before": [
+        {
+          "hold_reason": null,
+          "invoice_amount": 2108.88,
+          "invoice_id": "INV-0009",
+          "purchase_order_id": "PO-I-009",
+          "receipt_id": "RCV-I-009",
+          "status": "Pending",
+          "supplier_id": "SUP-A",
+          "task_id": "factorybench-049"
+        }
+      ],
+      "before_count": 1
+    },
+    "audit_log": {
+      "after": [
+        {
+          "action": "update",
+          "audit_id": 1,
+          "payload": "{\"hold_reason\": null, \"status\": \"Approved\"}",
+          "record_id": "INV-0009",
+          "table_name": "ap_invoices",
+          "task_id": "factorybench-049",
+          "tool": "approve_invoice"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 2,
+          "payload": "{\"value\": \"INV-0009\"}",
+          "record_id": "factorybench-049:invoice_id",
+          "table_name": "answers",
+          "task_id": "factorybench-049",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 3,
+          "payload": "{\"value\": \"Approved\"}",
+          "record_id": "factorybench-049:decision",
+          "table_name": "answers",
+          "task_id": "factorybench-049",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 4,
+          "payload": "{\"value\": \"1.00\"}",
+          "record_id": "factorybench-049:variance_percent",
+          "table_name": "answers",
+          "task_id": "factorybench-049",
+          "tool": "submit_answer"
+        }
+      ],
+      "after_count": 4,
+      "before": [],
+      "before_count": 0
+    }
+  },
+  "strict_pass": true,
+  "task_id": "factorybench-049",
+  "total_checks": 5,
+  "trace": [
+    {
+      "arguments": {
+        "category": "invoice_match"
+      },
+      "index": 0,
+      "result": {
+        "documents": [
+          {
+            "body": "Compare invoice, approved PO, and accepted receipt. Approve when quantity is covered and the amount variance is at most 2 percent; otherwise place a variance hold.",
+            "category": "invoice_match",
+            "doc_id": "POL-05",
+            "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
+            "title": "Three-way match policy"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "purchase_order_id": "PO-I-009"
+      },
+      "index": 1,
+      "result": {
+        "header": {
+          "approved_by": "U-MANAGER",
+          "buyer_id": "U-BUYER",
+          "promised_date": "2026-01-12",
+          "purchase_order_id": "PO-I-009",
+          "requisition_id": null,
+          "status": "Approved",
+          "supplier_id": "SUP-A",
+          "task_id": "factorybench-049",
+          "total_amount": 2088.0
+        },
+        "lines": [
+          {
+            "item_id": "RM-COPPER",
+            "line_no": 1,
+            "ordered_qty": 29.0,
+            "purchase_order_id": "PO-I-009",
+            "received_qty": 29.0,
+            "unit_price": 72.0
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_purchase_order"
+    },
+    {
+      "arguments": {
+        "receipt_id": "RCV-I-009"
+      },
+      "index": 2,
+      "result": {
+        "header": {
+          "purchase_order_id": "PO-I-009",
+          "receipt_id": "RCV-I-009",
+          "received_at": "2026-01-12",
+          "receiver_id": "U-PLANNER",
+          "status": "Inspected",
+          "task_id": "factorybench-049"
+        },
+        "lines": [
+          {
+            "accepted_qty": 29.0,
+            "item_id": "RM-COPPER",
+            "line_no": 1,
+            "lot_number": "LOT-I-009",
+            "quantity": 29.0,
+            "receipt_id": "RCV-I-009",
+            "rejected_qty": 0.0
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_receipt"
+    },
+    {
+      "arguments": {
+        "invoice_id": "INV-0009"
+      },
+      "index": 3,
+      "result": {
+        "accepted_qty": 29.0,
+        "invoice": {
+          "hold_reason": null,
+          "invoice_amount": 2108.88,
+          "invoice_id": "INV-0009",
+          "purchase_order_id": "PO-I-009",
+          "receipt_id": "RCV-I-009",
+          "status": "Pending",
+          "supplier_id": "SUP-A",
+          "task_id": "factorybench-049"
+        },
+        "ordered_qty": 29.0,
+        "po": {
+          "approved_by": "U-MANAGER",
+          "buyer_id": "U-BUYER",
+          "promised_date": "2026-01-12",
+          "purchase_order_id": "PO-I-009",
+          "requisition_id": null,
+          "status": "Approved",
+          "supplier_id": "SUP-A",
+          "task_id": "factorybench-049",
+          "total_amount": 2088.0
+        },
+        "variance_percent": 1.0
+      },
+      "success": true,
+      "tool": "get_invoice_match"
+    },
+    {
+      "arguments": {
+        "invoice_id": "INV-0009"
+      },
+      "index": 4,
+      "result": {
+        "invoice_id": "INV-0009",
+        "status": "Approved"
+      },
+      "success": true,
+      "tool": "approve_invoice"
+    },
+    {
+      "arguments": {
+        "decision": "Approved",
+        "invoice_id": "INV-0009",
+        "variance_percent": 1.0
+      },
+      "index": 5,
+      "result": {
+        "submitted": {
+          "decision": "Approved",
+          "invoice_id": "INV-0009",
+          "variance_percent": "1.00"
+        },
+        "task_id": "factorybench-049"
+      },
+      "success": true,
+      "tool": "submit_answer"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+Work order WO-S-005 is short RM-COPPER. Net the 28 required units against available SEA stock, select a valid approved quote that meets the need-by date 2026-02-04, create the requisition, and obtain any required approval. Return the requisition ID, net shortage, and supplier.

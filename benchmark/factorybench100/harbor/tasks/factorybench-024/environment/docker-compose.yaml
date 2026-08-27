@@ -1,0 +1,29 @@
+services:
+  main:
+    depends_on:
+      erp:
+        condition: service_healthy
+    environment:
+      FACTORYBENCH_SERVICE_URL: http://erp:8765/call
+    networks: [factorybench]
+    volumes:
+      - factorybench-evidence:/var/lib/factorybench-evidence:ro
+  erp:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=1)"]
+      interval: 1s
+      timeout: 2s
+      retries: 30
+    environment:
+      FACTORYBENCH_EVIDENCE_PATH: /var/lib/factorybench-evidence/evidence.json
+    networks: [factorybench]
+    volumes:
+      - factorybench-evidence:/var/lib/factorybench-evidence
+networks:
+  factorybench:
+    internal: true
+volumes:
+  factorybench-evidence:

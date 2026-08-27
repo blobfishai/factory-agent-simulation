@@ -1,0 +1,1 @@
+Close work order WO-C-003 after completing its remaining operation. Record 15 finished units and 0 scrap, post the supplied WIP variance amounts from the costing packet, and return the closure summary.

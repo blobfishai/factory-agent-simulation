@@ -1,0 +1,368 @@
+{
+  "checks": [
+    {
+      "description": "Required policy and ERP reads completed before the first write.",
+      "evidence": {
+        "missing": []
+      },
+      "id": "read_before_write",
+      "passed": true
+    },
+    {
+      "description": "The shortage is covered by an approved requisition.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "requisition_approved",
+      "passed": true
+    },
+    {
+      "description": "The requisition line equals net requirement after available stock.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "net_quantity_ordered",
+      "passed": true
+    },
+    {
+      "description": "Submitted answer fields exactly match the ground truth.",
+      "evidence": {
+        "expected": {
+          "net_shortage": "24",
+          "requisition_id": "REQ-0005",
+          "supplier_id": "SUP-A"
+        },
+        "submitted": {
+          "net_shortage": "24",
+          "requisition_id": "REQ-0005",
+          "supplier_id": "SUP-A"
+        }
+      },
+      "id": "exact_answer",
+      "passed": true
+    },
+    {
+      "description": "All successful writes stay inside the task's allowed tables.",
+      "evidence": {
+        "disallowed": [],
+        "written_tables": [
+          "answers",
+          "purchase_requisitions",
+          "requisition_lines"
+        ]
+      },
+      "id": "write_scope",
+      "passed": true
+    },
+    {
+      "description": "The episode completes without a rejected or malformed tool call.",
+      "evidence": {
+        "errors": []
+      },
+      "id": "error_free",
+      "passed": true
+    }
+  ],
+  "metric": "FactoryScore",
+  "passed_checks": 6,
+  "policy": "oracle",
+  "score": 100.0,
+  "state_diff": {
+    "answers": {
+      "after": [
+        {
+          "field": "net_shortage",
+          "task_id": "factorybench-015",
+          "value": "24"
+        },
+        {
+          "field": "requisition_id",
+          "task_id": "factorybench-015",
+          "value": "REQ-0005"
+        },
+        {
+          "field": "supplier_id",
+          "task_id": "factorybench-015",
+          "value": "SUP-A"
+        }
+      ],
+      "after_count": 3,
+      "before": [],
+      "before_count": 0
+    },
+    "audit_log": {
+      "after": [
+        {
+          "action": "insert",
+          "audit_id": 1,
+          "payload": "{\"approved_by\": null, \"need_by\": \"2026-02-04\", \"requester_id\": \"U-BUYER\", \"requisition_id\": \"REQ-0005\", \"status\": \"Pending Approval\", \"supplier_id\": \"SUP-A\", \"task_id\": \"factorybench-015\", \"total_amount\": 1692.0, \"work_order_id\": \"WO-S-005\"}",
+          "record_id": "REQ-0005",
+          "table_name": "purchase_requisitions",
+          "task_id": "factorybench-015",
+          "tool": "create_requisition"
+        },
+        {
+          "action": "insert",
+          "audit_id": 2,
+          "payload": "{\"item_id\": \"RM-COPPER\", \"line_no\": 1, \"quantity\": 24, \"requisition_id\": \"REQ-0005\", \"unit_price\": 70.5}",
+          "record_id": "REQ-0005:1",
+          "table_name": "requisition_lines",
+          "task_id": "factorybench-015",
+          "tool": "create_requisition"
+        },
+        {
+          "action": "update",
+          "audit_id": 3,
+          "payload": "{\"approved_by\": \"U-MANAGER\", \"status\": \"Approved\"}",
+          "record_id": "REQ-0005",
+          "table_name": "purchase_requisitions",
+          "task_id": "factorybench-015",
+          "tool": "approve_requisition"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 4,
+          "payload": "{\"value\": \"REQ-0005\"}",
+          "record_id": "factorybench-015:requisition_id",
+          "table_name": "answers",
+          "task_id": "factorybench-015",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 5,
+          "payload": "{\"value\": \"24\"}",
+          "record_id": "factorybench-015:net_shortage",
+          "table_name": "answers",
+          "task_id": "factorybench-015",
+          "tool": "submit_answer"
+        },
+        {
+          "action": "upsert",
+          "audit_id": 6,
+          "payload": "{\"value\": \"SUP-A\"}",
+          "record_id": "factorybench-015:supplier_id",
+          "table_name": "answers",
+          "task_id": "factorybench-015",
+          "tool": "submit_answer"
+        }
+      ],
+      "after_count": 6,
+      "before": [],
+      "before_count": 0
+    },
+    "purchase_requisitions": {
+      "after": [
+        {
+          "approved_by": "U-MANAGER",
+          "need_by": "2026-02-04",
+          "requester_id": "U-BUYER",
+          "requisition_id": "REQ-0005",
+          "status": "Approved",
+          "supplier_id": "SUP-A",
+          "task_id": "factorybench-015",
+          "total_amount": 1692.0,
+          "work_order_id": "WO-S-005"
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    },
+    "requisition_lines": {
+      "after": [
+        {
+          "item_id": "RM-COPPER",
+          "line_no": 1,
+          "quantity": 24.0,
+          "requisition_id": "REQ-0005",
+          "unit_price": 70.5
+        }
+      ],
+      "after_count": 1,
+      "before": [],
+      "before_count": 0
+    }
+  },
+  "strict_pass": true,
+  "task_id": "factorybench-015",
+  "total_checks": 6,
+  "trace": [
+    {
+      "arguments": {
+        "category": "material_shortage"
+      },
+      "index": 0,
+      "result": {
+        "documents": [
+          {
+            "body": "Net requirements against unreserved on-hand. Use an approved supplier quote that is valid through the need-by date. Requisitions over the requester's limit require the plant manager's approval.",
+            "category": "material_shortage",
+            "doc_id": "POL-02",
+            "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
+            "title": "Shortage requisition control"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "work_order_id": "WO-S-005"
+      },
+      "index": 1,
+      "result": {
+        "header": {
+          "completed_qty": 0.0,
+          "item_id": "FG-PANEL",
+          "parent_work_order_id": null,
+          "quantity": 28.0,
+          "sales_order_id": null,
+          "scheduled_completion": "2026-02-04",
+          "scheduled_start": "2026-02-02",
+          "scrap_qty": 0.0,
+          "status": "Released",
+          "task_id": "factorybench-015",
+          "work_order_id": "WO-S-005",
+          "workcenter_id": "WC-ASM-1"
+        },
+        "operations": [],
+        "requirements": [
+          {
+            "issued_qty": 0.0,
+            "item_id": "RM-COPPER",
+            "need_by": "2026-02-01",
+            "required_qty": 28.0,
+            "reserved_qty": 0.0,
+            "work_order_id": "WO-S-005"
+          }
+        ],
+        "reservations": []
+      },
+      "success": true,
+      "tool": "get_work_order"
+    },
+    {
+      "arguments": {
+        "item_ids": [
+          "RM-COPPER"
+        ],
+        "plant_id": "SEA"
+      },
+      "index": 2,
+      "result": {
+        "lots": [
+          {
+            "available_qty": 4.0,
+            "expiration_date": null,
+            "item_id": "RM-COPPER",
+            "lot_number": "CS-005",
+            "plant_id": "SEA",
+            "quantity": 4.0,
+            "reserved_qty": 0.0,
+            "status": "Unrestricted",
+            "subinventory": "STORES"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_inventory"
+    },
+    {
+      "arguments": {
+        "item_id": "RM-COPPER",
+        "need_by": "2026-02-04",
+        "task_id": "factorybench-015"
+      },
+      "index": 3,
+      "result": {
+        "quotes": [
+          {
+            "approved": 1,
+            "item_id": "RM-COPPER",
+            "lead_days": 5,
+            "minimum_qty": 5.0,
+            "name": "Cascade Industrial",
+            "on_time_rate": 0.94,
+            "quality_score": 97.2,
+            "quote_id": "QA-005",
+            "supplier_id": "SUP-A",
+            "task_id": "factorybench-015",
+            "unit_price": 70.5,
+            "valid_until": "2026-02-09"
+          },
+          {
+            "approved": 1,
+            "item_id": "RM-COPPER",
+            "lead_days": 3,
+            "minimum_qty": 5.0,
+            "name": "Rainier Components",
+            "on_time_rate": 0.98,
+            "quality_score": 95.8,
+            "quote_id": "QB-005",
+            "supplier_id": "SUP-B",
+            "task_id": "factorybench-015",
+            "unit_price": 72.5,
+            "valid_until": "2026-02-09"
+          }
+        ]
+      },
+      "success": true,
+      "tool": "get_supplier_quotes"
+    },
+    {
+      "arguments": {
+        "item_id": "RM-COPPER",
+        "need_by": "2026-02-04",
+        "quantity": 24,
+        "requester_id": "U-BUYER",
+        "requisition_id": "REQ-0005",
+        "supplier_id": "SUP-A",
+        "unit_price": 70.5,
+        "work_order_id": "WO-S-005"
+      },
+      "index": 4,
+      "result": {
+        "requisition_id": "REQ-0005",
+        "status": "Pending Approval",
+        "total_amount": 1692.0
+      },
+      "success": true,
+      "tool": "create_requisition"
+    },
+    {
+      "arguments": {
+        "approver_id": "U-MANAGER",
+        "requisition_id": "REQ-0005"
+      },
+      "index": 5,
+      "result": {
+        "requisition_id": "REQ-0005",
+        "status": "Approved"
+      },
+      "success": true,
+      "tool": "approve_requisition"
+    },
+    {
+      "arguments": {
+        "net_shortage": 24,
+        "requisition_id": "REQ-0005",
+        "supplier_id": "SUP-A"
+      },
+      "index": 6,
+      "result": {
+        "submitted": {
+          "net_shortage": "24",
+          "requisition_id": "REQ-0005",
+          "supplier_id": "SUP-A"
+        },
+        "task_id": "factorybench-015"
+      },
+      "success": true,
+      "tool": "submit_answer"
+    }
+  ]
+}

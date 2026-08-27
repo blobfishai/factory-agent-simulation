@@ -1,0 +1,1 @@
+Source requisition REQ-A-007 for 44 RM-RELAY units by 2026-02-02. Compare current quotes, exclude ineligible suppliers, award the purchase order, and obtain the approval required by policy. Return the PO ID, chosen supplier, and total amount.

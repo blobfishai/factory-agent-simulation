@@ -1,0 +1,125 @@
+{
+  "allowed_write_tables": [
+    "inventory_transfers",
+    "inventory_on_hand",
+    "work_orders",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "new_completion": {
+        "type": "string"
+      },
+      "new_start": {
+        "type": "string"
+      },
+      "transfer_id": {
+        "type": "string"
+      },
+      "work_order_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "new_completion",
+      "new_start",
+      "transfer_id",
+      "work_order_id"
+    ],
+    "type": "object"
+  },
+  "expected": {
+    "answer": {
+      "new_completion": "2026-01-17",
+      "new_start": "2026-01-14",
+      "transfer_id": "TRF-0008",
+      "work_order_id": "WO-T-008"
+    },
+    "assertions": [
+      {
+        "description": "The donor-plant transfer is completed for the shortage quantity.",
+        "id": "transfer_completed",
+        "table": "inventory_transfers",
+        "values": {
+          "quantity": 15,
+          "status": "Completed"
+        },
+        "where": {
+          "transfer_id": "TRF-0008"
+        }
+      },
+      {
+        "description": "Transferred stock is available at the receiving plant.",
+        "id": "receiving_inventory_created",
+        "table": "inventory_on_hand",
+        "values": {
+          "quantity": 15,
+          "status": "Unrestricted"
+        },
+        "where": {
+          "item_id": "RM-COPPER",
+          "lot_number": "PDX-C-008",
+          "plant_id": "SEA",
+          "subinventory": "STORES"
+        }
+      },
+      {
+        "description": "The work order starts on arrival and has a feasible completion date.",
+        "id": "work_order_rescheduled",
+        "table": "work_orders",
+        "values": {
+          "scheduled_completion": "2026-01-17",
+          "scheduled_start": "2026-01-14"
+        },
+        "where": {
+          "work_order_id": "WO-T-008"
+        }
+      }
+    ]
+  },
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "transfer_reschedule"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "work_order_id": "WO-T-008"
+      },
+      "tool": "get_work_order"
+    },
+    {
+      "arguments": {
+        "item_ids": [
+          "RM-COPPER"
+        ],
+        "plant_id": "PDX"
+      },
+      "tool": "get_inventory"
+    },
+    {
+      "arguments": {
+        "plant_id": "SEA",
+        "work_order_id": "WO-T-008"
+      },
+      "tool": "get_schedule"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_work_order",
+    "get_inventory",
+    "get_schedule"
+  ],
+  "task_id": "factorybench-088",
+  "write_tools": [
+    "complete_transfer",
+    "create_transfer",
+    "reschedule_work_order",
+    "submit_answer"
+  ]
+}

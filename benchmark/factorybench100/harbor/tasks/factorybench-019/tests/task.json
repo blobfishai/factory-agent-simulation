@@ -1,0 +1,108 @@
+{
+  "allowed_write_tables": [
+    "purchase_requisitions",
+    "requisition_lines",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "net_shortage": {
+        "type": "integer"
+      },
+      "requisition_id": {
+        "type": "string"
+      },
+      "supplier_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "net_shortage",
+      "requisition_id",
+      "supplier_id"
+    ],
+    "type": "object"
+  },
+  "expected": {
+    "answer": {
+      "net_shortage": 32,
+      "requisition_id": "REQ-0009",
+      "supplier_id": "SUP-A"
+    },
+    "assertions": [
+      {
+        "description": "The shortage is covered by an approved requisition.",
+        "id": "requisition_approved",
+        "table": "purchase_requisitions",
+        "values": {
+          "approved_by": "U-MANAGER",
+          "status": "Approved",
+          "supplier_id": "SUP-A",
+          "total_amount": 2268.8
+        },
+        "where": {
+          "requisition_id": "REQ-0009"
+        }
+      },
+      {
+        "description": "The requisition line equals net requirement after available stock.",
+        "id": "net_quantity_ordered",
+        "table": "requisition_lines",
+        "values": {
+          "item_id": "RM-COPPER",
+          "quantity": 32,
+          "unit_price": 70.9
+        },
+        "where": {
+          "line_no": 1,
+          "requisition_id": "REQ-0009"
+        }
+      }
+    ]
+  },
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "material_shortage"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "work_order_id": "WO-S-009"
+      },
+      "tool": "get_work_order"
+    },
+    {
+      "arguments": {
+        "item_ids": [
+          "RM-COPPER"
+        ],
+        "plant_id": "SEA"
+      },
+      "tool": "get_inventory"
+    },
+    {
+      "arguments": {
+        "item_id": "RM-COPPER",
+        "need_by": "2026-02-08",
+        "task_id": "factorybench-019"
+      },
+      "tool": "get_supplier_quotes"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_work_order",
+    "get_inventory",
+    "get_supplier_quotes"
+  ],
+  "task_id": "factorybench-019",
+  "write_tools": [
+    "approve_requisition",
+    "create_requisition",
+    "submit_answer"
+  ]
+}

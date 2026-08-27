@@ -1,0 +1,86 @@
+{
+  "allowed_write_tables": [
+    "ap_invoices",
+    "answers",
+    "audit_log"
+  ],
+  "answer_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "decision": {
+        "type": "string"
+      },
+      "invoice_id": {
+        "type": "string"
+      },
+      "variance_percent": {
+        "multipleOf": 0.01,
+        "type": "number"
+      }
+    },
+    "required": [
+      "decision",
+      "invoice_id",
+      "variance_percent"
+    ],
+    "type": "object"
+  },
+  "expected": {
+    "answer": {
+      "decision": "Approved",
+      "invoice_id": "INV-0009",
+      "variance_percent": 1.0
+    },
+    "assertions": [
+      {
+        "description": "The invoice receives the policy-correct three-way-match decision.",
+        "id": "invoice_decision",
+        "table": "ap_invoices",
+        "values": {
+          "hold_reason": null,
+          "status": "Approved"
+        },
+        "where": {
+          "invoice_id": "INV-0009"
+        }
+      }
+    ]
+  },
+  "required_read_calls": [
+    {
+      "arguments": {
+        "category": "invoice_match"
+      },
+      "tool": "search_documents"
+    },
+    {
+      "arguments": {
+        "purchase_order_id": "PO-I-009"
+      },
+      "tool": "get_purchase_order"
+    },
+    {
+      "arguments": {
+        "receipt_id": "RCV-I-009"
+      },
+      "tool": "get_receipt"
+    },
+    {
+      "arguments": {
+        "invoice_id": "INV-0009"
+      },
+      "tool": "get_invoice_match"
+    }
+  ],
+  "required_reads": [
+    "search_documents",
+    "get_purchase_order",
+    "get_receipt",
+    "get_invoice_match"
+  ],
+  "task_id": "factorybench-049",
+  "write_tools": [
+    "approve_invoice",
+    "submit_answer"
+  ]
+}
