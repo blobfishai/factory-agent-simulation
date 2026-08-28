@@ -22,15 +22,56 @@
   },
   {
     "arguments": {
-      "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
-      "fileId": "drive-002"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-002' and trashed = false"
+    },
+    "tool": "google_drive.files.list"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-002-10"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-002-12",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-002-03"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-002-04"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-002-09",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-approval-002"
     },
     "tool": "google_drive.files.get"
   },
   {
     "arguments": {
       "majorDimension": "ROWS",
-      "range": "Control!A1:H50",
+      "range": "Control!A1:I50",
       "spreadsheetId": "sheet-002",
       "valueRenderOption": "UNFORMATTED_VALUE"
     },
@@ -38,11 +79,11 @@
   },
   {
     "arguments": {
-      "limit": 50,
-      "onlyData": true,
-      "q": "ReferenceNumber='CASE-002'"
+      "format": "full",
+      "id": "thread-002",
+      "userId": "me"
     },
-    "tool": "oracle_fusion.sales_orders.list"
+    "tool": "gmail.threads.get"
   },
   {
     "arguments": {
@@ -52,16 +93,40 @@
   },
   {
     "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "OrderNumber='PO-0002'"
+    },
+    "tool": "oracle_fusion.purchase_orders.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "ItemNumber='CTRL-DEF-EXPORT' and OrganizationCode='SEA'"
+    },
+    "tool": "oracle_fusion.inventory_onhand_balances.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "SupplyOrderReferenceNumber='SUPPLY-0002'"
+    },
+    "tool": "oracle_fusion.supply_requests.list"
+  },
+  {
+    "arguments": {
       "requestBody": {
         "SupplyOrderReferenceNumber": "SUPPLY-0002",
-        "SupplyRequestDate": "2026-01-15",
+        "SupplyRequestDate": "2026-01-19",
         "SupplyRequestSystem": "EXT",
         "supplyRequestLines": [
           {
             "DestinationOrganizationCode": "SEA",
-            "ItemNumber": "NS-COMP-002",
+            "ItemNumber": "CTRL-DEF-EXPORT",
             "NeedByDate": "2026-01-20",
-            "Quantity": 10,
+            "Quantity": 52,
             "SupplyOrderSource": "EXT",
             "SupplyType": "BUY"
           }
@@ -72,27 +137,48 @@
   },
   {
     "arguments": {
-      "approvalId": "approval-002",
-      "fileId": "drive-approval-002",
+      "limit": 50,
+      "onlyData": true,
+      "q": "SupplyOrderReferenceNumber='SUPPLY-0002'"
+    },
+    "tool": "oracle_fusion.supply_requests.list"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-002",
       "requestBody": {
-        "message": "Approved for CASE-002 only."
+        "content": "CASE-002: release_domestic_quantity recorded on Oracle record NS-000002; completion 2026-01-20; constraint release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA; approval AP-0002."
       }
     },
-    "tool": "google_drive.approvals.approve"
+    "tool": "google_drive.comments.create"
   },
   {
     "arguments": {
       "channel": "C-QUALITY",
-      "text": "CASE-002: Partial supply created. Oracle reference REF-0002; control workbook updated.",
+      "text": "CASE-002: Oracle record NS-000002 now reflects release_domestic_quantity with completion 2026-01-20. Binding constraint: release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA. Alternatives: wait_for_full_license: outcome 2026-02-02, economic impact USD 0, FAILS_CURRENT_CONTROL; release_domestic_quantity: outcome 2026-01-20, economic impact USD 0, SUPPORTED_AND_APPROVED; cancel_restricted_line: outcome 2026-01-14, economic impact USD 900, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0002.",
       "thread_ts": "1768000002.000100"
     },
     "tool": "slack.chat_postMessage"
   },
   {
     "arguments": {
-      "order_number": "ORD-0002",
-      "revised_commit_date": "2026-01-15",
-      "supply_action": "Partial supply created"
+      "baseline_resolution_date": "2026-02-02",
+      "business_need_date": "2026-01-21",
+      "controlled_item_or_record": "CTRL-DEF-EXPORT",
+      "controlled_resolution_date": "2026-01-20",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-14",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 28,
+      "observed_quantity": 80,
+      "outcome_vs_control_days": -1,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "release_domestic_quantity",
+      "recommended_outcome_date": "2026-01-20",
+      "source_quantity": 80,
+      "supported_quantity": 52,
+      "transaction_quantity": 52
     },
     "tool": "factorybench.submit_answer"
   }

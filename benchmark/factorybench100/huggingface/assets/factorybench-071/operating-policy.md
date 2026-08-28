@@ -1,5 +1,7 @@
-# Post missing setup labor from signed timecards — operating control
+# Post missing setup labor from signed timecards — operating policy
 
-Scope: Post and reconcile production actuals against time, material, invoice, and close evidence.
+Decision scope: missing setup labor.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: employee, timecard, operation, rate, and period must reconcile. Establish the immutable source record and effective revision, then reconcile signed setup hours at the approved resource rate, hours not already posted to the correct operation, and duplicate, unsigned, or wrong-period hours from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file.

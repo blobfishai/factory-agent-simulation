@@ -1,5 +1,7 @@
-# Close a fully settled tooling PO before cutoff — operating control
+# Close a fully settled tooling PO before cutoff — operating policy
 
-Scope: Resolve purchasing, receiving, invoice, and production exceptions before the accounting cutoff.
+Decision scope: tooling PO close exception.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: all source activity must be complete before the close cutoff. Establish the immutable source record and effective revision, then reconcile PO committed value, accepted milestones, receipts, invoices, and payments, and open retainage or unmatched value from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: send the scoped completion reply in the existing email thread; and add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file.

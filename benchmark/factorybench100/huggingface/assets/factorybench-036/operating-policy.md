@@ -1,5 +1,7 @@
-# Receive a lot-controlled relay shipment — operating control
+# Receive a lot-controlled relay shipment — operating policy
 
-Scope: Process receipt, inspection, correction, delivery, and return evidence against source documents.
+Decision scope: relay shipment against PO-0036.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: PO line, receipt organization, lot, certificate, and dock count must reconcile. Establish the immutable source record and effective revision, then reconcile packing-slip and PO quantity, physically counted relays with matching supplier lot and certificate, and overage, wrong lot, or uncertified units from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: send the scoped completion reply in the existing email thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell.

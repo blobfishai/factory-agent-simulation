@@ -1,5 +1,7 @@
-# Create constrained supply for a service allocation — operating control
+# Create constrained supply for a service allocation — operating policy
 
-Scope: Create or revise supply execution from shortages, allocation decisions, and constrained-plan approvals.
+Decision scope: priority service allocation.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: priority, entitlement, destination, quantity, and need-by must match. Establish the immutable source record and effective revision, then reconcile service demand authorized by allocation policy, stock already reserved to that service request, and stock protected for higher priority or wrong destination from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction.

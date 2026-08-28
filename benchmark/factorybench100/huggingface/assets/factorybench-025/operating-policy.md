@@ -1,5 +1,7 @@
-# Convert a repeated bearing alarm into planned work — operating control
+# Convert a repeated bearing alarm into planned work — operating policy
 
-Scope: Convert equipment failures into auditable maintenance work, routing, resources, and technical references.
+Decision scope: repeated bearing alarm on ASSET-025.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: the third qualifying alarm plus reliability approval triggers planned work. Establish the immutable source record and effective revision, then reconcile qualifying alarms inside the reliability window, distinct alarms meeting duration and severity thresholds, and duplicate telemetry and acknowledged nuisance events from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it.

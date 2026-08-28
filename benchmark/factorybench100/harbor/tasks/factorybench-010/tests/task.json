@@ -7,49 +7,212 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "effective_timestamp": {
+      "affected_resource_or_operation": {
+        "description": "Immutable operation, asset, supplier operation, or resource in the recovery scope.",
         "type": "string"
       },
-      "production_decision": {
+      "base_completion": {
+        "description": "Completion under wait_for_internal_labor.",
         "type": "string"
       },
-      "work_order": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
+      },
+      "candidate_capacity": {
+        "description": "Gross candidate capacity associated with qualified contract hours inside the operation window before protected or unavailable load is removed.",
+        "type": "integer"
+      },
+      "capacity_gap": {
+        "description": "Uncovered HR after applying finite availability.",
+        "type": "integer"
+      },
+      "capacity_unit": {
+        "description": "Capacity unit used throughout the schedule comparison: HR.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_completion": {
+        "description": "Completion under authorize_overtime_crew.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "net_usable_capacity": {
+        "description": "Candidate capacity remaining after removing hours from expired certifications or conflicting assignments.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "qualified_alternative_completion": {
+        "description": "Completion under assign_certified_contractor.",
+        "type": "string"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental recovery cost of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing wait_for_internal_labor, assign_certified_contractor, authorize_overtime_crew.",
+        "enum": [
+          "wait_for_internal_labor",
+          "assign_certified_contractor",
+          "authorize_overtime_crew"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "required_capacity": {
+        "description": "wiring labor-hours still required",
+        "type": "integer"
+      },
+      "selected_resource_or_control": {
+        "description": "Provider identifier of the qualified resource, workcenter, asset, supplier control, or bounded order used by the selected recovery.",
+        "type": "string"
+      },
+      "unavailable_or_protected_capacity": {
+        "description": "hours from expired certifications or conflicting assignments",
+        "type": "integer"
       }
     },
     "required": [
-      "effective_timestamp",
-      "production_decision",
-      "work_order"
+      "affected_resource_or_operation",
+      "base_completion",
+      "business_need_date",
+      "candidate_capacity",
+      "capacity_gap",
+      "capacity_unit",
+      "decision_timing_status",
+      "escalated_completion",
+      "escalation_approval_required",
+      "net_usable_capacity",
+      "outcome_vs_control_days",
+      "qualified_alternative_completion",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "required_capacity",
+      "selected_resource_or_control",
+      "unavailable_or_protected_capacity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "effective_timestamp": "2026-01-23T16:00:00-08:00",
-      "production_decision": "Certified resource assigned",
-      "work_order": "ORD-0010"
+      "affected_resource_or_operation": "NS-000010",
+      "base_completion": "2026-01-19",
+      "business_need_date": "2026-01-16",
+      "candidate_capacity": 35,
+      "capacity_gap": 23,
+      "capacity_unit": "HR",
+      "decision_timing_status": "ON_TIME",
+      "escalated_completion": "2026-01-15",
+      "escalation_approval_required": 1,
+      "net_usable_capacity": 30,
+      "outcome_vs_control_days": 0,
+      "qualified_alternative_completion": "2026-01-16",
+      "recommended_incremental_cost_usd": 520,
+      "recommended_option": "assign_certified_contractor",
+      "recommended_outcome_date": "2026-01-16",
+      "required_capacity": 53,
+      "selected_resource_or_control": "RES-CERT-010",
+      "unavailable_or_protected_capacity": 5
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'assign_certified_contractor', tied to NS-000010, revision R4, and the selected assign_certified_contractor outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-16', tied to NS-000010, revision R4, and the selected assign_certified_contractor outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported affected resource or operation as 'NS-000010', tied to NS-000010, revision R4, and the selected assign_certified_contractor outcome.",
+        "field": "affected_resource_or_operation",
+        "id": "answer_affected_resource_or_operation",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported selected resource or control as 'RES-CERT-010', tied to NS-000010, revision R4, and the selected assign_certified_contractor outcome.",
+        "field": "selected_resource_or_control",
+        "id": "answer_selected_resource_or_control",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000010, revision R4, and the selected assign_certified_contractor outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.work_order_resources.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000010 to reach business outcome 'Certified resource assigned' through oracle_fusion.work_order_resources.create with exact provider-critical values WorkOrderId=100010, WoOperationId=200010, requestBody.ResourceCode='RES-CERT-010', requestBody.UsageRate=1.0, requestBody.AssignedUnits=1, requestBody.BasisType='VARIABLE'. The audited transition binds selected option assign_certified_contractor, revision R4, approval AP-0010, and constraint worker certification, approved rate, and remaining assignment capacity; hours from expired certifications or conflicting assignments = 5 HR; uncovered or unsupported scope = 23.0 HR; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "WoOperationId",
+          "WorkOrderId",
+          "requestBody.AssignedUnits",
+          "requestBody.BasisType",
+          "requestBody.ResourceCode",
+          "requestBody.UsageRate"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "WoOperationId": 200010,
+            "WorkOrderId": 100010,
+            "requestBody": {
+              "AssignedUnits": 1,
+              "BasisType": "VARIABLE",
+              "ResourceCode": "RES-CERT-010",
+              "UsageRate": 1.0
+            }
+          },
+          "tool": "oracle_fusion.work_order_resources.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"WoOperationId\":200010,\"WorkOrderId\":100010,\"requestBody\":{\"AssignedUnits\":1,\"BasisType\":\"VARIABLE\",\"ResourceCode\":\"RES-CERT-010\",\"UsageRate\":1.0}},\"case\":\"CASE-010\",\"outcome\":\"Verify the training certificate, approved rate, and remaining capacity before adding the resource to the wiring operation.\",\"tool\":\"oracle_fusion.work_order_resources.create\"}",
           "resource_type": "oracle_fusion.work_order_resources",
           "revision": 1,
           "status": "Certified resource assigned",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-010-mutation-01",
           "task_id": "factorybench-010"
         }
       },
       {
-        "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+        "description": "Marked the existing CASE-010 approval thread complete only after the Oracle decision was persisted.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "name": "white_check_mark",
+            "timestamp": "1768000010.000100"
+          },
+          "tool": "slack.reactions_add"
+        },
         "table": "resource_state",
         "values": {
           "resource_type": "slack",
@@ -57,14 +220,35 @@
           "status": "Recorded",
           "system": "slack"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-010-mutation-02",
           "task_id": "factorybench-010"
         }
       },
       {
-        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "description": "Created\u2014but did not send\u2014the requested CASE-010 decision draft with completion, constraint, alternatives, and the Oracle business reference.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "message": {
+              "threadId": "thread-010"
+            },
+            "userId": "me"
+          },
+          "tool": "gmail.drafts.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-010",
+            "NS-000010",
+            "NS-COMP-010"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-16",
+          "assign_certified_contractor"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "gmail.drafts",
@@ -72,26 +256,1347 @@
           "status": "Recorded",
           "system": "gmail"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-010-mutation-03",
           "task_id": "factorybench-010"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-16 as the documented date for wiring operation on WO-0010; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated 53 HR for wiring labor-hours still required.",
+        "field": "required_capacity",
+        "id": "calculate_required_capacity",
+        "weight": 2.0
+      },
+      {
+        "description": "Established 35 gross candidate HR associated with qualified contract hours inside the operation window; did not call it usable before applying protected load.",
+        "field": "candidate_capacity",
+        "id": "establish_candidate_capacity",
+        "weight": 1.5
+      },
+      {
+        "description": "Excluded 5 HR for hours from expired certifications or conflicting assignments.",
+        "field": "unavailable_or_protected_capacity",
+        "id": "remove_protected_capacity",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 35 candidate \u2212 5 unavailable/protected = 30 net usable HR.",
+        "field": "net_usable_capacity",
+        "id": "calculate_net_usable_capacity",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 53 required \u2212 30 effective capacity = 23 HR uncovered.",
+        "field": "capacity_gap",
+        "id": "calculate_capacity_gap",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept load and availability in HR.",
+        "field": "capacity_unit",
+        "id": "preserve_capacity_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Bound the recovery to provider identifier RES-CERT-010 only after confirming worker certification, approved rate, and remaining assignment capacity.",
+        "field": "selected_resource_or_control",
+        "id": "identify_selected_resource_or_control",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 2026-01-19 for wait_for_internal_labor.",
+        "field": "base_completion",
+        "id": "compare_base_schedule",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated 2026-01-16 for assign_certified_contractor using wiring bench and supervisor coverage.",
+        "field": "qualified_alternative_completion",
+        "id": "compare_qualified_schedule",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated 2026-01-15 for authorize_overtime_crew and retained its authority constraint.",
+        "field": "escalated_completion",
+        "id": "compare_escalated_schedule",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 520 as the documented incremental recovery cost for assign_certified_contractor; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that authorize_overtime_crew remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of wait_for_internal_labor, assign_certified_contractor, and authorize_overtime_crew; selected assign_certified_contractor because it alone gives the best currently authorized result under worker certification, approved rate, and remaining assignment capacity.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-16 as the supported outcome date for assign_certified_contractor.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-16 with the independent control date 2026-01-16 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-010"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-010 scope, immutable handles, mounted systems, and evidence index before investigating NS-000010.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-010"
+            },
+            "expected_result_contains": {
+              "id": "drive-010"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-010",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-010"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-010"
+            },
+            "expected_result_contains": {
+              "id": "drive-010"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R4 and established 53 HR for wiring labor-hours still required, with control date 2026-01-16.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-010\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-010"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-010 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "id": "att-010",
+              "messageId": "msg-010-1",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogc2tpbGxzLXJhdGUtYW5kLWxhYm9yLWNhcGFjaXR5LXJvc3Rlci0wMDEwCkNhc2UgcmVmZXJlbmNlOiBDQVNFLTAxMApJc3N1ZWQ6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpWYWxpZCB0aHJvdWdoOiAyMDI2LTAxLTE5CgoxLiBSRUZFUkVOQ0VEIFNDT1BFClNvdXJjZSBzdWJqZWN0OiBza2lsbHMsIHJhdGUsIGFuZCBsYWJvci1jYXBhY2l0eSByb3N0ZXIKSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTAxMApFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSNApNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDIzIEhSClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IGFzc2lnbl9jZXJ0aWZpZWRfY29udHJhY3RvcgpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xNwpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTQKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTYKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCA1MjAKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiBhZ2VuY3kncyBjb25maXJtZWQgd29ya2VyIHJvc3RlcgpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBob3VycyBmcm9tIGV4cGlyZWQgY2VydGlmaWNhdGlvbnMgb3IgY29uZmxpY3RpbmcgYXNzaWdubWVudHMKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogd29ya2VyIGNlcnRpZmljYXRpb24sIGFwcHJvdmVkIHJhdGUsIGFuZCByZW1haW5pbmcgYXNzaWdubWVudCBjYXBhY2l0eQpOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wMTEgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBSYWluaWVyIENvbXBvbmVudHMgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwMTAKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+              "size": 1562
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.attachments.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-14 readiness input for assign_certified_contractor, then separately derived its 2026-01-16 operating outcome under worker certification, approved rate, and remaining assignment capacity instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000010.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000010.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000010.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0010 only to assign_certified_contractor, NS-000010, and the supported 30 HR; kept broader scope and authorize_overtime_crew outside current authority.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "ranges": [
+                "Control!A1:I50",
+                "Approvals!A1:G20"
+              ],
+              "spreadsheetId": "sheet-010",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-010"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.batchGet"
+          },
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!A1:I50",
+              "spreadsheetId": "sheet-010",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-010"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Reconciled 35 observed less 5 excluded to 30 supported HR for qualified contract hours inside the operation window. Applied wiring bench and supervisor coverage to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-010' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-010"
+                },
+                {
+                  "id": "drive-approval-010"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-010 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-010-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-010-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-010-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R4 and established 53 HR for wiring labor-hours still required, with control date 2026-01-16.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-010-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-010-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-010-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000010 at R4.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-010-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-010-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-010-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R4 and established 53 HR for wiring labor-hours still required, with control date 2026-01-16.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-010-11"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-010-11",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-010-11"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the raw operating-window calendar and Applied wiring bench and supervisor coverage to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-010-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-010-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-010-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-010-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-14 readiness input for assign_certified_contractor, then separately derived its 2026-01-16 operating outcome under worker certification, approved rate, and remaining assignment capacity instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-010"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-010"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-010",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-010"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-010"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-010"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0010 only to assign_certified_contractor, NS-000010, and the supported 30 HR; kept broader scope and authorize_overtime_crew outside current authority.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100010,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 800010
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_resources.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work order resources record: Applied wiring bench and supervisor coverage to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "SupplierId": 600010
+            },
+            "expected_result_contains": {
+              "SupplierId": 600010
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.suppliers.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "SupplierNumber='SUP-00010'"
+            },
+            "expected_result_contains": {
+              "SupplierId": 600010
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.suppliers.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle suppliers record: Used the independently confirmed 2026-01-14 readiness input for assign_certified_contractor, then separately derived its 2026-01-16 operating outcome under worker certification, approved rate, and remaining assignment capacity instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100010,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100010
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_operations.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work order operations record: Applied wiring bench and supervisor coverage to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100010
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100010
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='WO-0010'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100010
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work orders record: Located NS-000010 for wiring operation on WO-0010 using immutable IDs and preserved effective revision R4.",
+        "id": "investigation_17",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.work_order_resources.create",
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100010,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100010
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_resources.list"
+          }
+        ],
+        "description": "Read NS-000010 back through the documented Oracle work order resources.list operation after the mutation and confirmed the resource-specific changed fields ['AssignedUnits', 'LastUpdateDate', 'ResourceCode', 'UsageRate'], including the effective update at 2026-01-16, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "AssignedUnits": 1,
+          "LastUpdateDate": "2026-01-16T16:00:00-08:00",
+          "ResourceCode": "RES-CERT-010",
+          "UsageRate": 1.0
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": true,
+        "target_identity": {
+          "WorkOrderId": 100010
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.work_order_resources.create",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100010,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100010
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_resources.list"
+        }
+      ],
+      "description": "Read NS-000010 back through the documented Oracle work order resources.list operation after the mutation and confirmed the resource-specific changed fields ['AssignedUnits', 'LastUpdateDate', 'ResourceCode', 'UsageRate'], including the effective update at 2026-01-16, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "AssignedUnits": 1,
+        "LastUpdateDate": "2026-01-16T16:00:00-08:00",
+        "ResourceCode": "RES-CERT-010",
+        "UsageRate": 1.0
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": true,
+      "target_identity": {
+        "WorkOrderId": 100010
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-010"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-010 scope, immutable handles, mounted systems, and evidence index before investigating NS-000010.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-010"
+          },
+          "expected_result_contains": {
+            "id": "drive-010"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-010",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-010"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-010"
+          },
+          "expected_result_contains": {
+            "id": "drive-010"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R4 and established 53 HR for wiring labor-hours still required, with control date 2026-01-16.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-010\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-010"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-010 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-010",
+            "messageId": "msg-010-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogc2tpbGxzLXJhdGUtYW5kLWxhYm9yLWNhcGFjaXR5LXJvc3Rlci0wMDEwCkNhc2UgcmVmZXJlbmNlOiBDQVNFLTAxMApJc3N1ZWQ6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpWYWxpZCB0aHJvdWdoOiAyMDI2LTAxLTE5CgoxLiBSRUZFUkVOQ0VEIFNDT1BFClNvdXJjZSBzdWJqZWN0OiBza2lsbHMsIHJhdGUsIGFuZCBsYWJvci1jYXBhY2l0eSByb3N0ZXIKSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTAxMApFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSNApNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDIzIEhSClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IGFzc2lnbl9jZXJ0aWZpZWRfY29udHJhY3RvcgpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xNwpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTQKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTYKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCA1MjAKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiBhZ2VuY3kncyBjb25maXJtZWQgd29ya2VyIHJvc3RlcgpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBob3VycyBmcm9tIGV4cGlyZWQgY2VydGlmaWNhdGlvbnMgb3IgY29uZmxpY3RpbmcgYXNzaWdubWVudHMKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogd29ya2VyIGNlcnRpZmljYXRpb24sIGFwcHJvdmVkIHJhdGUsIGFuZCByZW1haW5pbmcgYXNzaWdubWVudCBjYXBhY2l0eQpOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wMTEgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBSYWluaWVyIENvbXBvbmVudHMgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwMTAKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+            "size": 1562
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-14 readiness input for assign_certified_contractor, then separately derived its 2026-01-16 operating outcome under worker certification, approved rate, and remaining assignment capacity instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000010.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000010.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000010.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0010 only to assign_certified_contractor, NS-000010, and the supported 30 HR; kept broader scope and authorize_overtime_crew outside current authority.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-010",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-010"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-010",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-010"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 35 observed less 5 excluded to 30 supported HR for qualified contract hours inside the operation window. Applied wiring bench and supervisor coverage to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-010' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-010"
+              },
+              {
+                "id": "drive-approval-010"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-010 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-010-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-010-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-010-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R4 and established 53 HR for wiring labor-hours still required, with control date 2026-01-16.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-010-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-010-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-010-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000010 at R4.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-010-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-010-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-010-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R4 and established 53 HR for wiring labor-hours still required, with control date 2026-01-16.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-010-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-010-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-010-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied wiring bench and supervisor coverage to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-010-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-010-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-010-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-010-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-14 readiness input for assign_certified_contractor, then separately derived its 2026-01-16 operating outcome under worker certification, approved rate, and remaining assignment capacity instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-010"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-010"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-010",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-010"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-010"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-010"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0010 only to assign_certified_contractor, NS-000010, and the supported 30 HR; kept broader scope and authorize_overtime_crew outside current authority.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100010,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 800010
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_resources.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order resources record: Applied wiring bench and supervisor coverage to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "SupplierId": 600010
+          },
+          "expected_result_contains": {
+            "SupplierId": 600010
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.suppliers.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplierNumber='SUP-00010'"
+          },
+          "expected_result_contains": {
+            "SupplierId": 600010
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.suppliers.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle suppliers record: Used the independently confirmed 2026-01-14 readiness input for assign_certified_contractor, then separately derived its 2026-01-16 operating outcome under worker certification, approved rate, and remaining assignment capacity instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100010,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100010
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order operations record: Applied wiring bench and supervisor coverage to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100010
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100010
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0010'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100010
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000010 for wiring operation on WO-0010 using immutable IDs and preserved effective revision R4.",
+      "id": "investigation_17",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-010"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "id": "att-010",
-        "messageId": "msg-010",
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-010"
+      },
+      "expected_result_contains": {
+        "id": "drive-010"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-010\"",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-010"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "id": "att-010",
+        "messageId": "msg-010-1",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogc2tpbGxzLXJhdGUtYW5kLWxhYm9yLWNhcGFjaXR5LXJvc3Rlci0wMDEwCkNhc2UgcmVmZXJlbmNlOiBDQVNFLTAxMApJc3N1ZWQ6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpWYWxpZCB0aHJvdWdoOiAyMDI2LTAxLTE5CgoxLiBSRUZFUkVOQ0VEIFNDT1BFClNvdXJjZSBzdWJqZWN0OiBza2lsbHMsIHJhdGUsIGFuZCBsYWJvci1jYXBhY2l0eSByb3N0ZXIKSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTAxMApFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSNApNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDIzIEhSClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IGFzc2lnbl9jZXJ0aWZpZWRfY29udHJhY3RvcgpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xNwpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTQKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTYKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCA1MjAKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiBhZ2VuY3kncyBjb25maXJtZWQgd29ya2VyIHJvc3RlcgpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBob3VycyBmcm9tIGV4cGlyZWQgY2VydGlmaWNhdGlvbnMgb3IgY29uZmxpY3RpbmcgYXNzaWdubWVudHMKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogd29ya2VyIGNlcnRpZmljYXRpb24sIGFwcHJvdmVkIHJhdGUsIGFuZCByZW1haW5pbmcgYXNzaWdubWVudCBjYXBhY2l0eQpOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wMTEgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBSYWluaWVyIENvbXBvbmVudHMgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwMTAKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+        "size": 1562
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.attachments.get"
     },
     {
@@ -101,17 +1606,31 @@
         "limit": 100,
         "oldest": "1768000000.000000"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000010.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "slack.conversations_history"
     },
     {
       "arguments": {
         "majorDimension": "ROWS",
-        "range": "Control!A1:H50",
+        "range": "Control!A1:I50",
         "spreadsheetId": "sheet-010",
         "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "values": [
+          [
+            "CASE-010"
+          ]
+        ]
+      },
+      "match": "result_contains",
       "tool": "google_sheets.spreadsheets.values.get"
     },
     {
@@ -120,37 +1639,150 @@
         "pageSize": 50,
         "q": "name contains 'CASE-010' and trashed = false"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-010"
+          },
+          {
+            "id": "drive-approval-010"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.list"
     },
     {
       "arguments": {
-        "limit": 50,
-        "onlyData": true,
-        "q": "ReferenceNumber='CASE-010'"
+        "fileId": "drive-010-12",
+        "mimeType": "text/plain"
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.work_orders.list"
+      "expected_result_contains": {
+        "id": "drive-010-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-010-09"
+      },
+      "expected_result_contains": {
+        "id": "drive-010-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-010-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-010-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-010-11"
+      },
+      "expected_result_contains": {
+        "id": "drive-010-11"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-010-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-010-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-010"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-010"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
         "WorkOrderId": 100010,
         "limit": 50,
-        "onlyData": true,
-        "q": "ReferenceNumber='CASE-010'"
+        "onlyData": true
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "WorkOrderId": 800010
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.work_order_resources.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "SupplierNumber='SUP-00010'"
+      },
+      "expected_result_contains": {
+        "SupplierId": 600010
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.suppliers.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100010,
+        "limit": 50,
+        "onlyData": true
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 100010
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "WorkOrderNumber='WO-0010'"
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 100010
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.work_orders.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
+    "google_drive.files.get",
+    "gmail.messages.list",
     "gmail.messages.attachments.get",
     "slack.conversations_history",
     "google_sheets.spreadsheets.values.get",
     "google_drive.files.list",
-    "oracle_fusion.work_orders.list",
-    "oracle_fusion.work_order_resources.list"
+    "google_drive.files.export",
+    "google_drive.files.get",
+    "google_drive.files.get",
+    "google_drive.files.download",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "oracle_fusion.work_order_resources.list",
+    "oracle_fusion.suppliers.list",
+    "oracle_fusion.work_order_operations.list",
+    "oracle_fusion.work_orders.list"
   ],
   "task_id": "factorybench-010",
   "write_tools": [

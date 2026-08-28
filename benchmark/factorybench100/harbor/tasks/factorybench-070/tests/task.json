@@ -7,49 +7,236 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "affected_work_order": {
+      "accelerated_completion": {
+        "description": "Outcome date for use_customer_production_order.",
         "type": "string"
       },
-      "change_order": {
+      "baseline_completion": {
+        "description": "Outcome date for create_scoped_pilot_order.",
         "type": "string"
       },
-      "implementation_result": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
+      },
+      "coverage_item_or_resource": {
+        "description": "Immutable item or resource whose requirement and eligible coverage were reconciled.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_completion": {
+        "description": "Outcome date for build_unapproved_full_quantity.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "expedited_external_readiness": {
+        "description": "Expedited readiness date independently confirmed for prototype component readiness.",
+        "type": "string"
+      },
+      "external_recovery_quantity": {
+        "description": "Uncovered EA that the external recovery must cover.",
+        "type": "integer"
+      },
+      "ineligible_coverage_quantity": {
+        "description": "production stock protected for customer orders",
+        "type": "integer"
+      },
+      "observed_coverage_quantity": {
+        "description": "Gross observed coverage for material and fixture coverage at the released pilot revision before exclusions.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "quantity_unit": {
+        "description": "Unit shared by the requirement and coverage calculations: EA.",
+        "type": "string"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental recovery cost of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing create_scoped_pilot_order, use_customer_production_order, build_unapproved_full_quantity.",
+        "enum": [
+          "create_scoped_pilot_order",
+          "use_customer_production_order",
+          "build_unapproved_full_quantity"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "required_quantity": {
+        "description": "approved prototype quantity",
+        "type": "integer"
+      },
+      "shortage_quantity": {
+        "description": "Uncovered EA after netting eligible coverage from the requirement.",
+        "type": "integer"
+      },
+      "standard_external_readiness": {
+        "description": "Standard readiness date independently confirmed for prototype component readiness.",
+        "type": "string"
+      },
+      "usable_coverage_quantity": {
+        "description": "Net eligible coverage after removing production stock protected for customer orders.",
+        "type": "integer"
       }
     },
     "required": [
-      "affected_work_order",
-      "change_order",
-      "implementation_result"
+      "accelerated_completion",
+      "baseline_completion",
+      "business_need_date",
+      "coverage_item_or_resource",
+      "decision_timing_status",
+      "escalated_completion",
+      "escalation_approval_required",
+      "expedited_external_readiness",
+      "external_recovery_quantity",
+      "ineligible_coverage_quantity",
+      "observed_coverage_quantity",
+      "outcome_vs_control_days",
+      "quantity_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "required_quantity",
+      "shortage_quantity",
+      "standard_external_readiness",
+      "usable_coverage_quantity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "affected_work_order": "ORD-0070",
-      "change_order": "ORD-0070",
-      "implementation_result": "Pilot order created"
+      "accelerated_completion": "2026-01-16",
+      "baseline_completion": "2026-01-18",
+      "business_need_date": "2026-01-19",
+      "coverage_item_or_resource": "NS-COMP-070",
+      "decision_timing_status": "ON_TIME",
+      "escalated_completion": "2026-01-15",
+      "escalation_approval_required": 1,
+      "expedited_external_readiness": "2026-01-14",
+      "external_recovery_quantity": 7,
+      "ineligible_coverage_quantity": 7,
+      "observed_coverage_quantity": 71,
+      "outcome_vs_control_days": -1,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "create_scoped_pilot_order",
+      "recommended_outcome_date": "2026-01-18",
+      "required_quantity": 71,
+      "shortage_quantity": 7,
+      "standard_external_readiness": "2026-01-16",
+      "usable_coverage_quantity": 64
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'create_scoped_pilot_order', tied to NS-000070, revision R1, and the selected create_scoped_pilot_order outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-18', tied to NS-000070, revision R1, and the selected create_scoped_pilot_order outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported coverage item or resource as 'NS-COMP-070', tied to NS-000070, revision R1, and the selected create_scoped_pilot_order outcome.",
+        "field": "coverage_item_or_resource",
+        "id": "answer_coverage_item_or_resource",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported shortage quantity as 7, tied to NS-000070, revision R1, and the selected create_scoped_pilot_order outcome.",
+        "field": "shortage_quantity",
+        "id": "answer_shortage_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000070, revision R1, and the selected create_scoped_pilot_order outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.work_orders.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000070 to reach business outcome 'Pilot order created' through oracle_fusion.work_orders.create with exact provider-critical values requestBody.OrganizationCode='SEA', requestBody.WorkOrderNumber='WO-0070', requestBody.ItemNumber='NS-COMP-070', requestBody.WorkOrderQuantity=71, requestBody.WorkOrderStatusCode='ORA_RELEASED', requestBody.PlannedStartDate='2026-01-17', requestBody.PlannedCompletionDate='2026-01-18'. The audited transition binds selected option create_scoped_pilot_order, revision R1, approval AP-0070, and constraint ECO release, prototype scope, lot separation, and start approval; production stock protected for customer orders = 7 EA; uncovered or unsupported scope = 7.0 EA; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.ItemNumber",
+          "requestBody.OrganizationCode",
+          "requestBody.PlannedCompletionDate",
+          "requestBody.PlannedStartDate",
+          "requestBody.WorkOrderNumber",
+          "requestBody.WorkOrderQuantity",
+          "requestBody.WorkOrderStatusCode"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "ItemNumber": "NS-COMP-070",
+              "OrganizationCode": "SEA",
+              "PlannedCompletionDate": "2026-01-18",
+              "PlannedStartDate": "2026-01-17",
+              "WorkOrderNumber": "WO-0070",
+              "WorkOrderQuantity": 71,
+              "WorkOrderStatusCode": "ORA_RELEASED"
+            }
+          },
+          "tool": "oracle_fusion.work_orders.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"ItemNumber\":\"NS-COMP-070\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-29\",\"PlannedStartDate\":\"2026-01-26\",\"WorkOrderNumber\":\"WO-0070\",\"WorkOrderQuantity\":41,\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-070\",\"outcome\":\"Use the approved prototype quantity, revision, and start window to create an isolated pilot order.\",\"tool\":\"oracle_fusion.work_orders.create\"}",
           "resource_type": "oracle_fusion.work_orders",
           "revision": 1,
           "status": "Pilot order created",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-070-mutation-01",
           "task_id": "factorybench-070"
         }
       },
       {
-        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "description": "Sent manufacturing engineering the scoped outcome for CASE-070, including completion 2026-01-18, the binding constraint, alternatives, and the Oracle business reference.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "threadId": "thread-070",
+            "userId": "me"
+          },
+          "tool": "gmail.messages.send"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-070",
+            "NS-000070",
+            "NS-COMP-070"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-18",
+          "create_scoped_pilot_order"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "gmail.messages",
@@ -57,14 +244,32 @@
           "status": "Recorded",
           "system": "gmail"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-070-mutation-02",
           "task_id": "factorybench-070"
         }
       },
       {
-        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "description": "Added the Oracle result to the existing case file as a comment containing create_scoped_pilot_order, completion 2026-01-18, and the binding constraint.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "fileId": "drive-070"
+          },
+          "tool": "google_drive.comments.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-070",
+            "NS-000070",
+            "NS-COMP-070"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-18",
+          "create_scoped_pilot_order"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_drive.comments",
@@ -72,44 +277,1314 @@
           "status": "Recorded",
           "system": "google_drive"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-070-mutation-03",
           "task_id": "factorybench-070"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-19 as the documented date for revised-design pilot build; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 71 EA for approved prototype quantity at revision R1.",
+        "field": "required_quantity",
+        "id": "derive_plan_requirement",
+        "weight": 2.0
+      },
+      {
+        "description": "Read 71 EA of gross observed material and fixture coverage at the released pilot revision.",
+        "field": "observed_coverage_quantity",
+        "id": "read_gross_coverage",
+        "weight": 1.0
+      },
+      {
+        "description": "Excluded 7 EA for production stock protected for customer orders.",
+        "field": "ineligible_coverage_quantity",
+        "id": "remove_ineligible_coverage",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 71 observed \u2212 7 ineligible = 64 usable EA.",
+        "field": "usable_coverage_quantity",
+        "id": "calculate_usable_coverage",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 71 required \u2212 64 usable = 7 EA uncovered.",
+        "field": "shortage_quantity",
+        "id": "calculate_plan_gap",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept every planning quantity in EA.",
+        "field": "quantity_unit",
+        "id": "preserve_plan_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Calculated create_scoped_pilot_order outcome as 2026-01-18 under isolated pilot-cell window.",
+        "field": "baseline_completion",
+        "id": "compare_baseline_plan",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated use_customer_production_order outcome as 2026-01-16 using prototype component readiness.",
+        "field": "accelerated_completion",
+        "id": "compare_accelerated_plan",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated build_unapproved_full_quantity outcome as 2026-01-15 and kept its separate-approval condition.",
+        "field": "escalated_completion",
+        "id": "compare_escalated_plan",
+        "weight": 1.0
+      },
+      {
+        "description": "Read 2026-01-16 as the independently confirmed standard readiness date for prototype component readiness.",
+        "field": "standard_external_readiness",
+        "id": "read_standard_external_readiness",
+        "weight": 1.0
+      },
+      {
+        "description": "Read 2026-01-14 as the independently confirmed expedited readiness date for prototype component readiness.",
+        "field": "expedited_external_readiness",
+        "id": "read_expedited_external_readiness",
+        "weight": 1.0
+      },
+      {
+        "description": "Bound external recovery to the 7 EA uncovered requirement rather than ordering the full header quantity.",
+        "field": "external_recovery_quantity",
+        "id": "bound_external_recovery_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental recovery cost for create_scoped_pilot_order; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that build_unapproved_full_quantity remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of create_scoped_pilot_order, use_customer_production_order, and build_unapproved_full_quantity; selected create_scoped_pilot_order because it alone gives the best currently authorized result under ECO release, prototype scope, lot separation, and start approval.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-18 as the supported outcome date for create_scoped_pilot_order.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-18 with the independent control date 2026-01-19 and calculated a signed variance of -1 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-070"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-070 scope, immutable handles, mounted systems, and evidence index before investigating NS-000070.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "id": "att-070",
+              "messageId": "msg-070-1",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogcGlsb3QtcmVsZWFzZS1hbmQtaXNvbGF0ZWQtY2FwYWNpdHktcGxhbi0wMDcwCkNhc2UgcmVmZXJlbmNlOiBDQVNFLTA3MApJc3N1ZWQ6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpWYWxpZCB0aHJvdWdoOiAyMDI2LTAxLTE5CgoxLiBSRUZFUkVOQ0VEIFNDT1BFClNvdXJjZSBzdWJqZWN0OiBwaWxvdCByZWxlYXNlIGFuZCBpc29sYXRlZC1jYXBhY2l0eSBwbGFuCkltbXV0YWJsZSByZWNvcmQgb3IgaXRlbTogTlMtQ09NUC0wNzAKRWZmZWN0aXZlIHJldmlzaW9uIHN1cHBsaWVkIGJ5IHJlcXVlc3RlcjogUjEKTWF4aW11bSBzY29wZSByZXByZXNlbnRlZCBieSB0aGlzIHJlc3BvbnNlOiA3IEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IHVzZV9jdXN0b21lcl9wcm9kdWN0aW9uX29yZGVyClN0YW5kYXJkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTE2CkV4cGVkaXRlZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xNApSZXN1bHRpbmcgb3BlcmF0aW5nIG91dGNvbWUgc3RhdGVkIGJ5IHJlcXVlc3Rlciwgbm90IGJ5IGNvdW50ZXJwYXJ0eTogMjAyNi0wMS0xNgpFY29ub21pYyBpbXBhY3Qgc3RhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogVVNEIDE1NDAKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiBwcm90b3R5cGUgY29tcG9uZW50IHJlYWRpbmVzcwpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBwcm9kdWN0aW9uIHN0b2NrIHByb3RlY3RlZCBmb3IgY3VzdG9tZXIgb3JkZXJzCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IEVDTyByZWxlYXNlLCBwcm90b3R5cGUgc2NvcGUsIGxvdCBzZXBhcmF0aW9uLCBhbmQgc3RhcnQgYXBwcm92YWwKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDcxIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogUmFpbmllciBDb21wb25lbnRzIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDcwClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K",
+              "size": 1545
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.attachments.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-14 readiness input for use_customer_production_order, then separately derived its 2026-01-16 operating outcome under ECO release, prototype scope, lot separation, and start approval instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-070"
+            },
+            "expected_result_contains": {
+              "id": "drive-070"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-070",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-070"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-070"
+            },
+            "expected_result_contains": {
+              "id": "drive-070"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R1 and established 71 EA for approved prototype quantity, with control date 2026-01-19.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000070.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000070.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000070.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0070 only to create_scoped_pilot_order, NS-000070, and the supported 71 EA; kept broader scope and build_unapproved_full_quantity outside current authority.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "includeGridData": false,
+              "ranges": [
+                "Control!A1:I50"
+              ],
+              "spreadsheetId": "sheet-070"
+            },
+            "expected_result_contains": {
+              "developerMetadata": [
+                {
+                  "metadataKey": "case",
+                  "metadataValue": "CASE-070"
+                }
+              ],
+              "spreadsheetId": "sheet-070"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-070' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-070"
+                },
+                {
+                  "id": "drive-approval-070"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-070 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-070-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-070-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-070-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-14 readiness input for use_customer_production_order, then separately derived its 2026-01-16 operating outcome under ECO release, prototype scope, lot separation, and start approval instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-070-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-070-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-070-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000070 at R1.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-070-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-070-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-070-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R1 and established 71 EA for approved prototype quantity, with control date 2026-01-19.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-070-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-070-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-070-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R1 and established 71 EA for approved prototype quantity, with control date 2026-01-19.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-070-11"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-070-11",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-070-11"
+            },
+            "expected_result_contains": {
+              "id": "drive-070-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the raw operating-window calendar and Applied isolated pilot-cell window to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-070"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-070"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-070",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-070"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-070"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-070"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0070 only to create_scoped_pilot_order, NS-000070, and the supported 71 EA; kept broader scope and build_unapproved_full_quantity outside current authority.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-070\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-070"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-070 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-070' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400070
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 71 observed less 7 excluded to 64 supported EA for material and fixture coverage at the released pilot revision.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "SupplyOrderReferenceNumber='SUPPLY-0070'"
+            },
+            "expected_result_contains": {
+              "SupplyRequestId": 1500070
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.supply_requests.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-14 readiness input for use_customer_production_order, then separately derived its 2026-01-16 operating outcome under ECO release, prototype scope, lot separation, and start approval instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0070"
+            },
+            "expected_result_contains": {
+              "HeaderId": 12000070
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.sales_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "OrderNumber='SO-47070'"
+            },
+            "expected_result_contains": {
+              "HeaderId": 12000070
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.sales_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle sales orders record: Applied revision R1 and established 71 EA for approved prototype quantity, with control date 2026-01-19.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='WO-0070'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 800070
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work orders record: Located NS-000070 for revised-design pilot build using immutable IDs and preserved effective revision R1.",
+        "id": "investigation_17",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.work_orders.create",
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100070
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100070
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='WO-0070'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100070
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.list"
+          }
+        ],
+        "description": "Read NS-000070 back through the documented Oracle work orders.list operation after the mutation and confirmed the resource-specific changed fields ['ItemNumber', 'LastUpdateDate', 'OrganizationCode', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkOrderNumber', 'WorkOrderStatusCode'], including the effective update at 2026-01-18, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "ItemNumber": "NS-COMP-070",
+          "LastUpdateDate": "2026-01-18T16:00:00-08:00",
+          "OrganizationCode": "SEA",
+          "PlannedCompletionDate": "2026-01-18",
+          "PlannedStartDate": "2026-01-17",
+          "WorkOrderNumber": "WO-0070",
+          "WorkOrderStatusCode": "ORA_RELEASED"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": true,
+        "target_identity": {
+          "WorkOrderId": 100070
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.work_orders.create",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100070
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100070
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0070'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100070
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "description": "Read NS-000070 back through the documented Oracle work orders.list operation after the mutation and confirmed the resource-specific changed fields ['ItemNumber', 'LastUpdateDate', 'OrganizationCode', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkOrderNumber', 'WorkOrderStatusCode'], including the effective update at 2026-01-18, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "ItemNumber": "NS-COMP-070",
+        "LastUpdateDate": "2026-01-18T16:00:00-08:00",
+        "OrganizationCode": "SEA",
+        "PlannedCompletionDate": "2026-01-18",
+        "PlannedStartDate": "2026-01-17",
+        "WorkOrderNumber": "WO-0070",
+        "WorkOrderStatusCode": "ORA_RELEASED"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": true,
+      "target_identity": {
+        "WorkOrderId": 100070
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-070"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-070 scope, immutable handles, mounted systems, and evidence index before investigating NS-000070.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-070",
+            "messageId": "msg-070-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogcGlsb3QtcmVsZWFzZS1hbmQtaXNvbGF0ZWQtY2FwYWNpdHktcGxhbi0wMDcwCkNhc2UgcmVmZXJlbmNlOiBDQVNFLTA3MApJc3N1ZWQ6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpWYWxpZCB0aHJvdWdoOiAyMDI2LTAxLTE5CgoxLiBSRUZFUkVOQ0VEIFNDT1BFClNvdXJjZSBzdWJqZWN0OiBwaWxvdCByZWxlYXNlIGFuZCBpc29sYXRlZC1jYXBhY2l0eSBwbGFuCkltbXV0YWJsZSByZWNvcmQgb3IgaXRlbTogTlMtQ09NUC0wNzAKRWZmZWN0aXZlIHJldmlzaW9uIHN1cHBsaWVkIGJ5IHJlcXVlc3RlcjogUjEKTWF4aW11bSBzY29wZSByZXByZXNlbnRlZCBieSB0aGlzIHJlc3BvbnNlOiA3IEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IHVzZV9jdXN0b21lcl9wcm9kdWN0aW9uX29yZGVyClN0YW5kYXJkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTE2CkV4cGVkaXRlZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xNApSZXN1bHRpbmcgb3BlcmF0aW5nIG91dGNvbWUgc3RhdGVkIGJ5IHJlcXVlc3Rlciwgbm90IGJ5IGNvdW50ZXJwYXJ0eTogMjAyNi0wMS0xNgpFY29ub21pYyBpbXBhY3Qgc3RhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogVVNEIDE1NDAKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiBwcm90b3R5cGUgY29tcG9uZW50IHJlYWRpbmVzcwpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBwcm9kdWN0aW9uIHN0b2NrIHByb3RlY3RlZCBmb3IgY3VzdG9tZXIgb3JkZXJzCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IEVDTyByZWxlYXNlLCBwcm90b3R5cGUgc2NvcGUsIGxvdCBzZXBhcmF0aW9uLCBhbmQgc3RhcnQgYXBwcm92YWwKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDcxIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogUmFpbmllciBDb21wb25lbnRzIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDcwClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K",
+            "size": 1545
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-14 readiness input for use_customer_production_order, then separately derived its 2026-01-16 operating outcome under ECO release, prototype scope, lot separation, and start approval instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-070"
+          },
+          "expected_result_contains": {
+            "id": "drive-070"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-070",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-070"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-070"
+          },
+          "expected_result_contains": {
+            "id": "drive-070"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R1 and established 71 EA for approved prototype quantity, with control date 2026-01-19.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000070.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000070.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000070.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0070 only to create_scoped_pilot_order, NS-000070, and the supported 71 EA; kept broader scope and build_unapproved_full_quantity outside current authority.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-070"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-070"
+              }
+            ],
+            "spreadsheetId": "sheet-070"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-070' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-070"
+              },
+              {
+                "id": "drive-approval-070"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-070 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-070-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-070-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-070-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-14 readiness input for use_customer_production_order, then separately derived its 2026-01-16 operating outcome under ECO release, prototype scope, lot separation, and start approval instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-070-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-070-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-070-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000070 at R1.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-070-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-070-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-070-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R1 and established 71 EA for approved prototype quantity, with control date 2026-01-19.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-070-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-070-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-070-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R1 and established 71 EA for approved prototype quantity, with control date 2026-01-19.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-070-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-070-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-070-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-070-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied isolated pilot-cell window to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-070"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-070"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-070",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-070"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-070"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-070"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0070 only to create_scoped_pilot_order, NS-000070, and the supported 71 EA; kept broader scope and build_unapproved_full_quantity outside current authority.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-070\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-070"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-070 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-070' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400070
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 71 observed less 7 excluded to 64 supported EA for material and fixture coverage at the released pilot revision.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0070'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 1500070
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-14 readiness input for use_customer_production_order, then separately derived its 2026-01-16 operating outcome under ECO release, prototype scope, lot separation, and start approval instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0070"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000070
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='SO-47070'"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000070
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle sales orders record: Applied revision R1 and established 71 EA for approved prototype quantity, with control date 2026-01-19.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0070'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 800070
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000070 for revised-design pilot build using immutable IDs and preserved effective revision R1.",
+      "id": "investigation_17",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-070"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "includeGridData": false,
-        "ranges": [
-          "Control!A1:H50"
-        ],
-        "spreadsheetId": "sheet-070"
-      },
-      "match": "successful_tool_call",
-      "tool": "google_sheets.spreadsheets.get"
-    },
-    {
-      "arguments": {
-        "maxResults": 20,
-        "q": "\"CASE-070\"",
+        "id": "att-070",
+        "messageId": "msg-070-1",
         "userId": "me"
       },
-      "match": "successful_tool_call",
-      "tool": "gmail.messages.list"
+      "expected_result_contains": {
+        "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogcGlsb3QtcmVsZWFzZS1hbmQtaXNvbGF0ZWQtY2FwYWNpdHktcGxhbi0wMDcwCkNhc2UgcmVmZXJlbmNlOiBDQVNFLTA3MApJc3N1ZWQ6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpWYWxpZCB0aHJvdWdoOiAyMDI2LTAxLTE5CgoxLiBSRUZFUkVOQ0VEIFNDT1BFClNvdXJjZSBzdWJqZWN0OiBwaWxvdCByZWxlYXNlIGFuZCBpc29sYXRlZC1jYXBhY2l0eSBwbGFuCkltbXV0YWJsZSByZWNvcmQgb3IgaXRlbTogTlMtQ09NUC0wNzAKRWZmZWN0aXZlIHJldmlzaW9uIHN1cHBsaWVkIGJ5IHJlcXVlc3RlcjogUjEKTWF4aW11bSBzY29wZSByZXByZXNlbnRlZCBieSB0aGlzIHJlc3BvbnNlOiA3IEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IHVzZV9jdXN0b21lcl9wcm9kdWN0aW9uX29yZGVyClN0YW5kYXJkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTE2CkV4cGVkaXRlZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xNApSZXN1bHRpbmcgb3BlcmF0aW5nIG91dGNvbWUgc3RhdGVkIGJ5IHJlcXVlc3Rlciwgbm90IGJ5IGNvdW50ZXJwYXJ0eTogMjAyNi0wMS0xNgpFY29ub21pYyBpbXBhY3Qgc3RhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogVVNEIDE1NDAKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiBwcm90b3R5cGUgY29tcG9uZW50IHJlYWRpbmVzcwpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBwcm9kdWN0aW9uIHN0b2NrIHByb3RlY3RlZCBmb3IgY3VzdG9tZXIgb3JkZXJzCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IEVDTyByZWxlYXNlLCBwcm90b3R5cGUgc2NvcGUsIGxvdCBzZXBhcmF0aW9uLCBhbmQgc3RhcnQgYXBwcm92YWwKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDcxIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogUmFpbmllciBDb21wb25lbnRzIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDcwClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K",
+        "size": 1545
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
         "fileId": "drive-070"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "drive-070"
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.download"
     },
     {
@@ -118,34 +1593,202 @@
         "limit": 100,
         "ts": "1768000070.000100"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000070.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "WorkOrderId": 100070
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:I50"
+        ],
+        "spreadsheetId": "sheet-070"
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.work_orders.get"
+      "expected_result_contains": {
+        "developerMetadata": [
+          {
+            "metadataKey": "case",
+            "metadataValue": "CASE-070"
+          }
+        ],
+        "spreadsheetId": "sheet-070"
+      },
+      "match": "result_contains",
+      "tool": "google_sheets.spreadsheets.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-070' and trashed = false"
+      },
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-070"
+          },
+          {
+            "id": "drive-approval-070"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-070-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-070-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-070-09"
+      },
+      "expected_result_contains": {
+        "id": "drive-070-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-070-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-070-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-070-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-070-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-070-11"
+      },
+      "expected_result_contains": {
+        "id": "drive-070-11"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-070"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-070"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-070\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-070"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-070'"
+        "q": "ItemNumber='NS-COMP-070' and OrganizationCode='SEA'"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "InventoryItemId": 1400070
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "SupplyOrderReferenceNumber='SUPPLY-0070'"
+      },
+      "expected_result_contains": {
+        "SupplyRequestId": 1500070
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "OrderNumber='SO-47070'"
+      },
+      "expected_result_contains": {
+        "HeaderId": 12000070
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.sales_orders.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "WorkOrderNumber='WO-0070'"
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 800070
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.work_orders.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
-    "google_sheets.spreadsheets.get",
-    "gmail.messages.list",
+    "gmail.messages.attachments.get",
     "google_drive.files.download",
     "slack.conversations_replies",
-    "oracle_fusion.work_orders.get",
-    "oracle_fusion.inventory_onhand_balances.list"
+    "google_sheets.spreadsheets.get",
+    "google_drive.files.list",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "gmail.messages.list",
+    "oracle_fusion.inventory_onhand_balances.list",
+    "oracle_fusion.supply_requests.list",
+    "oracle_fusion.sales_orders.list",
+    "oracle_fusion.work_orders.list"
   ],
   "task_id": "factorybench-070",
   "write_tools": [

@@ -5,15 +5,71 @@
   },
   {
     "arguments": {
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-016' and trashed = false"
+    },
+    "tool": "google_drive.files.list"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-016-09"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-016-04"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-016-11"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-016-03"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-016-12",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-approval-016"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
       "majorDimension": "ROWS",
       "ranges": [
-        "Control!A1:H50",
+        "Control!A1:I50",
         "Approvals!A1:G20"
       ],
       "spreadsheetId": "sheet-016",
       "valueRenderOption": "UNFORMATTED_VALUE"
     },
     "tool": "google_sheets.spreadsheets.values.batchGet"
+  },
+  {
+    "arguments": {
+      "maxResults": 20,
+      "q": "\"CASE-016\"",
+      "userId": "me"
+    },
+    "tool": "gmail.messages.list"
   },
   {
     "arguments": {
@@ -31,17 +87,17 @@
   },
   {
     "arguments": {
-      "fileId": "drive-approval-016",
-      "pageSize": 20
+      "WorkOrderId": 100016,
+      "limit": 50,
+      "onlyData": true
     },
-    "tool": "google_drive.approvals.list"
+    "tool": "oracle_fusion.work_order_resources.list"
   },
   {
     "arguments": {
       "WorkOrderId": 100016,
       "limit": 50,
-      "onlyData": true,
-      "q": "ReferenceNumber='CASE-016'"
+      "onlyData": true
     },
     "tool": "oracle_fusion.work_order_operations.list"
   },
@@ -53,12 +109,18 @@
   },
   {
     "arguments": {
+      "WorkOrderId": 100016
+    },
+    "tool": "oracle_fusion.work_orders.get"
+  },
+  {
+    "arguments": {
       "WoOperationId": 200016,
       "WorkOrderId": 100016,
       "requestBody": {
         "OperationName": "Controlled operation CASE-016",
-        "PlannedCompletionDate": "2026-02-02",
-        "PlannedStartDate": "2026-01-29",
+        "PlannedCompletionDate": "2026-01-17",
+        "PlannedStartDate": "2026-01-16",
         "WorkCenterCode": "WC-ALT-2"
       }
     },
@@ -66,14 +128,21 @@
   },
   {
     "arguments": {
+      "WorkOrderId": 100016,
+      "limit": 50,
+      "onlyData": true
+    },
+    "tool": "oracle_fusion.work_order_operations.list"
+  },
+  {
+    "arguments": {
       "includeValuesInResponse": true,
       "range": "Control!H18",
       "requestBody": {
         "majorDimension": "ROWS",
-        "range": "Control!H18",
         "values": [
           [
-            "Alternate cell scheduled"
+            "CASE-016 | reroute_to_qualified_cell | 2026-01-17 | NS-000016 | alternate must be active, qualified, and non-displacing; down primary-cell hours and protected alternate load = 11 HR; uncovered or unsupported scope = 22.0 HR | AP-0016"
           ]
         ]
       },
@@ -85,16 +154,31 @@
   {
     "arguments": {
       "channel": "C-PRODUCTION",
-      "text": "CASE-016: Alternate cell scheduled. Oracle reference REF-0016; control workbook updated.",
+      "text": "CASE-016: Oracle record NS-000016 now reflects reroute_to_qualified_cell with completion 2026-01-17. Binding constraint: alternate must be active, qualified, and non-displacing; down primary-cell hours and protected alternate load = 11 HR; uncovered or unsupported scope = 22.0 HR. Alternatives: wait_for_primary_cell: outcome 2026-01-20, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; reroute_to_qualified_cell: outcome 2026-01-17, economic impact USD 622, SUPPORTED_AND_APPROVED; add_unapproved_night_shift: outcome 2026-01-16, economic impact USD 1596, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0016.",
       "thread_ts": "1768000016.000100"
     },
     "tool": "slack.chat_postMessage"
   },
   {
     "arguments": {
-      "affected_order": "ORD-0016",
-      "recovery_route": "SEA-1",
-      "revised_completion": "2026-01-29"
+      "affected_resource_or_operation": "NS-000016",
+      "base_completion": "2026-01-20",
+      "business_need_date": "2026-01-17",
+      "candidate_capacity": 35,
+      "capacity_gap": 22,
+      "capacity_unit": "HR",
+      "decision_timing_status": "ON_TIME",
+      "escalated_completion": "2026-01-16",
+      "escalation_approval_required": 1,
+      "net_usable_capacity": 24,
+      "outcome_vs_control_days": 0,
+      "qualified_alternative_completion": "2026-01-17",
+      "recommended_incremental_cost_usd": 622,
+      "recommended_option": "reroute_to_qualified_cell",
+      "recommended_outcome_date": "2026-01-17",
+      "required_capacity": 46,
+      "selected_resource_or_control": "WC-ALT-2",
+      "unavailable_or_protected_capacity": 11
     },
     "tool": "factorybench.submit_answer"
   }

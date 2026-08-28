@@ -1,5 +1,7 @@
-# Escalate sole-source spend concentration — operating control
+# Escalate sole-source spend concentration — operating policy
 
-Scope: Combine supplier master, performance, approval, and collaboration evidence into controlled ERP follow-up.
+Decision scope: sole-source spend exposure.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: exposure must combine open POs, forecast, currency, and supplier parent. Establish the immutable source record and effective revision, then reconcile open and forecast spend with the supplier, spend covered by approved mitigation actions, and unmitigated concentration above policy threshold from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell.

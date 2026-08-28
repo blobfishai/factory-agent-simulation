@@ -1,5 +1,7 @@
-# Report outside operation completion after receipt — operating control
+# Report outside operation completion after receipt — operating policy
 
-Scope: Coordinate outside processing purchase orders, receipts, yield, and manufacturing completion.
+Decision scope: outside operation completion.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: operation completion cannot exceed accepted returned quantity. Establish the immutable source record and effective revision, then reconcile quantity sent to the supplier operation, accepted quantity received and available to the order, and rejected, missing, or not-yet-received quantity from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: send the scoped completion reply in the existing email thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell.

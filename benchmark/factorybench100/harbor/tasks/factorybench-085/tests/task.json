@@ -7,49 +7,223 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "field_destination": {
+      "baseline_resolution_date": {
+        "description": "Resolution date for receive_matching_original_asset.",
         "type": "string"
       },
-      "service_request": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
       },
-      "stock_action": {
+      "controlled_item_or_record": {
+        "description": "Immutable item, lot, serial set, or transaction record in scope.",
         "type": "string"
+      },
+      "controlled_resolution_date": {
+        "description": "Resolution date for receive_replacement_serial.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_resolution_date": {
+        "description": "Resolution date for close_without_return.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "excluded_quantity": {
+        "description": "replacement serial, accessory, or unrelated return",
+        "type": "integer"
+      },
+      "observed_quantity": {
+        "description": "Observed source quantity before applying the control for advance-replacement return.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "quantity_unit": {
+        "description": "Unit of measure for every controlled quantity: SERIALS.",
+        "type": "string"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing receive_matching_original_asset, receive_replacement_serial, close_without_return.",
+        "enum": [
+          "receive_matching_original_asset",
+          "receive_replacement_serial",
+          "close_without_return"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "source_quantity": {
+        "description": "serials expected under the return obligation",
+        "type": "integer"
+      },
+      "supported_quantity": {
+        "description": "serial received with matching RMA and ownership",
+        "type": "integer"
+      },
+      "transaction_quantity": {
+        "description": "Exact quantity the Oracle mutation may persist.",
+        "type": "integer"
       }
     },
     "required": [
-      "field_destination",
-      "service_request",
-      "stock_action"
+      "baseline_resolution_date",
+      "business_need_date",
+      "controlled_item_or_record",
+      "controlled_resolution_date",
+      "decision_timing_status",
+      "escalated_resolution_date",
+      "escalation_approval_required",
+      "excluded_quantity",
+      "observed_quantity",
+      "outcome_vs_control_days",
+      "quantity_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "source_quantity",
+      "supported_quantity",
+      "transaction_quantity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "field_destination": "SEA-2",
-      "service_request": "FB-085",
-      "stock_action": "Replacement return received"
+      "baseline_resolution_date": "2026-01-14",
+      "business_need_date": "2026-01-14",
+      "controlled_item_or_record": "NS-COMP-085",
+      "controlled_resolution_date": "2026-01-15",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-16",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 8,
+      "observed_quantity": 73,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "SERIALS",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "receive_matching_original_asset",
+      "recommended_outcome_date": "2026-01-14",
+      "source_quantity": 70,
+      "supported_quantity": 65,
+      "transaction_quantity": 65
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'receive_matching_original_asset', tied to NS-000085, revision R2, and the selected receive_matching_original_asset outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-14', tied to NS-000085, revision R2, and the selected receive_matching_original_asset outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported controlled item or record as 'NS-COMP-085', tied to NS-000085, revision R2, and the selected receive_matching_original_asset outcome.",
+        "field": "controlled_item_or_record",
+        "id": "answer_controlled_item_or_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported transaction quantity as 65, tied to NS-000085, revision R2, and the selected receive_matching_original_asset outcome.",
+        "field": "transaction_quantity",
+        "id": "answer_transaction_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000085, revision R2, and the selected receive_matching_original_asset outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.receiving_receipt_requests.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000085 to reach business outcome 'Replacement return received' through oracle_fusion.receiving_receipt_requests.create with exact provider-critical values requestBody.ReceiptSourceCode='VENDOR', requestBody.OrganizationCode='SEA', requestBody.VendorName='Cascade Industrial', requestBody.EmployeeId=7185, requestBody.lines[0].SourceDocumentCode='PO', requestBody.lines[0].POHeaderId=2000085, requestBody.lines[0].POLineId=2100085, requestBody.lines[0].ItemNumber='NS-COMP-085', requestBody.lines[0].Quantity=65, requestBody.lines[0].UnitOfMeasure='SERIALS', requestBody.lines[0].LotNumber='LOT-0085'. The audited transition binds selected option receive_matching_original_asset, revision R2, approval AP-0085, and constraint sales order, RMA, original serial, replacement serial, and receipt organization; replacement serial, accessory, or unrelated return = 8 SERIALS; uncovered or unsupported scope = 5.0 SERIALS; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.EmployeeId",
+          "requestBody.OrganizationCode",
+          "requestBody.ReceiptSourceCode",
+          "requestBody.VendorName",
+          "requestBody.lines[0].ItemNumber",
+          "requestBody.lines[0].LotNumber",
+          "requestBody.lines[0].POHeaderId",
+          "requestBody.lines[0].POLineId",
+          "requestBody.lines[0].Quantity",
+          "requestBody.lines[0].SourceDocumentCode",
+          "requestBody.lines[0].UnitOfMeasure"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "EmployeeId": 7185,
+              "OrganizationCode": "SEA",
+              "ReceiptSourceCode": "VENDOR",
+              "VendorName": "Cascade Industrial",
+              "lines": [
+                {
+                  "ItemNumber": "NS-COMP-085",
+                  "LotNumber": "LOT-0085",
+                  "POHeaderId": 2000085,
+                  "POLineId": 2100085,
+                  "Quantity": 65,
+                  "SourceDocumentCode": "PO",
+                  "UnitOfMeasure": "SERIALS"
+                }
+              ]
+            }
+          },
+          "tool": "oracle_fusion.receiving_receipt_requests.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"EmployeeId\":7185,\"OrganizationCode\":\"SEA\",\"ReceiptSourceCode\":\"VENDOR\",\"VendorName\":\"Cascade Industrial\",\"lines\":[{\"ItemNumber\":\"NS-COMP-085\",\"LotNumber\":\"LOT-0085\",\"POHeaderId\":2000085,\"POLineId\":2100085,\"Quantity\":19,\"SourceDocumentCode\":\"PO\",\"UnitOfMeasure\":\"EA\"}]}},\"case\":\"CASE-085\",\"outcome\":\"Match shipment, RMA, and serial evidence before creating the receipt request for the returned asset.\",\"tool\":\"oracle_fusion.receiving_receipt_requests.create\"}",
           "resource_type": "oracle_fusion.receiving_receipt_requests",
           "revision": 1,
           "status": "Replacement return received",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-085-mutation-01",
           "task_id": "factorybench-085"
         }
       },
       {
-        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "description": "Wrote receive_matching_original_asset, completion 2026-01-14, and the binding constraint into the existing task-scoped control cell without altering another row.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "range": "Control!H7",
+            "spreadsheetId": "sheet-085"
+          },
+          "tool": "google_sheets.spreadsheets.values.update"
+        },
+        "payload_text_contains": [
+          "2026-01-14",
+          "receive_matching_original_asset"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_sheets.spreadsheets.values",
@@ -57,14 +231,33 @@
           "status": "Recorded",
           "system": "google_sheets"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-085-mutation-02",
           "task_id": "factorybench-085"
         }
       },
       {
-        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "description": "Replied in the existing operations thread with receive_matching_original_asset, completion 2026-01-14, the constraint, alternatives, and Oracle result.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "thread_ts": "1768000085.000100"
+          },
+          "tool": "slack.chat_postMessage"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-085",
+            "NS-000085",
+            "NS-COMP-085"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-14",
+          "receive_matching_original_asset"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "slack",
@@ -72,31 +265,1365 @@
           "status": "Recorded",
           "system": "slack"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-085-mutation-03",
           "task_id": "factorybench-085"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-14 as the documented date for advance-replacement return; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Established 70 SERIALS for serials expected under the return obligation.",
+        "field": "source_quantity",
+        "id": "establish_source_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Correlated the independent source records to 73 observed SERIALS.",
+        "field": "observed_quantity",
+        "id": "reconcile_observed_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Removed 8 SERIALS for replacement serial, accessory, or unrelated return.",
+        "field": "excluded_quantity",
+        "id": "identify_excluded_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 73 observed \u2212 8 excluded = 65 supported SERIALS.",
+        "field": "supported_quantity",
+        "id": "calculate_supported_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Bound the Oracle transaction to exactly 65 SERIALS, the measure required by the chosen disposition; did not substitute the header or another business quantity.",
+        "field": "transaction_quantity",
+        "id": "bound_transaction_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept the receipt, issue, transfer, inspection, or completion quantity in SERIALS.",
+        "field": "quantity_unit",
+        "id": "preserve_transaction_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Derived 2026-01-14 for receive_matching_original_asset.",
+        "field": "baseline_resolution_date",
+        "id": "compare_quantity_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-15 for receive_replacement_serial.",
+        "field": "controlled_resolution_date",
+        "id": "compare_quantity_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-16 for close_without_return and recognized its control impact.",
+        "field": "escalated_resolution_date",
+        "id": "compare_quantity_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for receive_matching_original_asset; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that close_without_return remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of receive_matching_original_asset, receive_replacement_serial, and close_without_return; selected receive_matching_original_asset because it alone gives the best currently authorized result under sales order, RMA, original serial, replacement serial, and receipt organization.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-14 as the supported outcome date for receive_matching_original_asset.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-14 with the independent control date 2026-01-14 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-085"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-085 scope, immutable handles, mounted systems, and evidence index before investigating NS-000085.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-085' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-085"
+                },
+                {
+                  "id": "drive-approval-085"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-085 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-085-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-085-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-085-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R2 and established 70 SERIALS for serials expected under the return obligation, with control date 2026-01-14.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-085-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-085-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-085-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000085 at R2.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-085-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-085-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-085-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 73 observed less 8 excluded to 65 supported SERIALS for serial received with matching RMA and ownership.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-085-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-085-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-085-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R2 and established 70 SERIALS for serials expected under the return obligation, with control date 2026-01-14.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-085-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-085-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-085-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-085-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-12 readiness input for receive_replacement_serial, then separately derived its 2026-01-15 operating outcome under sales order, RMA, original serial, replacement serial, and receipt organization instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-085"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-085"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-085",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-085"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-085"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-085"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0085 only to receive_matching_original_asset, NS-000085, and the supported 65 SERIALS; kept broader scope and close_without_return outside current authority.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "ranges": [
+                "Control!A1:I50",
+                "Approvals!A1:G20"
+              ],
+              "spreadsheetId": "sheet-085",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-085"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.batchGet"
+          },
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!A1:I50",
+              "spreadsheetId": "sheet-085",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-085"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Reconciled 73 observed less 8 excluded to 65 supported SERIALS for serial received with matching RMA and ownership. Applied depot receiving window to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-085\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-085"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-085 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-085",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-085",
+              "threadId": "thread-085"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-085",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-085"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-12 readiness input for receive_replacement_serial, then separately derived its 2026-01-15 operating outcome under sales order, RMA, original serial, replacement serial, and receipt organization instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "file": "F-000085"
+            },
+            "expected_result_contains": {
+              "file": {
+                "id": "F-000085"
+              }
+            },
+            "match": "result_contains",
+            "tool": "slack.files_info"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Inspected the attachment linked from the scoped Slack discussion and correlated its case and source revision before using its control evidence.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0085"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000085
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_order_lines.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle purchase order lines record: Applied revision R2 and established 70 SERIALS for serials expected under the return obligation, with control date 2026-01-14.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0085"
+            },
+            "expected_result_contains": {
+              "HeaderId": 12000085
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.sales_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "OrderNumber='SO-47085'"
+            },
+            "expected_result_contains": {
+              "HeaderId": 12000085
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.sales_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle sales orders record: Applied revision R2 and established 70 SERIALS for serials expected under the return obligation, with control date 2026-01-14.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-085' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400085
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 73 observed less 8 excluded to 65 supported SERIALS for serial received with matching RMA and ownership.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "HeaderInterfaceId=700085"
+            },
+            "expected_result_contains": {
+              "HeaderInterfaceId": 1400085
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.receiving_receipt_requests.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle receiving receipt requests record: Reconciled 73 observed less 8 excluded to 65 supported SERIALS for serial received with matching RMA and ownership.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0085"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000085
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "OrderNumber='PO-0085'"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000085
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-12 readiness input for receive_replacement_serial, then separately derived its 2026-01-15 operating outcome under sales order, RMA, original serial, replacement serial, and receipt organization instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_17",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.receiving_receipt_requests.create",
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "HeaderInterfaceId=700085"
+            },
+            "expected_result_contains": {
+              "HeaderInterfaceId": 700085
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.receiving_receipt_requests.list"
+          }
+        ],
+        "description": "Read NS-000085 back through the documented Oracle receiving receipt requests.list operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'OrganizationCode', 'ProcessingStatusCode', 'ReceiptSourceCode', 'VendorName'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "LastUpdateDate": "2026-01-14T16:00:00-08:00",
+          "OrganizationCode": "SEA",
+          "ProcessingStatusCode": "PENDING",
+          "ReceiptSourceCode": "VENDOR",
+          "VendorName": "Cascade Industrial"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": true,
+        "target_identity": {
+          "HeaderInterfaceId": 700085
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.receiving_receipt_requests.create",
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "HeaderInterfaceId=700085"
+          },
+          "expected_result_contains": {
+            "HeaderInterfaceId": 700085
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.receiving_receipt_requests.list"
+        }
+      ],
+      "description": "Read NS-000085 back through the documented Oracle receiving receipt requests.list operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'OrganizationCode', 'ProcessingStatusCode', 'ReceiptSourceCode', 'VendorName'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "LastUpdateDate": "2026-01-14T16:00:00-08:00",
+        "OrganizationCode": "SEA",
+        "ProcessingStatusCode": "PENDING",
+        "ReceiptSourceCode": "VENDOR",
+        "VendorName": "Cascade Industrial"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": true,
+      "target_identity": {
+        "HeaderInterfaceId": 700085
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-085"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-085 scope, immutable handles, mounted systems, and evidence index before investigating NS-000085.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-085' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-085"
+              },
+              {
+                "id": "drive-approval-085"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-085 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-085-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-085-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-085-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R2 and established 70 SERIALS for serials expected under the return obligation, with control date 2026-01-14.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-085-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-085-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-085-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000085 at R2.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-085-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-085-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-085-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 73 observed less 8 excluded to 65 supported SERIALS for serial received with matching RMA and ownership.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-085-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-085-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-085-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R2 and established 70 SERIALS for serials expected under the return obligation, with control date 2026-01-14.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-085-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-085-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-085-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-085-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-12 readiness input for receive_replacement_serial, then separately derived its 2026-01-15 operating outcome under sales order, RMA, original serial, replacement serial, and receipt organization instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-085"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-085"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-085",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-085"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-085"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-085"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0085 only to receive_matching_original_asset, NS-000085, and the supported 65 SERIALS; kept broader scope and close_without_return outside current authority.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-085",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-085"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-085",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-085"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 73 observed less 8 excluded to 65 supported SERIALS for serial received with matching RMA and ownership. Applied depot receiving window to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-085\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-085"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-085 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-085",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-085",
+            "threadId": "thread-085"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-085",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-085"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-12 readiness input for receive_replacement_serial, then separately derived its 2026-01-15 operating outcome under sales order, RMA, original serial, replacement serial, and receipt organization instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "file": "F-000085"
+          },
+          "expected_result_contains": {
+            "file": {
+              "id": "F-000085"
+            }
+          },
+          "match": "result_contains",
+          "tool": "slack.files_info"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Inspected the attachment linked from the scoped Slack discussion and correlated its case and source revision before using its control evidence.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0085"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000085
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_order_lines.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase order lines record: Applied revision R2 and established 70 SERIALS for serials expected under the return obligation, with control date 2026-01-14.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0085"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000085
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='SO-47085'"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000085
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle sales orders record: Applied revision R2 and established 70 SERIALS for serials expected under the return obligation, with control date 2026-01-14.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-085' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400085
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 73 observed less 8 excluded to 65 supported SERIALS for serial received with matching RMA and ownership.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "HeaderInterfaceId=700085"
+          },
+          "expected_result_contains": {
+            "HeaderInterfaceId": 1400085
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.receiving_receipt_requests.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle receiving receipt requests record: Reconciled 73 observed less 8 excluded to 65 supported SERIALS for serial received with matching RMA and ownership.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0085"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000085
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0085'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000085
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-12 readiness input for receive_replacement_serial, then separately derived its 2026-01-15 operating outcome under sales order, RMA, original serial, replacement serial, and receipt organization instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_17",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-085"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-085' and trashed = false"
+      },
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-085"
+          },
+          {
+            "id": "drive-approval-085"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-085-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-085-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-085-09",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-085-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-085-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-085-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-085-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-085-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-085-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-085-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-085"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-085"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
         "majorDimension": "ROWS",
         "ranges": [
-          "Control!A1:H50",
+          "Control!A1:I50",
           "Approvals!A1:G20"
         ],
         "spreadsheetId": "sheet-085",
         "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "values": [
+          [
+            "CASE-085"
+          ]
+        ]
+      },
+      "match": "result_contains",
       "tool": "google_sheets.spreadsheets.values.batchGet"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-085\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-085"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     },
     {
       "arguments": {
@@ -104,49 +1631,100 @@
         "id": "msg-085",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "msg-085",
+        "threadId": "thread-085"
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.get"
     },
     {
       "arguments": {
         "file": "F-000085"
       },
-      "match": "successful_tool_call",
-      "tool": "slack.files_info"
-    },
-    {
-      "arguments": {
-        "fileId": "drive-approval-085",
-        "pageSize": 20
+      "expected_result_contains": {
+        "file": {
+          "id": "F-000085"
+        }
       },
-      "match": "successful_tool_call",
-      "tool": "google_drive.approvals.list"
+      "match": "result_contains",
+      "tool": "slack.files_info"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-085'"
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0085"
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.inventory_onhand_balances.list"
+      "expected_result_contains": {
+        "POHeaderId": 2000085
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.purchase_order_lines.list"
     },
     {
       "arguments": {
         "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0085"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "HeaderId": 12000085
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.sales_orders.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ItemNumber='NS-COMP-085' and OrganizationCode='SEA'"
+      },
+      "expected_result_contains": {
+        "InventoryItemId": 1400085
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "HeaderInterfaceId=700085"
+      },
+      "expected_result_contains": {
+        "HeaderInterfaceId": 1400085
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.receiving_receipt_requests.list"
+    },
+    {
+      "arguments": {
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0085"
+      },
+      "expected_result_contains": {
+        "POHeaderId": 2000085
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.purchase_orders.get"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
+    "google_drive.files.list",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.get",
     "google_sheets.spreadsheets.values.batchGet",
+    "gmail.messages.list",
     "gmail.messages.get",
     "slack.files_info",
-    "google_drive.approvals.list",
+    "oracle_fusion.purchase_order_lines.list",
+    "oracle_fusion.sales_orders.get",
     "oracle_fusion.inventory_onhand_balances.list",
-    "oracle_fusion.sales_orders.get"
+    "oracle_fusion.receiving_receipt_requests.list",
+    "oracle_fusion.purchase_orders.get"
   ],
   "task_id": "factorybench-085",
   "write_tools": [

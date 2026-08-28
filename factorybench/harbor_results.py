@@ -9,7 +9,13 @@ import statistics
 from pathlib import Path
 from typing import Any
 
-from .catalog import BENCHMARK_NAME, BENCHMARK_VERSION, build_catalog
+from .catalog import (
+    BENCHMARK_NAME,
+    BENCHMARK_VERSION,
+    build_catalog,
+    catalog_fingerprint,
+    task_fingerprint,
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = REPO_ROOT / "model_runs"
@@ -31,6 +37,10 @@ def _write_json(path: Path, value: Any) -> None:
 def _exact_factory_score(verdict: dict[str, Any]) -> float:
     """Recover the unrounded per-task percentage from deterministic checks."""
 
+    passed_weight = verdict.get("passed_weight")
+    total_weight = verdict.get("total_weight")
+    if isinstance(passed_weight, (int, float)) and isinstance(total_weight, (int, float)) and total_weight:
+        return float(passed_weight) / float(total_weight) * 100
     checks = verdict.get("checks")
     if isinstance(checks, list) and checks and all(isinstance(check, dict) for check in checks):
         return sum(bool(check.get("passed")) for check in checks) / len(checks) * 100
@@ -81,6 +91,7 @@ def import_harbor_job(
         agent = trajectory.get("agent") or {}
         trial_record = {
             "task_id": task_id,
+            "benchmark_task_sha256": task_fingerprint(tasks[task_id]),
             "family": tasks[task_id]["family"],
             "score": _exact_factory_score(verdict),
             "strict_pass": bool(verdict["strict_pass"]),
@@ -152,6 +163,7 @@ def import_harbor_job(
         "schema_version": "factorybench.model-run.v1",
         "benchmark": BENCHMARK_NAME,
         "benchmark_version": BENCHMARK_VERSION,
+        "catalog_sha256": catalog_fingerprint(list(tasks.values())),
         "run_slug": run_slug,
         "job_id": job.get("id"),
         "run_url": run_url,

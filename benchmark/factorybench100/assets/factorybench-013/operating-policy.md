@@ -1,5 +1,7 @@
-# Correct a wrong-lot scan before consumption — operating control
+# Correct a wrong-lot scan before consumption — operating policy
 
-Scope: Post traceable material, inventory, operation, and resource transactions from controlled shop-floor evidence.
+Decision scope: wrong-lot inventory scan.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: reverse the erroneous lot movement before posting the verified lot. Establish the immutable source record and effective revision, then reconcile candidate scan and lot records, scan matching item, location, timestamp, and supervisor confirmation, and similar scans from other lots or operations from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread.

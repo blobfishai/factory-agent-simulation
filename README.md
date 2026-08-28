@@ -13,44 +13,46 @@ It ships no Oracle code, proprietary UI, or customer data.
 ## What is public
 
 - An isolated multi-system SQLite starting state for every task
-- 87 typed, source-pinned operations across Oracle Fusion, Gmail, Drive, Sheets, Slack, and the benchmark harness
+- 94 typed, source-pinned operations across Oracle Fusion, Gmail, Drive, Sheets, Slack, and the benchmark harness
 - 12 task-specific source artifacts per task: policies, email, Slack, PDFs, Excel, CSV, approvals, specifications, and ERP exports
-- 100 unique call sequences with a maximum pairwise sequence similarity of 0.7778
-- Required read-before-write controls and transaction validation
-- Exact state, answer, write-scope, and tool-validity checks
+- 100 unique call sequences with a maximum pairwise sequence similarity of 0.7568
+- High-level employee requests that leave the investigation path to the agent
+- Scored discovery-before-mutation evidence, persisted provider payloads, and post-write readback
+- Task-specific calculations, decisions, state, answer, containment, and tool-validity checks
 - Replayed oracle trajectories and three measured negative controls
 - Harbor isolation with the ERP state and trace in a private root-owned sidecar
 - Upload-ready Hugging Face and Harbor distributions
 - Website data for the public task, asset, environment, and trajectory explorer
 
-The single metric is **FactoryScore**: `100 × deterministic workflow checks
-passed / checks available`, averaged over evaluated tasks. Strict completion is
-supporting evidence, not a second benchmark metric.
+The single metric is **FactoryScore**: `100 × passed deterministic criterion
+weight / available criterion weight`, averaged over evaluated tasks. Strict
+completion is supporting evidence, not a second benchmark metric.
 
 ## Qualification results
 
 | Measured control | FactoryScore | Strict passes |
 |---|---:|---:|
 | Reference oracle | 100.00 | 100/100 |
-| Incomplete workflow | 85.71 | 0/100 |
-| Read only | 42.86 | 0/100 |
-| No controls | 14.29 | 0/100 |
+| Incomplete workflow | 97.14 | 0/100 |
+| No controls | 69.43 | 0/100 |
+| Read only | 34.38 | 0/100 |
 
 The reference oracle establishes solvability; it is not a model submission. The
 other rows are deliberately impaired controls that demonstrate diagnostic range.
+Schema-valid but business-wrong writes are accepted by the sandbox just as they
+would be by the provider. They persist as actual state and fail the task-specific
+payload or readback criteria; the API never reveals a hidden approved value.
 
 ## Full-suite model run
 
-The published `gpt-5.6-luna` run evaluated all 100 v2 tasks with Codex 0.150.1
-at medium reasoning effort. It achieved a **FactoryScore of 85.29**, averaged
-32.31 tool calls per task, and cost $2.726084 in total ($0.027261 per task).
-All 100 trials completed without infrastructure exceptions. Strict completion
-was 0/100 because that supporting diagnostic rejects any invalid exploratory
-tool call; the primary FactoryScore retains credit for each deterministic
-workflow check the agent completed. The release includes every trajectory,
-verdict, reward record, and the disclosed agent-image runtime overlay.
-Release qualification also detects all 300 single-mutation omissions, proving
-that no reference write is dispensable under the published verifier contract.
+The v3 release includes a version-pinned, maximum-reasoning `gpt-5.6-luna`
+run over all 100 tasks. Its manifest publishes coverage, aggregate and
+task-level FactoryScores, exceptions, tool calls, cost, trajectories, verifier
+verdicts, reward records, and the disclosed agent-image runtime overlay. The
+leaderboard result is imported directly from Harbor rather than reconstructed
+from oracle traces. Release qualification also detects all 300 single-mutation
+omissions, proving that no reference write is dispensable under the published
+verifier contract.
 
 ## Run locally
 

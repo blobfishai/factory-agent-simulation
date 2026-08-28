@@ -14,8 +14,11 @@ from .world import (
     FactoryWorld,
     READ_TOOLS,
     WRITE_TOOLS,
+    missing_post_write_verifications,
+    missing_required_investigations,
     missing_required_read_calls,
     normalize_answer_fields,
+    payload_assertion_mismatches,
 )
 
 POLICIES = ("oracle", "incomplete_workflow", "read_only", "no_control")
@@ -54,19 +57,72 @@ def verify_episode(task: dict[str, Any], world: FactoryWorld) -> dict[str, Any]:
         (entry["index"] for entry in successful if entry["tool"] in WRITE_TOOLS),
         default=len(world.trace) + 1,
     )
-    missing_reads = missing_required_read_calls(
-        task,
-        world.trace,
-        before_index=first_write_index,
-    )
-    checks.append(
-        {
-            "id": "read_before_write",
-            "description": "Required cross-system evidence reads completed before the first write.",
-            "passed": not missing_reads,
-            "evidence": {"missing": missing_reads},
-        }
-    )
+    for investigation in task.get("required_investigations", []):
+        missing = missing_required_investigations(
+            {"required_investigations": [investigation]},
+            world.trace,
+            before_index=first_write_index,
+        )
+        checks.append(
+            {
+                "id": investigation["id"],
+                "description": investigation["description"],
+                "weight": float(investigation.get("weight", 1.0)),
+                "passed": not missing,
+                "evidence": {
+                    "satisfied_by": [
+                        {
+                            "index": entry["index"],
+                            "tool": entry["tool"],
+                        }
+                        for entry in successful
+                        if entry["index"] < first_write_index
+                        and any(entry["tool"] == call["tool"] for call in investigation["any_of"])
+                    ],
+                    "missing": missing,
+                },
+            }
+        )
+    if not task.get("required_investigations"):
+        missing_reads = missing_required_read_calls(
+            task,
+            world.trace,
+            before_index=first_write_index,
+        )
+        checks.append(
+            {
+                "id": "read_before_write",
+                "description": "Required cross-system evidence reads completed before the first write.",
+                "weight": 1.0,
+                "passed": not missing_reads,
+                "evidence": {"missing": missing_reads},
+            }
+        )
+
+    for verification in task.get("post_write_verifications", []):
+        missing_readbacks = missing_post_write_verifications(
+            {"post_write_verifications": [verification]},
+            world.trace,
+        )
+        checks.append(
+            {
+                "id": verification["id"],
+                "description": verification["description"],
+                "weight": float(verification.get("weight", 1.0)),
+                "passed": not missing_readbacks,
+                "evidence": {
+                    "missing": missing_readbacks,
+                    "satisfied_by": [
+                        {"index": entry["index"], "tool": entry["tool"]}
+                        for entry in successful
+                        if any(
+                            entry["tool"] == requirement["tool"]
+                            for requirement in verification.get("any_of", [])
+                        )
+                    ],
+                },
+            }
+        )
 
     for assertion in task["expected"]["assertions"]:
         rows = _query_rows(world, assertion)
@@ -83,10 +139,15 @@ def verify_episode(task: dict[str, Any], world: FactoryWorld) -> dict[str, Any]:
                 values_passed, mismatches = _values_match(rows[0], assertion["values"])
                 passed = passed and values_passed
                 evidence["mismatches"] = mismatches
+        if len(rows) == 1:
+            payload_mismatches = payload_assertion_mismatches(rows[0], assertion)
+            passed = passed and not payload_mismatches
+            evidence.update(payload_mismatches)
         checks.append(
             {
                 "id": assertion["id"],
                 "description": assertion["description"],
+                "weight": float(assertion.get("weight", 1.0)),
                 "passed": passed,
                 "evidence": evidence,
             }
@@ -100,14 +161,34 @@ def verify_episode(task: dict[str, Any], world: FactoryWorld) -> dict[str, Any]:
         ).fetchall()
     }
     expected_answer = normalize_answer_fields(task, task["expected"]["answer"])
-    checks.append(
-        {
-            "id": "exact_answer",
-            "description": "Submitted answer fields exactly match the ground truth.",
-            "passed": submitted == expected_answer,
-            "evidence": {"expected": expected_answer, "submitted": submitted},
-        }
-    )
+    answer_criteria = [
+        *task["expected"].get("answer_checks", []),
+        *task["expected"].get("calculations", []),
+    ]
+    if answer_criteria:
+        for criterion in answer_criteria:
+            field = criterion["field"]
+            actual = submitted.get(field)
+            expected = expected_answer[field]
+            checks.append(
+                {
+                    "id": criterion["id"],
+                    "description": criterion["description"],
+                    "weight": float(criterion.get("weight", 1.0)),
+                    "passed": actual == expected,
+                    "evidence": {"field": field, "expected": expected, "submitted": actual},
+                }
+            )
+    else:
+        checks.append(
+            {
+                "id": "exact_answer",
+                "description": "Submitted answer fields exactly match the ground truth.",
+                "weight": 1.0,
+                "passed": submitted == expected_answer,
+                "evidence": {"expected": expected_answer, "submitted": submitted},
+            }
+        )
 
     written_tables = {
         row["table_name"]
@@ -120,35 +201,41 @@ def verify_episode(task: dict[str, Any], world: FactoryWorld) -> dict[str, Any]:
     checks.append(
         {
             "id": "write_scope",
-            "description": "All successful writes stay inside the task's allowed tables.",
+            "description": f"Kept every successful write inside {task['task_id']}'s declared Oracle, collaboration, answer, and audit state.",
+            "weight": 1.0,
             "passed": not disallowed,
             "evidence": {"written_tables": sorted(written_tables), "disallowed": disallowed},
         }
     )
 
-    errors = [
+    mutation_errors = [
         {"index": entry["index"], "tool": entry["tool"], "error": entry["result"].get("error")}
         for entry in world.trace
-        if not entry["success"]
+        if not entry["success"] and entry["tool"] in WRITE_TOOLS - {"factorybench.submit_answer"}
     ]
     checks.append(
         {
-            "id": "error_free",
-            "description": "The episode completes without a rejected or malformed tool call.",
-            "passed": not errors,
-            "evidence": {"errors": errors},
+            "id": "no_rejected_mutation",
+            "description": "Completed without a rejected state-changing call; failed exploratory reads do not erase a correct business outcome.",
+            "weight": 1.0,
+            "passed": not mutation_errors,
+            "evidence": {"errors": mutation_errors},
         }
     )
 
     passed = sum(1 for check in checks if check["passed"])
     total = len(checks)
-    score = round(passed / total * 100, 2)
+    passed_weight = sum(check["weight"] for check in checks if check["passed"])
+    total_weight = sum(check["weight"] for check in checks)
+    score = round(passed_weight / total_weight * 100, 2)
     return {
         "task_id": task["task_id"],
         "metric": "FactoryScore",
         "score": score,
         "passed_checks": passed,
         "total_checks": total,
+        "passed_weight": round(passed_weight, 2),
+        "total_weight": round(total_weight, 2),
         "strict_pass": passed == total,
         "checks": checks,
     }

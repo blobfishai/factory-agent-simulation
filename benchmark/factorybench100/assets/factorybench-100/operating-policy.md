@@ -1,5 +1,7 @@
-# Close an outside-processing PO after final acceptance — operating control
+# Close an outside-processing PO after final acceptance — operating policy
 
-Scope: Coordinate outside processing purchase orders, receipts, yield, and manufacturing completion.
+Decision scope: outside-processing PO closure.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: ordered, sent, accepted, invoiced, and paid quantities must all reconcile. Establish the immutable source record and effective revision, then reconcile ordered outside-operation quantity, accepted receipts with fully matched invoice coverage, and rejected, missing, unreceived, or uninvoiced balance from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file; and append one dated decision row to the existing audit tab; do not overwrite prior entries.

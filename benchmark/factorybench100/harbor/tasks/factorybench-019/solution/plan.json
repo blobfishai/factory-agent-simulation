@@ -5,6 +5,14 @@
   },
   {
     "arguments": {
+      "format": "full",
+      "id": "thread-019",
+      "userId": "me"
+    },
+    "tool": "gmail.threads.get"
+  },
+  {
+    "arguments": {
       "count": 50,
       "query": "\"CASE-019\"",
       "sort": "timestamp",
@@ -22,15 +30,56 @@
   },
   {
     "arguments": {
-      "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
-      "fileId": "drive-019"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-019' and trashed = false"
+    },
+    "tool": "google_drive.files.list"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-019-03"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-019-12",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-019-09"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-019-04"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-019-11"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-approval-019"
     },
     "tool": "google_drive.files.get"
   },
   {
     "arguments": {
       "majorDimension": "ROWS",
-      "range": "Control!A1:H50",
+      "range": "Control!A1:I50",
       "spreadsheetId": "sheet-019",
       "valueRenderOption": "UNFORMATTED_VALUE"
     },
@@ -40,10 +89,15 @@
     "arguments": {
       "WorkOrderId": 100019,
       "limit": 50,
-      "onlyData": true,
-      "q": "ReferenceNumber='CASE-019'"
+      "onlyData": true
     },
-    "tool": "oracle_fusion.work_order_operations.list"
+    "tool": "oracle_fusion.work_order_resources.list"
+  },
+  {
+    "arguments": {
+      "WorkOrderId": 100019
+    },
+    "tool": "oracle_fusion.maintenance_work_orders.get"
   },
   {
     "arguments": {
@@ -53,12 +107,20 @@
   },
   {
     "arguments": {
+      "WorkOrderId": 100019,
+      "limit": 50,
+      "onlyData": true
+    },
+    "tool": "oracle_fusion.work_order_operations.list"
+  },
+  {
+    "arguments": {
       "WoOperationId": 200019,
       "WorkOrderId": 100019,
       "requestBody": {
         "OperationName": "Controlled operation CASE-019",
         "PlannedCompletionDate": "2026-01-20",
-        "PlannedStartDate": "2026-01-13",
+        "PlannedStartDate": "2026-01-18",
         "WorkCenterCode": "WC-ALT-2"
       }
     },
@@ -66,27 +128,49 @@
   },
   {
     "arguments": {
-      "approvalId": "approval-019",
-      "fileId": "drive-approval-019",
+      "WorkOrderId": 100019,
+      "limit": 50,
+      "onlyData": true
+    },
+    "tool": "oracle_fusion.work_order_operations.list"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-019",
       "requestBody": {
-        "message": "Approved for CASE-019 only."
+        "content": "CASE-019: apply_approved_weekend_overtime recorded on Oracle record NS-000019; completion 2026-01-20; constraint only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR; approval AP-0019."
       }
     },
-    "tool": "google_drive.approvals.approve"
+    "tool": "google_drive.comments.create"
   },
   {
     "arguments": {
       "channel": "C-FINANCE",
-      "text": "CASE-019: Overtime plan applied. Oracle reference REF-0019; control workbook updated.",
+      "text": "CASE-019: Oracle record NS-000019 now reflects apply_approved_weekend_overtime with completion 2026-01-20. Binding constraint: only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR. Alternatives: keep_weekday_sequence: outcome 2026-01-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_approved_weekend_overtime: outcome 2026-01-20, economic impact USD 673, SUPPORTED_AND_APPROVED; add_second_unapproved_shift: outcome 2026-01-19, economic impact USD 1689, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0019.",
       "thread_ts": "1768000019.000100"
     },
     "tool": "slack.chat_postMessage"
   },
   {
     "arguments": {
-      "affected_order": "ORD-0019",
-      "recovery_route": "SEA-4",
-      "revised_completion": "2026-01-13"
+      "affected_resource_or_operation": "NS-000019",
+      "base_completion": "2026-01-23",
+      "business_need_date": "2026-01-20",
+      "candidate_capacity": 53,
+      "capacity_gap": 19,
+      "capacity_unit": "HR",
+      "decision_timing_status": "ON_TIME",
+      "escalated_completion": "2026-01-19",
+      "escalation_approval_required": 1,
+      "net_usable_capacity": 48,
+      "outcome_vs_control_days": 0,
+      "qualified_alternative_completion": "2026-01-20",
+      "recommended_incremental_cost_usd": 673,
+      "recommended_option": "apply_approved_weekend_overtime",
+      "recommended_outcome_date": "2026-01-20",
+      "required_capacity": 67,
+      "selected_resource_or_control": "WC-ALT-2",
+      "unavailable_or_protected_capacity": 5
     },
     "tool": "factorybench.submit_answer"
   }

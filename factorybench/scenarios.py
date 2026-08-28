@@ -19,7 +19,6 @@ class Scenario:
     primary_read: str
     primary_write: str
     result_status: str
-    answer_keys: tuple[str, str, str]
 
 
 FAMILY_LABELS = {
@@ -73,7 +72,6 @@ def _s(
     family: str,
     role: str,
     support_read: str,
-    answer_keys: tuple[str, str, str],
     rows: tuple[tuple[str, str, str, str, str], ...],
 ) -> list[Scenario]:
     return [
@@ -86,7 +84,6 @@ def _s(
             primary_read=primary_read,
             primary_write=primary_write,
             result_status=result_status,
-            answer_keys=answer_keys,
         )
         for title, outcome, primary_read, primary_write, result_status in rows
     ]
@@ -98,9 +95,8 @@ SCENARIOS = tuple(
             "customer_commitment",
             "order_fulfillment_manager",
             "oracle_fusion.sales_orders.list",
-            ("order_number", "supply_action", "revised_commit_date"),
             (
-                ("Expedite a penalty-backed hospital order", "Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team.", "oracle_fusion.sales_orders.get", "oracle_fusion.work_orders.update", "Rescheduled"),
+                ("Commit one pallet of Luma lamps", "Plan one pallet of Luma lamps against the effective bill of material, nettable component stock, supplier lead time, and finite qualified assembly capacity.", "oracle_fusion.sales_orders.get", "oracle_fusion.work_orders.update", "Production plan committed"),
                 ("Split a defense order around an export hold", "Separate the unrestricted domestic quantity from the export-controlled line, create supply only for the released demand, and document the split for compliance.", "oracle_fusion.sales_orders.get", "oracle_fusion.supply_requests.create", "Partial supply created"),
                 ("Recover a customer promise after a carrier rollover", "Reconcile the carrier email, allocation sheet, and customer thread, then revise the production completion supporting the new confirmed delivery.", "oracle_fusion.work_orders.get", "oracle_fusion.work_orders.update", "Customer commit recovered"),
                 ("Replace an obsolete configuration before fulfillment", "Confirm engineering approval for the replacement configuration and revise the open manufacturing material without changing the customer's contracted quantity.", "oracle_fusion.work_order_materials.list", "oracle_fusion.work_order_materials.replace_with_substitute", "Approved substitute applied"),
@@ -111,7 +107,6 @@ SCENARIOS = tuple(
             "production_control",
             "production_planner",
             "oracle_fusion.work_orders.list",
-            ("work_order", "production_decision", "effective_timestamp"),
             (
                 ("Release the flight-test controller build", "Check the released drawing, approved deviation, material readiness, and dispatch window before creating the discrete work order.", "oracle_fusion.inventory_onhand_balances.list", "oracle_fusion.work_orders.create", "Work order created"),
                 ("Resequence burn-in ahead of final assembly", "Use the dispatch escalation and capacity workbook to revise the active operation dates without changing completed quantities.", "oracle_fusion.work_order_operations.list", "oracle_fusion.work_order_operations.update", "Operation resequenced"),
@@ -124,7 +119,6 @@ SCENARIOS = tuple(
             "material_execution",
             "shop_floor_controller",
             "oracle_fusion.inventory_onhand_balances.list",
-            ("transaction_reference", "item_lot", "posted_quantity"),
             (
                 ("Issue the earliest-expiry conforming adhesive", "Reconcile the reservation, shelf-life waiver, and lot certificate before posting the exact work-order material issue.", "oracle_fusion.work_order_materials.list", "oracle_fusion.material_transactions.create", "Material issued"),
                 ("Return unused copper from a canceled operation", "Confirm the cancellation and physical count, then return the excess from WIP to the original controlled subinventory.", "oracle_fusion.work_orders.get", "oracle_fusion.material_transactions.create", "Material returned"),
@@ -137,7 +131,6 @@ SCENARIOS = tuple(
             "capacity_recovery",
             "manufacturing_scheduler",
             "oracle_fusion.work_order_operations.list",
-            ("affected_order", "recovery_route", "revised_completion"),
             (
                 ("Reroute assembly after a spindle failure", "Confirm the downtime diagnosis, alternate-cell qualification, open load, and manager approval before rerouting the affected operation.", "oracle_fusion.maintenance_work_orders.get", "oracle_fusion.work_order_operations.update", "Alternate cell scheduled"),
                 ("Recover output after a certified welder absence", "Use the shift roster and skills matrix to assign the approved labor resource and preserve the customer commit.", "oracle_fusion.work_order_resources.list", "oracle_fusion.work_order_resources.update", "Labor capacity recovered"),
@@ -150,7 +143,6 @@ SCENARIOS = tuple(
             "corrective_maintenance",
             "maintenance_planner",
             "oracle_fusion.maintenance_work_orders.list",
-            ("maintenance_order", "asset_or_resource", "planned_finish"),
             (
                 ("Open repair for a failed servo drive", "Correlate the alarm email, technician Slack thread, fault-history export, and service manual before opening the high-priority asset work order.", "oracle_fusion.maintenance_programs.get", "oracle_fusion.maintenance_work_orders.create", "Corrective work opened"),
                 ("Extend a pump repair after teardown findings", "Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.", "oracle_fusion.maintenance_work_orders.get", "oracle_fusion.maintenance_work_orders.update", "Repair scope revised"),
@@ -163,7 +155,6 @@ SCENARIOS = tuple(
             "preventive_maintenance",
             "reliability_engineer",
             "oracle_fusion.maintenance_programs.list",
-            ("program_code", "generation_action", "forecast_horizon"),
             (
                 ("Advance lubrication after a meter spike", "Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.", "oracle_fusion.maintenance_programs.get", "oracle_fusion.maintenance_programs.update", "Forecast window advanced"),
                 ("Generate the quarterly compressor forecast", "Check the approved calendar pattern and blackout dates before generating the bounded maintenance forecast.", "oracle_fusion.maintenance_programs.get", "oracle_fusion.maintenance_programs.generate_forecasts", "Forecast generated"),
@@ -176,7 +167,6 @@ SCENARIOS = tuple(
             "strategic_procurement",
             "buyer",
             "oracle_fusion.suppliers.list",
-            ("purchase_document", "supplier_decision", "committed_value"),
             (
                 ("Award the enclosure tooling package", "Compare the technical bid, commercial workbook, supplier status, and approval thread before creating the draft purchase order.", "oracle_fusion.draft_purchase_orders.list", "oracle_fusion.draft_purchase_orders.create", "Draft purchase order created"),
                 ("Record the supplier's expedited promise", "Match the signed acknowledgment email to the open PO and record the supplier order reference and note.", "oracle_fusion.purchase_orders.get", "oracle_fusion.purchase_orders.acknowledge", "Supplier promise acknowledged"),
@@ -189,7 +179,6 @@ SCENARIOS = tuple(
             "receiving_control",
             "receiving_specialist",
             "oracle_fusion.receiving_receipt_requests.list",
-            ("receipt_reference", "inspection_disposition", "accepted_quantity"),
             (
                 ("Receive a lot-controlled relay shipment", "Match packing slip, PO, certificate, and dock count before creating the receipt request with the supplier lot.", "oracle_fusion.purchase_orders.get", "oracle_fusion.receiving_receipt_requests.create", "Receipt request created"),
                 ("Reject water-damaged enclosures at inspection", "Use dock photos and the inspection plan to post the rejected receiving transaction and preserve the carrier claim evidence.", "oracle_fusion.receiving_receipt_transactions.list", "oracle_fusion.receiving_receipt_transactions.create", "Receipt rejected"),
@@ -202,7 +191,6 @@ SCENARIOS = tuple(
             "payables_control",
             "accounts_payable_specialist",
             "oracle_fusion.invoices.get",
-            ("invoice_number", "validation_outcome", "hold_or_reference"),
             (
                 ("Validate a clean three-way-matched invoice", "Compare the supplier PDF, PO line, accepted receipt, and tolerance policy before invoking Oracle invoice validation.", "oracle_fusion.purchase_order_lines.list", "oracle_fusion.invoices.validate", "Validated"),
                 ("Place a freight-variance hold", "Confirm freight is excluded from the PO and exceeds tolerance, then create the documented Payables hold with the approved reason.", "oracle_fusion.purchase_orders.get", "oracle_fusion.invoice_holds.create", "Freight hold placed"),
@@ -215,7 +203,6 @@ SCENARIOS = tuple(
             "supplier_governance",
             "supplier_quality_manager",
             "oracle_fusion.suppliers.list",
-            ("supplier", "governance_action", "case_reference"),
             (
                 ("Approve a conditional alternate for molded parts", "Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.", "oracle_fusion.suppliers.get", "oracle_fusion.supply_requests.create", "Conditional source enabled"),
                 ("Escalate sole-source spend concentration", "Combine supplier master, open PO exposure, spend workbook, and controller approval before recording the mitigation action.", "oracle_fusion.purchase_orders.list", "oracle_fusion.purchase_orders.acknowledge", "Mitigation acknowledged"),
@@ -228,7 +215,6 @@ SCENARIOS = tuple(
             "quality_execution",
             "quality_engineer",
             "oracle_fusion.inspection_plans.list",
-            ("inspection_reference", "quality_result", "controlled_quantity"),
             (
                 ("Create incoming inspection for plated busbars", "Select the approved receiving inspection plan and create a result record tied to the receipt and supplier lot.", "oracle_fusion.receiving_receipt_transactions.list", "oracle_fusion.quality_inspection_results.create", "Inspection created"),
                 ("Record failed dielectric-test samples", "Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.", "oracle_fusion.quality_inspection_results.list", "oracle_fusion.quality_inspection_results.update", "Failed result recorded"),
@@ -241,7 +227,6 @@ SCENARIOS = tuple(
             "inventory_control",
             "inventory_control_manager",
             "oracle_fusion.inventory_onhand_balances.list",
-            ("inventory_transaction", "from_to_location", "controlled_quantity"),
             (
                 ("Transfer a constrained relay lot between plants", "Check donor availability, lot status, transit lead time, and allocation approval before posting the interorganization movement.", "oracle_fusion.supply_requests.list", "oracle_fusion.inventory_transactions.create", "Interorganization transfer posted"),
                 ("Post a blind cycle-count adjustment", "Reconcile independent count sheets and recount approval before posting the bounded quantity correction.", "oracle_fusion.inventory_onhand_balances.list", "oracle_fusion.inventory_transactions.create", "Cycle count adjusted"),
@@ -254,7 +239,6 @@ SCENARIOS = tuple(
             "supply_planning",
             "supply_planner",
             "oracle_fusion.supply_requests.list",
-            ("supply_reference", "planning_action", "need_by_date"),
             (
                 ("Cover an unplanned copper demand spike", "Net the revised demand workbook against usable on-hand and create supply for only the uncovered quantity.", "oracle_fusion.inventory_onhand_balances.list", "oracle_fusion.supply_requests.create", "Shortage supply created"),
                 ("Pull in supply after a forecast-consumption jump", "Verify sales-order consumption and supplier confirmation before revising the linked production dates.", "oracle_fusion.sales_orders.list", "oracle_fusion.work_orders.update", "Supply pulled in"),
@@ -267,7 +251,6 @@ SCENARIOS = tuple(
             "engineering_change",
             "manufacturing_engineer",
             "oracle_fusion.work_orders.get",
-            ("change_order", "affected_work_order", "implementation_result"),
             (
                 ("Implement a released relay substitution", "Verify the effective engineering change and serial breakpoint before replacing the active material component.", "oracle_fusion.work_order_materials.list", "oracle_fusion.work_order_materials.replace_with_substitute", "Change material implemented"),
                 ("Move inspection to the revised routing step", "Match the released routing redline to the open operation and update its work center and timing.", "oracle_fusion.work_order_operations.list", "oracle_fusion.work_order_operations.update", "Routing change implemented"),
@@ -280,7 +263,6 @@ SCENARIOS = tuple(
             "cost_accounting",
             "manufacturing_cost_accountant",
             "oracle_fusion.work_orders.get",
-            ("cost_reference", "posting_action", "reconciled_amount"),
             (
                 ("Post missing setup labor from signed timecards", "Match employee time, resource rate, and operation status before posting the omitted resource transaction.", "oracle_fusion.work_order_resources.list", "oracle_fusion.resource_transactions.create", "Labor cost posted"),
                 ("Reverse a duplicated copper issue", "Prove the duplicate scan and remaining physical stock before posting the material return that corrects WIP cost.", "oracle_fusion.work_order_materials.list", "oracle_fusion.material_transactions.create", "Duplicate issue reversed"),
@@ -293,7 +275,6 @@ SCENARIOS = tuple(
             "project_manufacturing",
             "project_material_controller",
             "oracle_fusion.work_orders.list",
-            ("project_task", "manufacturing_record", "ownership_result"),
             (
                 ("Move project-owned relays to the build subinventory", "Verify project, task, lot, and approval before posting the project inventory transfer.", "oracle_fusion.inventory_onhand_balances.list", "oracle_fusion.inventory_transactions.create", "Project material transferred"),
                 ("Create project supply for a customer milestone", "Reconcile milestone approval and net availability before creating supply with the correct project destination.", "oracle_fusion.supply_requests.list", "oracle_fusion.supply_requests.create", "Project supply requested"),
@@ -306,7 +287,6 @@ SCENARIOS = tuple(
             "field_service_supply",
             "service_supply_coordinator",
             "oracle_fusion.inventory_onhand_balances.list",
-            ("service_request", "stock_action", "field_destination"),
             (
                 ("Replenish a technician's critical relay stock", "Validate the van count, open service demand, and regional allocation before creating replenishment supply.", "oracle_fusion.supply_requests.list", "oracle_fusion.supply_requests.create", "Technician stock requested"),
                 ("Quarantine a returned field controller", "Match the RMA, serial, and failure report before posting the returned unit into quarantine.", "oracle_fusion.receiving_receipt_requests.list", "oracle_fusion.inventory_transactions.create", "Field return quarantined"),
@@ -319,7 +299,6 @@ SCENARIOS = tuple(
             "compliance_traceability",
             "compliance_manager",
             "oracle_fusion.quality_inspection_results.list",
-            ("compliance_case", "contained_record", "evidence_reference"),
             (
                 ("Contain relays named in a supplier recall", "Trace the supplier lot across receiving and on-hand evidence, then quarantine only the affected remaining quantity.", "oracle_fusion.inventory_onhand_balances.list", "oracle_fusion.inventory_transactions.create", "Recall stock contained"),
                 ("Attach a certificate of conformance to repair work", "Verify certificate issuer, lot, and asset applicability before creating the maintenance document reference.", "oracle_fusion.maintenance_work_orders.get", "oracle_fusion.maintenance_documents.create", "Certificate attached"),
@@ -332,7 +311,6 @@ SCENARIOS = tuple(
             "period_close",
             "plant_controller",
             "oracle_fusion.purchase_orders.list",
-            ("close_exception", "resolution_action", "accounting_period"),
             (
                 ("Close a fully settled tooling PO before cutoff", "Reconcile PO, accepted receipt, final invoice, and buyer confirmation before finally closing the document.", "oracle_fusion.purchase_orders.get", "oracle_fusion.purchase_orders.close", "PO close exception resolved"),
                 ("Validate the final matched invoice batch item", "Confirm the invoice belongs to the open period and matches accepted quantity before validation.", "oracle_fusion.invoices.get", "oracle_fusion.invoices.validate", "Invoice validated for close"),
@@ -345,7 +323,6 @@ SCENARIOS = tuple(
             "supplier_operations",
             "outside_processing_coordinator",
             "oracle_fusion.purchase_orders.get",
-            ("supplier_operation", "execution_action", "accepted_output"),
             (
                 ("Acknowledge the anodizer's revised promise", "Match the supplier email to the correct outside-processing PO and record the new supplier order reference.", "oracle_fusion.purchase_order_lines.list", "oracle_fusion.purchase_orders.acknowledge", "Revised promise acknowledged"),
                 ("Receive accepted plated housings from processing", "Reconcile packing slip, operation quantity, and inspection certificate before creating the receipt transaction.", "oracle_fusion.receiving_receipt_transactions.list", "oracle_fusion.receiving_receipt_transactions.create", "Processed units received"),
@@ -362,4 +339,3 @@ FAMILIES = tuple(FAMILY_LABELS)
 assert len(SCENARIOS) == 100
 assert set(scenario.family for scenario in SCENARIOS) == set(FAMILIES)
 assert len({scenario.title for scenario in SCENARIOS}) == 100
-

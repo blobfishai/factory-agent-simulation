@@ -1,29 +1,109 @@
 {
   "answer": {
-    "committed_value": 3325.51,
-    "purchase_document": "PO-0033",
-    "supplier_decision": "Unsafe supply canceled"
+    "baseline_resolution_date": "2026-01-13",
+    "business_need_date": "2026-01-13",
+    "controlled_item_or_record": "NS-COMP-033",
+    "controlled_resolution_date": "2026-01-14",
+    "decision_timing_status": "ON_TIME",
+    "escalated_resolution_date": "2026-01-15",
+    "escalation_approval_required": 1,
+    "excluded_quantity": 9,
+    "observed_quantity": 67,
+    "outcome_vs_control_days": 0,
+    "quantity_unit": "KG",
+    "recommended_incremental_cost_usd": 0,
+    "recommended_option": "cancel_affected_open_quantity",
+    "recommended_outcome_date": "2026-01-13",
+    "source_quantity": 79,
+    "supported_quantity": 58,
+    "transaction_quantity": 58
   },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'cancel_affected_open_quantity', tied to NS-000033, revision R6, and the selected cancel_affected_open_quantity outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-13', tied to NS-000033, revision R6, and the selected cancel_affected_open_quantity outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported controlled item or record as 'NS-COMP-033', tied to NS-000033, revision R6, and the selected cancel_affected_open_quantity outcome.",
+      "field": "controlled_item_or_record",
+      "id": "answer_controlled_item_or_record",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported transaction quantity as 58, tied to NS-000033, revision R6, and the selected cancel_affected_open_quantity outcome.",
+      "field": "transaction_quantity",
+      "id": "answer_transaction_quantity",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000033, revision R6, and the selected cancel_affected_open_quantity outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "weight": 1.0
+    }
+  ],
   "assertions": [
     {
-      "description": "oracle_fusion.purchase_orders.cancel produced the task-scoped, source-audited state transition.",
+      "description": "Required immutable record NS-000033 to reach business outcome 'Unsafe supply canceled' through oracle_fusion.purchase_orders.cancel with exact provider-critical values purchaseOrdersUniqID='purchaseOrdersUniqID-0033', requestBody.cancelUnfulfilledDemandFlag=True, requestBody.initiatingParty='buyer'. Human-authored names, descriptions, notes, and reasons are accepted when they preserve the task-scoped business meaning. The audited transition binds selected option cancel_affected_open_quantity, revision R6, approval AP-0033, and constraint bulletin material code, lot scope, and cancellation authority; received, consumed, or unaffected resin = 9 KG; uncovered or unsupported scope = 21.0 KG; no other provider record satisfies this state criterion.",
       "id": "mutation_01",
+      "payload_allowed_argument_paths": [
+        "purchaseOrdersUniqID",
+        "requestBody.cancelUnfulfilledDemandFlag",
+        "requestBody.cancellationReason",
+        "requestBody.initiatingParty"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "purchaseOrdersUniqID": "purchaseOrdersUniqID-0033",
+          "requestBody": {
+            "cancelUnfulfilledDemandFlag": true,
+            "initiatingParty": "buyer"
+          }
+        },
+        "tool": "oracle_fusion.purchase_orders.cancel"
+      },
       "table": "resource_state",
       "values": {
-        "payload_json": "{\"arguments\":{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0033\",\"requestBody\":{\"cancelUnfulfilledDemandFlag\":true,\"cancellationReason\":\"Verify the affected material and remaining open quantity, then cancel the PO with the approved reason and notify stakeholders.\",\"initiatingParty\":\"buyer\"}},\"case\":\"CASE-033\",\"outcome\":\"Verify the affected material and remaining open quantity, then cancel the PO with the approved reason and notify stakeholders.\",\"tool\":\"oracle_fusion.purchase_orders.cancel\"}",
         "resource_type": "oracle_fusion.purchase_orders",
         "revision": 1,
         "status": "Unsafe supply canceled",
         "system": "oracle_fusion"
       },
+      "weight": 3.0,
       "where": {
         "resource_id": "factorybench-033-mutation-01",
         "task_id": "factorybench-033"
       }
     },
     {
-      "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+      "description": "Replied in the existing operations thread with cancel_affected_open_quantity, completion 2026-01-13, the constraint, alternatives, and Oracle result.",
       "id": "mutation_02",
+      "payload_contains": {
+        "arguments": {
+          "channel": "C-PROCUREMENT",
+          "thread_ts": "1768000033.000100"
+        },
+        "tool": "slack.chat_postMessage"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-033",
+          "NS-000033",
+          "NS-COMP-033"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-13",
+        "cancel_affected_open_quantity"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "slack",
@@ -31,25 +111,736 @@
         "status": "Recorded",
         "system": "slack"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-033-mutation-02",
         "task_id": "factorybench-033"
       }
     },
     {
-      "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+      "description": "Added the Oracle result to the existing case file as a comment containing cancel_affected_open_quantity, completion 2026-01-13, and the binding constraint.",
       "id": "mutation_03",
+      "payload_contains": {
+        "arguments": {
+          "fileId": "drive-033"
+        },
+        "tool": "google_drive.comments.create"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-033",
+          "NS-000033",
+          "NS-COMP-033"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-13",
+        "cancel_affected_open_quantity"
+      ],
       "table": "resource_state",
       "values": {
-        "resource_type": "google_drive.approvals",
+        "resource_type": "google_drive.comments",
         "revision": 1,
         "status": "Recorded",
         "system": "google_drive"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-033-mutation-03",
         "task_id": "factorybench-033"
       }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-13 as the documented date for resin PO affected by safety bulletin; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Established 79 KG for open resin quantity on named lots.",
+      "field": "source_quantity",
+      "id": "establish_source_quantity",
+      "weight": 1.5
+    },
+    {
+      "description": "Correlated the independent source records to 67 observed KG.",
+      "field": "observed_quantity",
+      "id": "reconcile_observed_quantity",
+      "weight": 1.5
+    },
+    {
+      "description": "Removed 9 KG for received, consumed, or unaffected resin.",
+      "field": "excluded_quantity",
+      "id": "identify_excluded_quantity",
+      "weight": 1.5
+    },
+    {
+      "description": "Calculated 67 observed \u2212 9 excluded = 58 supported KG.",
+      "field": "supported_quantity",
+      "id": "calculate_supported_quantity",
+      "weight": 2.0
+    },
+    {
+      "description": "Bound the Oracle transaction to exactly 58 KG, the measure required by the chosen disposition; did not substitute the header or another business quantity.",
+      "field": "transaction_quantity",
+      "id": "bound_transaction_quantity",
+      "weight": 2.0
+    },
+    {
+      "description": "Kept the receipt, issue, transfer, inspection, or completion quantity in KG.",
+      "field": "quantity_unit",
+      "id": "preserve_transaction_unit",
+      "weight": 0.5
+    },
+    {
+      "description": "Derived 2026-01-13 for cancel_affected_open_quantity.",
+      "field": "baseline_resolution_date",
+      "id": "compare_quantity_option_one",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 2026-01-14 for cancel_entire_supplier_account.",
+      "field": "controlled_resolution_date",
+      "id": "compare_quantity_option_two",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 2026-01-15 for continue_receiving_resin and recognized its control impact.",
+      "field": "escalated_resolution_date",
+      "id": "compare_quantity_option_three",
+      "weight": 1.0
+    },
+    {
+      "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for cancel_affected_open_quantity; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that continue_receiving_resin remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of cancel_affected_open_quantity, cancel_entire_supplier_account, and continue_receiving_resin; selected cancel_affected_open_quantity because it alone gives the best currently authorized result under bulletin material code, lot scope, and cancellation authority.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-13 as the supported outcome date for cancel_affected_open_quantity.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-13 with the independent control date 2026-01-13 and calculated a signed variance of 0 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-033"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-033 scope, immutable handles, mounted systems, and evidence index before investigating NS-000033.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-033",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-033",
+            "threadId": "thread-033"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-033",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-033"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-11 readiness input for cancel_entire_supplier_account, then separately derived its 2026-01-14 operating outcome under bulletin material code, lot scope, and cancellation authority instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "count": 50,
+            "query": "\"CASE-033\"",
+            "sort": "timestamp",
+            "sort_dir": "asc"
+          },
+          "expected_result_contains": {
+            "messages": {
+              "matches": [
+                {
+                  "ts": "1768000033.000100"
+                }
+              ]
+            }
+          },
+          "match": "result_contains",
+          "tool": "slack.search_messages"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the existing operations thread for CASE-033 and its immutable channel and thread timestamp before using the discussion.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000033.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000033.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000033.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0033 only to cancel_affected_open_quantity, NS-000033, and the supported 58 KG; kept broader scope and continue_receiving_resin outside current authority.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-033' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-033"
+              },
+              {
+                "id": "drive-approval-033"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-033 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-033-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-033-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-033-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R6 and established 79 KG for open resin quantity on named lots, with control date 2026-01-13.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-033-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-033-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-033-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-11 readiness input for cancel_entire_supplier_account, then separately derived its 2026-01-14 operating outcome under bulletin material code, lot scope, and cancellation authority instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-033-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-033-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-033-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R6 and established 79 KG for open resin quantity on named lots, with control date 2026-01-13.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-033-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-033-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-033-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000033 at R6.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-033-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-033-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-033-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-033-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 67 observed less 9 excluded to 58 supported KG for unreceived and unconsumed quantity safe to cancel.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-033"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-033"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-033",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-033"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-033"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-033"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0033 only to cancel_affected_open_quantity, NS-000033, and the supported 58 KG; kept broader scope and continue_receiving_resin outside current authority.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-033",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-033"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-033",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-033"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 67 observed less 9 excluded to 58 supported KG for unreceived and unconsumed quantity safe to cancel. Applied replacement-resin coverage to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0033"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000033
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0033'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000033
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-11 readiness input for cancel_entire_supplier_account, then separately derived its 2026-01-14 operating outcome under bulletin material code, lot scope, and cancellation authority instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0033'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 1500033
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-11 readiness input for cancel_entire_supplier_account, then separately derived its 2026-01-14 operating outcome under bulletin material code, lot scope, and cancellation authority instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-033' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400033
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 67 observed less 9 excluded to 58 supported KG for unreceived and unconsumed quantity safe to cancel.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0033"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000033
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_order_lines.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase order lines record: Applied revision R6 and established 79 KG for open resin quantity on named lots, with control date 2026-01-13.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "SupplierId": 600033
+          },
+          "expected_result_contains": {
+            "SupplierId": 600033
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.suppliers.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplierNumber='SUP-00033'"
+          },
+          "expected_result_contains": {
+            "SupplierId": 600033
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.suppliers.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle suppliers record: Used the independently confirmed 2026-01-11 readiness input for cancel_entire_supplier_account, then separately derived its 2026-01-14 operating outcome under bulletin material code, lot scope, and cancellation authority instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_17",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.purchase_orders.cancel",
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0033"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000033
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0033'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000033
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "description": "Read NS-000033 back through the documented Oracle purchase orders.get operation after the mutation and confirmed the resource-specific changed fields ['CanceledFlag', 'DocumentStatus', 'LastUpdateDate'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "CanceledFlag": true,
+        "DocumentStatus": "CANCELED",
+        "LastUpdateDate": "2026-01-13T16:00:00-08:00"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "POHeaderId": 2000033
+      },
+      "weight": 2.0
     }
   ]
 }

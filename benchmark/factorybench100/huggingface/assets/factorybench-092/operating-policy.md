@@ -1,5 +1,7 @@
-# Validate the final matched invoice batch item — operating control
+# Validate the final matched invoice batch item — operating policy
 
-Scope: Resolve purchasing, receiving, invoice, and production exceptions before the accounting cutoff.
+Decision scope: final invoice batch item.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: batch item, supplier, match, approval, and accounting date. Establish the immutable source record and effective revision, then reconcile invoice gross amount, PO and receipt matched amount inside tolerance, and duplicate, unmatched, or post-cutoff value from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell.

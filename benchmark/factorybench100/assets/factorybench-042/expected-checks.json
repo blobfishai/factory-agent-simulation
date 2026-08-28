@@ -1,29 +1,108 @@
 {
   "answer": {
-    "hold_or_reference": "REF-0042",
-    "invoice_number": "INV-0042",
-    "validation_outcome": "Freight hold placed"
+    "baseline_settlement_date": "2026-01-16",
+    "business_need_date": "2026-01-16",
+    "control_threshold_usd": 50.0,
+    "controlled_settlement_date": "2026-01-16",
+    "decision_timing_status": "ON_TIME",
+    "document_amount_usd": 13264.5,
+    "escalated_settlement_date": "2026-01-18",
+    "escalation_approval_required": 1,
+    "exception_amount_usd": 331.61,
+    "financial_control": "contract freight tolerance",
+    "financial_document_or_record": "INV-0042",
+    "outcome_vs_control_days": 0,
+    "recommended_incremental_cost_usd": 0,
+    "recommended_option": "place_freight_variance_hold",
+    "recommended_outcome_date": "2026-01-16",
+    "supported_amount_usd": 12932.89
   },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'place_freight_variance_hold', tied to NS-000042, revision R1, and the selected place_freight_variance_hold outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-16', tied to NS-000042, revision R1, and the selected place_freight_variance_hold outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported financial document or record as 'INV-0042', tied to NS-000042, revision R1, and the selected place_freight_variance_hold outcome.",
+      "field": "financial_document_or_record",
+      "id": "answer_financial_document_or_record",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported supported amount usd as 12932.89, tied to NS-000042, revision R1, and the selected place_freight_variance_hold outcome.",
+      "field": "supported_amount_usd",
+      "id": "answer_supported_amount_usd",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000042, revision R1, and the selected place_freight_variance_hold outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "weight": 1.0
+    }
+  ],
   "assertions": [
     {
-      "description": "oracle_fusion.invoice_holds.create produced the task-scoped, source-audited state transition.",
+      "description": "Required immutable record NS-000042 to reach business outcome 'Freight hold placed' through oracle_fusion.invoice_holds.create with exact provider-critical values requestBody.InvoiceId=900042, requestBody.HoldName='CONTROL REVIEW'. Human-authored names, descriptions, notes, and reasons are accepted when they preserve the task-scoped business meaning. The audited transition binds selected option place_freight_variance_hold, revision R1, approval AP-0042, and constraint hold only the documented exception with the approved reason; freight excluded from the contract above tolerance = 331.61 USD; uncovered or unsupported scope = 331.61 USD; no other provider record satisfies this state criterion.",
       "id": "mutation_01",
+      "payload_allowed_argument_paths": [
+        "requestBody.HoldName",
+        "requestBody.HoldReason",
+        "requestBody.InvoiceId"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "requestBody": {
+            "HoldName": "CONTROL REVIEW",
+            "InvoiceId": 900042
+          }
+        },
+        "tool": "oracle_fusion.invoice_holds.create"
+      },
       "table": "resource_state",
       "values": {
-        "payload_json": "{\"arguments\":{\"requestBody\":{\"HoldName\":\"CONTROL REVIEW\",\"HoldReason\":\"Confirm freight is excluded from the PO and exceeds tolerance, then create the documented Payables hold with the approved reason.\",\"InvoiceId\":900042}},\"case\":\"CASE-042\",\"outcome\":\"Confirm freight is excluded from the PO and exceeds tolerance, then create the documented Payables hold with the approved reason.\",\"tool\":\"oracle_fusion.invoice_holds.create\"}",
         "resource_type": "oracle_fusion.invoice_holds",
         "revision": 1,
         "status": "Freight hold placed",
         "system": "oracle_fusion"
       },
+      "weight": 3.0,
       "where": {
         "resource_id": "factorybench-042-mutation-01",
         "task_id": "factorybench-042"
       }
     },
     {
-      "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+      "description": "Created\u2014but did not send\u2014the requested CASE-042 decision draft with completion, constraint, alternatives, and the Oracle business reference.",
       "id": "mutation_02",
+      "payload_contains": {
+        "arguments": {
+          "message": {
+            "threadId": "thread-042"
+          },
+          "userId": "me"
+        },
+        "tool": "gmail.drafts.create"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-042",
+          "NS-000042",
+          "NS-COMP-042"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-16",
+        "place_freight_variance_hold"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "gmail.drafts",
@@ -31,14 +110,32 @@
         "status": "Recorded",
         "system": "gmail"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-042-mutation-02",
         "task_id": "factorybench-042"
       }
     },
     {
-      "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+      "description": "Added the Oracle result to the existing case file as a comment containing place_freight_variance_hold, completion 2026-01-16, and the binding constraint.",
       "id": "mutation_03",
+      "payload_contains": {
+        "arguments": {
+          "fileId": "drive-042"
+        },
+        "tool": "google_drive.comments.create"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-042",
+          "NS-000042",
+          "NS-COMP-042"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-16",
+        "place_freight_variance_hold"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "google_drive.comments",
@@ -46,10 +143,664 @@
         "status": "Recorded",
         "system": "google_drive"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-042-mutation-03",
         "task_id": "factorybench-042"
       }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-16 as the documented date for freight variance on INV-0042; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Established the exact invoice amount including freight as USD 13264.50.",
+      "field": "document_amount_usd",
+      "id": "establish_document_amount",
+      "weight": 2.0
+    },
+    {
+      "description": "Reconciled independent source activity to USD 12932.89 of PO-supported goods and allowed charges.",
+      "field": "supported_amount_usd",
+      "id": "calculate_supported_amount",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated USD 13264.50 document \u2212 USD 12932.89 supported = USD 331.61 exception for freight excluded from the contract above tolerance.",
+      "field": "exception_amount_usd",
+      "id": "calculate_exception_amount",
+      "weight": 2.0
+    },
+    {
+      "description": "Identified contract freight tolerance as the governing monetary control for Place a freight-variance hold; did not substitute a generic invoice tolerance.",
+      "field": "financial_control",
+      "id": "identify_financial_control",
+      "weight": 1.5
+    },
+    {
+      "description": "Applied the exact USD 50.00 threshold for contract freight tolerance to the USD 331.61 unsupported or residual value.",
+      "field": "control_threshold_usd",
+      "id": "apply_financial_control_threshold",
+      "weight": 1.5
+    },
+    {
+      "description": "Derived 2026-01-16 for pay_invoice_as_submitted.",
+      "field": "baseline_settlement_date",
+      "id": "compare_financial_option_one",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 2026-01-16 for place_freight_variance_hold.",
+      "field": "controlled_settlement_date",
+      "id": "compare_financial_option_two",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 2026-01-18 for short_pay_without_hold and applied its approval impact.",
+      "field": "escalated_settlement_date",
+      "id": "compare_financial_option_three",
+      "weight": 1.0
+    },
+    {
+      "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for place_freight_variance_hold; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that short_pay_without_hold remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of pay_invoice_as_submitted, place_freight_variance_hold, and short_pay_without_hold; selected place_freight_variance_hold because it alone gives the best currently authorized result under hold only the documented exception with the approved reason.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-16 as the supported outcome date for place_freight_variance_hold.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-16 with the independent control date 2026-01-16 and calculated a signed variance of 0 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-042"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-042 scope, immutable handles, mounted systems, and evidence index before investigating NS-000042.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000042.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000042.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000042.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0042 only to place_freight_variance_hold, NS-000042, and the supported 12932.89 USD; kept broader scope and short_pay_without_hold outside current authority.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-042"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-042"
+              }
+            ],
+            "spreadsheetId": "sheet-042"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-042' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-042"
+              },
+              {
+                "id": "drive-approval-042"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-042 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-042-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-042-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-042-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R1 and established 13264.5 USD for invoice amount including freight, with control date 2026-01-16.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-042-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-042-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-042-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 13264.5 observed less 331.61 excluded to 12932.89 supported USD for PO-supported goods and allowed charges.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-042-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-042-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-042-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R1 and established 13264.5 USD for invoice amount including freight, with control date 2026-01-16.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-042-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-042-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-042-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-14 readiness input for place_freight_variance_hold, then separately derived its 2026-01-16 operating outcome under hold only the documented exception with the approved reason instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-042-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-042-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-042-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-042-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000042 at R1.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-042"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-042"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-042",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-042"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-042"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-042"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0042 only to place_freight_variance_hold, NS-000042, and the supported 12932.89 USD; kept broader scope and short_pay_without_hold outside current authority.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-042\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-042"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-042 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-042",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-042",
+            "threadId": "thread-042"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-042",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-042"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-14 readiness input for place_freight_variance_hold, then separately derived its 2026-01-16 operating outcome under hold only the documented exception with the approved reason instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0042"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000042
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0042'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000042
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-14 readiness input for place_freight_variance_hold, then separately derived its 2026-01-16 operating outcome under hold only the documented exception with the approved reason instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "HeaderInterfaceId": 700042,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "HeaderInterfaceId": 700042
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.receiving_receipt_transactions.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle receiving receipt transactions record: Reconciled 13264.5 observed less 331.61 excluded to 12932.89 supported USD for PO-supported goods and allowed charges.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0042"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000042
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_order_lines.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase order lines record: Applied revision R1 and established 13264.5 USD for invoice amount including freight, with control date 2026-01-16.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "invoicesUniqID": "invoicesUniqID-0042"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900042
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "InvoiceNumber='INV-0042'"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900042
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle invoices record: Applied revision R1 and established 13264.5 USD for invoice amount including freight, with control date 2026-01-16.",
+      "id": "investigation_16",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.invoice_holds.create",
+      "any_of": [
+        {
+          "arguments": {
+            "invoicesUniqID": "invoicesUniqID-0042"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900042
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "InvoiceNumber='INV-0042'"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900042
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.list"
+        }
+      ],
+      "description": "Read NS-000042 back through the documented Oracle invoices.get operation after the mutation and confirmed the resource-specific changed fields ['InvoiceId', 'LastUpdateDate', 'invoiceHolds'], including the effective update at 2026-01-16, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "InvoiceId": 900042,
+        "LastUpdateDate": "2026-01-16T16:00:00-08:00",
+        "invoiceHolds": [
+          {
+            "HoldId": 1000042,
+            "HoldName": "CONTROL REVIEW",
+            "HoldReason": null,
+            "HoldStatus": "ACTIVE"
+          }
+        ]
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "InvoiceId": 900042
+      },
+      "weight": 2.0
     }
   ]
 }

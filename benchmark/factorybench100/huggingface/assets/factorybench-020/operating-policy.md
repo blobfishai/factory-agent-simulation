@@ -1,5 +1,7 @@
-# Hold production for an expired torque-tool calibration — operating control
+# Hold production for an expired torque-tool calibration — operating policy
 
-Scope: Recover constrained production with approved work-center, labor, tooling, and timing decisions.
+Decision scope: torque operation using an expired tool.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: production stays held until a calibrated tool and corrective work exist. Establish the immutable source record and effective revision, then reconcile open serials exposed after calibration expiry, serials completed before expiry with valid trace, and post-expiry serials and unverified torque records from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction.

@@ -1,29 +1,106 @@
 {
   "answer": {
-    "forecast_horizon": "2026-01-22",
-    "generation_action": "Due work generated",
-    "program_code": "PM-0028"
+    "business_need_date": "2026-01-15",
+    "decision_timing_status": "ON_TIME",
+    "due_date": "2026-01-26",
+    "escalation_approval_required": 1,
+    "excluded_measure": 3,
+    "forecast_horizon_end": "2026-04-11",
+    "measure_unit": "WORK_ORDERS",
+    "outcome_vs_control_days": 0,
+    "program_or_asset_record": "PM-0028",
+    "qualifying_measure": 8,
+    "recommended_incremental_cost_usd": 0,
+    "recommended_option": "generate_due_work_only",
+    "recommended_outcome_date": "2026-01-15",
+    "safe_window_start": "2026-01-26",
+    "source_measure": 11,
+    "trigger_threshold": 1
   },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'generate_due_work_only', tied to NS-000028, revision R1, and the selected generate_due_work_only outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-15', tied to NS-000028, revision R1, and the selected generate_due_work_only outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported program or asset record as 'PM-0028', tied to NS-000028, revision R1, and the selected generate_due_work_only outcome.",
+      "field": "program_or_asset_record",
+      "id": "answer_program_or_asset_record",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported safe window start as '2026-01-26', tied to NS-000028, revision R1, and the selected generate_due_work_only outcome.",
+      "field": "safe_window_start",
+      "id": "answer_safe_window_start",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000028, revision R1, and the selected generate_due_work_only outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "weight": 1.0
+    }
+  ],
   "assertions": [
     {
-      "description": "oracle_fusion.maintenance_programs.generate_work_orders produced the task-scoped, source-audited state transition.",
+      "description": "Required immutable record NS-000028 to reach business outcome 'Due work generated' through oracle_fusion.maintenance_programs.generate_work_orders with exact provider-critical values requestBody.MaintenanceProgramCode='PM-0028', requestBody.WorkOrderStartDate='2026-01-14', requestBody.WorkOrderEndDate='2026-02-13'. The audited transition binds selected option generate_due_work_only, revision R1, approval AP-0028, and constraint one work order per eligible forecast row without duplication; already generated, inactive, or blackout-window rows = 3 WORK_ORDERS; uncovered or unsupported scope = 3.0 WORK_ORDERS; no other provider record satisfies this state criterion.",
       "id": "mutation_01",
+      "payload_allowed_argument_paths": [
+        "requestBody.MaintenanceProgramCode",
+        "requestBody.WorkOrderEndDate",
+        "requestBody.WorkOrderStartDate"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "requestBody": {
+            "MaintenanceProgramCode": "PM-0028",
+            "WorkOrderEndDate": "2026-02-13",
+            "WorkOrderStartDate": "2026-01-14"
+          }
+        },
+        "tool": "oracle_fusion.maintenance_programs.generate_work_orders"
+      },
       "table": "resource_state",
       "values": {
-        "payload_json": "{\"arguments\":{\"requestBody\":{\"MaintenanceProgramCode\":\"PM-0028\",\"WorkOrderEndDate\":\"2026-02-21\",\"WorkOrderStartDate\":\"2026-01-22\"}},\"case\":\"CASE-028\",\"outcome\":\"Reconcile the approved forecast due dates with the shutdown calendar before generating work orders.\",\"tool\":\"oracle_fusion.maintenance_programs.generate_work_orders\"}",
         "resource_type": "oracle_fusion.maintenance_programs",
         "revision": 1,
         "status": "Due work generated",
         "system": "oracle_fusion"
       },
+      "weight": 3.0,
       "where": {
         "resource_id": "factorybench-028-mutation-01",
         "task_id": "factorybench-028"
       }
     },
     {
-      "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+      "description": "Added the Oracle result to the existing case file as a comment containing generate_due_work_only, completion 2026-01-15, and the binding constraint.",
       "id": "mutation_02",
+      "payload_contains": {
+        "arguments": {
+          "fileId": "drive-028"
+        },
+        "tool": "google_drive.comments.create"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-028",
+          "NS-000028",
+          "NS-COMP-028"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-15",
+        "generate_due_work_only"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "google_drive.comments",
@@ -31,14 +108,35 @@
         "status": "Recorded",
         "system": "google_drive"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-028-mutation-02",
         "task_id": "factorybench-028"
       }
     },
     {
-      "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+      "description": "Created\u2014but did not send\u2014the requested CASE-028 decision draft with completion, constraint, alternatives, and the Oracle business reference.",
       "id": "mutation_03",
+      "payload_contains": {
+        "arguments": {
+          "message": {
+            "threadId": "thread-028"
+          },
+          "userId": "me"
+        },
+        "tool": "gmail.drafts.create"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-028",
+          "NS-000028",
+          "NS-COMP-028"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-15",
+        "generate_due_work_only"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "gmail.drafts",
@@ -46,10 +144,659 @@
         "status": "Recorded",
         "system": "gmail"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-028-mutation-03",
         "task_id": "factorybench-028"
       }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-15 as the documented date for guarded-saw inspection forecast; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Established 11 WORK_ORDERS for forecast rows due before the next shutdown.",
+      "field": "source_measure",
+      "id": "establish_forecast_source_measure",
+      "weight": 1.5
+    },
+    {
+      "description": "Retained 8 WORK_ORDERS for due rows with active assets and safe shutdown windows.",
+      "field": "qualifying_measure",
+      "id": "qualify_forecast_measure",
+      "weight": 2.0
+    },
+    {
+      "description": "Removed 3 WORK_ORDERS for already generated, inactive, or blackout-window rows.",
+      "field": "excluded_measure",
+      "id": "exclude_invalid_forecast_measure",
+      "weight": 1.5
+    },
+    {
+      "description": "Applied the trigger and reconciliation in WORK_ORDERS.",
+      "field": "measure_unit",
+      "id": "preserve_forecast_measure_unit",
+      "weight": 0.5
+    },
+    {
+      "description": "Applied the effective 1 WORK_ORDERS threshold under one work order per eligible forecast row without duplication.",
+      "field": "trigger_threshold",
+      "id": "apply_trigger_threshold",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-26 from the qualifying measure and effective trigger.",
+      "field": "due_date",
+      "id": "calculate_due_date",
+      "weight": 1.5
+    },
+    {
+      "description": "Identified 2026-01-26 as the first safe window under approved shutdown windows.",
+      "field": "safe_window_start",
+      "id": "identify_safe_window",
+      "weight": 1.5
+    },
+    {
+      "description": "Bound generation at 2026-04-11; did not use the emergency-option date as the horizon.",
+      "field": "forecast_horizon_end",
+      "id": "bound_forecast_horizon",
+      "weight": 1.0
+    },
+    {
+      "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for generate_due_work_only; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that defer_to_next_shutdown remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of generate_due_work_only, generate_full_year_work, and defer_to_next_shutdown; selected generate_due_work_only because it alone gives the best currently authorized result under one work order per eligible forecast row without duplication.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-15 as the supported outcome date for generate_due_work_only.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-15 with the independent control date 2026-01-15 and calculated a signed variance of 0 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-028"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-028 scope, immutable handles, mounted systems, and evidence index before investigating NS-000028.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PRODUCTION",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000028.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-PRODUCTION",
+            "limit": 100,
+            "ts": "1768000028.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000028.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0028 only to generate_due_work_only, NS-000028, and the supported 8 WORK_ORDERS; kept broader scope and defer_to_next_shutdown outside current authority.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-028"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-028"
+              }
+            ],
+            "spreadsheetId": "sheet-028"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-028' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-028"
+              },
+              {
+                "id": "drive-approval-028"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-028 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-028-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-028-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-028-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R1 and established 11 WORK_ORDERS for forecast rows due before the next shutdown, with control date 2026-01-15.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-028-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-028-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-028-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied approved shutdown windows to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-028-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-028-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-028-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R1 and established 11 WORK_ORDERS for forecast rows due before the next shutdown, with control date 2026-01-15.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-028-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-028-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-028-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000028 at R1.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-028-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-028-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-028-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-028-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-02-23 readiness input for generate_full_year_work, then separately derived its 2026-02-25 operating outcome under one work order per eligible forecast row without duplication instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-028"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-028"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-028",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-028"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-028"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-028"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0028 only to generate_due_work_only, NS-000028, and the supported 8 WORK_ORDERS; kept broader scope and defer_to_next_shutdown outside current authority.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-028\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-028"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-028 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-028",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-028",
+            "threadId": "thread-028"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-028",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-028"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-02-23 readiness input for generate_full_year_work, then separately derived its 2026-02-25 operating outcome under one work order per eligible forecast row without duplication instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100028,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100028
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_resources.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance resources record: Applied approved shutdown windows to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "MaintenanceProgramId": 500028
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500028
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "MaintenanceProgramCode='PM-0028'"
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500028
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance programs record: Located NS-000028 for guarded-saw inspection forecast using immutable IDs and preserved effective revision R1.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100028
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100028
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='MWO-0028'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100028
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance work orders record: Located NS-000028 for guarded-saw inspection forecast using immutable IDs and preserved effective revision R1.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-028' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400028
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 11 observed less 3 excluded to 8 supported WORK_ORDERS for due rows with active assets and safe shutdown windows.",
+      "id": "investigation_16",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.maintenance_programs.generate_work_orders",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100028
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100028
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='MWO-0028'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100028
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.list"
+        }
+      ],
+      "description": "Read NS-000028 back through the documented Oracle maintenance work orders.list operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkOrderDescription', 'WorkOrderStatusCode'], including the effective update at 2026-01-15, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "LastUpdateDate": "2026-01-15T16:00:00-08:00",
+        "PlannedCompletionDate": "2026-02-13",
+        "PlannedStartDate": "2026-01-14",
+        "WorkOrderDescription": "Generated from PM-0028 for CASE-028",
+        "WorkOrderStatusCode": "ORA_UNRELEASED"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "WorkOrderId": 100028
+      },
+      "weight": 2.0
     }
   ]
 }

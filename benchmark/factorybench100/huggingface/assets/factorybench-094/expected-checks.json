@@ -1,29 +1,113 @@
 {
   "answer": {
-    "accounting_period": "2026-01",
-    "close_exception": "FB-094",
-    "resolution_action": "Incomplete WIP deferred"
+    "affected_resource_or_operation": "NS-000094",
+    "base_completion": "2026-01-20",
+    "business_need_date": "2026-01-20",
+    "candidate_capacity": 42,
+    "capacity_gap": 19,
+    "capacity_unit": "HR",
+    "decision_timing_status": "ON_TIME",
+    "escalated_completion": "2026-01-18",
+    "escalation_approval_required": 1,
+    "net_usable_capacity": 34,
+    "outcome_vs_control_days": 0,
+    "qualified_alternative_completion": "2026-01-19",
+    "recommended_incremental_cost_usd": 0,
+    "recommended_option": "defer_unfinished_work",
+    "recommended_outcome_date": "2026-01-20",
+    "required_capacity": 53,
+    "selected_resource_or_control": "WO-0094",
+    "unavailable_or_protected_capacity": 8
   },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'defer_unfinished_work', tied to NS-000094, revision R4, and the selected defer_unfinished_work outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-20', tied to NS-000094, revision R4, and the selected defer_unfinished_work outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported affected resource or operation as 'NS-000094', tied to NS-000094, revision R4, and the selected defer_unfinished_work outcome.",
+      "field": "affected_resource_or_operation",
+      "id": "answer_affected_resource_or_operation",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported selected resource or control as 'WO-0094', tied to NS-000094, revision R4, and the selected defer_unfinished_work outcome.",
+      "field": "selected_resource_or_control",
+      "id": "answer_selected_resource_or_control",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000094, revision R4, and the selected defer_unfinished_work outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "weight": 1.0
+    }
+  ],
   "assertions": [
     {
-      "description": "oracle_fusion.work_orders.update produced the task-scoped, source-audited state transition.",
+      "description": "Required immutable record NS-000094 to reach business outcome 'Incomplete WIP deferred' through oracle_fusion.work_orders.update with exact provider-critical values WorkOrderId=100094, requestBody.WorkOrderStatusCode='ORA_RELEASED', requestBody.PlannedStartDate='2026-01-19', requestBody.PlannedCompletionDate='2026-01-20'. The audited transition binds selected option defer_unfinished_work, revision R4, approval AP-0094, and constraint physical status, operation transactions, period cutoff, and revised dates; completed quantity and current-period actuals = 8 HR; uncovered or unsupported scope = 19.0 HR; no other provider record satisfies this state criterion.",
       "id": "mutation_01",
+      "payload_allowed_argument_paths": [
+        "WorkOrderId",
+        "requestBody.PlannedCompletionDate",
+        "requestBody.PlannedStartDate",
+        "requestBody.WorkOrderStatusCode"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "WorkOrderId": 100094,
+          "requestBody": {
+            "PlannedCompletionDate": "2026-01-20",
+            "PlannedStartDate": "2026-01-19",
+            "WorkOrderStatusCode": "ORA_RELEASED"
+          }
+        },
+        "tool": "oracle_fusion.work_orders.update"
+      },
       "table": "resource_state",
       "values": {
-        "payload_json": "{\"arguments\":{\"WorkOrderId\":100094,\"requestBody\":{\"PlannedCompletionDate\":\"2026-02-07\",\"PlannedStartDate\":\"2026-01-31\",\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-094\",\"outcome\":\"Check the WIP count and operations log before revising the incomplete order dates beyond cutoff.\",\"tool\":\"oracle_fusion.work_orders.update\"}",
         "resource_type": "oracle_fusion.work_orders",
         "revision": 1,
         "status": "Incomplete WIP deferred",
         "system": "oracle_fusion"
       },
+      "weight": 3.0,
       "where": {
         "resource_id": "factorybench-094-mutation-01",
         "task_id": "factorybench-094"
       }
     },
     {
-      "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+      "description": "Created\u2014but did not send\u2014the requested CASE-094 decision draft with completion, constraint, alternatives, and the Oracle business reference.",
       "id": "mutation_02",
+      "payload_contains": {
+        "arguments": {
+          "message": {
+            "threadId": "thread-094"
+          },
+          "userId": "me"
+        },
+        "tool": "gmail.drafts.create"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-094",
+          "NS-000094",
+          "NS-COMP-094"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-20",
+        "defer_unfinished_work"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "gmail.drafts",
@@ -31,14 +115,26 @@
         "status": "Recorded",
         "system": "gmail"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-094-mutation-02",
         "task_id": "factorybench-094"
       }
     },
     {
-      "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+      "description": "Wrote defer_unfinished_work, completion 2026-01-20, and the binding constraint into the existing task-scoped control cell without altering another row.",
       "id": "mutation_03",
+      "payload_contains": {
+        "arguments": {
+          "range": "Control!H16",
+          "spreadsheetId": "sheet-094"
+        },
+        "tool": "google_sheets.spreadsheets.values.update"
+      },
+      "payload_text_contains": [
+        "2026-01-20",
+        "defer_unfinished_work"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "google_sheets.spreadsheets.values",
@@ -46,10 +142,747 @@
         "status": "Recorded",
         "system": "google_sheets"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-094-mutation-03",
         "task_id": "factorybench-094"
       }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-20 as the documented date for unfinished production at cutoff; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated 53 HR for remaining operation-hours and quantity.",
+      "field": "required_capacity",
+      "id": "calculate_required_capacity",
+      "weight": 2.0
+    },
+    {
+      "description": "Established 42 gross candidate HR associated with work physically incomplete and unreported; did not call it usable before applying protected load.",
+      "field": "candidate_capacity",
+      "id": "establish_candidate_capacity",
+      "weight": 1.5
+    },
+    {
+      "description": "Excluded 8 HR for completed quantity and current-period actuals.",
+      "field": "unavailable_or_protected_capacity",
+      "id": "remove_protected_capacity",
+      "weight": 1.5
+    },
+    {
+      "description": "Calculated 42 candidate \u2212 8 unavailable/protected = 34 net usable HR.",
+      "field": "net_usable_capacity",
+      "id": "calculate_net_usable_capacity",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 53 required \u2212 34 effective capacity = 19 HR uncovered.",
+      "field": "capacity_gap",
+      "id": "calculate_capacity_gap",
+      "weight": 2.0
+    },
+    {
+      "description": "Kept load and availability in HR.",
+      "field": "capacity_unit",
+      "id": "preserve_capacity_unit",
+      "weight": 0.5
+    },
+    {
+      "description": "Bound the recovery to provider identifier WO-0094 only after confirming physical status, operation transactions, period cutoff, and revised dates.",
+      "field": "selected_resource_or_control",
+      "id": "identify_selected_resource_or_control",
+      "weight": 1.5
+    },
+    {
+      "description": "Calculated 2026-01-20 for defer_unfinished_work.",
+      "field": "base_completion",
+      "id": "compare_base_schedule",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated 2026-01-19 for complete_order_for_close using first next-period qualified slot.",
+      "field": "qualified_alternative_completion",
+      "id": "compare_qualified_schedule",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated 2026-01-18 for leave_schedule_inside_closed_period and retained its authority constraint.",
+      "field": "escalated_completion",
+      "id": "compare_escalated_schedule",
+      "weight": 1.0
+    },
+    {
+      "description": "Applied USD 0 as the documented incremental recovery cost for defer_unfinished_work; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that leave_schedule_inside_closed_period remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of defer_unfinished_work, complete_order_for_close, and leave_schedule_inside_closed_period; selected defer_unfinished_work because it alone gives the best currently authorized result under physical status, operation transactions, period cutoff, and revised dates.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-20 as the supported outcome date for defer_unfinished_work.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-20 with the independent control date 2026-01-20 and calculated a signed variance of 0 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-094"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-094 scope, immutable handles, mounted systems, and evidence index before investigating NS-000094.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-094"
+          },
+          "expected_result_contains": {
+            "id": "drive-094"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-094",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-094"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-094"
+          },
+          "expected_result_contains": {
+            "id": "drive-094"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R4 and established 53 HR for remaining operation-hours and quantity, with control date 2026-01-20.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-094",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-094"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-094",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-094"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 42 observed less 8 excluded to 34 supported HR for work physically incomplete and unreported. Applied first next-period qualified slot to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000094.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000094.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000094.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0094 only to defer_unfinished_work, NS-000094, and the supported 34 HR; kept broader scope and leave_schedule_inside_closed_period outside current authority.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-094\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-094"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-094 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-094",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-094",
+            "threadId": "thread-094"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-094",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-094"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-17 readiness input for complete_order_for_close, then separately derived its 2026-01-19 operating outcome under physical status, operation transactions, period cutoff, and revised dates instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-094' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-094"
+              },
+              {
+                "id": "drive-approval-094"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-094 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-094-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-094-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-094-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-17 readiness input for complete_order_for_close, then separately derived its 2026-01-19 operating outcome under physical status, operation transactions, period cutoff, and revised dates instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-094-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-094-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-094-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R4 and established 53 HR for remaining operation-hours and quantity, with control date 2026-01-20.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-094-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-094-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-094-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000094 at R4.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-094-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-094-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-094-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R4 and established 53 HR for remaining operation-hours and quantity, with control date 2026-01-20.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-094-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-094-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-094-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-094-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied first next-period qualified slot to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-094"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-094"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-094",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-094"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-094"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-094"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0094 only to defer_unfinished_work, NS-000094, and the supported 34 HR; kept broader scope and leave_schedule_inside_closed_period outside current authority.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100094
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100094
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0094'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100094
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000094 for unfinished production at cutoff using immutable IDs and preserved effective revision R4.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0094"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000094
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0094'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000094
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-17 readiness input for complete_order_for_close, then separately derived its 2026-01-19 operating outcome under physical status, operation transactions, period cutoff, and revised dates instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100094,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100094
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order operations record: Applied first next-period qualified slot to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-094' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400094
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 42 observed less 8 excluded to 34 supported HR for work physically incomplete and unreported.",
+      "id": "investigation_17",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100094,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100094
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_materials.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order materials record: Applied revision R4 and established 53 HR for remaining operation-hours and quantity, with control date 2026-01-20.",
+      "id": "investigation_18",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.work_orders.update",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100094
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100094
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0094'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100094
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "description": "Read NS-000094 back through the documented Oracle work orders.get operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkOrderStatusCode'], including the effective update at 2026-01-20, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "LastUpdateDate": "2026-01-20T16:00:00-08:00",
+        "PlannedCompletionDate": "2026-01-20",
+        "PlannedStartDate": "2026-01-19",
+        "WorkOrderStatusCode": "ORA_RELEASED"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "WorkOrderId": 100094
+      },
+      "weight": 2.0
     }
   ]
 }

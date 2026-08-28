@@ -7,50 +7,240 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "cost_reference": {
+      "approved_unit_rate_usd": {
+        "description": "Approved unit rate used to bridge the physical transaction to the reconciled financial amount.",
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "baseline_settlement_date": {
+        "description": "Posting, payment, or close date under post_supported_missing_labor.",
         "type": "string"
       },
-      "posting_action": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
       },
-      "reconciled_amount": {
+      "control_threshold_usd": {
+        "description": "Exact USD threshold for signed-timecard posting variance.",
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "controlled_settlement_date": {
+        "description": "Posting, payment, or close date under post_estimated_hours.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "document_amount_usd": {
+        "description": "signed setup hours at the approved resource rate",
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "escalated_settlement_date": {
+        "description": "Posting, payment, or close date under defer_valid_current_period_cost.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "exception_amount_usd": {
+        "description": "duplicate, unsigned, or wrong-period hours",
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "financial_control": {
+        "description": "Task-specific monetary control that governs the action; it is not assumed to be an invoice tolerance.",
+        "type": "string"
+      },
+      "financial_document_or_record": {
+        "description": "Immutable invoice, PO, cost record, or close exception being reconciled.",
+        "type": "string"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "physical_transaction_quantity": {
+        "description": "Positive provider-posted quantity magnitude. The Oracle transaction type supplies the issue, return, or reversal direction; do not negate a return.",
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "physical_transaction_unit": {
+        "description": "Provider unit of measure for the physical transaction.",
+        "type": "string"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing post_supported_missing_labor, post_estimated_hours, defer_valid_current_period_cost.",
+        "enum": [
+          "post_supported_missing_labor",
+          "post_estimated_hours",
+          "defer_valid_current_period_cost"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "supported_amount_usd": {
+        "description": "hours not already posted to the correct operation",
         "multipleOf": 0.01,
         "type": "number"
       }
     },
     "required": [
-      "cost_reference",
-      "posting_action",
-      "reconciled_amount"
+      "approved_unit_rate_usd",
+      "baseline_settlement_date",
+      "business_need_date",
+      "control_threshold_usd",
+      "controlled_settlement_date",
+      "decision_timing_status",
+      "document_amount_usd",
+      "escalated_settlement_date",
+      "escalation_approval_required",
+      "exception_amount_usd",
+      "financial_control",
+      "financial_document_or_record",
+      "outcome_vs_control_days",
+      "physical_transaction_quantity",
+      "physical_transaction_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "supported_amount_usd"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "cost_reference": "REF-0071",
-      "posting_action": "Labor cost posted",
-      "reconciled_amount": 5273.94
+      "approved_unit_rate_usd": 85.0,
+      "baseline_settlement_date": "2026-01-17",
+      "business_need_date": "2026-01-17",
+      "control_threshold_usd": 0.0,
+      "controlled_settlement_date": "2026-01-18",
+      "decision_timing_status": "ON_TIME",
+      "document_amount_usd": 1020.0,
+      "escalated_settlement_date": "2026-01-19",
+      "escalation_approval_required": 1,
+      "exception_amount_usd": 0.0,
+      "financial_control": "signed-timecard posting variance",
+      "financial_document_or_record": "COST-0071",
+      "outcome_vs_control_days": 0,
+      "physical_transaction_quantity": 12.0,
+      "physical_transaction_unit": "HR",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "post_supported_missing_labor",
+      "recommended_outcome_date": "2026-01-17",
+      "supported_amount_usd": 1020.0
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'post_supported_missing_labor', tied to NS-000071, revision R2, and the selected post_supported_missing_labor outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-17', tied to NS-000071, revision R2, and the selected post_supported_missing_labor outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported financial document or record as 'COST-0071', tied to NS-000071, revision R2, and the selected post_supported_missing_labor outcome.",
+        "field": "financial_document_or_record",
+        "id": "answer_financial_document_or_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported supported amount usd as 1020.0, tied to NS-000071, revision R2, and the selected post_supported_missing_labor outcome.",
+        "field": "supported_amount_usd",
+        "id": "answer_supported_amount_usd",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000071, revision R2, and the selected post_supported_missing_labor outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.resource_transactions.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000071 to reach business outcome 'Labor cost posted' through oracle_fusion.resource_transactions.create with exact provider-critical values requestBody.SourceSystemCode='FUSION_MOBILE', requestBody.ResourceTransactionDetail[0].OrganizationCode='SEA', requestBody.ResourceTransactionDetail[0].WorkOrderNumber='WO-0071', requestBody.ResourceTransactionDetail[0].WoOperationSequenceNumber=10, requestBody.ResourceTransactionDetail[0].ResourceCode='RES-071', requestBody.ResourceTransactionDetail[0].TransactionQuantity=12.0, requestBody.ResourceTransactionDetail[0].TransactionUnitOfMeasure='HR'. The audited transition binds selected option post_supported_missing_labor, revision R2, approval AP-0071, and constraint employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.ResourceTransactionDetail[0].OrganizationCode",
+          "requestBody.ResourceTransactionDetail[0].ResourceCode",
+          "requestBody.ResourceTransactionDetail[0].TransactionQuantity",
+          "requestBody.ResourceTransactionDetail[0].TransactionUnitOfMeasure",
+          "requestBody.ResourceTransactionDetail[0].WoOperationSequenceNumber",
+          "requestBody.ResourceTransactionDetail[0].WorkOrderNumber",
+          "requestBody.SourceSystemCode"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "ResourceTransactionDetail": [
+                {
+                  "OrganizationCode": "SEA",
+                  "ResourceCode": "RES-071",
+                  "TransactionQuantity": 12.0,
+                  "TransactionUnitOfMeasure": "HR",
+                  "WoOperationSequenceNumber": 10,
+                  "WorkOrderNumber": "WO-0071"
+                }
+              ],
+              "SourceSystemCode": "FUSION_MOBILE"
+            }
+          },
+          "tool": "oracle_fusion.resource_transactions.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"ResourceTransactionDetail\":[{\"OrganizationCode\":\"SEA\",\"ResourceCode\":\"RES-071\",\"TransactionQuantity\":31.5,\"TransactionUnitOfMeasure\":\"HR\",\"WoOperationSequenceNumber\":10,\"WorkOrderNumber\":\"WO-0071\"}],\"SourceSystemCode\":\"FUSION_MOBILE\"}},\"case\":\"CASE-071\",\"outcome\":\"Match employee time, resource rate, and operation status before posting the omitted resource transaction.\",\"tool\":\"oracle_fusion.resource_transactions.create\"}",
           "resource_type": "oracle_fusion.resource_transactions",
           "revision": 1,
           "status": "Labor cost posted",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-071-mutation-01",
           "task_id": "factorybench-071"
         }
       },
       {
-        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "description": "Replied in the existing operations thread with post_supported_missing_labor, completion 2026-01-17, the constraint, alternatives, and Oracle result.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "thread_ts": "1768000071.000100"
+          },
+          "tool": "slack.chat_postMessage"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-071",
+            "NS-000071",
+            "NS-COMP-071"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-17",
+          "post_supported_missing_labor"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "slack",
@@ -58,32 +248,1274 @@
           "status": "Recorded",
           "system": "slack"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-071-mutation-02",
           "task_id": "factorybench-071"
         }
       },
       {
-        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "description": "Added the Oracle result to the existing case file as a comment containing post_supported_missing_labor, completion 2026-01-17, and the binding constraint.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "fileId": "drive-071"
+          },
+          "tool": "google_drive.comments.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-071",
+            "NS-000071",
+            "NS-COMP-071"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-17",
+          "post_supported_missing_labor"
+        ],
         "table": "resource_state",
         "values": {
-          "resource_type": "google_drive.approvals",
+          "resource_type": "google_drive.comments",
           "revision": 1,
           "status": "Recorded",
           "system": "google_drive"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-071-mutation-03",
           "task_id": "factorybench-071"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-17 as the documented date for missing setup labor; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Established the exact signed setup hours at the approved resource rate as USD 1020.00.",
+        "field": "document_amount_usd",
+        "id": "establish_document_amount",
+        "weight": 2.0
+      },
+      {
+        "description": "Reconciled independent source activity to USD 1020.00 of hours not already posted to the correct operation.",
+        "field": "supported_amount_usd",
+        "id": "calculate_supported_amount",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated USD 1020.00 document \u2212 USD 1020.00 supported = USD 0.00 exception for duplicate, unsigned, or wrong-period hours.",
+        "field": "exception_amount_usd",
+        "id": "calculate_exception_amount",
+        "weight": 2.0
+      },
+      {
+        "description": "Identified signed-timecard posting variance as the governing monetary control for Post missing setup labor from signed timecards; did not substitute a generic invoice tolerance.",
+        "field": "financial_control",
+        "id": "identify_financial_control",
+        "weight": 1.5
+      },
+      {
+        "description": "Applied the exact USD 0.00 threshold for signed-timecard posting variance to the USD 0.00 unsupported or residual value.",
+        "field": "control_threshold_usd",
+        "id": "apply_financial_control_threshold",
+        "weight": 1.5
+      },
+      {
+        "description": "Derived 2026-01-17 for post_supported_missing_labor.",
+        "field": "baseline_settlement_date",
+        "id": "compare_financial_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-18 for post_estimated_hours.",
+        "field": "controlled_settlement_date",
+        "id": "compare_financial_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-19 for defer_valid_current_period_cost and applied its approval impact.",
+        "field": "escalated_settlement_date",
+        "id": "compare_financial_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Established the provider-posted quantity magnitude as 12.0 HR; used the transaction type, not a negative sign, to carry issue or return direction.",
+        "field": "physical_transaction_quantity",
+        "id": "establish_physical_transaction_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Applied the approved USD 85.00/HR rate from the signed rate source.",
+        "field": "approved_unit_rate_usd",
+        "id": "apply_approved_physical_rate",
+        "weight": 1.5
+      },
+      {
+        "description": "Kept the Oracle transaction in HR, rather than posting the reconciled USD amount as a physical quantity.",
+        "field": "physical_transaction_unit",
+        "id": "preserve_physical_transaction_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for post_supported_missing_labor; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that defer_valid_current_period_cost remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of post_supported_missing_labor, post_estimated_hours, and defer_valid_current_period_cost; selected post_supported_missing_labor because it alone gives the best currently authorized result under employee, timecard, operation, rate, and period must reconcile.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-17 as the supported outcome date for post_supported_missing_labor.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-17 with the independent control date 2026-01-17 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-071"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-071 scope, immutable handles, mounted systems, and evidence index before investigating NS-000071.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-FINANCE",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000071.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-FINANCE",
+              "limit": 100,
+              "ts": "1768000071.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000071.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0071 only to post_supported_missing_labor, NS-000071, and the supported 12.0 HR; kept broader scope and defer_valid_current_period_cost outside current authority.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-071' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-071"
+                },
+                {
+                  "id": "drive-approval-071"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-071 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-071-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-071-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-071-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000071 at R2.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-071-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-071-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-071-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R2 and established 1020.0 USD for signed setup hours at the approved resource rate, with control date 2026-01-17.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-071-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-071-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-071-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 1020.0 observed less 0.0 excluded to 1020.0 supported USD for hours not already posted to the correct operation.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-071-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-071-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-071-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R2 and established 1020.0 USD for signed setup hours at the approved resource rate, with control date 2026-01-17.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-071-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-071-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-071-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-071-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-15 readiness input for post_estimated_hours, then separately derived its 2026-01-18 operating outcome under employee, timecard, operation, rate, and period must reconcile instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-071"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-071"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-071",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-071"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-071"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-071"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0071 only to post_supported_missing_labor, NS-000071, and the supported 12.0 HR; kept broader scope and defer_valid_current_period_cost outside current authority.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "ranges": [
+                "Control!A1:I50",
+                "Approvals!A1:G20"
+              ],
+              "spreadsheetId": "sheet-071",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-071"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.batchGet"
+          },
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!A1:I50",
+              "spreadsheetId": "sheet-071",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-071"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Reconciled 1020.0 observed less 0.0 excluded to 1020.0 supported USD for hours not already posted to the correct operation. Applied open cost-posting period to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-071",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-071",
+              "threadId": "thread-071"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-071",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-071"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-15 readiness input for post_estimated_hours, then separately derived its 2026-01-18 operating outcome under employee, timecard, operation, rate, and period must reconcile instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "count": 50,
+              "query": "\"CASE-071\"",
+              "sort": "timestamp",
+              "sort_dir": "asc"
+            },
+            "expected_result_contains": {
+              "messages": {
+                "matches": [
+                  {
+                    "ts": "1768000071.000100"
+                  }
+                ]
+              }
+            },
+            "match": "result_contains",
+            "tool": "slack.search_messages"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the existing operations thread for CASE-071 and its immutable channel and thread timestamp before using the discussion.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100071,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100071
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_resources.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work order resources record: Applied open cost-posting period to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0071"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000071
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_order_lines.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle purchase order lines record: Applied revision R2 and established 1020.0 USD for signed setup hours at the approved resource rate, with control date 2026-01-17.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100071
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100071
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='WO-0071'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100071
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work orders record: Located NS-000071 for missing setup labor using immutable IDs and preserved effective revision R2.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100071,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100071
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_operations.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work order operations record: Applied open cost-posting period to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_16",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.resource_transactions.create",
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100071,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100071
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_resources.list"
+          }
+        ],
+        "description": "Read NS-000071 back through the documented Oracle work order resources.list operation after the mutation and confirmed the resource-specific changed fields ['ChargedQuantity', 'LastUpdateDate', 'ResourceCode'], including the effective update at 2026-01-17, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "ChargedQuantity": 12.0,
+          "LastUpdateDate": "2026-01-17T16:00:00-08:00",
+          "ResourceCode": "RES-071"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": false,
+        "target_identity": {
+          "WorkOrderId": 100071
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.resource_transactions.create",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100071,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100071
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_resources.list"
+        }
+      ],
+      "description": "Read NS-000071 back through the documented Oracle work order resources.list operation after the mutation and confirmed the resource-specific changed fields ['ChargedQuantity', 'LastUpdateDate', 'ResourceCode'], including the effective update at 2026-01-17, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "ChargedQuantity": 12.0,
+        "LastUpdateDate": "2026-01-17T16:00:00-08:00",
+        "ResourceCode": "RES-071"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "WorkOrderId": 100071
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-071"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-071 scope, immutable handles, mounted systems, and evidence index before investigating NS-000071.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000071.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000071.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000071.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0071 only to post_supported_missing_labor, NS-000071, and the supported 12.0 HR; kept broader scope and defer_valid_current_period_cost outside current authority.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-071' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-071"
+              },
+              {
+                "id": "drive-approval-071"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-071 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-071-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-071-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-071-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000071 at R2.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-071-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-071-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-071-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R2 and established 1020.0 USD for signed setup hours at the approved resource rate, with control date 2026-01-17.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-071-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-071-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-071-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 1020.0 observed less 0.0 excluded to 1020.0 supported USD for hours not already posted to the correct operation.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-071-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-071-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-071-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R2 and established 1020.0 USD for signed setup hours at the approved resource rate, with control date 2026-01-17.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-071-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-071-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-071-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-071-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-15 readiness input for post_estimated_hours, then separately derived its 2026-01-18 operating outcome under employee, timecard, operation, rate, and period must reconcile instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-071"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-071"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-071",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-071"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-071"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-071"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0071 only to post_supported_missing_labor, NS-000071, and the supported 12.0 HR; kept broader scope and defer_valid_current_period_cost outside current authority.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-071",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-071"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-071",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-071"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 1020.0 observed less 0.0 excluded to 1020.0 supported USD for hours not already posted to the correct operation. Applied open cost-posting period to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-071",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-071",
+            "threadId": "thread-071"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-071",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-071"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-15 readiness input for post_estimated_hours, then separately derived its 2026-01-18 operating outcome under employee, timecard, operation, rate, and period must reconcile instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "count": 50,
+            "query": "\"CASE-071\"",
+            "sort": "timestamp",
+            "sort_dir": "asc"
+          },
+          "expected_result_contains": {
+            "messages": {
+              "matches": [
+                {
+                  "ts": "1768000071.000100"
+                }
+              ]
+            }
+          },
+          "match": "result_contains",
+          "tool": "slack.search_messages"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the existing operations thread for CASE-071 and its immutable channel and thread timestamp before using the discussion.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100071,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100071
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_resources.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order resources record: Applied open cost-posting period to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0071"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000071
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_order_lines.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase order lines record: Applied revision R2 and established 1020.0 USD for signed setup hours at the approved resource rate, with control date 2026-01-17.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100071
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100071
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0071'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100071
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000071 for missing setup labor using immutable IDs and preserved effective revision R2.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100071,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100071
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order operations record: Applied open cost-posting period to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_16",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-071"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
     },
     {
@@ -92,26 +1524,126 @@
         "limit": 100,
         "ts": "1768000071.000100"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000071.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
-        "fileId": "drive-071"
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-071' and trashed = false"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-071"
+          },
+          {
+            "id": "drive-approval-071"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-071-09"
+      },
+      "expected_result_contains": {
+        "id": "drive-071-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-071-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-071-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-071-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-071-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-071-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-071-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-071-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-071-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-071"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-071"
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.get"
     },
     {
       "arguments": {
         "majorDimension": "ROWS",
-        "range": "Control!A1:H50",
+        "range": "Control!A1:I50",
         "spreadsheetId": "sheet-071",
         "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "values": [
+          [
+            "CASE-071"
+          ]
+        ]
+      },
+      "match": "result_contains",
       "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "thread-071",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "thread-071"
+      },
+      "match": "result_contains",
+      "tool": "gmail.threads.get"
     },
     {
       "arguments": {
@@ -120,40 +1652,87 @@
         "sort": "timestamp",
         "sort_dir": "asc"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": {
+          "matches": [
+            {
+              "ts": "1768000071.000100"
+            }
+          ]
+        }
+      },
+      "match": "result_contains",
       "tool": "slack.search_messages"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100071,
+        "limit": 50,
+        "onlyData": true
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 100071
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.work_order_resources.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0071"
+      },
+      "expected_result_contains": {
+        "POHeaderId": 2000071
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.purchase_order_lines.list"
     },
     {
       "arguments": {
         "WorkOrderId": 100071
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "WorkOrderId": 100071
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.work_orders.get"
     },
     {
       "arguments": {
         "WorkOrderId": 100071,
         "limit": 50,
-        "onlyData": true,
-        "q": "ReferenceNumber='CASE-071'"
+        "onlyData": true
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.work_order_resources.list"
+      "expected_result_contains": {
+        "WorkOrderId": 100071
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.work_order_operations.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
     "slack.conversations_replies",
+    "google_drive.files.list",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.download",
+    "google_drive.files.export",
+    "google_drive.files.download",
     "google_drive.files.get",
     "google_sheets.spreadsheets.values.get",
+    "gmail.threads.get",
     "slack.search_messages",
+    "oracle_fusion.work_order_resources.list",
+    "oracle_fusion.purchase_order_lines.list",
     "oracle_fusion.work_orders.get",
-    "oracle_fusion.work_order_resources.list"
+    "oracle_fusion.work_order_operations.list"
   ],
   "task_id": "factorybench-071",
   "write_tools": [
     "factorybench.submit_answer",
-    "google_drive.approvals.approve",
+    "google_drive.comments.create",
     "oracle_fusion.resource_transactions.create",
     "slack.chat_postMessage"
   ]

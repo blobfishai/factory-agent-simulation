@@ -31,7 +31,7 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
     }
     assert fidelity["passed"] is True
     assert fidelity["unique_sequences"] == 100
-    assert fidelity["closest_pair"]["similarity"] <= 0.82
+    assert fidelity["closest_pair"]["similarity"] <= 0.80
     assert website["benchmark"]["taskCount"] == 100
     assert len(website["benchmark"]["categories"]) == 20
     assert website["benchmark"]["world"]["documents"] == 1200
@@ -82,8 +82,8 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
 
 def test_released_pdf_and_excel_assets_are_real_files() -> None:
     asset_root = RELEASE / "assets" / "factorybench-001"
-    assert (asset_root / "supplier-quotation.pdf").read_bytes().startswith(b"%PDF-1.4")
-    with zipfile.ZipFile(asset_root / "supplier-lead-time-and-capacity.xlsx") as workbook:
+    assert (asset_root / "supplier-confirmation.pdf").read_bytes().startswith(b"%PDF-1.4")
+    with zipfile.ZipFile(asset_root / "planning-inputs.xlsx") as workbook:
         assert "xl/workbook.xml" in workbook.namelist()
         assert "xl/worksheets/sheet1.xml" in workbook.namelist()
 
@@ -142,7 +142,7 @@ def test_mcp_initialize_and_tool_list(tmp_path: Path) -> None:
     with FactoryWorld.fresh(task, tmp_path / "world.db") as world:
         initialized = handle_request(world, {"jsonrpc": "2.0", "id": 1, "method": "initialize"})
         listed = handle_request(world, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
-    assert initialized["result"]["serverInfo"] == {"name": "factorybench", "version": "2.0.0"}
+    assert initialized["result"]["serverInfo"] == {"name": "factorybench", "version": "3.0.0"}
     assert len(listed["result"]["tools"]) == len(tool_definitions())
     submit = next(tool for tool in listed["result"]["tools"] if tool["name"] == "factorybench.submit_answer")
     assert submit["inputSchema"] == task["answer_schema"]

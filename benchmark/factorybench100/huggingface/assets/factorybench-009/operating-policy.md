@@ -1,5 +1,7 @@
-# Replace a constrained relay on an active order — operating control
+# Replace a constrained relay on an active order — operating policy
 
-Scope: Release or revise discrete production only after checking drawings, dispatch state, materials, and resource constraints.
+Decision scope: relay material line on WO-0009.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: substitute effectivity, conversion ratio, and available lot status. Establish the immutable source record and effective revision, then reconcile remaining relay demand at the active revision, approved substitute stock after conversion ratio, and original relays already issued or substitute lots outside effectivity from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell.

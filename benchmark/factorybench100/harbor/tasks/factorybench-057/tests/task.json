@@ -7,64 +7,259 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "controlled_quantity": {
+      "baseline_resolution_date": {
+        "description": "Resolution date for post_verified_count_adjustment.",
+        "type": "string"
+      },
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
+        "type": "string"
+      },
+      "controlled_item_or_record": {
+        "description": "Immutable item, lot, serial set, or transaction record in scope.",
+        "type": "string"
+      },
+      "controlled_resolution_date": {
+        "description": "Resolution date for force_book_quantity.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_resolution_date": {
+        "description": "Resolution date for adjust_without_recount.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
         "type": "integer"
       },
-      "from_to_location": {
+      "excluded_quantity": {
+        "description": "counted units with the wrong lot or unverified ownership",
+        "type": "integer"
+      },
+      "observed_quantity": {
+        "description": "Observed source quantity before applying the control for blind cycle count.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "quantity_unit": {
+        "description": "Unit of measure for every controlled quantity: EA.",
         "type": "string"
       },
-      "inventory_transaction": {
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing post_verified_count_adjustment, force_book_quantity, adjust_without_recount.",
+        "enum": [
+          "post_verified_count_adjustment",
+          "force_book_quantity",
+          "adjust_without_recount"
+        ],
         "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "source_quantity": {
+        "description": "book quantity before count",
+        "type": "integer"
+      },
+      "supported_quantity": {
+        "description": "independently counted physical quantity",
+        "type": "integer"
+      },
+      "transaction_quantity": {
+        "description": "Exact quantity the Oracle mutation may persist.",
+        "type": "integer"
       }
     },
     "required": [
-      "controlled_quantity",
-      "from_to_location",
-      "inventory_transaction"
+      "baseline_resolution_date",
+      "business_need_date",
+      "controlled_item_or_record",
+      "controlled_resolution_date",
+      "decision_timing_status",
+      "escalated_resolution_date",
+      "escalation_approval_required",
+      "excluded_quantity",
+      "observed_quantity",
+      "outcome_vs_control_days",
+      "quantity_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "source_quantity",
+      "supported_quantity",
+      "transaction_quantity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "controlled_quantity": 28,
-      "from_to_location": "SEA-2",
-      "inventory_transaction": "Cycle count adjusted"
+      "baseline_resolution_date": "2026-01-13",
+      "business_need_date": "2026-01-13",
+      "controlled_item_or_record": "NS-COMP-057",
+      "controlled_resolution_date": "2026-01-14",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-15",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 0,
+      "observed_quantity": 83,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "post_verified_count_adjustment",
+      "recommended_outcome_date": "2026-01-13",
+      "source_quantity": 94,
+      "supported_quantity": 83,
+      "transaction_quantity": -11
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'post_verified_count_adjustment', tied to NS-000057, revision R2, and the selected post_verified_count_adjustment outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-13', tied to NS-000057, revision R2, and the selected post_verified_count_adjustment outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported controlled item or record as 'NS-COMP-057', tied to NS-000057, revision R2, and the selected post_verified_count_adjustment outcome.",
+        "field": "controlled_item_or_record",
+        "id": "answer_controlled_item_or_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported transaction quantity as -11, tied to NS-000057, revision R2, and the selected post_verified_count_adjustment outcome.",
+        "field": "transaction_quantity",
+        "id": "answer_transaction_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000057, revision R2, and the selected post_verified_count_adjustment outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.inventory_transactions.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000057 to reach business outcome 'Cycle count adjusted' through oracle_fusion.inventory_transactions.create with exact provider-critical values requestBody.SourceSystemCode='EXTERNAL', requestBody.TransactionMode='ONLINE', requestBody.TransactionLines[0].OrganizationCode='SEA', requestBody.TransactionLines[0].Item='NS-COMP-057', requestBody.TransactionLines[0].Subinventory='STORES', requestBody.TransactionLines[0].TransactionType='Cycle Count Adjustment', requestBody.TransactionLines[0].TransactionQuantity=-11.0, requestBody.TransactionLines[0].TransactionUnitOfMeasure='EA', requestBody.TransactionLines[0].LotNumber='LOT-0057'. The audited transition binds selected option post_verified_count_adjustment, revision R2, approval AP-0057, and constraint the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.SourceSystemCode",
+          "requestBody.TransactionLines[0].Item",
+          "requestBody.TransactionLines[0].LotNumber",
+          "requestBody.TransactionLines[0].OrganizationCode",
+          "requestBody.TransactionLines[0].Subinventory",
+          "requestBody.TransactionLines[0].TransactionQuantity",
+          "requestBody.TransactionLines[0].TransactionType",
+          "requestBody.TransactionLines[0].TransactionUnitOfMeasure",
+          "requestBody.TransactionMode"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "SourceSystemCode": "EXTERNAL",
+              "TransactionLines": [
+                {
+                  "Item": "NS-COMP-057",
+                  "LotNumber": "LOT-0057",
+                  "OrganizationCode": "SEA",
+                  "Subinventory": "STORES",
+                  "TransactionQuantity": -11.0,
+                  "TransactionType": "Cycle Count Adjustment",
+                  "TransactionUnitOfMeasure": "EA"
+                }
+              ],
+              "TransactionMode": "ONLINE"
+            }
+          },
+          "tool": "oracle_fusion.inventory_transactions.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"SourceSystemCode\":\"EXTERNAL\",\"TransactionLines\":[{\"Item\":\"NS-COMP-057\",\"LotNumber\":\"LOT-0057\",\"OrganizationCode\":\"SEA\",\"Subinventory\":\"STORES\",\"TransactionQuantity\":28,\"TransactionType\":\"Subinventory Transfer\",\"TransactionUnitOfMeasure\":\"EA\",\"TransferSubinventory\":\"CONTROLLED\"}],\"TransactionMode\":\"ONLINE\"}},\"case\":\"CASE-057\",\"outcome\":\"Reconcile independent count sheets and recount approval before posting the bounded quantity correction.\",\"tool\":\"oracle_fusion.inventory_transactions.create\"}",
           "resource_type": "oracle_fusion.inventory_transactions",
           "revision": 1,
           "status": "Cycle count adjusted",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-057-mutation-01",
           "task_id": "factorybench-057"
         }
       },
       {
-        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "description": "Added the Oracle result to the existing case file as a comment containing post_verified_count_adjustment, completion 2026-01-13, and the binding constraint.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "fileId": "drive-057"
+          },
+          "tool": "google_drive.comments.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-057",
+            "NS-000057",
+            "NS-COMP-057"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-13",
+          "post_verified_count_adjustment"
+        ],
         "table": "resource_state",
         "values": {
-          "resource_type": "google_drive.approvals",
+          "resource_type": "google_drive.comments",
           "revision": 1,
           "status": "Recorded",
           "system": "google_drive"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-057-mutation-02",
           "task_id": "factorybench-057"
         }
       },
       {
-        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "description": "Replied in the existing operations thread with post_verified_count_adjustment, completion 2026-01-13, the constraint, alternatives, and Oracle result.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "thread_ts": "1768000057.000100"
+          },
+          "tool": "slack.chat_postMessage"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-057",
+            "NS-000057",
+            "NS-COMP-057"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-13",
+          "post_verified_count_adjustment"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "slack",
@@ -72,18 +267,1342 @@
           "status": "Recorded",
           "system": "slack"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-057-mutation-03",
           "task_id": "factorybench-057"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-13 as the documented date for blind cycle count; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Established 94 EA for book quantity before count.",
+        "field": "source_quantity",
+        "id": "establish_source_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Correlated the independent source records to 83 observed EA.",
+        "field": "observed_quantity",
+        "id": "reconcile_observed_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Removed 0 EA for counted units with the wrong lot or unverified ownership.",
+        "field": "excluded_quantity",
+        "id": "identify_excluded_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 83 observed \u2212 0 excluded = 83 supported EA.",
+        "field": "supported_quantity",
+        "id": "calculate_supported_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Bound the Oracle transaction to exactly -11 EA, the measure required by the chosen disposition; did not substitute the header or another business quantity.",
+        "field": "transaction_quantity",
+        "id": "bound_transaction_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept the receipt, issue, transfer, inspection, or completion quantity in EA.",
+        "field": "quantity_unit",
+        "id": "preserve_transaction_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Derived 2026-01-13 for post_verified_count_adjustment.",
+        "field": "baseline_resolution_date",
+        "id": "compare_quantity_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-14 for force_book_quantity.",
+        "field": "controlled_resolution_date",
+        "id": "compare_quantity_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-15 for adjust_without_recount and recognized its control impact.",
+        "field": "escalated_resolution_date",
+        "id": "compare_quantity_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for post_verified_count_adjustment; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that adjust_without_recount remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of post_verified_count_adjustment, force_book_quantity, and adjust_without_recount; selected post_verified_count_adjustment because it alone gives the best currently authorized result under the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-13 as the supported outcome date for post_verified_count_adjustment.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-13 with the independent control date 2026-01-13 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-057"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-057 scope, immutable handles, mounted systems, and evidence index before investigating NS-000057.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PROCUREMENT",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000057.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-PROCUREMENT",
+              "limit": 100,
+              "ts": "1768000057.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000057.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0057 only to post_verified_count_adjustment, NS-000057, and the supported -11.0 EA; kept broader scope and adjust_without_recount outside current authority.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-057' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-057"
+                },
+                {
+                  "id": "drive-approval-057"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-057 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-057-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-057-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-057-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 83 observed less 0 excluded to 83 supported EA for independently counted physical quantity.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-057-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-057-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-057-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R2 and established 94 EA for book quantity before count, with control date 2026-01-13.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-057-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-057-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-057-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-11 readiness input for force_book_quantity, then separately derived its 2026-01-14 operating outcome under the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-057-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-057-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-057-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R2 and established 94 EA for book quantity before count, with control date 2026-01-13.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-057-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-057-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-057-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-057-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000057 at R2.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-057"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-057"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-057",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-057"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-057"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-057"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0057 only to post_verified_count_adjustment, NS-000057, and the supported -11.0 EA; kept broader scope and adjust_without_recount outside current authority.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "ranges": [
+                "Control!A1:I50",
+                "Approvals!A1:G20"
+              ],
+              "spreadsheetId": "sheet-057",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-057"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.batchGet"
+          },
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!A1:I50",
+              "spreadsheetId": "sheet-057",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-057"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Reconciled 83 observed less 0 excluded to 83 supported EA for independently counted physical quantity. Applied inventory accounting cutoff to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-057",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-057",
+              "threadId": "thread-057"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-057",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-057"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-11 readiness input for force_book_quantity, then separately derived its 2026-01-14 operating outcome under the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "count": 50,
+              "query": "\"CASE-057\"",
+              "sort": "timestamp",
+              "sort_dir": "asc"
+            },
+            "expected_result_contains": {
+              "messages": {
+                "matches": [
+                  {
+                    "ts": "1768000057.000100"
+                  }
+                ]
+              }
+            },
+            "match": "result_contains",
+            "tool": "slack.search_messages"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the existing operations thread for CASE-057 and its immutable channel and thread timestamp before using the discussion.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-057' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400057
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 83 observed less 0 excluded to 83 supported EA for independently counted physical quantity.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "CycleCountName='SEA-BLIND-0057'"
+            },
+            "expected_result_contains": {
+              "CycleCountHeaderId": 1600057
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.cycle_count_definitions.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle cycle count definitions record: Applied revision R2 and established 94 EA for book quantity before count, with control date 2026-01-13.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "CycleCountEntryId=1610057"
+            },
+            "expected_result_contains": {
+              "CycleCountEntryId": 1610057
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.cycle_count_sequence_details.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle cycle count sequence details record: Reconciled 83 observed less 0 excluded to 83 supported EA for independently counted physical quantity.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "cycleCountSequenceDetailsUniqID": "cycleCountSequenceDetailsUniqID-0057",
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "EntryHistoryId": 1620057
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.cycle_count_history.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle cycle count history record: Reconciled 83 observed less 0 excluded to 83 supported EA for independently counted physical quantity.",
+        "id": "investigation_16",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.inventory_transactions.create",
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-057' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400057
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "description": "Read NS-000057 back through the documented Oracle inventory onhand balances.list operation after the mutation and confirmed the resource-specific changed fields ['AvailableToTransact', 'LastUpdateDate', 'LotNumber', 'PrimaryQuantity', 'SubinventoryCode'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "AvailableToTransact": 83,
+          "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+          "LotNumber": "LOT-0057",
+          "PrimaryQuantity": 83,
+          "SubinventoryCode": "STORES"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": false,
+        "target_identity": {
+          "InventoryItemId": 1400057
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.inventory_transactions.create",
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-057' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400057
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "description": "Read NS-000057 back through the documented Oracle inventory onhand balances.list operation after the mutation and confirmed the resource-specific changed fields ['AvailableToTransact', 'LastUpdateDate', 'LotNumber', 'PrimaryQuantity', 'SubinventoryCode'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "AvailableToTransact": 83,
+        "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+        "LotNumber": "LOT-0057",
+        "PrimaryQuantity": 83,
+        "SubinventoryCode": "STORES"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "InventoryItemId": 1400057
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-057"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-057 scope, immutable handles, mounted systems, and evidence index before investigating NS-000057.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000057.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000057.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000057.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0057 only to post_verified_count_adjustment, NS-000057, and the supported -11.0 EA; kept broader scope and adjust_without_recount outside current authority.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-057' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-057"
+              },
+              {
+                "id": "drive-approval-057"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-057 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-057-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-057-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-057-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 83 observed less 0 excluded to 83 supported EA for independently counted physical quantity.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-057-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-057-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-057-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R2 and established 94 EA for book quantity before count, with control date 2026-01-13.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-057-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-057-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-057-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-11 readiness input for force_book_quantity, then separately derived its 2026-01-14 operating outcome under the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-057-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-057-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-057-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R2 and established 94 EA for book quantity before count, with control date 2026-01-13.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-057-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-057-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-057-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-057-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000057 at R2.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-057"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-057"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-057",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-057"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-057"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-057"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0057 only to post_verified_count_adjustment, NS-000057, and the supported -11.0 EA; kept broader scope and adjust_without_recount outside current authority.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-057",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-057"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-057",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-057"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 83 observed less 0 excluded to 83 supported EA for independently counted physical quantity. Applied inventory accounting cutoff to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-057",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-057",
+            "threadId": "thread-057"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-057",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-057"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-11 readiness input for force_book_quantity, then separately derived its 2026-01-14 operating outcome under the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "count": 50,
+            "query": "\"CASE-057\"",
+            "sort": "timestamp",
+            "sort_dir": "asc"
+          },
+          "expected_result_contains": {
+            "messages": {
+              "matches": [
+                {
+                  "ts": "1768000057.000100"
+                }
+              ]
+            }
+          },
+          "match": "result_contains",
+          "tool": "slack.search_messages"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the existing operations thread for CASE-057 and its immutable channel and thread timestamp before using the discussion.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-057' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400057
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 83 observed less 0 excluded to 83 supported EA for independently counted physical quantity.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "CycleCountName='SEA-BLIND-0057'"
+          },
+          "expected_result_contains": {
+            "CycleCountHeaderId": 1600057
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.cycle_count_definitions.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle cycle count definitions record: Applied revision R2 and established 94 EA for book quantity before count, with control date 2026-01-13.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "CycleCountEntryId=1610057"
+          },
+          "expected_result_contains": {
+            "CycleCountEntryId": 1610057
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.cycle_count_sequence_details.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle cycle count sequence details record: Reconciled 83 observed less 0 excluded to 83 supported EA for independently counted physical quantity.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "cycleCountSequenceDetailsUniqID": "cycleCountSequenceDetailsUniqID-0057",
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "EntryHistoryId": 1620057
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.cycle_count_history.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle cycle count history record: Reconciled 83 observed less 0 excluded to 83 supported EA for independently counted physical quantity.",
+      "id": "investigation_16",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-057"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
+    },
+    {
+      "arguments": {
+        "channel": "C-PROCUREMENT",
+        "limit": 100,
+        "ts": "1768000057.000100"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000057.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-057' and trashed = false"
+      },
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-057"
+          },
+          {
+            "id": "drive-approval-057"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-057-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-057-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-057-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-057-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-057-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-057-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-057-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-057-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-057-09",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-057-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-057"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-057"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!A1:I50",
+        "spreadsheetId": "sheet-057",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "expected_result_contains": {
+        "values": [
+          [
+            "CASE-057"
+          ]
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "thread-057",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "thread-057"
+      },
+      "match": "result_contains",
+      "tool": "gmail.threads.get"
     },
     {
       "arguments": {
@@ -92,58 +1611,89 @@
         "sort": "timestamp",
         "sort_dir": "asc"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": {
+          "matches": [
+            {
+              "ts": "1768000057.000100"
+            }
+          ]
+        }
+      },
+      "match": "result_contains",
       "tool": "slack.search_messages"
-    },
-    {
-      "arguments": {
-        "channel": "C-PROCUREMENT",
-        "limit": 100,
-        "ts": "1768000057.000100"
-      },
-      "match": "successful_tool_call",
-      "tool": "slack.conversations_replies"
-    },
-    {
-      "arguments": {
-        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
-        "fileId": "drive-057"
-      },
-      "match": "successful_tool_call",
-      "tool": "google_drive.files.get"
-    },
-    {
-      "arguments": {
-        "majorDimension": "ROWS",
-        "range": "Control!A1:H50",
-        "spreadsheetId": "sheet-057",
-        "valueRenderOption": "UNFORMATTED_VALUE"
-      },
-      "match": "successful_tool_call",
-      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-057'"
+        "q": "ItemNumber='NS-COMP-057' and OrganizationCode='SEA'"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "InventoryItemId": 1400057
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "CycleCountName='SEA-BLIND-0057'"
+      },
+      "expected_result_contains": {
+        "CycleCountHeaderId": 1600057
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.cycle_count_definitions.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "CycleCountEntryId=1610057"
+      },
+      "expected_result_contains": {
+        "CycleCountEntryId": 1610057
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.cycle_count_sequence_details.list"
+    },
+    {
+      "arguments": {
+        "cycleCountSequenceDetailsUniqID": "cycleCountSequenceDetailsUniqID-0057",
+        "limit": 50,
+        "onlyData": true
+      },
+      "expected_result_contains": {
+        "EntryHistoryId": 1620057
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.cycle_count_history.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
-    "slack.search_messages",
     "slack.conversations_replies",
+    "google_drive.files.list",
+    "google_drive.files.download",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.export",
     "google_drive.files.get",
     "google_sheets.spreadsheets.values.get",
-    "oracle_fusion.inventory_onhand_balances.list"
+    "gmail.threads.get",
+    "slack.search_messages",
+    "oracle_fusion.inventory_onhand_balances.list",
+    "oracle_fusion.cycle_count_definitions.list",
+    "oracle_fusion.cycle_count_sequence_details.list",
+    "oracle_fusion.cycle_count_history.list"
   ],
   "task_id": "factorybench-057",
   "write_tools": [
     "factorybench.submit_answer",
-    "google_drive.approvals.approve",
+    "google_drive.comments.create",
     "oracle_fusion.inventory_transactions.create",
     "slack.chat_postMessage"
   ]

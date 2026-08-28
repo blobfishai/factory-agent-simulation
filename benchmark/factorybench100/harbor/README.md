@@ -23,10 +23,12 @@ configs:
 
 # FactoryBench-100
 
-FactoryBench-100 is a 100-task benchmark for long-horizon enterprise ERP agents.
-Each independently authored task runs in an isolated SQLite snapshot and exposes
-documented Oracle Fusion Cloud 26a REST operations alongside Gmail v1, Drive v3,
-Sheets v4, and Slack Web API operations over synthetic state.
+FactoryBench-100 is a 100-task benchmark for employee-grade manufacturing and
+ERP decisions. Each public prompt is a short, high-level employee request; it
+does not name the systems, files, API calls, answer schema, or execution order.
+The isolated SQLite world exposes documented Oracle Fusion Cloud 26a REST
+operations alongside Gmail v1, Drive v3, Sheets v4, and Slack Web API operations
+over synthetic state.
 
 Harbor runs the authoritative SQLite state and trace in a private root-owned
 sidecar. The agent container receives only the task instruction, typed tool CLI,
@@ -40,19 +42,22 @@ record, or copied task is included.
 
 The single metric is **FactoryScore**:
 
-`100 × deterministic workflow checks passed / checks available`, averaged over
-all evaluated tasks.
+`100 × passed deterministic criterion weight / available criterion weight`,
+averaged over all evaluated tasks.
 
-Checks cover read-before-write controls, exact ERP state transitions, exact
-answer fields, write-scope containment, and error-free execution. Strict pass is
+Every rubric is task-specific. Criteria cover prerequisite discoveries in any
+valid order, netting and date calculations, conditional branches, comparison of
+three realistic options, post-write provider readback, the exact ERP and collaboration state transitions,
+key answer insights, write containment, and rejected mutations. Harmless failed
+exploratory reads do not erase an otherwise correct outcome. Strict pass is
 reported only as supporting evidence.
 
 ## Qualification
 
 - Reference oracle: 100.00 FactoryScore, 100/100 strict passes
-- Incomplete-workflow control: 85.71
-- Read-only control: 42.86
-- No-control ablation: 14.29
+- Incomplete-workflow control: 97.25
+- Read-only control: 34.96
+- No-control ablation: 68.71
 - Deterministic replay sample: 10/10 matched
 - Single-mutation omission checks: 300/300 detected
 
@@ -62,7 +67,7 @@ These rows are measured controls, not claims about frontier models.
 
 | Model | Harness | Coverage | FactoryScore | Strict passes | Selection |
 |---|---|---:|---:|---:|---|
-| [gpt-5.6-luna](model-runs/gpt-5.6-luna-full-100.json) | Harbor 0.21.0 / codex 0.150.1 / medium | 100/100 | 85.29 | 0/100 | Full v2 suite (100/100 tasks). Codex 0.150.1 was preinstalled in the agent image; all prompts, tools, private sidecars, and verifiers were byte-identical to the released tasks. |
+| [gpt-5.6-luna](model-runs/gpt-5.6-luna-full-100.json) | Harbor 0.21.0 / codex 0.150.1 / max | 100/100 | 89.21 | 4/100 | Full FactoryBench-100 v3.0.0 suite (100/100 tasks); high-level human requests, multi-source investigation, and task-specific deterministic scoring. Runtime overlay changed only the agent image to preinstall Codex 0.150.1; all semantic task and verifier files matched the released tree. |
 
 Coverage is part of the result. A stratified subset is not presented as a
 100-task score. Full manifests and task-level traces are mirrored under
@@ -71,8 +76,9 @@ Coverage is part of the result. A stratified subset is not presented as a
 ## Fields
 
 Each JSONL row includes the natural-language prompt, role, workflow family,
-12 heterogeneous context files, required tools and reads, allowed write tables,
-human-readable rubric, and metric contract. Executable worlds, oracle traces,
+12 heterogeneous context files, reference tools, prerequisite investigation
+groups, allowed write tables, weighted human-readable rubric, and metric
+contract. Executable worlds, oracle traces,
 exact verifier specifications, and Harbor tasks live in the source repository.
 
 ## Links

@@ -1,5 +1,7 @@
-# Recover a customer promise after a carrier rollover — operating control
+# Recover a customer promise after a carrier rollover — operating policy
 
-Scope: Reconcile customer correspondence, contractual commitments, and Order Management state before changing supply execution.
+Decision scope: customer order SO-47003.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: new sailing cutoff plus port transit and customer dock window. Establish the immutable source record and effective revision, then reconcile finished units committed to the rolled sailing, units already packed and carrier-ready, and units missing the rolled cutoff from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction.

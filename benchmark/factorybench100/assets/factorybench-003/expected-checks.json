@@ -1,29 +1,104 @@
 {
   "answer": {
-    "order_number": "ORD-0003",
-    "revised_commit_date": "2026-01-16",
-    "supply_action": "Customer commit recovered"
+    "affected_resource_or_operation": "NS-000003",
+    "base_completion": "2026-01-22",
+    "business_need_date": "2026-01-19",
+    "candidate_capacity": 42,
+    "capacity_gap": 18,
+    "capacity_unit": "EA",
+    "decision_timing_status": "ON_TIME",
+    "escalated_completion": "2026-01-18",
+    "escalation_approval_required": 1,
+    "net_usable_capacity": 35,
+    "outcome_vs_control_days": 0,
+    "qualified_alternative_completion": "2026-01-19",
+    "recommended_incremental_cost_usd": 401,
+    "recommended_option": "split_air_and_ocean",
+    "recommended_outcome_date": "2026-01-19",
+    "required_capacity": 53,
+    "selected_resource_or_control": "WO-0003",
+    "unavailable_or_protected_capacity": 7
   },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'split_air_and_ocean', tied to NS-000003, revision R4, and the selected split_air_and_ocean outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-19', tied to NS-000003, revision R4, and the selected split_air_and_ocean outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported affected resource or operation as 'NS-000003', tied to NS-000003, revision R4, and the selected split_air_and_ocean outcome.",
+      "field": "affected_resource_or_operation",
+      "id": "answer_affected_resource_or_operation",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported selected resource or control as 'WO-0003', tied to NS-000003, revision R4, and the selected split_air_and_ocean outcome.",
+      "field": "selected_resource_or_control",
+      "id": "answer_selected_resource_or_control",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000003, revision R4, and the selected split_air_and_ocean outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "weight": 1.0
+    }
+  ],
   "assertions": [
     {
-      "description": "oracle_fusion.work_orders.update produced the task-scoped, source-audited state transition.",
+      "description": "Required immutable record NS-000003 to reach business outcome 'Customer commit recovered' through oracle_fusion.work_orders.update with exact provider-critical values WorkOrderId=100003, requestBody.WorkOrderStatusCode='ORA_RELEASED', requestBody.PlannedStartDate='2026-01-17', requestBody.PlannedCompletionDate='2026-01-19'. The audited transition binds selected option split_air_and_ocean, revision R4, approval AP-0003, and constraint new sailing cutoff plus port transit and customer dock window; units missing the rolled cutoff = 7 EA; uncovered or unsupported scope = 18.0 EA; no other provider record satisfies this state criterion.",
       "id": "mutation_01",
+      "payload_allowed_argument_paths": [
+        "WorkOrderId",
+        "requestBody.PlannedCompletionDate",
+        "requestBody.PlannedStartDate",
+        "requestBody.WorkOrderStatusCode"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "WorkOrderId": 100003,
+          "requestBody": {
+            "PlannedCompletionDate": "2026-01-19",
+            "PlannedStartDate": "2026-01-17",
+            "WorkOrderStatusCode": "ORA_RELEASED"
+          }
+        },
+        "tool": "oracle_fusion.work_orders.update"
+      },
       "table": "resource_state",
       "values": {
-        "payload_json": "{\"arguments\":{\"WorkOrderId\":100003,\"requestBody\":{\"PlannedCompletionDate\":\"2026-01-22\",\"PlannedStartDate\":\"2026-01-16\",\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-003\",\"outcome\":\"Reconcile the carrier email, allocation sheet, and customer thread, then revise the production completion supporting the new confirmed delivery.\",\"tool\":\"oracle_fusion.work_orders.update\"}",
         "resource_type": "oracle_fusion.work_orders",
         "revision": 1,
         "status": "Customer commit recovered",
         "system": "oracle_fusion"
       },
+      "weight": 3.0,
       "where": {
         "resource_id": "factorybench-003-mutation-01",
         "task_id": "factorybench-003"
       }
     },
     {
-      "description": "google_sheets.spreadsheets.values.append produced the task-scoped, source-audited state transition.",
+      "description": "Appended one audit row for CASE-003 with the selected option, completion, role, and AP-0003.",
       "id": "mutation_02",
+      "payload_contains": {
+        "arguments": {
+          "range": "Audit!A:G",
+          "spreadsheetId": "sheet-003"
+        },
+        "tool": "google_sheets.spreadsheets.values.append"
+      },
+      "payload_text_contains": [
+        "2026-01-19",
+        "split_air_and_ocean"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "google_sheets.spreadsheets.values",
@@ -31,14 +106,23 @@
         "status": "Recorded",
         "system": "google_sheets"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-003-mutation-02",
         "task_id": "factorybench-003"
       }
     },
     {
-      "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+      "description": "Marked the existing CASE-003 approval thread complete only after the Oracle decision was persisted.",
       "id": "mutation_03",
+      "payload_contains": {
+        "arguments": {
+          "channel": "C-FINANCE",
+          "name": "white_check_mark",
+          "timestamp": "1768000003.000100"
+        },
+        "tool": "slack.reactions_add"
+      },
       "table": "resource_state",
       "values": {
         "resource_type": "slack",
@@ -46,10 +130,718 @@
         "status": "Recorded",
         "system": "slack"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-003-mutation-03",
         "task_id": "factorybench-003"
       }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-19 as the documented date for customer order SO-47003; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated 53 EA for finished units committed to the rolled sailing.",
+      "field": "required_capacity",
+      "id": "calculate_required_capacity",
+      "weight": 2.0
+    },
+    {
+      "description": "Established 42 gross candidate EA associated with units already packed and carrier-ready; did not call it usable before applying protected load.",
+      "field": "candidate_capacity",
+      "id": "establish_candidate_capacity",
+      "weight": 1.5
+    },
+    {
+      "description": "Excluded 7 EA for units missing the rolled cutoff.",
+      "field": "unavailable_or_protected_capacity",
+      "id": "remove_protected_capacity",
+      "weight": 1.5
+    },
+    {
+      "description": "Calculated 42 candidate \u2212 7 unavailable/protected = 35 net usable EA.",
+      "field": "net_usable_capacity",
+      "id": "calculate_net_usable_capacity",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 53 required \u2212 35 effective capacity = 18 EA uncovered.",
+      "field": "capacity_gap",
+      "id": "calculate_capacity_gap",
+      "weight": 2.0
+    },
+    {
+      "description": "Kept load and availability in EA.",
+      "field": "capacity_unit",
+      "id": "preserve_capacity_unit",
+      "weight": 0.5
+    },
+    {
+      "description": "Bound the recovery to provider identifier WO-0003 only after confirming new sailing cutoff plus port transit and customer dock window.",
+      "field": "selected_resource_or_control",
+      "id": "identify_selected_resource_or_control",
+      "weight": 1.5
+    },
+    {
+      "description": "Calculated 2026-01-22 for accept_next_sailing.",
+      "field": "base_completion",
+      "id": "compare_base_schedule",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated 2026-01-19 for split_air_and_ocean using packing capacity before each cutoff.",
+      "field": "qualified_alternative_completion",
+      "id": "compare_qualified_schedule",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated 2026-01-18 for move_all_units_by_air and retained its authority constraint.",
+      "field": "escalated_completion",
+      "id": "compare_escalated_schedule",
+      "weight": 1.0
+    },
+    {
+      "description": "Applied USD 401 as the documented incremental recovery cost for split_air_and_ocean; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that move_all_units_by_air remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of accept_next_sailing, split_air_and_ocean, and move_all_units_by_air; selected split_air_and_ocean because it alone gives the best currently authorized result under new sailing cutoff plus port transit and customer dock window.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-19 as the supported outcome date for split_air_and_ocean.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-19 with the independent control date 2026-01-19 and calculated a signed variance of 0 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-003"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-003 scope, immutable handles, mounted systems, and evidence index before investigating NS-000003.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-003' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-003"
+              },
+              {
+                "id": "drive-approval-003"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-003 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-003-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-003-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-003-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied packing capacity before each cutoff to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-003-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-003-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-003-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-16 readiness input for split_air_and_ocean, then separately derived its 2026-01-19 operating outcome under new sailing cutoff plus port transit and customer dock window instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-003-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-003-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-003-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R4 and established 53 EA for finished units committed to the rolled sailing, with control date 2026-01-19.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-003-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-003-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-003-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000003 at R4.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-003-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-003-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-003-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-003-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R4 and established 53 EA for finished units committed to the rolled sailing, with control date 2026-01-19.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-003"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-003"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-003",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-003"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-003"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-003"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0003 only to split_air_and_ocean, NS-000003, and the supported 35 EA; kept broader scope and move_all_units_by_air outside current authority.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-003"
+          },
+          "expected_result_contains": {
+            "id": "drive-003"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-003",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-003"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-003"
+          },
+          "expected_result_contains": {
+            "id": "drive-003"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R4 and established 53 EA for finished units committed to the rolled sailing, with control date 2026-01-19.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-003"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-003"
+              }
+            ],
+            "spreadsheetId": "sheet-003"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000003.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000003.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000003.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0003 only to split_air_and_ocean, NS-000003, and the supported 35 EA; kept broader scope and move_all_units_by_air outside current authority.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-003\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-003"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-003 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-003",
+            "messageId": "msg-003-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "Q0FTQ0FERSBJTkRVU1RSSUFMIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogY2Fycmllci1yb2xsb3Zlci1hbmQtZGVsaXZlcnktY2FsZW5kYXItMDAwMwpDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMDMKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogY2FycmllciByb2xsb3ZlciBhbmQgZGVsaXZlcnkgY2FsZW5kYXIKSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTAwMwpFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSNApNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDE4IEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IHNwbGl0X2Fpcl9hbmRfb2NlYW4KU3RhbmRhcmQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTkKRXhwZWRpdGVkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTE2ClJlc3VsdGluZyBvcGVyYXRpbmcgb3V0Y29tZSBzdGF0ZWQgYnkgcmVxdWVzdGVyLCBub3QgYnkgY291bnRlcnBhcnR5OiAyMDI2LTAxLTE5CkVjb25vbWljIGltcGFjdCBzdGF0ZWQgYnkgY291bnRlcnBhcnR5OiBVU0QgNDAxCkluZGVwZW5kZW50IGNvbmRpdGlvbjogY2FycmllcidzIGNvbmZpcm1lZCBuZXh0LXNhaWxpbmcgYW5kIGFpcmZyZWlnaHQgcXVvdGVzCkNhcGFjaXR5IGlzIHJlc2VydmVkIG9ubHkgYWZ0ZXIgdGhlIGJ1eWVyIG9yIHBsYW5uZXIgc3VwcGxpZXMgdGhlIG1hdGNoaW5nIGltbXV0YWJsZSByZWNvcmQgYW5kIGN1cnJlbnQgYXBwcm92YWwuCgozLiBFWENMVVNJT05TIEFORCBBU1NVTVBUSU9OUwpOb3QgaW5jbHVkZWQ6IHVuaXRzIG1pc3NpbmcgdGhlIHJvbGxlZCBjdXRvZmYKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogbmV3IHNhaWxpbmcgY3V0b2ZmIHBsdXMgcG9ydCB0cmFuc2l0IGFuZCBjdXN0b21lciBkb2NrIHdpbmRvdwpOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wMDQgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBDYXNjYWRlIEluZHVzdHJpYWwgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwMDMKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+            "size": 1538
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-16 readiness input for split_air_and_ocean, then separately derived its 2026-01-19 operating outcome under new sailing cutoff plus port transit and customer dock window instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100003,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100003
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order operations record: Applied packing capacity before each cutoff to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100003,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100003
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_materials.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order materials record: Applied revision R4 and established 53 EA for finished units committed to the rolled sailing, with control date 2026-01-19.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-003' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400003
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 42 observed less 7 excluded to 35 supported EA for units already packed and carrier-ready.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100003
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100003
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0003'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100003
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000003 for customer order SO-47003 using immutable IDs and preserved effective revision R4.",
+      "id": "investigation_17",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0003"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000003
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='SO-47003'"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000003
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle sales orders record: Applied revision R4 and established 53 EA for finished units committed to the rolled sailing, with control date 2026-01-19.",
+      "id": "investigation_18",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.work_orders.update",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100003
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100003
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0003'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100003
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "description": "Read NS-000003 back through the documented Oracle work orders.get operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkOrderStatusCode'], including the effective update at 2026-01-19, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "LastUpdateDate": "2026-01-19T16:00:00-08:00",
+        "PlannedCompletionDate": "2026-01-19",
+        "PlannedStartDate": "2026-01-17",
+        "WorkOrderStatusCode": "ORA_RELEASED"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "WorkOrderId": 100003
+      },
+      "weight": 2.0
     }
   ]
 }

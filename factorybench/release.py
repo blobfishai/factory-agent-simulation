@@ -20,7 +20,9 @@ from .catalog import (
     FAMILIES,
     WORLD_ID,
     build_catalog,
+    catalog_fingerprint,
     catalog_quality_report,
+    task_fingerprint,
 )
 from .evaluation import POLICIES, policy_steps, qualify, run_episode
 from .scenarios import FAMILY_DESCRIPTIONS, FAMILY_LABELS
@@ -168,6 +170,11 @@ def _read_json(path: Path) -> dict[str, Any]:
 def _load_model_runs() -> list[dict[str, Any]]:
     if not MODEL_RUNS_ROOT.exists():
         return []
+    current_tasks = build_catalog()
+    current_task_fingerprints = {
+        task["task_id"]: task_fingerprint(task) for task in current_tasks
+    }
+    current_catalog_fingerprint = catalog_fingerprint(current_tasks)
     runs = []
     for path in sorted(MODEL_RUNS_ROOT.glob("*.json")):
         run = _read_json(path)
@@ -175,16 +182,30 @@ def _load_model_runs() -> list[dict[str, Any]]:
             raise ValueError(f"unsupported model-run schema: {path}")
         if run.get("benchmark_version") != BENCHMARK_VERSION:
             continue
+        if run.get("catalog_sha256") != current_catalog_fingerprint:
+            continue
         trials = run.get("trials")
         if not isinstance(trials, list) or len(trials) != run.get("aggregate", {}).get("tasks"):
             raise ValueError(f"model-run trial count mismatch: {path}")
+        if any(
+            trial.get("task_id") not in current_task_fingerprints
+            or trial.get("benchmark_task_sha256")
+            != current_task_fingerprints[trial.get("task_id")]
+            for trial in trials
+        ):
+            continue
+        runtime_overlay = run.get("runtime_overlay")
+        if runtime_overlay is not None:
+            if not isinstance(runtime_overlay, dict):
+                raise ValueError(f"invalid model-run runtime overlay: {path}")
+            if runtime_overlay.get("benchmark_version") != BENCHMARK_VERSION:
+                continue
         for trial in trials:
             artifact = MODEL_RUNS_ROOT / str(trial["artifact"])
             if not artifact.is_file():
                 raise ValueError(f"missing model-run trial artifact: {artifact}")
-        runtime_overlay = run.get("runtime_overlay")
         if runtime_overlay is not None:
-            if not isinstance(runtime_overlay, dict) or not runtime_overlay.get("artifact"):
+            if not runtime_overlay.get("artifact"):
                 raise ValueError(f"invalid model-run runtime overlay: {path}")
             overlay_artifact = MODEL_RUNS_ROOT / str(runtime_overlay["artifact"])
             if not overlay_artifact.is_file():
@@ -273,7 +294,37 @@ def _harbor_dataset_manifest(tasks_root: Path) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _rubric_criteria(task: dict[str, Any]) -> list[dict[str, Any]]:
+    criteria = [
+        *task["expected"]["investigations"],
+        *task["expected"].get("post_write_verifications", []),
+        *task["expected"]["calculations"],
+        *task["expected"]["assertions"],
+        *task["expected"]["answer_checks"],
+    ]
+    return [
+        {
+            "id": criterion["id"],
+            "description": criterion["description"],
+            "weight": float(criterion.get("weight", 1.0)),
+        }
+        for criterion in criteria
+    ] + [
+        {
+            "id": "write_scope",
+            "description": f"Keep every successful write inside {task['task_id']}'s declared Oracle, collaboration, answer, and audit state.",
+            "weight": 1.0,
+        },
+        {
+            "id": "no_rejected_mutation",
+            "description": "Complete without a rejected state-changing call; failed exploratory reads do not erase a correct business outcome.",
+            "weight": 1.0,
+        },
+    ]
+
+
 def _public_task(task: dict[str, Any]) -> dict[str, Any]:
+    rubric = _rubric_criteria(task)
     return {
         "task_id": task["task_id"],
         "task_name": task["title"],
@@ -285,18 +336,15 @@ def _public_task(task: dict[str, Any]) -> dict[str, Any]:
         "as_of": task["as_of"],
         "context_files": [f"assets/{task['task_id']}/{asset['path']}" for asset in task["assets"]]
         + [f"assets/{task['task_id']}/starting-state.json"],
-        "required_tools": [step["tool"] for step in task["oracle_steps"]],
+        "reference_tools": [step["tool"] for step in task["oracle_steps"]],
+        "call_order_policy": "No exact sequence is graded; each prerequisite investigation must complete before the first mutation.",
         "required_reads": task["required_reads"],
         "required_read_calls": task["required_read_calls"],
+        "post_write_verifications": task.get("post_write_verifications", []),
         "answer_schema": task["answer_schema"],
         "allowed_write_tables": task["allowed_write_tables"],
-        "rubric": [assertion["description"] for assertion in task["expected"]["assertions"]]
-        + [
-            "Complete all required policy and ERP reads before the first write.",
-            "Submit the exact requested answer fields.",
-            "Keep every write inside the declared task scope.",
-            "Complete without rejected tool calls.",
-        ],
+        "rubric": [criterion["description"] for criterion in rubric],
+        "rubric_criteria": rubric,
         "metric": task["evaluation"],
         "metadata": {
             "benchmark": BENCHMARK_NAME,
@@ -345,7 +393,7 @@ def _website_data(
         "oracle": "Measured solvability ceiling from replaying the checked-in reference workflow; not a model submission.",
         "incomplete_workflow": "Measured ablation that omits the final ERP mutation while still submitting the oracle answer.",
         "read_only": "Measured control that performs the required reads but makes no ERP changes or answer submission.",
-        "no_control": "Measured ablation that skips all policy and preflight reads; the environment rejects its writes.",
+        "no_control": "Measured ablation that attempts the reference mutations and answer without the required source investigation.",
     }
     leaderboard = []
     ranked_runs = sorted(
@@ -420,8 +468,10 @@ def _website_data(
         samples[task_id] = {
             "taskId": task_id,
             "prompt": task["instruction"],
-            "gradedCriteria": [assertion["description"] for assertion in task["expected"]["assertions"]]
-            + ["Read-before-write control", "Exact answer fields", "Write-scope containment", "Error-free execution"],
+            "gradedCriteria": [criterion["description"] for criterion in _rubric_criteria(task)],
+            "criterionWeights": _rubric_criteria(task),
+            "decisionBranch": task["workflow"]["decision_branch"],
+            "options": task["decision_model"]["options"],
             "assets": [
                 {
                     "path": (Path("assets") / task_id / asset["path"]).as_posix(),
@@ -461,7 +511,7 @@ def _website_data(
                     "name": "expected-checks.json",
                     "format": "JSON",
                     "bytes": (release_root / checks_path).stat().st_size,
-                    "preview": f"{len(task['expected']['assertions']) + 4} deterministic workflow checks plus exact answer fields.",
+                    "preview": f"{len(_rubric_criteria(task))} weighted, task-specific deterministic criteria spanning discovery, calculation, alternatives, state, and answer insights.",
                     "role": "verifier",
                     "note": "Public check contract; no LLM judge participates in scoring.",
                 },
@@ -600,10 +650,10 @@ def _website_data(
         "benchmark": {
             "name": BENCHMARK_NAME,
             "version": BENCHMARK_VERSION,
-            "tagline": "100 distinct, executable Oracle Fusion enterprise workflows across ERP and collaboration systems.",
-            "question": "Can an agent reconcile real enterprise evidence, execute the documented ERP operation, and close the loop across collaboration systems?",
+            "tagline": "100 employee-grade manufacturing decisions with hidden investigation graphs and executable ERP outcomes.",
+            "question": "Can an agent turn a high-level operating question into the right investigation, calculation, option analysis, and audited Oracle decision?",
             "taskCount": len(tasks),
-            "categoryNoun": "workflow family",
+            "categoryNoun": "decision domain",
             "categories": [{"key": family, "label": FAMILY_LABELS[family], "count": sum(task["family"] == family for task in tasks)} for family in FAMILIES],
             "world": {"tools": len(tools), "tables": 7, "documents": sum(len(task["assets"]) for task in tasks)},
             "referenceCalls": {"min": min(reference_calls), "median": statistics.median(reference_calls), "max": max(reference_calls)},
@@ -635,7 +685,7 @@ def _website_data(
                     "key": "factory_score",
                     "label": "FactoryScore",
                     "weight": 100,
-                    "description": "100 × deterministic workflow checks passed / checks available, averaged over tasks.",
+                    "description": "100 × passed task-specific deterministic criterion weight / available criterion weight, averaged over tasks.",
                 }
             ],
             "strictPassTracked": True,
@@ -654,11 +704,15 @@ def _website_data(
         "methodology": [
             {
                 "title": "One metric, inspectable evidence",
-                "body": "FactoryScore is the mean percentage of deterministic checks passed. Each task checks required cross-system reads before writes, exact Oracle and collaboration state transitions, exact answer fields, write-scope containment, and tool-call validity. Strict completion is supporting evidence, not a second benchmark metric.",
+                "body": "FactoryScore is the mean percentage of task-specific deterministic criterion weight passed. Discovery and final insights carry weight, calculations and the primary ERP decision carry more, and supporting collaboration writes and containment remain observable. Strict completion is supporting evidence, not a second metric.",
             },
             {
-                "title": "Real workflow shape, synthetic company data",
-                "body": "The suite is a clean-room simulation shaped by production ERP work: evidence in email, Drive, spreadsheets, Slack, vendor PDFs, technical specifications, and Oracle records; explicit approvals; lot and serial traceability; transactional rollback; and required write-back. It contains no Oracle binaries, proprietary screens, customer records, or copied benchmark tasks.",
+                "title": "The request does not reveal the recipe",
+                "body": "Each prompt is a short employee request: decide the date, quantity, disposition, or commercial response and explain the constraint and alternatives. It contains no task ID, source list, filenames, answer schema, API names, or ordered steps. The agent must discover the case records and decide which evidence matters.",
+            },
+            {
+                "title": "Facts are scattered, not preassembled",
+                "body": "Oracle resources, email, Drive documents, spreadsheets, Slack, vendor PDFs, specifications, inventory eligibility, finite-capacity slots, and approval limits each contribute only part of the decision. No read returns an approved payload, operation name, or assembled answer. The clean-room company and all records are synthetic.",
             },
             {
                 "title": "Qualification before publication",
@@ -678,7 +732,7 @@ def _website_data(
                 {"layer": "Environment", "left": "Containerized task environments with snapshot lifecycle", "right": "Per-task SQLite snapshots for Oracle, Gmail, Drive, Sheets, and Slack state"},
                 {"layer": "Tool surface", "left": "MCP gateway and environment servers", "right": "One tool per documented upstream API operation, with method/path/source pins"},
                 {"layer": "Agent run", "left": "Agent runner records tool interaction", "right": "Harness records every evidence read, ERP mutation, collaboration write, rejection, and submission"},
-                {"layer": "Grading", "left": "Before/after snapshot graders", "right": "State assertions + read order + exact answer + write scope + errors"},
+                {"layer": "Grading", "left": "Before/after snapshot graders", "right": "Task-specific discoveries + calculations + alternatives + exact state + answer insights"},
                 {"layer": "Distribution", "left": "Open-source framework and role benchmarks", "right": "GitHub world, Hugging Face rows, Harbor tasks, and website explorer"},
             ],
             "linkLabel": "Inspect Archipelago",
@@ -717,9 +771,12 @@ def _harbor_task(root: Path, task: dict[str, Any]) -> None:
             "level": task["level"],
             "as_of": task["as_of"],
             "world": task["world"],
+            "workflow": task["workflow"],
             "seed_tables": task["seed_tables"],
             "required_reads": task["required_reads"],
             "required_read_calls": task["required_read_calls"],
+            "required_investigations": task["required_investigations"],
+            "post_write_verifications": task.get("post_write_verifications", []),
             "answer_schema": task["answer_schema"],
             "allowed_write_tables": task["allowed_write_tables"],
             "expected": task["expected"],
@@ -794,7 +851,7 @@ volumes:
     _write_text(
         task_dir / "instruction.md",
         task["instruction"]
-        + "\n\nUse `tool list`, `tool schema NAME`, and `tool call NAME JSON` to inspect and operate the isolated enterprise world. Start with `factorybench.context.get`; it returns the scoped task identity, evidence index, reference records, and mounted systems. Finish with `factorybench.submit_answer` using exactly the requested fields.\n",
+        + "\n\nThe isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.\n",
     )
     description = json.dumps(task["instruction"])
     _write_text(
@@ -839,6 +896,8 @@ synthetic = true
             "task_id": task["task_id"],
             "required_reads": task["required_reads"],
             "required_read_calls": task["required_read_calls"],
+            "required_investigations": task["required_investigations"],
+            "post_write_verifications": task.get("post_write_verifications", []),
             "answer_schema": task["answer_schema"],
             "allowed_write_tables": task["allowed_write_tables"],
             "write_tools": sorted({step["tool"] for step in task["oracle_steps"] if step["tool"] not in READ_TOOLS}),
@@ -925,10 +984,12 @@ configs:
 
 # FactoryBench-100
 
-FactoryBench-100 is a 100-task benchmark for long-horizon enterprise ERP agents.
-Each independently authored task runs in an isolated SQLite snapshot and exposes
-documented Oracle Fusion Cloud 26a REST operations alongside Gmail v1, Drive v3,
-Sheets v4, and Slack Web API operations over synthetic state.
+FactoryBench-100 is a 100-task benchmark for employee-grade manufacturing and
+ERP decisions. Each public prompt is a short, high-level employee request; it
+does not name the systems, files, API calls, answer schema, or execution order.
+The isolated SQLite world exposes documented Oracle Fusion Cloud 26a REST
+operations alongside Gmail v1, Drive v3, Sheets v4, and Slack Web API operations
+over synthetic state.
 
 Harbor runs the authoritative SQLite state and trace in a private root-owned
 sidecar. The agent container receives only the task instruction, typed tool CLI,
@@ -942,11 +1003,14 @@ record, or copied task is included.
 
 The single metric is **FactoryScore**:
 
-`100 × deterministic workflow checks passed / checks available`, averaged over
-all evaluated tasks.
+`100 × passed deterministic criterion weight / available criterion weight`,
+averaged over all evaluated tasks.
 
-Checks cover read-before-write controls, exact ERP state transitions, exact
-answer fields, write-scope containment, and error-free execution. Strict pass is
+Every rubric is task-specific. Criteria cover prerequisite discoveries in any
+valid order, netting and date calculations, conditional branches, comparison of
+three realistic options, post-write provider readback, the exact ERP and collaboration state transitions,
+key answer insights, write containment, and rejected mutations. Harmless failed
+exploratory reads do not erase an otherwise correct outcome. Strict pass is
 reported only as supporting evidence.
 
 ## Qualification
@@ -971,8 +1035,9 @@ Coverage is part of the result. A stratified subset is not presented as a
 ## Fields
 
 Each JSONL row includes the natural-language prompt, role, workflow family,
-12 heterogeneous context files, required tools and reads, allowed write tables,
-human-readable rubric, and metric contract. Executable worlds, oracle traces,
+12 heterogeneous context files, reference tools, prerequisite investigation
+groups, allowed write tables, weighted human-readable rubric, and metric
+contract. Executable worlds, oracle traces,
 exact verifier specifications, and Harbor tasks live in the source repository.
 
 ## Links
@@ -1003,10 +1068,12 @@ def _release_readme(
     model_run_table = _model_run_markdown(model_runs)
     return f"""# FactoryBench-100 release
 
-FactoryBench-100 contains 100 distinct executable enterprise workflows across
-20 families. Every task includes a prompt, 12 synthetic evidence artifacts,
-multi-system starting state, endpoint-pinned tool contracts, an oracle replay,
-exact state and answer checks, a Harbor 1.4 task, and a Hugging Face row.
+FactoryBench-100 contains 100 distinct executable employee decisions across 20
+manufacturing and ERP domains. Every task includes a high-level human request,
+12 synthetic evidence artifacts, a multi-system starting state, endpoint-pinned
+tool contracts, a hidden investigation and calculation graph, three realistic
+options, task-specific weighted criteria, an oracle replay, a Harbor 1.4 task,
+and a Hugging Face row.
 
 Each Harbor task isolates the authoritative ERP state and trace in a private
 root-owned sidecar. The agent container contains no database, runtime, verifier,

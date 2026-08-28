@@ -1,5 +1,7 @@
-# Enter a non-PO metrology invoice — operating control
+# Enter a non-PO metrology invoice — operating policy
 
-Scope: Apply Oracle invoice validation and hold operations to multi-document invoice evidence.
+Decision scope: non-PO metrology invoice.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: supplier site, service acceptance, coding, and approval authority. Establish the immutable source record and effective revision, then reconcile invoice gross amount, approved service value with valid BU and account coding, and tax, duplicate, or unapproved service value from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file; and append one dated decision row to the existing audit tab; do not overwrite prior entries.

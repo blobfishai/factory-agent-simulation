@@ -1,5 +1,7 @@
-# Quarantine a returned field controller — operating control
+# Quarantine a returned field controller — operating policy
 
-Scope: Replenish and recover technician stock from field evidence without losing item or ownership controls.
+Decision scope: returned field controller.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: RMA, serial, ownership, failure code, and quarantine location. Establish the immutable source record and effective revision, then reconcile serialized units received from the service event, serials matching the RMA and customer asset, and different serials, accessories, and advance replacement from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it.

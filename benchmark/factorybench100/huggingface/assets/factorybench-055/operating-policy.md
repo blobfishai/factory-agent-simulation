@@ -1,5 +1,7 @@
-# Create rework supply from a failed final inspection — operating control
+# Create rework supply from a failed final inspection — operating policy
 
-Scope: Execute inspection plans and disposition evidence while preserving lot and result traceability.
+Decision scope: failed final-inspection quantity.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: supply covers only approved rework yield and component demand. Establish the immutable source record and effective revision, then reconcile units rejected by final inspection, units with approved rework disposition and recoverable BOM, and scrap and accepted units from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: mark the existing operations thread complete with the approved check reaction; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it.

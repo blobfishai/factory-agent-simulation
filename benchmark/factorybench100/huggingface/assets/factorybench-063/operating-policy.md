@@ -1,5 +1,7 @@
-# Cancel redundant purchase supply after demand deletion — operating control
+# Cancel redundant purchase supply after demand deletion — operating policy
 
-Scope: Create or revise supply execution from shortages, allocation decisions, and constrained-plan approvals.
+Decision scope: purchase supply after demand deletion.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: demand deletion, pegging, downstream reservations, and cancellation cutoff. Establish the immutable source record and effective revision, then reconcile open purchase quantity pegged to deleted demand, unreserved, unreceived quantity with no remaining peg, and quantity reserved, received, or re-pegged from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it.

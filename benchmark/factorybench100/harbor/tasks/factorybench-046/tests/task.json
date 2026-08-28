@@ -7,49 +7,220 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "case_reference": {
+      "baseline_action_date": {
+        "description": "Action date under enable_conditional_source.",
         "type": "string"
       },
-      "governance_action": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
       },
-      "supplier": {
+      "candidate_record_count": {
+        "description": "candidate supplier sites",
+        "type": "integer"
+      },
+      "controlled_action_date": {
+        "description": "Action date under approve_supplier_globally.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "effective_revision": {
+        "description": "Effective approved revision after rejecting drafts and superseded records.",
+        "type": "string"
+      },
+      "escalated_action_date": {
+        "description": "Action date under stay_sole_source.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "excluded_record_count": {
+        "description": "expired, failed, or unapproved sites",
+        "type": "integer"
+      },
+      "immutable_match_key": {
+        "description": "Pipe-delimited source_or_target_record|effective_revision|case_reference used to correlate source and target without name matching.",
+        "type": "string"
+      },
+      "matching_record_count": {
+        "description": "site passing audit, insurance, and trial-lot quality",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing enable_conditional_source, approve_supplier_globally, stay_sole_source.",
+        "enum": [
+          "enable_conditional_source",
+          "approve_supplier_globally",
+          "stay_sole_source"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "source_or_target_record": {
+        "description": "Immutable source or target record identifier in the effectivity or traceability decision.",
         "type": "string"
       }
     },
     "required": [
-      "case_reference",
-      "governance_action",
-      "supplier"
+      "baseline_action_date",
+      "business_need_date",
+      "candidate_record_count",
+      "controlled_action_date",
+      "decision_timing_status",
+      "effective_revision",
+      "escalated_action_date",
+      "escalation_approval_required",
+      "excluded_record_count",
+      "immutable_match_key",
+      "matching_record_count",
+      "outcome_vs_control_days",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "source_or_target_record"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "case_reference": "CASE-0046",
-      "governance_action": "Conditional source enabled",
-      "supplier": "SUP-0046"
+      "baseline_action_date": "2026-01-13",
+      "business_need_date": "2026-01-16",
+      "candidate_record_count": 4,
+      "controlled_action_date": "2026-01-12",
+      "decision_timing_status": "ON_TIME",
+      "effective_revision": "R5",
+      "escalated_action_date": "2026-01-19",
+      "escalation_approval_required": 1,
+      "excluded_record_count": 3,
+      "immutable_match_key": "NS-000046|R5|CASE-046",
+      "matching_record_count": 1,
+      "outcome_vs_control_days": -3,
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "enable_conditional_source",
+      "recommended_outcome_date": "2026-01-13",
+      "source_or_target_record": "NS-000046"
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'enable_conditional_source', tied to NS-000046, revision R5, and the selected enable_conditional_source outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-13', tied to NS-000046, revision R5, and the selected enable_conditional_source outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported source or target record as 'NS-000046', tied to NS-000046, revision R5, and the selected enable_conditional_source outcome.",
+        "field": "source_or_target_record",
+        "id": "answer_source_or_target_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported immutable match key as 'NS-000046|R5|CASE-046', tied to NS-000046, revision R5, and the selected enable_conditional_source outcome.",
+        "field": "immutable_match_key",
+        "id": "answer_immutable_match_key",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000046, revision R5, and the selected enable_conditional_source outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.supply_requests.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000046 to reach business outcome 'Conditional source enabled' through oracle_fusion.supply_requests.create with exact provider-critical values requestBody.SupplyOrderReferenceNumber='SUPPLY-0046', requestBody.SupplyRequestSystem='EXT', requestBody.SupplyRequestDate='2026-01-12', requestBody.supplyRequestLines[0].SupplyOrderSource='EXT', requestBody.supplyRequestLines[0].SupplyType='BUY', requestBody.supplyRequestLines[0].ItemNumber='NS-COMP-046', requestBody.supplyRequestLines[0].Quantity=1, requestBody.supplyRequestLines[0].NeedByDate='2026-01-13', requestBody.supplyRequestLines[0].DestinationOrganizationCode='SEA'. The audited transition binds selected option enable_conditional_source, revision R5, approval AP-0046, and constraint conditional use is limited by item, quantity, duration, and approval; expired, failed, or unapproved sites = 3 SITES; uncovered or unsupported scope = 3.0 SITES; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.SupplyOrderReferenceNumber",
+          "requestBody.SupplyRequestDate",
+          "requestBody.SupplyRequestSystem",
+          "requestBody.supplyRequestLines[0].DestinationOrganizationCode",
+          "requestBody.supplyRequestLines[0].ItemNumber",
+          "requestBody.supplyRequestLines[0].NeedByDate",
+          "requestBody.supplyRequestLines[0].Quantity",
+          "requestBody.supplyRequestLines[0].SupplyOrderSource",
+          "requestBody.supplyRequestLines[0].SupplyType"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "SupplyOrderReferenceNumber": "SUPPLY-0046",
+              "SupplyRequestDate": "2026-01-12",
+              "SupplyRequestSystem": "EXT",
+              "supplyRequestLines": [
+                {
+                  "DestinationOrganizationCode": "SEA",
+                  "ItemNumber": "NS-COMP-046",
+                  "NeedByDate": "2026-01-13",
+                  "Quantity": 1,
+                  "SupplyOrderSource": "EXT",
+                  "SupplyType": "BUY"
+                }
+              ]
+            }
+          },
+          "tool": "oracle_fusion.supply_requests.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0046\",\"SupplyRequestDate\":\"2026-01-21\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-046\",\"NeedByDate\":\"2026-01-25\",\"Quantity\":17,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}},\"case\":\"CASE-046\",\"outcome\":\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\",\"tool\":\"oracle_fusion.supply_requests.create\"}",
           "resource_type": "oracle_fusion.supply_requests",
           "revision": 1,
           "status": "Conditional source enabled",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-046-mutation-01",
           "task_id": "factorybench-046"
         }
       },
       {
-        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "description": "Sent procurement leadership the scoped outcome for CASE-046, including completion 2026-01-13, the binding constraint, alternatives, and the Oracle business reference.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "threadId": "thread-046",
+            "userId": "me"
+          },
+          "tool": "gmail.messages.send"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-046",
+            "NS-000046",
+            "NS-COMP-046"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-13",
+          "enable_conditional_source"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "gmail.messages",
@@ -57,14 +228,32 @@
           "status": "Recorded",
           "system": "gmail"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-046-mutation-02",
           "task_id": "factorybench-046"
         }
       },
       {
-        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "description": "Added the Oracle result to the existing case file as a comment containing enable_conditional_source, completion 2026-01-13, and the binding constraint.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "fileId": "drive-046"
+          },
+          "tool": "google_drive.comments.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-046",
+            "NS-000046",
+            "NS-COMP-046"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-13",
+          "enable_conditional_source"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_drive.comments",
@@ -72,24 +261,1354 @@
           "status": "Recorded",
           "system": "google_drive"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-046-mutation-03",
           "task_id": "factorybench-046"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-16 as the documented date for conditional molded-parts source; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Enumerated 4 candidates for candidate supplier sites.",
+        "field": "candidate_record_count",
+        "id": "enumerate_candidate_records",
+        "weight": 1.5
+      },
+      {
+        "description": "Correlated immutable identifiers and retained 1 record(s) for site passing audit, insurance, and trial-lot quality.",
+        "field": "matching_record_count",
+        "id": "correlate_matching_records",
+        "weight": 2.0
+      },
+      {
+        "description": "Excluded 3 candidate(s) for expired, failed, or unapproved sites.",
+        "field": "excluded_record_count",
+        "id": "exclude_nonmatching_records",
+        "weight": 1.5
+      },
+      {
+        "description": "Applied released revision R5; did not select a draft or similarly named record.",
+        "field": "effective_revision",
+        "id": "apply_effective_revision",
+        "weight": 1.5
+      },
+      {
+        "description": "Used composite match key NS-000046|R5|CASE-046 to correlate the source and target.",
+        "field": "immutable_match_key",
+        "id": "construct_immutable_match",
+        "weight": 2.0
+      },
+      {
+        "description": "Derived 2026-01-13 for enable_conditional_source.",
+        "field": "baseline_action_date",
+        "id": "compare_identity_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-12 for approve_supplier_globally.",
+        "field": "controlled_action_date",
+        "id": "compare_identity_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-19 for stay_sole_source and rejected any out-of-scope shortcut.",
+        "field": "escalated_action_date",
+        "id": "compare_identity_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for enable_conditional_source; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that stay_sole_source remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of enable_conditional_source, approve_supplier_globally, and stay_sole_source; selected enable_conditional_source because it alone gives the best currently authorized result under conditional use is limited by item, quantity, duration, and approval.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-13 as the supported outcome date for enable_conditional_source.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-13 with the independent control date 2026-01-16 and calculated a signed variance of -3 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-046"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-046 scope, immutable handles, mounted systems, and evidence index before investigating NS-000046.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "id": "att-046",
+              "messageId": "msg-046-1",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogc3VwcGxpZXItYXVkaXQtYW5kLWNvbmRpdGlvbmFsLXVzZS1zY29wZS0wMDQ2CkNhc2UgcmVmZXJlbmNlOiBDQVNFLTA0NgpJc3N1ZWQ6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpWYWxpZCB0aHJvdWdoOiAyMDI2LTAxLTE5CgoxLiBSRUZFUkVOQ0VEIFNDT1BFClNvdXJjZSBzdWJqZWN0OiBzdXBwbGllciBhdWRpdCBhbmQgY29uZGl0aW9uYWwtdXNlIHNjb3BlCkltbXV0YWJsZSByZWNvcmQgb3IgaXRlbTogTlMtQ09NUC0wNDYKRWZmZWN0aXZlIHJldmlzaW9uIHN1cHBsaWVkIGJ5IHJlcXVlc3RlcjogUjUKTWF4aW11bSBzY29wZSByZXByZXNlbnRlZCBieSB0aGlzIHJlc3BvbnNlOiAzIFNJVEVTClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IGFwcHJvdmVfc3VwcGxpZXJfZ2xvYmFsbHkKU3RhbmRhcmQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTEKRXhwZWRpdGVkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTEwClJlc3VsdGluZyBvcGVyYXRpbmcgb3V0Y29tZSBzdGF0ZWQgYnkgcmVxdWVzdGVyLCBub3QgYnkgY291bnRlcnBhcnR5OiAyMDI2LTAxLTEyCkVjb25vbWljIGltcGFjdCBzdGF0ZWQgYnkgY291bnRlcnBhcnR5OiBVU0QgMApJbmRlcGVuZGVudCBjb25kaXRpb246IHRyaWFsLWxvdCBhbmQgaW5zdXJhbmNlIHZhbGlkaXR5CkNhcGFjaXR5IGlzIHJlc2VydmVkIG9ubHkgYWZ0ZXIgdGhlIGJ1eWVyIG9yIHBsYW5uZXIgc3VwcGxpZXMgdGhlIG1hdGNoaW5nIGltbXV0YWJsZSByZWNvcmQgYW5kIGN1cnJlbnQgYXBwcm92YWwuCgozLiBFWENMVVNJT05TIEFORCBBU1NVTVBUSU9OUwpOb3QgaW5jbHVkZWQ6IGV4cGlyZWQsIGZhaWxlZCwgb3IgdW5hcHByb3ZlZCBzaXRlcwpDb250cm9sIG5vdCBldmFsdWF0ZWQgYnkgY291bnRlcnBhcnR5OiBjb25kaXRpb25hbCB1c2UgaXMgbGltaXRlZCBieSBpdGVtLCBxdWFudGl0eSwgZHVyYXRpb24sIGFuZCBhcHByb3ZhbApOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wNDcgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBSYWluaWVyIENvbXBvbmVudHMgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwNDYKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+              "size": 1538
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.attachments.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-10 readiness input for approve_supplier_globally, then separately derived its 2026-01-12 operating outcome under conditional use is limited by item, quantity, duration, and approval instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-046"
+            },
+            "expected_result_contains": {
+              "id": "drive-046"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-046",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-046"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-046"
+            },
+            "expected_result_contains": {
+              "id": "drive-046"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R5 and established 4 SITES for candidate supplier sites, with control date 2026-01-16.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000046.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000046.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000046.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0046 only to enable_conditional_source, NS-000046, and the supported 1 SITES; kept broader scope and stay_sole_source outside current authority.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "includeGridData": false,
+              "ranges": [
+                "Control!A1:I50"
+              ],
+              "spreadsheetId": "sheet-046"
+            },
+            "expected_result_contains": {
+              "developerMetadata": [
+                {
+                  "metadataKey": "case",
+                  "metadataValue": "CASE-046"
+                }
+              ],
+              "spreadsheetId": "sheet-046"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-046' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-046"
+                },
+                {
+                  "id": "drive-approval-046"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-046 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-046-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-046-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-046-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000046 at R5.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-046-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-046-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-046-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R5 and established 4 SITES for candidate supplier sites, with control date 2026-01-16.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-046-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-046-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-046-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-10 readiness input for approve_supplier_globally, then separately derived its 2026-01-12 operating outcome under conditional use is limited by item, quantity, duration, and approval instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-046-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-046-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-046-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 4 observed less 3 excluded to 1 supported SITES for site passing audit, insurance, and trial-lot quality.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-046-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-046-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-046-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-046-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R5 and established 4 SITES for candidate supplier sites, with control date 2026-01-16.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-046"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-046"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-046",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-046"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-046"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-046"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0046 only to enable_conditional_source, NS-000046, and the supported 1 SITES; kept broader scope and stay_sole_source outside current authority.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-046\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-046"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-046 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0046"
+            },
+            "expected_result_contains": {
+              "HeaderId": 12000046
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.sales_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "OrderNumber='SO-47046'"
+            },
+            "expected_result_contains": {
+              "HeaderId": 12000046
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.sales_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle sales orders record: Applied revision R5 and established 4 SITES for candidate supplier sites, with control date 2026-01-16.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0046"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000046
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "OrderNumber='PO-0046'"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000046
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-10 readiness input for approve_supplier_globally, then separately derived its 2026-01-12 operating outcome under conditional use is limited by item, quantity, duration, and approval instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-046' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400046
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 4 observed less 3 excluded to 1 supported SITES for site passing audit, insurance, and trial-lot quality.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "SupplyOrderReferenceNumber='SUPPLY-0046'"
+            },
+            "expected_result_contains": {
+              "SupplyRequestId": 2200046
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.supply_requests.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-10 readiness input for approve_supplier_globally, then separately derived its 2026-01-12 operating outcome under conditional use is limited by item, quantity, duration, and approval instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_17",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "SupplierId": 600046
+            },
+            "expected_result_contains": {
+              "SupplierId": 600046
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.suppliers.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "SupplierNumber='SUP-00046'"
+            },
+            "expected_result_contains": {
+              "SupplierId": 600046
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.suppliers.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle suppliers record: Used the independently confirmed 2026-01-10 readiness input for approve_supplier_globally, then separately derived its 2026-01-12 operating outcome under conditional use is limited by item, quantity, duration, and approval instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_18",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.supply_requests.create",
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "SupplyOrderReferenceNumber='SUPPLY-0046'"
+            },
+            "expected_result_contains": {
+              "SupplyRequestId": 1500046
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.supply_requests.list"
+          }
+        ],
+        "description": "Read NS-000046 back through the documented Oracle supply requests.list operation after the mutation and confirmed the resource-specific changed fields ['DestinationOrganizationCode', 'ItemNumber', 'LastUpdateDate', 'NeedByDate', 'Quantity', 'SupplyOrderReferenceNumber', 'SupplyRequestDate', 'SupplyRequestStatus', 'SupplyRequestSystem'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "DestinationOrganizationCode": "SEA",
+          "ItemNumber": "NS-COMP-046",
+          "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+          "NeedByDate": "2026-01-13",
+          "Quantity": 1,
+          "SupplyOrderReferenceNumber": "SUPPLY-0046",
+          "SupplyRequestDate": "2026-01-12",
+          "SupplyRequestStatus": "NEW",
+          "SupplyRequestSystem": "EXT"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": true,
+        "target_identity": {
+          "SupplyRequestId": 1500046
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.supply_requests.create",
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0046'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 1500046
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "description": "Read NS-000046 back through the documented Oracle supply requests.list operation after the mutation and confirmed the resource-specific changed fields ['DestinationOrganizationCode', 'ItemNumber', 'LastUpdateDate', 'NeedByDate', 'Quantity', 'SupplyOrderReferenceNumber', 'SupplyRequestDate', 'SupplyRequestStatus', 'SupplyRequestSystem'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "DestinationOrganizationCode": "SEA",
+        "ItemNumber": "NS-COMP-046",
+        "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+        "NeedByDate": "2026-01-13",
+        "Quantity": 1,
+        "SupplyOrderReferenceNumber": "SUPPLY-0046",
+        "SupplyRequestDate": "2026-01-12",
+        "SupplyRequestStatus": "NEW",
+        "SupplyRequestSystem": "EXT"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": true,
+      "target_identity": {
+        "SupplyRequestId": 1500046
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-046"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-046 scope, immutable handles, mounted systems, and evidence index before investigating NS-000046.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-046",
+            "messageId": "msg-046-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogc3VwcGxpZXItYXVkaXQtYW5kLWNvbmRpdGlvbmFsLXVzZS1zY29wZS0wMDQ2CkNhc2UgcmVmZXJlbmNlOiBDQVNFLTA0NgpJc3N1ZWQ6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpWYWxpZCB0aHJvdWdoOiAyMDI2LTAxLTE5CgoxLiBSRUZFUkVOQ0VEIFNDT1BFClNvdXJjZSBzdWJqZWN0OiBzdXBwbGllciBhdWRpdCBhbmQgY29uZGl0aW9uYWwtdXNlIHNjb3BlCkltbXV0YWJsZSByZWNvcmQgb3IgaXRlbTogTlMtQ09NUC0wNDYKRWZmZWN0aXZlIHJldmlzaW9uIHN1cHBsaWVkIGJ5IHJlcXVlc3RlcjogUjUKTWF4aW11bSBzY29wZSByZXByZXNlbnRlZCBieSB0aGlzIHJlc3BvbnNlOiAzIFNJVEVTClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IGFwcHJvdmVfc3VwcGxpZXJfZ2xvYmFsbHkKU3RhbmRhcmQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTEKRXhwZWRpdGVkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTEwClJlc3VsdGluZyBvcGVyYXRpbmcgb3V0Y29tZSBzdGF0ZWQgYnkgcmVxdWVzdGVyLCBub3QgYnkgY291bnRlcnBhcnR5OiAyMDI2LTAxLTEyCkVjb25vbWljIGltcGFjdCBzdGF0ZWQgYnkgY291bnRlcnBhcnR5OiBVU0QgMApJbmRlcGVuZGVudCBjb25kaXRpb246IHRyaWFsLWxvdCBhbmQgaW5zdXJhbmNlIHZhbGlkaXR5CkNhcGFjaXR5IGlzIHJlc2VydmVkIG9ubHkgYWZ0ZXIgdGhlIGJ1eWVyIG9yIHBsYW5uZXIgc3VwcGxpZXMgdGhlIG1hdGNoaW5nIGltbXV0YWJsZSByZWNvcmQgYW5kIGN1cnJlbnQgYXBwcm92YWwuCgozLiBFWENMVVNJT05TIEFORCBBU1NVTVBUSU9OUwpOb3QgaW5jbHVkZWQ6IGV4cGlyZWQsIGZhaWxlZCwgb3IgdW5hcHByb3ZlZCBzaXRlcwpDb250cm9sIG5vdCBldmFsdWF0ZWQgYnkgY291bnRlcnBhcnR5OiBjb25kaXRpb25hbCB1c2UgaXMgbGltaXRlZCBieSBpdGVtLCBxdWFudGl0eSwgZHVyYXRpb24sIGFuZCBhcHByb3ZhbApOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wNDcgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBSYWluaWVyIENvbXBvbmVudHMgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwNDYKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+            "size": 1538
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-10 readiness input for approve_supplier_globally, then separately derived its 2026-01-12 operating outcome under conditional use is limited by item, quantity, duration, and approval instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-046"
+          },
+          "expected_result_contains": {
+            "id": "drive-046"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-046",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-046"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-046"
+          },
+          "expected_result_contains": {
+            "id": "drive-046"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R5 and established 4 SITES for candidate supplier sites, with control date 2026-01-16.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000046.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000046.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000046.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0046 only to enable_conditional_source, NS-000046, and the supported 1 SITES; kept broader scope and stay_sole_source outside current authority.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-046"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-046"
+              }
+            ],
+            "spreadsheetId": "sheet-046"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-046' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-046"
+              },
+              {
+                "id": "drive-approval-046"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-046 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-046-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-046-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-046-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000046 at R5.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-046-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-046-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-046-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R5 and established 4 SITES for candidate supplier sites, with control date 2026-01-16.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-046-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-046-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-046-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-10 readiness input for approve_supplier_globally, then separately derived its 2026-01-12 operating outcome under conditional use is limited by item, quantity, duration, and approval instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-046-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-046-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-046-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 4 observed less 3 excluded to 1 supported SITES for site passing audit, insurance, and trial-lot quality.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-046-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-046-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-046-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-046-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R5 and established 4 SITES for candidate supplier sites, with control date 2026-01-16.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-046"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-046"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-046",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-046"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-046"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-046"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0046 only to enable_conditional_source, NS-000046, and the supported 1 SITES; kept broader scope and stay_sole_source outside current authority.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-046\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-046"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-046 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0046"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000046
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='SO-47046'"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000046
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle sales orders record: Applied revision R5 and established 4 SITES for candidate supplier sites, with control date 2026-01-16.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0046"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000046
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0046'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000046
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-10 readiness input for approve_supplier_globally, then separately derived its 2026-01-12 operating outcome under conditional use is limited by item, quantity, duration, and approval instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-046' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400046
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 4 observed less 3 excluded to 1 supported SITES for site passing audit, insurance, and trial-lot quality.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0046'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 2200046
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-10 readiness input for approve_supplier_globally, then separately derived its 2026-01-12 operating outcome under conditional use is limited by item, quantity, duration, and approval instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_17",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "SupplierId": 600046
+          },
+          "expected_result_contains": {
+            "SupplierId": 600046
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.suppliers.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplierNumber='SUP-00046'"
+          },
+          "expected_result_contains": {
+            "SupplierId": 600046
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.suppliers.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle suppliers record: Used the independently confirmed 2026-01-10 readiness input for approve_supplier_globally, then separately derived its 2026-01-12 operating outcome under conditional use is limited by item, quantity, duration, and approval instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_18",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-046"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
+    },
+    {
+      "arguments": {
+        "id": "att-046",
+        "messageId": "msg-046-1",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogc3VwcGxpZXItYXVkaXQtYW5kLWNvbmRpdGlvbmFsLXVzZS1zY29wZS0wMDQ2CkNhc2UgcmVmZXJlbmNlOiBDQVNFLTA0NgpJc3N1ZWQ6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpWYWxpZCB0aHJvdWdoOiAyMDI2LTAxLTE5CgoxLiBSRUZFUkVOQ0VEIFNDT1BFClNvdXJjZSBzdWJqZWN0OiBzdXBwbGllciBhdWRpdCBhbmQgY29uZGl0aW9uYWwtdXNlIHNjb3BlCkltbXV0YWJsZSByZWNvcmQgb3IgaXRlbTogTlMtQ09NUC0wNDYKRWZmZWN0aXZlIHJldmlzaW9uIHN1cHBsaWVkIGJ5IHJlcXVlc3RlcjogUjUKTWF4aW11bSBzY29wZSByZXByZXNlbnRlZCBieSB0aGlzIHJlc3BvbnNlOiAzIFNJVEVTClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IGFwcHJvdmVfc3VwcGxpZXJfZ2xvYmFsbHkKU3RhbmRhcmQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTEKRXhwZWRpdGVkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTEwClJlc3VsdGluZyBvcGVyYXRpbmcgb3V0Y29tZSBzdGF0ZWQgYnkgcmVxdWVzdGVyLCBub3QgYnkgY291bnRlcnBhcnR5OiAyMDI2LTAxLTEyCkVjb25vbWljIGltcGFjdCBzdGF0ZWQgYnkgY291bnRlcnBhcnR5OiBVU0QgMApJbmRlcGVuZGVudCBjb25kaXRpb246IHRyaWFsLWxvdCBhbmQgaW5zdXJhbmNlIHZhbGlkaXR5CkNhcGFjaXR5IGlzIHJlc2VydmVkIG9ubHkgYWZ0ZXIgdGhlIGJ1eWVyIG9yIHBsYW5uZXIgc3VwcGxpZXMgdGhlIG1hdGNoaW5nIGltbXV0YWJsZSByZWNvcmQgYW5kIGN1cnJlbnQgYXBwcm92YWwuCgozLiBFWENMVVNJT05TIEFORCBBU1NVTVBUSU9OUwpOb3QgaW5jbHVkZWQ6IGV4cGlyZWQsIGZhaWxlZCwgb3IgdW5hcHByb3ZlZCBzaXRlcwpDb250cm9sIG5vdCBldmFsdWF0ZWQgYnkgY291bnRlcnBhcnR5OiBjb25kaXRpb25hbCB1c2UgaXMgbGltaXRlZCBieSBpdGVtLCBxdWFudGl0eSwgZHVyYXRpb24sIGFuZCBhcHByb3ZhbApOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wNDcgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBSYWluaWVyIENvbXBvbmVudHMgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwNDYKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+        "size": 1538
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
         "fileId": "drive-046"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "drive-046"
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.download"
     },
     {
@@ -98,19 +1617,118 @@
         "limit": 100,
         "ts": "1768000046.000100"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000046.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
         "includeGridData": false,
         "ranges": [
-          "Control!A1:H50"
+          "Control!A1:I50"
         ],
         "spreadsheetId": "sheet-046"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "developerMetadata": [
+          {
+            "metadataKey": "case",
+            "metadataValue": "CASE-046"
+          }
+        ],
+        "spreadsheetId": "sheet-046"
+      },
+      "match": "result_contains",
       "tool": "google_sheets.spreadsheets.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-046' and trashed = false"
+      },
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-046"
+          },
+          {
+            "id": "drive-approval-046"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-046-09"
+      },
+      "expected_result_contains": {
+        "id": "drive-046-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-046-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-046-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-046-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-046-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-046-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-046-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-046-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-046-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-046"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-046"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
@@ -118,33 +1736,93 @@
         "q": "\"CASE-046\"",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-046"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.list"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-046'"
+        "q": "OrderNumber='SO-47046'"
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.suppliers.list"
+      "expected_result_contains": {
+        "HeaderId": 12000046
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.sales_orders.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "OrderNumber='PO-0046'"
+      },
+      "expected_result_contains": {
+        "POHeaderId": 2000046
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.purchase_orders.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ItemNumber='NS-COMP-046' and OrganizationCode='SEA'"
+      },
+      "expected_result_contains": {
+        "InventoryItemId": 1400046
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "SupplyOrderReferenceNumber='SUPPLY-0046'"
+      },
+      "expected_result_contains": {
+        "SupplyRequestId": 2200046
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.supply_requests.list"
     },
     {
       "arguments": {
         "SupplierId": 600046
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "SupplierId": 600046
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.suppliers.get"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
+    "gmail.messages.attachments.get",
     "google_drive.files.download",
     "slack.conversations_replies",
     "google_sheets.spreadsheets.get",
+    "google_drive.files.list",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.get",
     "gmail.messages.list",
-    "oracle_fusion.suppliers.list",
+    "oracle_fusion.sales_orders.list",
+    "oracle_fusion.purchase_orders.list",
+    "oracle_fusion.inventory_onhand_balances.list",
+    "oracle_fusion.supply_requests.list",
     "oracle_fusion.suppliers.get"
   ],
   "task_id": "factorybench-046",

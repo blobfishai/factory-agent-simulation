@@ -1,5 +1,7 @@
-# Award the enclosure tooling package — operating control
+# Award the enclosure tooling package — operating policy
 
-Scope: Turn approved demand and supplier evidence into correctly controlled purchase-order actions.
+Decision scope: enclosure tooling sourcing event.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: technical score, landed cost, supplier status, launch capacity, and sourcing authority. Establish the immutable source record and effective revision, then reconcile best-value bid quoted total before commercial exclusions, supported landed cost of the technically acceptable best-value bid, and unapproved options and unsupported fees on the selected bid from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: mark the existing operations thread complete with the approved check reaction; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it.

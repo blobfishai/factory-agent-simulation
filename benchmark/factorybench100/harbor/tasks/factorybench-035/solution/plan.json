@@ -5,29 +5,59 @@
   },
   {
     "arguments": {
-      "channel": "C-FINANCE",
-      "inclusive": true,
-      "limit": 100,
-      "oldest": "1768000000.000000"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-035' and trashed = false"
     },
-    "tool": "slack.conversations_history"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "includeGridData": false,
-      "ranges": [
-        "Control!A1:H50"
-      ],
-      "spreadsheetId": "sheet-035"
+      "fileId": "drive-035-03"
     },
-    "tool": "google_sheets.spreadsheets.get"
+    "tool": "google_drive.files.download"
   },
   {
     "arguments": {
-      "fileId": "drive-approval-035",
-      "pageSize": 20
+      "alt": "media",
+      "fileId": "drive-035-09"
     },
-    "tool": "google_drive.approvals.list"
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-035-04"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-035-12",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-035-11"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-approval-035"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "maxResults": 20,
+      "q": "\"CASE-035\"",
+      "userId": "me"
+    },
+    "tool": "gmail.messages.list"
   },
   {
     "arguments": {
@@ -39,9 +69,44 @@
   },
   {
     "arguments": {
+      "channel": "C-FINANCE",
+      "inclusive": true,
+      "limit": 100,
+      "oldest": "1768000000.000000"
+    },
+    "tool": "slack.conversations_history"
+  },
+  {
+    "arguments": {
+      "includeGridData": false,
+      "ranges": [
+        "Control!A1:I50"
+      ],
+      "spreadsheetId": "sheet-035"
+    },
+    "tool": "google_sheets.spreadsheets.get"
+  },
+  {
+    "arguments": {
       "limit": 50,
       "onlyData": true,
-      "q": "ReferenceNumber='CASE-035'"
+      "q": "OrderNumber='SO-47035'"
+    },
+    "tool": "oracle_fusion.sales_orders.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "ItemNumber='NS-COMP-035' and OrganizationCode='SEA'"
+    },
+    "tool": "oracle_fusion.inventory_onhand_balances.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "SupplierNumber='SUP-00035'"
     },
     "tool": "oracle_fusion.suppliers.list"
   },
@@ -49,22 +114,30 @@
     "arguments": {
       "limit": 50,
       "onlyData": true,
-      "q": "ReferenceNumber='CASE-035'"
+      "q": "SupplyOrderReferenceNumber='SUPPLY-0035'"
     },
-    "tool": "oracle_fusion.inventory_onhand_balances.list"
+    "tool": "oracle_fusion.supply_requests.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "OrderNumber='PO-0035'"
+    },
+    "tool": "oracle_fusion.purchase_orders.list"
   },
   {
     "arguments": {
       "requestBody": {
         "SupplyOrderReferenceNumber": "SUPPLY-0035",
-        "SupplyRequestDate": "2026-01-29",
+        "SupplyRequestDate": "2026-01-16",
         "SupplyRequestSystem": "EXT",
         "supplyRequestLines": [
           {
             "DestinationOrganizationCode": "SEA",
             "ItemNumber": "NS-COMP-035",
-            "NeedByDate": "2026-02-01",
-            "Quantity": 43,
+            "NeedByDate": "2026-01-18",
+            "Quantity": 6.0,
             "SupplyOrderSource": "EXT",
             "SupplyType": "BUY"
           }
@@ -75,9 +148,17 @@
   },
   {
     "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "SupplyOrderReferenceNumber='SUPPLY-0035'"
+    },
+    "tool": "oracle_fusion.supply_requests.list"
+  },
+  {
+    "arguments": {
       "fileId": "drive-035",
       "requestBody": {
-        "content": "CASE-035: Emergency supply requested; Oracle reference recorded."
+        "content": "CASE-035: create_bounded_emergency_supply recorded on Oracle record NS-000035; completion 2026-01-18; constraint sole-source exception, exact shortage, and emergency freight authority; reserved stock and supply arriving after the line-down point = 10 EA; uncovered or unsupported scope = 6.0 EA; approval AP-0035."
       }
     },
     "tool": "google_drive.comments.create"
@@ -85,7 +166,7 @@
   {
     "arguments": {
       "message": {
-        "raw": "RnJvbTogYnV5ZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBvcGVyYXRpb25zLWNvbnRyb2xAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDM1IOKAlCBEcmFmdCBlbnRlcnByaXNlIHdvcmtmbG93DQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRW1lcmdlbmN5IHN1cHBseSByZXF1ZXN0ZWQuIE9yYWNsZSBhbmQgY29sbGFib3JhdGlvbiByZWZlcmVuY2VzIGFyZSByZWNvcmRlZCB1bmRlciBDQVNFLTAzNS4NCg",
+        "raw": "RnJvbTogYnV5ZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZXF1ZXN0aW5nLnBsYW5uZXJAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDM1IOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogY3JlYXRlX2JvdW5kZWRfZW1lcmdlbmN5X3N1cHBseS4gQ29tcGxldGlvbjogMjAyNi0wMS0xOC4NCkJpbmRpbmcgY29uc3RyYWludDogc29sZS1zb3VyY2UgZXhjZXB0aW9uLCBleGFjdCBzaG9ydGFnZSwgYW5kIGVtZXJnZW5jeSBmcmVpZ2h0IGF1dGhvcml0eTsgcmVzZXJ2ZWQgc3RvY2sgYW5kIHN1cHBseSBhcnJpdmluZyBhZnRlciB0aGUgbGluZS1kb3duIHBvaW50ID0gMTAgRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDYuMCBFQS4NCkFsdGVybmF0aXZlczogY3JlYXRlX2JvdW5kZWRfZW1lcmdlbmN5X3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTE4LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IG9yZGVyX2Z1bGxfZ3Jvc3NfZGVtYW5kOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgOTQ1LCBGQUlMU19DVVJSRU5UX0NPTlRST0w7IHdhaXRfZm9yX3N0YW5kYXJkX3JlcGxlbmlzaG1lbnQ6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAyMTg1LCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDM1LiBBcHByb3ZhbDogQVAtMDAzNS4gQ2FzZTogQ0FTRS0wMzUuDQo",
         "threadId": "thread-035"
       },
       "userId": "me"
@@ -94,9 +175,26 @@
   },
   {
     "arguments": {
-      "committed_value": 3588.35,
-      "purchase_document": "PO-0035",
-      "supplier_decision": "Emergency supply requested"
+      "accelerated_completion": "2026-01-16",
+      "baseline_completion": "2026-01-18",
+      "business_need_date": "2026-01-19",
+      "coverage_item_or_resource": "NS-COMP-035",
+      "decision_timing_status": "ON_TIME",
+      "escalated_completion": "2026-01-15",
+      "escalation_approval_required": 1,
+      "expedited_external_readiness": "2026-01-13",
+      "external_recovery_quantity": 6,
+      "ineligible_coverage_quantity": 10,
+      "observed_coverage_quantity": 105,
+      "outcome_vs_control_days": -1,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "create_bounded_emergency_supply",
+      "recommended_outcome_date": "2026-01-18",
+      "required_quantity": 101,
+      "shortage_quantity": 6,
+      "standard_external_readiness": "2026-01-15",
+      "usable_coverage_quantity": 95
     },
     "tool": "factorybench.submit_answer"
   }

@@ -7,49 +7,221 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "item_lot": {
+      "baseline_resolution_date": {
+        "description": "Resolution date for return_verified_excess.",
         "type": "string"
       },
-      "posted_quantity": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
+        "type": "string"
+      },
+      "controlled_item_or_record": {
+        "description": "Immutable item, lot, serial set, or transaction record in scope.",
+        "type": "string"
+      },
+      "controlled_resolution_date": {
+        "description": "Resolution date for leave_material_in_wip.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_resolution_date": {
+        "description": "Resolution date for adjust_full_issued_quantity.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
         "type": "integer"
       },
-      "transaction_reference": {
+      "excluded_quantity": {
+        "description": "scrap, consumed, or unverified copper",
+        "type": "integer"
+      },
+      "observed_quantity": {
+        "description": "Observed source quantity before applying the control for unused copper on canceled operation 20.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "quantity_unit": {
+        "description": "Unit of measure for every controlled quantity: KG.",
         "type": "string"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing return_verified_excess, leave_material_in_wip, adjust_full_issued_quantity.",
+        "enum": [
+          "return_verified_excess",
+          "leave_material_in_wip",
+          "adjust_full_issued_quantity"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "source_quantity": {
+        "description": "quantity previously issued to the canceled operation",
+        "type": "integer"
+      },
+      "supported_quantity": {
+        "description": "physically counted unconsumed copper",
+        "type": "integer"
+      },
+      "transaction_quantity": {
+        "description": "Exact quantity the Oracle mutation may persist.",
+        "type": "integer"
       }
     },
     "required": [
-      "item_lot",
-      "posted_quantity",
-      "transaction_reference"
+      "baseline_resolution_date",
+      "business_need_date",
+      "controlled_item_or_record",
+      "controlled_resolution_date",
+      "decision_timing_status",
+      "escalated_resolution_date",
+      "escalation_approval_required",
+      "excluded_quantity",
+      "observed_quantity",
+      "outcome_vs_control_days",
+      "quantity_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "source_quantity",
+      "supported_quantity",
+      "transaction_quantity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "item_lot": "FB-012",
-      "posted_quantity": 20,
-      "transaction_reference": "Material returned"
+      "baseline_resolution_date": "2026-01-13",
+      "business_need_date": "2026-01-13",
+      "controlled_item_or_record": "NS-COMP-012",
+      "controlled_resolution_date": "2026-01-14",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-15",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 13,
+      "observed_quantity": 93,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "KG",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "return_verified_excess",
+      "recommended_outcome_date": "2026-01-13",
+      "source_quantity": 97,
+      "supported_quantity": 80,
+      "transaction_quantity": 80
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'return_verified_excess', tied to NS-000012, revision R6, and the selected return_verified_excess outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-13', tied to NS-000012, revision R6, and the selected return_verified_excess outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported controlled item or record as 'NS-COMP-012', tied to NS-000012, revision R6, and the selected return_verified_excess outcome.",
+        "field": "controlled_item_or_record",
+        "id": "answer_controlled_item_or_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported transaction quantity as 80, tied to NS-000012, revision R6, and the selected return_verified_excess outcome.",
+        "field": "transaction_quantity",
+        "id": "answer_transaction_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000012, revision R6, and the selected return_verified_excess outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.material_transactions.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000012 to reach business outcome 'Material returned' through oracle_fusion.material_transactions.create with exact provider-critical values requestBody.SourceSystemCode='FUSION_MOBILE', requestBody.SourceSystemType='EXTERNAL', requestBody.MaterialTransactionDetail[0].OrganizationCode='SEA', requestBody.MaterialTransactionDetail[0].WorkOrderNumber='WO-0012', requestBody.MaterialTransactionDetail[0].InventoryItemNumber='NS-COMP-012', requestBody.MaterialTransactionDetail[0].TransactionTypeCode='MATERIAL_RETURN', requestBody.MaterialTransactionDetail[0].TransactionQuantity=80, requestBody.MaterialTransactionDetail[0].TransactionUnitOfMeasure='KG', requestBody.MaterialTransactionDetail[0].SubinventoryCode='STORES', requestBody.MaterialTransactionDetail[0].LotNumber='LOT-0012'. The audited transition binds selected option return_verified_excess, revision R6, approval AP-0012, and constraint return cannot exceed issued less consumed and must preserve project ownership; scrap, consumed, or unverified copper = 13 KG; uncovered or unsupported scope = 17.0 KG; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.MaterialTransactionDetail[0].InventoryItemNumber",
+          "requestBody.MaterialTransactionDetail[0].LotNumber",
+          "requestBody.MaterialTransactionDetail[0].OrganizationCode",
+          "requestBody.MaterialTransactionDetail[0].SubinventoryCode",
+          "requestBody.MaterialTransactionDetail[0].TransactionQuantity",
+          "requestBody.MaterialTransactionDetail[0].TransactionTypeCode",
+          "requestBody.MaterialTransactionDetail[0].TransactionUnitOfMeasure",
+          "requestBody.MaterialTransactionDetail[0].WorkOrderNumber",
+          "requestBody.SourceSystemCode",
+          "requestBody.SourceSystemType"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "MaterialTransactionDetail": [
+                {
+                  "InventoryItemNumber": "NS-COMP-012",
+                  "LotNumber": "LOT-0012",
+                  "OrganizationCode": "SEA",
+                  "SubinventoryCode": "STORES",
+                  "TransactionQuantity": 80,
+                  "TransactionTypeCode": "MATERIAL_RETURN",
+                  "TransactionUnitOfMeasure": "KG",
+                  "WorkOrderNumber": "WO-0012"
+                }
+              ],
+              "SourceSystemCode": "FUSION_MOBILE",
+              "SourceSystemType": "EXTERNAL"
+            }
+          },
+          "tool": "oracle_fusion.material_transactions.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"MaterialTransactionDetail\":[{\"InventoryItemNumber\":\"NS-COMP-012\",\"LotNumber\":\"LOT-0012\",\"OrganizationCode\":\"SEA\",\"SubinventoryCode\":\"STORES\",\"TransactionQuantity\":20,\"TransactionTypeCode\":\"MATERIAL_ISSUE\",\"TransactionUnitOfMeasure\":\"EA\",\"WorkOrderNumber\":\"WO-0012\"}],\"SourceSystemCode\":\"FUSION_MOBILE\",\"SourceSystemType\":\"EXTERNAL\"}},\"case\":\"CASE-012\",\"outcome\":\"Confirm the cancellation and physical count, then return the excess from WIP to the original controlled subinventory.\",\"tool\":\"oracle_fusion.material_transactions.create\"}",
           "resource_type": "oracle_fusion.material_transactions",
           "revision": 1,
           "status": "Material returned",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-012-mutation-01",
           "task_id": "factorybench-012"
         }
       },
       {
-        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "description": "Wrote return_verified_excess, completion 2026-01-13, and the binding constraint into the existing task-scoped control cell without altering another row.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "range": "Control!H14",
+            "spreadsheetId": "sheet-012"
+          },
+          "tool": "google_sheets.spreadsheets.values.update"
+        },
+        "payload_text_contains": [
+          "2026-01-13",
+          "return_verified_excess"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_sheets.spreadsheets.values",
@@ -57,14 +229,33 @@
           "status": "Recorded",
           "system": "google_sheets"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-012-mutation-02",
           "task_id": "factorybench-012"
         }
       },
       {
-        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "description": "Sent shift supervisor the scoped outcome for CASE-012, including completion 2026-01-13, the binding constraint, alternatives, and the Oracle business reference.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "threadId": "thread-012",
+            "userId": "me"
+          },
+          "tool": "gmail.messages.send"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-012",
+            "NS-000012",
+            "NS-COMP-012"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-13",
+          "return_verified_excess"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "gmail.messages",
@@ -72,18 +263,1290 @@
           "status": "Recorded",
           "system": "gmail"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-012-mutation-03",
           "task_id": "factorybench-012"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-13 as the documented date for unused copper on canceled operation 20; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Established 97 KG for quantity previously issued to the canceled operation.",
+        "field": "source_quantity",
+        "id": "establish_source_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Correlated the independent source records to 93 observed KG.",
+        "field": "observed_quantity",
+        "id": "reconcile_observed_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Removed 13 KG for scrap, consumed, or unverified copper.",
+        "field": "excluded_quantity",
+        "id": "identify_excluded_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 93 observed \u2212 13 excluded = 80 supported KG.",
+        "field": "supported_quantity",
+        "id": "calculate_supported_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Bound the Oracle transaction to exactly 80 KG, the measure required by the chosen disposition; did not substitute the header or another business quantity.",
+        "field": "transaction_quantity",
+        "id": "bound_transaction_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept the receipt, issue, transfer, inspection, or completion quantity in KG.",
+        "field": "quantity_unit",
+        "id": "preserve_transaction_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Derived 2026-01-13 for return_verified_excess.",
+        "field": "baseline_resolution_date",
+        "id": "compare_quantity_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-14 for leave_material_in_wip.",
+        "field": "controlled_resolution_date",
+        "id": "compare_quantity_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-15 for adjust_full_issued_quantity and recognized its control impact.",
+        "field": "escalated_resolution_date",
+        "id": "compare_quantity_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for return_verified_excess; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that adjust_full_issued_quantity remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of return_verified_excess, leave_material_in_wip, and adjust_full_issued_quantity; selected return_verified_excess because it alone gives the best currently authorized result under return cannot exceed issued less consumed and must preserve project ownership.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-13 as the supported outcome date for return_verified_excess.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-13 with the independent control date 2026-01-13 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-012"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-012 scope, immutable handles, mounted systems, and evidence index before investigating NS-000012.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "file": "F-000012"
+            },
+            "expected_result_contains": {
+              "file": {
+                "id": "F-000012"
+              }
+            },
+            "match": "result_contains",
+            "tool": "slack.files_info"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Inspected the attachment linked from the scoped Slack discussion and correlated its case and source revision before using its control evidence.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-012\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-012"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-012 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-012",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-012",
+              "threadId": "thread-012"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-012",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-012"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-12 readiness input for leave_material_in_wip, then separately derived its 2026-01-14 operating outcome under return cannot exceed issued less consumed and must preserve project ownership instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "ranges": [
+                "Control!A1:I50",
+                "Approvals!A1:G20"
+              ],
+              "spreadsheetId": "sheet-012",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-012"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.batchGet"
+          },
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!A1:I50",
+              "spreadsheetId": "sheet-012",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-012"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Reconciled 93 observed less 13 excluded to 80 supported KG for physically counted unconsumed copper. Applied stores receiving window to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-012' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-012"
+                },
+                {
+                  "id": "drive-approval-012"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-012 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-012-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-012-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-012-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 93 observed less 13 excluded to 80 supported KG for physically counted unconsumed copper.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-012-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-012-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-012-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R6 and established 97 KG for quantity previously issued to the canceled operation, with control date 2026-01-13.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-012-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-012-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-012-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-12 readiness input for leave_material_in_wip, then separately derived its 2026-01-14 operating outcome under return cannot exceed issued less consumed and must preserve project ownership instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-012-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-012-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-012-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R6 and established 97 KG for quantity previously issued to the canceled operation, with control date 2026-01-13.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-012-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-012-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-012-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-012-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000012 at R6.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-012"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-012"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-012",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-012"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-012"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-012"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0012 only to return_verified_excess, NS-000012, and the supported 80 KG; kept broader scope and adjust_full_issued_quantity outside current authority.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-012"
+            },
+            "expected_result_contains": {
+              "id": "drive-012"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-012",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-012"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-012"
+            },
+            "expected_result_contains": {
+              "id": "drive-012"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R6 and established 97 KG for quantity previously issued to the canceled operation, with control date 2026-01-13.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100012,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100012
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_materials.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work order materials record: Applied revision R6 and established 97 KG for quantity previously issued to the canceled operation, with control date 2026-01-13.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-012' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400012
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 93 observed less 13 excluded to 80 supported KG for physically counted unconsumed copper.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100012
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100012
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='WO-0012'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100012
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work orders record: Located NS-000012 for unused copper on canceled operation 20 using immutable IDs and preserved effective revision R6.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "DocumentNumber='RCV-0012'"
+            },
+            "expected_result_contains": {
+              "InspectionId": 1100012
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.quality_inspection_results.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle quality inspection results record: Reconciled 93 observed less 13 excluded to 80 supported KG for physically counted unconsumed copper.",
+        "id": "investigation_17",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.material_transactions.create",
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100012,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100012
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_materials.list"
+          }
+        ],
+        "description": "Read NS-000012 back through the documented Oracle work order materials.list operation after the mutation and confirmed the resource-specific changed fields ['IssuedQuantity', 'LastUpdateDate', 'SupplySubinventory'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "IssuedQuantity": -80,
+          "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+          "SupplySubinventory": "STORES"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": false,
+        "target_identity": {
+          "WorkOrderId": 100012
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.material_transactions.create",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100012,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100012
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_materials.list"
+        }
+      ],
+      "description": "Read NS-000012 back through the documented Oracle work order materials.list operation after the mutation and confirmed the resource-specific changed fields ['IssuedQuantity', 'LastUpdateDate', 'SupplySubinventory'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "IssuedQuantity": -80,
+        "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+        "SupplySubinventory": "STORES"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "WorkOrderId": 100012
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-012"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-012 scope, immutable handles, mounted systems, and evidence index before investigating NS-000012.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "file": "F-000012"
+          },
+          "expected_result_contains": {
+            "file": {
+              "id": "F-000012"
+            }
+          },
+          "match": "result_contains",
+          "tool": "slack.files_info"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Inspected the attachment linked from the scoped Slack discussion and correlated its case and source revision before using its control evidence.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-012\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-012"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-012 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-012",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-012",
+            "threadId": "thread-012"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-012",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-012"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-12 readiness input for leave_material_in_wip, then separately derived its 2026-01-14 operating outcome under return cannot exceed issued less consumed and must preserve project ownership instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-012",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-012"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-012",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-012"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 93 observed less 13 excluded to 80 supported KG for physically counted unconsumed copper. Applied stores receiving window to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-012' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-012"
+              },
+              {
+                "id": "drive-approval-012"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-012 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-012-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-012-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-012-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 93 observed less 13 excluded to 80 supported KG for physically counted unconsumed copper.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-012-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-012-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-012-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R6 and established 97 KG for quantity previously issued to the canceled operation, with control date 2026-01-13.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-012-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-012-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-012-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-12 readiness input for leave_material_in_wip, then separately derived its 2026-01-14 operating outcome under return cannot exceed issued less consumed and must preserve project ownership instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-012-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-012-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-012-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R6 and established 97 KG for quantity previously issued to the canceled operation, with control date 2026-01-13.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-012-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-012-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-012-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-012-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000012 at R6.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-012"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-012"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-012",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-012"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-012"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-012"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0012 only to return_verified_excess, NS-000012, and the supported 80 KG; kept broader scope and adjust_full_issued_quantity outside current authority.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-012"
+          },
+          "expected_result_contains": {
+            "id": "drive-012"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-012",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-012"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-012"
+          },
+          "expected_result_contains": {
+            "id": "drive-012"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R6 and established 97 KG for quantity previously issued to the canceled operation, with control date 2026-01-13.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100012,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100012
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_materials.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order materials record: Applied revision R6 and established 97 KG for quantity previously issued to the canceled operation, with control date 2026-01-13.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-012' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400012
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 93 observed less 13 excluded to 80 supported KG for physically counted unconsumed copper.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100012
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100012
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0012'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100012
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000012 for unused copper on canceled operation 20 using immutable IDs and preserved effective revision R6.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "DocumentNumber='RCV-0012'"
+          },
+          "expected_result_contains": {
+            "InspectionId": 1100012
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.quality_inspection_results.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle quality inspection results record: Reconciled 93 observed less 13 excluded to 80 supported KG for physically counted unconsumed copper.",
+      "id": "investigation_17",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-012"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
+    },
+    {
+      "arguments": {
+        "file": "F-000012"
+      },
+      "expected_result_contains": {
+        "file": {
+          "id": "F-000012"
+        }
+      },
+      "match": "result_contains",
+      "tool": "slack.files_info"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-012\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-012"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     },
     {
       "arguments": {
@@ -91,59 +1554,189 @@
         "id": "msg-012",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "msg-012",
+        "threadId": "thread-012"
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.get"
     },
     {
       "arguments": {
         "majorDimension": "ROWS",
-        "range": "Control!A1:H50",
+        "range": "Control!A1:I50",
         "spreadsheetId": "sheet-012",
         "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "values": [
+          [
+            "CASE-012"
+          ]
+        ]
+      },
+      "match": "result_contains",
       "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-012' and trashed = false"
+      },
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-012"
+          },
+          {
+            "id": "drive-approval-012"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-012-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-012-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-012-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-012-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-012-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-012-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-012-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-012-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-012-09",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-012-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-012"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-012"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
         "fileId": "drive-012",
         "mimeType": "text/plain"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "drive-012"
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.export"
     },
     {
       "arguments": {
-        "file": "F-000012"
+        "WorkOrderId": 100012,
+        "limit": 50,
+        "onlyData": true
       },
-      "match": "successful_tool_call",
-      "tool": "slack.files_info"
+      "expected_result_contains": {
+        "WorkOrderId": 100012
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.work_order_materials.list"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-012'"
+        "q": "ItemNumber='NS-COMP-012' and OrganizationCode='SEA'"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "InventoryItemId": 1400012
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.inventory_onhand_balances.list"
     },
     {
       "arguments": {
         "WorkOrderId": 100012
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "WorkOrderId": 100012
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.work_orders.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "DocumentNumber='RCV-0012'"
+      },
+      "expected_result_contains": {
+        "InspectionId": 1100012
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.quality_inspection_results.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
+    "slack.files_info",
+    "gmail.messages.list",
     "gmail.messages.get",
     "google_sheets.spreadsheets.values.get",
+    "google_drive.files.list",
+    "google_drive.files.download",
     "google_drive.files.export",
-    "slack.files_info",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "oracle_fusion.work_order_materials.list",
     "oracle_fusion.inventory_onhand_balances.list",
-    "oracle_fusion.work_orders.get"
+    "oracle_fusion.work_orders.get",
+    "oracle_fusion.quality_inspection_results.list"
   ],
   "task_id": "factorybench-012",
   "write_tools": [

@@ -130,8 +130,8 @@ def handle_request(world: FactoryWorld, request: dict[str, Any]) -> dict[str, An
                         "content": {
                             "type": "text",
                             "text": (
-                                f"{world.task['instruction']} Start with factorybench.context.get, "
-                                "respect every read-before-write control, and finish with factorybench.submit_answer."
+                                f"{world.task['instruction']} Investigate the isolated world in any valid order. "
+                                "When the business work is complete, record the structured decision with factorybench.submit_answer."
                             ),
                         },
                     }
