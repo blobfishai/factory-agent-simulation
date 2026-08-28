@@ -1,8 +1,8 @@
 ---
 license: cc-by-4.0
 task_categories:
-- tool-use
 - question-answering
+- reinforcement-learning
 language:
 - en
 tags:

@@ -98,6 +98,16 @@ def _column_name(index: int) -> str:
     return name
 
 
+def _stable_zip_info(filename: str) -> zipfile.ZipInfo:
+    """Return cross-run metadata for deterministic XLSX members."""
+
+    info = zipfile.ZipInfo(filename=filename, date_time=(1980, 1, 1, 0, 0, 0))
+    info.compress_type = zipfile.ZIP_STORED
+    info.create_system = 3
+    info.external_attr = 0o600 << 16
+    return info
+
+
 def _write_xlsx(path: Path, rows: list[list[Any]]) -> None:
     """Write a dependency-free, standards-shaped one-sheet XLSX workbook."""
 
@@ -117,9 +127,9 @@ def _write_xlsx(path: Path, rows: list[list[Any]]) -> None:
         '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
         f'<sheetData>{"".join(sheet_rows)}</sheetData></worksheet>'
     )
-    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_STORED) as archive:
         archive.writestr(
-            "[Content_Types].xml",
+            _stable_zip_info("[Content_Types].xml"),
             '<?xml version="1.0" encoding="UTF-8"?>'
             '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
             '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
@@ -129,26 +139,26 @@ def _write_xlsx(path: Path, rows: list[list[Any]]) -> None:
             '</Types>',
         )
         archive.writestr(
-            "_rels/.rels",
+            _stable_zip_info("_rels/.rels"),
             '<?xml version="1.0" encoding="UTF-8"?>'
             '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
             '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
             '</Relationships>',
         )
         archive.writestr(
-            "xl/workbook.xml",
+            _stable_zip_info("xl/workbook.xml"),
             '<?xml version="1.0" encoding="UTF-8"?>'
             '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
             '<sheets><sheet name="Evidence" sheetId="1" r:id="rId1"/></sheets></workbook>',
         )
         archive.writestr(
-            "xl/_rels/workbook.xml.rels",
+            _stable_zip_info("xl/_rels/workbook.xml.rels"),
             '<?xml version="1.0" encoding="UTF-8"?>'
             '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
             '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
             '</Relationships>',
         )
-        archive.writestr("xl/worksheets/sheet1.xml", sheet)
+        archive.writestr(_stable_zip_info("xl/worksheets/sheet1.xml"), sheet)
 
 
 def _write_asset(path: Path, asset: dict[str, Any]) -> None:
@@ -962,8 +972,8 @@ def _dataset_card(
     return f"""---
 license: cc-by-4.0
 task_categories:
-- tool-use
 - question-answering
+- reinforcement-learning
 language:
 - en
 tags:
