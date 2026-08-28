@@ -1,47 +1,80 @@
 {
   "allowed_write_tables": [
-    "ap_invoices",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "decision": {
+      "hold_or_reference": {
         "type": "string"
       },
-      "invoice_id": {
+      "invoice_number": {
         "type": "string"
       },
-      "variance_percent": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "validation_outcome": {
+        "type": "string"
       }
     },
     "required": [
-      "decision",
-      "invoice_id",
-      "variance_percent"
+      "hold_or_reference",
+      "invoice_number",
+      "validation_outcome"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "decision": "Approved",
-      "invoice_id": "INV-0001",
-      "variance_percent": 1.0
+      "hold_or_reference": "REF-0041",
+      "invoice_number": "INV-0041",
+      "validation_outcome": "Validated"
     },
     "assertions": [
       {
-        "description": "The invoice receives the policy-correct three-way-match decision.",
-        "id": "invoice_decision",
-        "table": "ap_invoices",
+        "description": "oracle_fusion.invoices.validate produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "hold_reason": null,
-          "status": "Approved"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"BusinessUnit\":\"Northstar Manufacturing BU\",\"InvoiceNumber\":\"INV-0041\",\"ProcessAction\":\"Validate\",\"Supplier\":\"Cascade Industrial\"}},\"case\":\"CASE-041\",\"outcome\":\"Compare the supplier PDF, PO line, accepted receipt, and tolerance policy before invoking Oracle invoice validation.\",\"tool\":\"oracle_fusion.invoices.validate\"}",
+          "resource_type": "oracle_fusion.invoices",
+          "revision": 1,
+          "status": "Validated",
+          "system": "oracle_fusion"
         },
         "where": {
-          "invoice_id": "INV-0001"
+          "resource_id": "factorybench-041-mutation-01",
+          "task_id": "factorybench-041"
+        }
+      },
+      {
+        "description": "google_sheets.spreadsheets.values.append produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
+        },
+        "where": {
+          "resource_id": "factorybench-041-mutation-02",
+          "task_id": "factorybench-041"
+        }
+      },
+      {
+        "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
+        },
+        "where": {
+          "resource_id": "factorybench-041-mutation-03",
+          "task_id": "factorybench-041"
         }
       }
     ]
@@ -49,43 +82,80 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "invoice_match"
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-041' and trashed = false"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.list"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-I-001"
+        "fileId": "drive-041"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "receipt_id": "RCV-I-001"
+        "majorDimension": "ROWS",
+        "ranges": [
+          "Control!A1:H50",
+          "Approvals!A1:G20"
+        ],
+        "spreadsheetId": "sheet-041",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_receipt"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.batchGet"
     },
     {
       "arguments": {
-        "invoice_id": "INV-0001"
+        "channel": "C-PROCUREMENT",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
       },
-      "tool": "get_invoice_match"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
+    },
+    {
+      "arguments": {
+        "invoicesUniqID": "invoicesUniqID-0041"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.invoices.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0041",
+        "q": "ReferenceNumber='CASE-041'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.purchase_order_lines.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order",
-    "get_receipt",
-    "get_invoice_match"
+    "factorybench.context.get",
+    "google_drive.files.list",
+    "google_drive.files.download",
+    "google_sheets.spreadsheets.values.batchGet",
+    "slack.conversations_history",
+    "oracle_fusion.invoices.get",
+    "oracle_fusion.purchase_order_lines.list"
   ],
   "task_id": "factorybench-041",
   "write_tools": [
-    "approve_invoice",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_sheets.spreadsheets.values.append",
+    "oracle_fusion.invoices.validate",
+    "slack.reactions_add"
   ]
 }

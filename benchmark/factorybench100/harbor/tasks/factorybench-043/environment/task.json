@@ -1,428 +1,743 @@
 {
   "allowed_write_tables": [
-    "ap_invoices",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "decision": {
+      "hold_or_reference": {
         "type": "string"
       },
-      "invoice_id": {
+      "invoice_number": {
         "type": "string"
       },
-      "variance_percent": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "validation_outcome": {
+        "type": "string"
       }
     },
     "required": [
-      "decision",
-      "invoice_id",
-      "variance_percent"
+      "hold_or_reference",
+      "invoice_number",
+      "validation_outcome"
     ],
     "type": "object"
   },
   "as_of": "2026-01-12",
   "expected": {
     "answer": {
-      "decision": "Approved",
-      "invoice_id": "INV-0003",
-      "variance_percent": 1.0
+      "hold_or_reference": "REF-0043",
+      "invoice_number": "INV-0043",
+      "validation_outcome": "Hold released"
     },
     "assertions": [
       {
-        "description": "The invoice receives the policy-correct three-way-match decision.",
-        "id": "invoice_decision",
-        "table": "ap_invoices",
+        "description": "oracle_fusion.invoice_holds.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "hold_reason": null,
-          "status": "Approved"
+          "payload_json": "{\"arguments\":{\"HoldId\":1000043,\"requestBody\":{\"ReleaseName\":\"APPROVED EVIDENCE\",\"ReleaseReason\":\"Match the credit memo and manager approval to the existing hold before recording its release reason.\"}},\"case\":\"CASE-043\",\"outcome\":\"Match the credit memo and manager approval to the existing hold before recording its release reason.\",\"tool\":\"oracle_fusion.invoice_holds.update\"}",
+          "resource_type": "oracle_fusion.invoice_holds",
+          "revision": 1,
+          "status": "Hold released",
+          "system": "oracle_fusion"
         },
         "where": {
-          "invoice_id": "INV-0003"
+          "resource_id": "factorybench-043-mutation-01",
+          "task_id": "factorybench-043"
+        }
+      },
+      {
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
+        "where": {
+          "resource_id": "factorybench-043-mutation-02",
+          "task_id": "factorybench-043"
+        }
+      },
+      {
+        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
+        },
+        "where": {
+          "resource_id": "factorybench-043-mutation-03",
+          "task_id": "factorybench-043"
         }
       }
     ]
   },
-  "family": "invoice_match",
-  "instruction": "Perform three-way match for invoice INV-0003 against PO PO-I-003 and receipt RCV-I-003. The invoice is $1672.56; apply the variance policy, update the invoice, and return the decision and variance percentage.",
-  "level": "L2",
+  "family": "payables_control",
+  "instruction": "You are the accounts payable specialist for Northstar Controls. Resolve FACTORYBENCH-043 (Release a hold after the supplier credit arrives). Match the credit memo and manager approval to the existing hold before recording its release reason. The case is an isolated snapshot as of 2026-01-12; correlate immutable IDs and effective revisions rather than matching names alone. Evidence is distributed across Oracle Fusion, Gmail, Drive, Sheets, and Slack, with inspectable files including `operating-policy.md`, `contract-or-service-control.md`, `supplier-quotation.pdf`, `supplier-lead-time-and-capacity.xlsx`, `approval-decision-log.csv`, `source-email-thread.eml`, `operations-slack-thread.json`, `drive-approval-record.json`. After the documented Oracle operation, send the scoped completion email; then write the outcome into the existing control-workbook cell. Return exactly: invoice_number, validation_outcome, hold_or_reference.",
+  "level": "L3",
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "invoice_match"
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-043",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-I-003"
+        "fileId": "drive-043",
+        "mimeType": "text/plain"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.export"
     },
     {
       "arguments": {
-        "receipt_id": "RCV-I-003"
+        "file": "F-000043"
       },
-      "tool": "get_receipt"
+      "match": "successful_tool_call",
+      "tool": "slack.files_info"
     },
     {
       "arguments": {
-        "invoice_id": "INV-0003"
+        "format": "full",
+        "id": "msg-043",
+        "userId": "me"
       },
-      "tool": "get_invoice_match"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.get"
+    },
+    {
+      "arguments": {
+        "invoicesUniqID": "invoicesUniqID-0043"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.invoices.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order",
-    "get_receipt",
-    "get_invoice_match"
+    "factorybench.context.get",
+    "google_sheets.spreadsheets.values.get",
+    "google_drive.files.export",
+    "slack.files_info",
+    "gmail.messages.get",
+    "oracle_fusion.invoices.get"
   ],
   "role": "accounts_payable_specialist",
   "seed_tables": {
-    "ap_invoices": [
+    "api_fixtures": [
       {
-        "hold_reason": null,
-        "invoice_amount": 1672.56,
-        "invoice_id": "INV-0003",
-        "purchase_order_id": "PO-I-003",
-        "receipt_id": "RCV-I-003",
-        "status": "Pending",
-        "supplier_id": "SUP-A",
-        "task_id": "factorybench-043"
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:H50\",\"spreadsheetId\":\"sheet-043\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-call-01",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:E2\",\"values\":[[\"case\",\"record\",\"quantity\",\"approval\",\"approved_operation\",\"approved_arguments_json\",\"return_fields_json\"],[\"CASE-043\",\"NS-000043\",14,\"APPROVED\",\"oracle_fusion.invoice_holds.update\",\"{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}}\",\"{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}\"]]}",
+        "task_id": "factorybench-043",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-043\",\"mimeType\":\"text/plain\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-call-02",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-043 | APPROVED | Match the credit memo and manager approval to the existing hold before recording its release reason. | Oracle operation oracle_fusion.invoice_holds.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}},\\\"case\\\":\\\"CASE-043\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H5\\\",\\\"decision\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.invoice_holds.update\\\",\\\"returnFields\\\":{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}}\",\"description\":\"Match the credit memo and manager approval to the existing hold before recording its release reason.\",\"id\":\"drive-043\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "google_drive.files.export"
+      },
+      {
+        "arguments_json": "{\"file\":\"F-000043\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-call-03",
+        "read_only": 1,
+        "response_json": "{\"file\":{\"id\":\"F-000043\",\"mimetype\":\"application/pdf\",\"name\":\"inspection-evidence.pdf\",\"preview\":\"CASE-043 | APPROVED | Match the credit memo and manager approval to the existing hold before recording its release reason. | Oracle operation oracle_fusion.invoice_holds.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}},\\\"case\\\":\\\"CASE-043\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H5\\\",\\\"decision\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.invoice_holds.update\\\",\\\"returnFields\\\":{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}}\",\"title\":\"CASE-043 inspection evidence\"},\"ok\":true}",
+        "task_id": "factorybench-043",
+        "tool_name": "slack.files_info"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-043\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-call-04",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-043\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"Q0FTRS0wNDMgfCBBUFBST1ZFRCB8IE1hdGNoIHRoZSBjcmVkaXQgbWVtbyBhbmQgbWFuYWdlciBhcHByb3ZhbCB0byB0aGUgZXhpc3RpbmcgaG9sZCBiZWZvcmUgcmVjb3JkaW5nIGl0cyByZWxlYXNlIHJlYXNvbi4gfCBPcmFjbGUgb3BlcmF0aW9uIG9yYWNsZV9mdXNpb24uaW52b2ljZV9ob2xkcy51cGRhdGUgfCBhcHByb3ZlZCBjb250cm9sIHBhY2tldCB7ImFwcHJvdmFsU3RhdHVzIjoiQVBQUk9WRUQiLCJhcHByb3ZlZEFyZ3VtZW50cyI6eyJIb2xkSWQiOjEwMDAwNDMsInJlcXVlc3RCb2R5Ijp7IlJlbGVhc2VOYW1lIjoiQVBQUk9WRUQgRVZJREVOQ0UiLCJSZWxlYXNlUmVhc29uIjoiTWF0Y2ggdGhlIGNyZWRpdCBtZW1vIGFuZCBtYW5hZ2VyIGFwcHJvdmFsIHRvIHRoZSBleGlzdGluZyBob2xkIGJlZm9yZSByZWNvcmRpbmcgaXRzIHJlbGVhc2UgcmVhc29uLiJ9fSwiY2FzZSI6IkNBU0UtMDQzIiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDUiLCJkZWNpc2lvbiI6Ik1hdGNoIHRoZSBjcmVkaXQgbWVtbyBhbmQgbWFuYWdlciBhcHByb3ZhbCB0byB0aGUgZXhpc3RpbmcgaG9sZCBiZWZvcmUgcmVjb3JkaW5nIGl0cyByZWxlYXNlIHJlYXNvbi4iLCJvcmFjbGVPcGVyYXRpb24iOiJvcmFjbGVfZnVzaW9uLmludm9pY2VfaG9sZHMudXBkYXRlIiwicmV0dXJuRmllbGRzIjp7ImhvbGRfb3JfcmVmZXJlbmNlIjoiUkVGLTAwNDMiLCJpbnZvaWNlX251bWJlciI6IklOVi0wMDQzIiwidmFsaWRhdGlvbl9vdXRjb21lIjoiSG9sZCByZWxlYXNlZCJ9fQ\",\"size\":823},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-043 \\u2014 evidence and requested action\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-043\",\"size\":1024},\"filename\":\"supplier-quotation.pdf\"}]},\"snippet\":\"Match the credit memo and manager approval to the existing hold before recording its release reason.\",\"threadId\":\"thread-043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "gmail.messages.get"
+      },
+      {
+        "arguments_json": "{\"invoicesUniqID\":\"invoicesUniqID-0043\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-call-05",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.invoices.get"
+      },
+      {
+        "arguments_json": "{\"HoldId\":1000043,\"requestBody\":{\"ReleaseName\":\"APPROVED EVIDENCE\",\"ReleaseReason\":\"Match the credit memo and manager approval to the existing hold before recording its release reason.\"}}",
+        "effect_json": "{\"effective_at\":\"2026-01-18\",\"payload_json\":\"{\\\"arguments\\\":{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}},\\\"case\\\":\\\"CASE-043\\\",\\\"outcome\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"tool\\\":\\\"oracle_fusion.invoice_holds.update\\\"}\",\"resource_id\":\"factorybench-043-mutation-01\",\"resource_type\":\"oracle_fusion.invoice_holds\",\"revision\":1,\"status\":\"Hold released\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-043\"}",
+        "fixture_id": "factorybench-043-call-06",
+        "read_only": 0,
+        "response_json": "{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"Operation\":\"oracle_fusion.invoice_holds.update\",\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"HOLD_RELEASED\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"links\":[],\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.invoice_holds.update"
+      },
+      {
+        "arguments_json": "{\"raw\":\"RnJvbTogYWNjb3VudHMucGF5YWJsZS5zcGVjaWFsaXN0QG5vcnRoc3Rhci5leGFtcGxlDQpUbzogb3BlcmF0aW9ucy1jb250cm9sQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA0MyDigJQgQ29tcGxldGVkIGVudGVycHJpc2Ugd29ya2Zsb3cNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpIb2xkIHJlbGVhc2VkLiBPcmFjbGUgYW5kIGNvbGxhYm9yYXRpb24gcmVmZXJlbmNlcyBhcmUgcmVjb3JkZWQgdW5kZXIgQ0FTRS0wNDMuDQo\",\"threadId\":\"thread-043\",\"userId\":\"me\"}",
+        "effect_json": "{\"effective_at\":\"2026-01-18\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogYWNjb3VudHMucGF5YWJsZS5zcGVjaWFsaXN0QG5vcnRoc3Rhci5leGFtcGxlDQpUbzogb3BlcmF0aW9ucy1jb250cm9sQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA0MyDigJQgQ29tcGxldGVkIGVudGVycHJpc2Ugd29ya2Zsb3cNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpIb2xkIHJlbGVhc2VkLiBPcmFjbGUgYW5kIGNvbGxhYm9yYXRpb24gcmVmZXJlbmNlcyBhcmUgcmVjb3JkZWQgdW5kZXIgQ0FTRS0wNDMuDQo\\\",\\\"threadId\\\":\\\"thread-043\\\",\\\"userId\\\":\\\"me\\\"},\\\"case\\\":\\\"CASE-043\\\",\\\"outcome\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-043-mutation-02\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-043\"}",
+        "fixture_id": "factorybench-043-call-07",
+        "read_only": 0,
+        "response_json": "{\"id\":\"sent-043\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "gmail.messages.send"
+      },
+      {
+        "arguments_json": "{\"includeValuesInResponse\":true,\"range\":\"Control!H5\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"range\":\"Control!H5\",\"values\":[[\"Hold released\"]]},\"spreadsheetId\":\"sheet-043\",\"valueInputOption\":\"RAW\"}",
+        "effect_json": "{\"effective_at\":\"2026-01-18\",\"payload_json\":\"{\\\"arguments\\\":{\\\"includeValuesInResponse\\\":true,\\\"range\\\":\\\"Control!H5\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"range\\\":\\\"Control!H5\\\",\\\"values\\\":[[\\\"Hold released\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-043\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"case\\\":\\\"CASE-043\\\",\\\"outcome\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"tool\\\":\\\"google_sheets.spreadsheets.values.update\\\"}\",\"resource_id\":\"factorybench-043-mutation-03\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-043\"}",
+        "fixture_id": "factorybench-043-call-08",
+        "read_only": 0,
+        "response_json": "{\"spreadsheetId\":\"sheet-043\",\"updatedCells\":1,\"updatedColumns\":1,\"updatedRange\":\"Control!H5\",\"updatedRows\":1}",
+        "task_id": "factorybench-043",
+        "tool_name": "google_sheets.spreadsheets.values.update"
+      },
+      {
+        "arguments_json": "{\"id\":\"att-043\",\"messageId\":\"msg-043\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-01",
+        "read_only": 1,
+        "response_json": "{\"data\":\"U3VwcGxpZXIgcXVvdGF0aW9uIGF0dGFjaG1lbnQgZm9yIENBU0UtMDQzOiBxdWFudGl0eSAxNC4gQ0FTRS0wNDMgfCBBUFBST1ZFRCB8IE1hdGNoIHRoZSBjcmVkaXQgbWVtbyBhbmQgbWFuYWdlciBhcHByb3ZhbCB0byB0aGUgZXhpc3RpbmcgaG9sZCBiZWZvcmUgcmVjb3JkaW5nIGl0cyByZWxlYXNlIHJlYXNvbi4gfCBPcmFjbGUgb3BlcmF0aW9uIG9yYWNsZV9mdXNpb24uaW52b2ljZV9ob2xkcy51cGRhdGUgfCBhcHByb3ZlZCBjb250cm9sIHBhY2tldCB7ImFwcHJvdmFsU3RhdHVzIjoiQVBQUk9WRUQiLCJhcHByb3ZlZEFyZ3VtZW50cyI6eyJIb2xkSWQiOjEwMDAwNDMsInJlcXVlc3RCb2R5Ijp7IlJlbGVhc2VOYW1lIjoiQVBQUk9WRUQgRVZJREVOQ0UiLCJSZWxlYXNlUmVhc29uIjoiTWF0Y2ggdGhlIGNyZWRpdCBtZW1vIGFuZCBtYW5hZ2VyIGFwcHJvdmFsIHRvIHRoZSBleGlzdGluZyBob2xkIGJlZm9yZSByZWNvcmRpbmcgaXRzIHJlbGVhc2UgcmVhc29uLiJ9fSwiY2FzZSI6IkNBU0UtMDQzIiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDUiLCJkZWNpc2lvbiI6Ik1hdGNoIHRoZSBjcmVkaXQgbWVtbyBhbmQgbWFuYWdlciBhcHByb3ZhbCB0byB0aGUgZXhpc3RpbmcgaG9sZCBiZWZvcmUgcmVjb3JkaW5nIGl0cyByZWxlYXNlIHJlYXNvbi4iLCJvcmFjbGVPcGVyYXRpb24iOiJvcmFjbGVfZnVzaW9uLmludm9pY2VfaG9sZHMudXBkYXRlIiwicmV0dXJuRmllbGRzIjp7ImhvbGRfb3JfcmVmZXJlbmNlIjoiUkVGLTAwNDMiLCJpbnZvaWNlX251bWJlciI6IklOVi0wMDQzIiwidmFsaWRhdGlvbl9vdXRjb21lIjoiSG9sZCByZWxlYXNlZCJ9fQ\",\"size\":880}",
+        "task_id": "factorybench-043",
+        "tool_name": "gmail.messages.attachments.get"
+      },
+      {
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-043\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-03",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-043\",\"threadId\":\"thread-043\"}],\"resultSizeEstimate\":1}",
+        "task_id": "factorybench-043",
+        "tool_name": "gmail.messages.list"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"thread-043\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-04",
+        "read_only": 1,
+        "response_json": "{\"historyId\":\"900043\",\"id\":\"thread-043\",\"messages\":[{\"id\":\"msg-043\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"Q0FTRS0wNDMgfCBBUFBST1ZFRCB8IE1hdGNoIHRoZSBjcmVkaXQgbWVtbyBhbmQgbWFuYWdlciBhcHByb3ZhbCB0byB0aGUgZXhpc3RpbmcgaG9sZCBiZWZvcmUgcmVjb3JkaW5nIGl0cyByZWxlYXNlIHJlYXNvbi4gfCBPcmFjbGUgb3BlcmF0aW9uIG9yYWNsZV9mdXNpb24uaW52b2ljZV9ob2xkcy51cGRhdGUgfCBhcHByb3ZlZCBjb250cm9sIHBhY2tldCB7ImFwcHJvdmFsU3RhdHVzIjoiQVBQUk9WRUQiLCJhcHByb3ZlZEFyZ3VtZW50cyI6eyJIb2xkSWQiOjEwMDAwNDMsInJlcXVlc3RCb2R5Ijp7IlJlbGVhc2VOYW1lIjoiQVBQUk9WRUQgRVZJREVOQ0UiLCJSZWxlYXNlUmVhc29uIjoiTWF0Y2ggdGhlIGNyZWRpdCBtZW1vIGFuZCBtYW5hZ2VyIGFwcHJvdmFsIHRvIHRoZSBleGlzdGluZyBob2xkIGJlZm9yZSByZWNvcmRpbmcgaXRzIHJlbGVhc2UgcmVhc29uLiJ9fSwiY2FzZSI6IkNBU0UtMDQzIiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDUiLCJkZWNpc2lvbiI6Ik1hdGNoIHRoZSBjcmVkaXQgbWVtbyBhbmQgbWFuYWdlciBhcHByb3ZhbCB0byB0aGUgZXhpc3RpbmcgaG9sZCBiZWZvcmUgcmVjb3JkaW5nIGl0cyByZWxlYXNlIHJlYXNvbi4iLCJvcmFjbGVPcGVyYXRpb24iOiJvcmFjbGVfZnVzaW9uLmludm9pY2VfaG9sZHMudXBkYXRlIiwicmV0dXJuRmllbGRzIjp7ImhvbGRfb3JfcmVmZXJlbmNlIjoiUkVGLTAwNDMiLCJpbnZvaWNlX251bWJlciI6IklOVi0wMDQzIiwidmFsaWRhdGlvbl9vdXRjb21lIjoiSG9sZCByZWxlYXNlZCJ9fQ\",\"size\":823},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-043 \\u2014 approved enterprise action\"}]},\"snippet\":\"Match the credit memo and manager approval to the existing hold before recording its release reason.\",\"threadId\":\"thread-043\"}]}",
+        "task_id": "factorybench-043",
+        "tool_name": "gmail.threads.get"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-approval-043\",\"pageSize\":20}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-05",
+        "read_only": 1,
+        "response_json": "{\"approvals\":[{\"fileId\":\"drive-approval-043\",\"id\":\"approval-043\",\"reviewerResponses\":[{\"comment\":\"CASE-043 | APPROVED | Match the credit memo and manager approval to the existing hold before recording its release reason. | Oracle operation oracle_fusion.invoice_holds.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}},\\\"case\\\":\\\"CASE-043\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H5\\\",\\\"decision\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.invoice_holds.update\\\",\\\"returnFields\\\":{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}}\",\"response\":\"APPROVED\",\"reviewer\":\"U-APPROVER\"}],\"status\":\"IN_PROGRESS\"}]}",
+        "task_id": "factorybench-043",
+        "tool_name": "google_drive.approvals.list"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-043\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-06",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-043 | APPROVED | Match the credit memo and manager approval to the existing hold before recording its release reason. | Oracle operation oracle_fusion.invoice_holds.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}},\\\"case\\\":\\\"CASE-043\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H5\\\",\\\"decision\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.invoice_holds.update\\\",\\\"returnFields\\\":{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}}\",\"description\":\"Match the credit memo and manager approval to the existing hold before recording its release reason.\",\"id\":\"drive-043\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "google_drive.files.download"
+      },
+      {
+        "arguments_json": "{\"fields\":\"id,name,mimeType,modifiedTime,md5Checksum,description\",\"fileId\":\"drive-043\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-08",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-043 | APPROVED | Match the credit memo and manager approval to the existing hold before recording its release reason. | Oracle operation oracle_fusion.invoice_holds.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}},\\\"case\\\":\\\"CASE-043\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H5\\\",\\\"decision\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.invoice_holds.update\\\",\\\"returnFields\\\":{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}}\",\"description\":\"Match the credit memo and manager approval to the existing hold before recording its release reason.\",\"id\":\"drive-043\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "google_drive.files.get"
+      },
+      {
+        "arguments_json": "{\"fields\":\"files(id,name,mimeType,modifiedTime,md5Checksum)\",\"pageSize\":50,\"q\":\"name contains 'CASE-043' and trashed = false\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-09",
+        "read_only": 1,
+        "response_json": "{\"files\":[{\"description\":\"CASE-043: Operating policy\",\"id\":\"drive-043-01\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"operating-policy.md\"},{\"description\":\"CASE-043: Contract / service control\",\"id\":\"drive-043\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"},{\"description\":\"CASE-043: Supplier quotation\",\"id\":\"drive-043-03\",\"mimeType\":\"application/pdf\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"supplier-quotation.pdf\"},{\"description\":\"CASE-043: Supplier lead-time and capacity workbook\",\"id\":\"drive-043-04\",\"mimeType\":\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"supplier-lead-time-and-capacity.xlsx\"},{\"description\":\"CASE-043: Approval decision log\",\"id\":\"drive-043-05\",\"mimeType\":\"text/csv\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"approval-decision-log.csv\"},{\"description\":\"CASE-043: Source email thread\",\"id\":\"drive-043-06\",\"mimeType\":\"message/rfc822\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"source-email-thread.eml\"},{\"description\":\"CASE-043: Operations Slack thread\",\"id\":\"drive-043-07\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"operations-slack-thread.json\"},{\"description\":\"CASE-043: Drive approval record\",\"id\":\"drive-approval-043\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"drive-approval-record.json\"},{\"description\":\"CASE-043: Oracle starting-record export\",\"id\":\"drive-043-09\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"oracle-starting-record.json\"},{\"description\":\"CASE-043: Inspection measurements\",\"id\":\"drive-043-10\",\"mimeType\":\"text/csv\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"inspection-measurements.csv\"},{\"description\":\"CASE-043: Workflow risk register\",\"id\":\"drive-043-11\",\"mimeType\":\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"workflow-risk-register.xlsx\"},{\"description\":\"CASE-043: Technical specification\",\"id\":\"drive-043-12\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"technical-specification.md\"}],\"kind\":\"drive#fileList\",\"nextPageToken\":null}",
+        "task_id": "factorybench-043",
+        "tool_name": "google_drive.files.list"
+      },
+      {
+        "arguments_json": "{\"includeGridData\":false,\"ranges\":[\"Control!A1:H50\"],\"spreadsheetId\":\"sheet-043\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-10",
+        "read_only": 1,
+        "response_json": "{\"developerMetadata\":[{\"metadataKey\":\"case\",\"metadataValue\":\"CASE-043\"},{\"metadataKey\":\"approvalStatus\",\"metadataValue\":\"APPROVED\"},{\"metadataKey\":\"approvedControlPacket\",\"metadataValue\":\"{\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}},\\\"case\\\":\\\"CASE-043\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H5\\\",\\\"decision\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.invoice_holds.update\\\",\\\"returnFields\\\":{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}}\"}],\"namedRanges\":[{\"name\":\"ApprovedDecision\",\"namedRangeId\":\"decision-043\"}],\"properties\":{\"title\":\"CASE-043 control workbook\"},\"sheets\":[{\"properties\":{\"sheetId\":0,\"title\":\"Control\"}}],\"spreadsheetId\":\"sheet-043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "google_sheets.spreadsheets.get"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"ranges\":[\"Control!A1:H50\",\"Approvals!A1:G20\"],\"spreadsheetId\":\"sheet-043\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-11",
+        "read_only": 1,
+        "response_json": "{\"spreadsheetId\":\"sheet-043\",\"valueRanges\":[{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:E2\",\"values\":[[\"case\",\"record\",\"quantity\",\"approval\",\"approved_operation\",\"approved_arguments_json\",\"return_fields_json\"],[\"CASE-043\",\"NS-000043\",14,\"APPROVED\",\"oracle_fusion.invoice_holds.update\",\"{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}}\",\"{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}\"]]}]}",
+        "task_id": "factorybench-043",
+        "tool_name": "google_sheets.spreadsheets.values.batchGet"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-13",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.draft_purchase_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-14",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.inspection_plans.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-15",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.inventory_onhand_balances.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100043,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-17",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.maintenance_documents.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100043,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-18",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.maintenance_operations.list"
+      },
+      {
+        "arguments_json": "{\"MaintenanceProgramId\":500043}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-19",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.maintenance_programs.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-20",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.maintenance_programs.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100043}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-21",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.maintenance_work_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-22",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.maintenance_work_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-23",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.purchase_order_lines.list"
+      },
+      {
+        "arguments_json": "{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-24",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.purchase_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-25",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.purchase_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-26",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.quality_inspection_results.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-27",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.receiving_receipt_requests.list"
+      },
+      {
+        "arguments_json": "{\"HeaderInterfaceId\":700043,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-28",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.receiving_receipt_transactions.list"
+      },
+      {
+        "arguments_json": "{\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-29",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.sales_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-30",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.sales_orders.list"
+      },
+      {
+        "arguments_json": "{\"SupplierId\":600043}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-31",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.suppliers.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-32",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.suppliers.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-33",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.supply_requests.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100043,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-34",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.work_order_materials.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100043,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-35",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.work_order_operations.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100043,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-36",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.work_order_resources.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100043}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-37",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.work_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-043'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-38",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700043,\"HoldId\":1000043,\"InspectionId\":1100043,\"InterfaceTransactionId\":800043,\"InvoiceId\":900043,\"ItemNumber\":\"NS-COMP-043\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500043,\"OrderNumber\":\"ORD-0043\",\"OrganizationCode\":\"SEA\",\"Quantity\":14,\"RecordId\":10000043,\"ReferenceNumber\":\"CASE-043\",\"StatusCode\":\"OPEN\",\"SupplierId\":600043,\"WoOperationId\":200043,\"WoOperationMaterialId\":300043,\"WoOperationResourceId\":400043,\"WorkOrderId\":100043,\"WorkOrderNumber\":\"WO-0043\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0043\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0043\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-043",
+        "tool_name": "oracle_fusion.work_orders.list"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-FINANCE\",\"inclusive\":true,\"limit\":100,\"oldest\":\"1768000000.000000\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-39",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"CASE-043: evidence checked.\",\"ts\":\"1768000043.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"CASE-043 | APPROVED | Match the credit memo and manager approval to the existing hold before recording its release reason. | Oracle operation oracle_fusion.invoice_holds.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}},\\\"case\\\":\\\"CASE-043\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H5\\\",\\\"decision\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.invoice_holds.update\\\",\\\"returnFields\\\":{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}}\",\"ts\":\"1768000043.000200\",\"user\":\"U-APPROVER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-043",
+        "tool_name": "slack.conversations_history"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-FINANCE\",\"limit\":100,\"ts\":\"1768000043.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-40",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"CASE-043: evidence checked.\",\"ts\":\"1768000043.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"CASE-043 | APPROVED | Match the credit memo and manager approval to the existing hold before recording its release reason. | Oracle operation oracle_fusion.invoice_holds.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}},\\\"case\\\":\\\"CASE-043\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H5\\\",\\\"decision\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.invoice_holds.update\\\",\\\"returnFields\\\":{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}}\",\"ts\":\"1768000043.000200\",\"user\":\"U-APPROVER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-043",
+        "tool_name": "slack.conversations_replies"
+      },
+      {
+        "arguments_json": "{\"count\":50,\"query\":\"\\\"CASE-043\\\"\",\"sort\":\"timestamp\",\"sort_dir\":\"asc\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-043-discovery-42",
+        "read_only": 1,
+        "response_json": "{\"messages\":{\"matches\":[{\"channel\":{\"id\":\"C-FINANCE\"},\"text\":\"CASE-043 | APPROVED | Match the credit memo and manager approval to the existing hold before recording its release reason. | Oracle operation oracle_fusion.invoice_holds.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"HoldId\\\":1000043,\\\"requestBody\\\":{\\\"ReleaseName\\\":\\\"APPROVED EVIDENCE\\\",\\\"ReleaseReason\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\"}},\\\"case\\\":\\\"CASE-043\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H5\\\",\\\"decision\\\":\\\"Match the credit memo and manager approval to the existing hold before recording its release reason.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.invoice_holds.update\\\",\\\"returnFields\\\":{\\\"hold_or_reference\\\":\\\"REF-0043\\\",\\\"invoice_number\\\":\\\"INV-0043\\\",\\\"validation_outcome\\\":\\\"Hold released\\\"}}\",\"ts\":\"1768000043.000100\",\"user\":\"U-APPROVER\"}],\"total\":1},\"ok\":true,\"query\":\"\\\"CASE-043\\\"\"}",
+        "task_id": "factorybench-043",
+        "tool_name": "slack.search_messages"
       }
     ],
-    "bom_components": [
+    "evidence_files": [
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-HOUSING",
-        "operation_sequence": 10,
-        "quantity_per": 1,
-        "yield_factor": 1
-      },
-      {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-RELAY",
-        "operation_sequence": 20,
-        "quantity_per": 2,
-        "yield_factor": 1
-      },
-      {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-COPPER",
-        "operation_sequence": 20,
-        "quantity_per": 1,
-        "yield_factor": 1
-      }
-    ],
-    "bom_headers": [
-      {
-        "assembly_item_id": "FG-PANEL",
-        "bom_id": "BOM-PANEL-C",
-        "effective_on": "2025-10-01",
-        "revision": "C",
-        "status": "Active"
-      }
-    ],
-    "documents": [
-      {
-        "body": "Release only when the customer is not on credit hold, an effective BOM exists, and every component has enough available stock. Reserve the exact BOM quantity.",
-        "category": "order_release",
-        "doc_id": "POL-01",
-        "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
+        "asset_id": "factorybench-043-policy",
+        "extracted_text": "# Release a hold after the supplier credit arrives \u2014 operating control\n\nScope: Apply Oracle invoice validation and hold operations to multi-document invoice evidence.\n\nThe operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.\n",
+        "kind": "policy",
+        "media_type": "text/markdown",
+        "path": "operating-policy.md",
+        "sha256": "b624473de543cabb2f769be18693458715ab520f5e99615c21b8d2cc2cdc292d",
+        "source": "google_drive",
         "task_id": "factorybench-043",
-        "title": "Order release control"
+        "title": "Operating policy"
       },
       {
-        "body": "Net requirements against unreserved on-hand. Use an approved supplier quote that is valid through the need-by date. Requisitions over the requester's limit require the plant manager's approval.",
-        "category": "material_shortage",
-        "doc_id": "POL-02",
-        "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
+        "asset_id": "factorybench-043-contract",
+        "extracted_text": "# Commercial or service control for CASE-043\n\nThe approved operational objective is: Match the credit memo and manager approval to the existing hold before recording its release reason.\n\nEffective date: 2026-01-18\nReference record: NS-000043\nAny deviation affecting price, completion, inspected quantity, compliance, or customer commit requires explicit approval preserved in the case packet.\n",
+        "kind": "contract",
+        "media_type": "text/markdown",
+        "path": "contract-or-service-control.md",
+        "sha256": "a97c66dc5ec910c38d33fc3da41e7fd8c19cc0b19ee723c8875b58f99ec7f895",
+        "source": "google_drive",
         "task_id": "factorybench-043",
-        "title": "Shortage requisition control"
+        "title": "Contract / service control"
       },
       {
-        "body": "Choose an approved supplier. Minimize landed price while meeting the need-by date; break ties by higher quality score, then higher on-time rate. Purchase orders above the buyer's limit require plant-manager approval.",
-        "category": "supplier_selection",
-        "doc_id": "POL-03",
-        "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
+        "asset_id": "factorybench-043-quote",
+        "extracted_text": "VENDOR QUOTATION CASE-043\nSupplier: Rainier Components\nItem: NS-COMP-043\nQuantity: 14 EA\nUnit price: USD 92.81\nExtended: USD 1299.34\nLead time: 13 calendar days\nValid through: 2026-02-17\nFreight: included\nQuality certificate: required with shipment\n",
+        "kind": "vendor_pdf",
+        "media_type": "application/pdf",
+        "path": "supplier-quotation.pdf",
+        "sha256": "f03c046c339f7978f2b6b76d75ba0f0f325f24743f137ce3e50e0f442a36c5d3",
+        "source": "gmail_attachment",
         "task_id": "factorybench-043",
-        "title": "Supplier award policy"
+        "title": "Supplier quotation"
       },
       {
-        "body": "Receive only against an approved purchase order. Put the lot in inspection status, record accepted and rejected quantities, and release only accepted quantity to stores.",
-        "category": "inbound_receipt",
-        "doc_id": "POL-04",
-        "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
+        "asset_id": "factorybench-043-leadtime",
+        "extracted_text": "[[\"supplier\", \"item\", \"quoted_days\", \"historical_p50\", \"historical_p90\", \"capacity_confirmed\", \"valid_through\"], [\"Rainier Components\", \"NS-COMP-043\", 13, 8, 12, \"YES\", \"2026-02-17\"], [\"Alternate Dynamics\", \"NS-COMP-043\", 10, 8, 15, \"NO\", \"2026-02-07\"]]",
+        "kind": "spreadsheet",
+        "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "path": "supplier-lead-time-and-capacity.xlsx",
+        "sha256": "a0146731df9a6b083ef71a72e41550b96cc3c0f2bda50759d44bbf4e519f846e",
+        "source": "google_drive",
         "task_id": "factorybench-043",
-        "title": "Receiving and inspection policy"
+        "title": "Supplier lead-time and capacity workbook"
       },
       {
-        "body": "Compare invoice, approved PO, and accepted receipt. Approve when quantity is covered and the amount variance is at most 2 percent; otherwise place a variance hold.",
-        "category": "invoice_match",
-        "doc_id": "POL-05",
-        "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
+        "asset_id": "factorybench-043-decision",
+        "extracted_text": "timestamp,case,actor,decision,scope,source\n2026-01-12T09:10:00-08:00,CASE-043,U-OPS-LEAD,evidence_verified,NS-000043,slack\n2026-01-12T10:05:00-08:00,CASE-043,U-APPROVER,approved,2026-01-18,drive_approval\n",
+        "kind": "spreadsheet_export",
+        "media_type": "text/csv",
+        "path": "approval-decision-log.csv",
+        "sha256": "e7b2b0fbf78935354adf448f3a394c4abf29c6bbbe7a1323b7f565b9271845ef",
+        "source": "google_sheets",
         "task_id": "factorybench-043",
-        "title": "Three-way match policy"
+        "title": "Approval decision log"
       },
       {
-        "body": "Issue only reserved, unrestricted stock. Use FEFO across eligible lots and start the operation only after the full required quantity has been issued.",
-        "category": "production_issue",
-        "doc_id": "POL-06",
-        "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
+        "asset_id": "factorybench-043-email",
+        "extracted_text": "From: operations-43@northstar.example\nTo: accounts.payable.specialist@northstar.example\nDate: 2026-01-12\nMessage-ID: <msg-043@northstar.example>\nSubject: CASE-043 \u2014 evidence and requested action\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\n\nPlease complete: Match the credit memo and manager approval to the existing hold before recording its release reason.\nUse record NS-000043; approved effective date is 2026-01-18. The supporting quotation and spreadsheet are attached. Reply with the Oracle reference.\n",
+        "kind": "email",
+        "media_type": "message/rfc822",
+        "path": "source-email-thread.eml",
+        "sha256": "038b5757db702f2512851f9cc4131451db293af9064d53a970bdfec0398d249e",
+        "source": "gmail",
         "task_id": "factorybench-043",
-        "title": "Material issue policy"
+        "title": "Source email thread"
       },
       {
-        "body": "A failed inspection requires an immediate lot hold and an open nonconformance. Use REWORK when the defect is recoverable and assign it to the quality engineer.",
-        "category": "quality_exception",
-        "doc_id": "POL-07",
-        "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
+        "asset_id": "factorybench-043-slack",
+        "extracted_text": "{\n  \"channel\": \"C-FINANCE\",\n  \"messages\": [\n    {\n      \"text\": \"CASE-043: physical/operational evidence checked for NS-000043.\",\n      \"ts\": \"1768000043.000100\",\n      \"user\": \"U-OPS-LEAD\"\n    },\n    {\n      \"text\": \"Approved exactly as documented; effective 2026-01-18. No broader change authorized.\",\n      \"ts\": \"1768000043.000200\",\n      \"user\": \"U-APPROVER\"\n    },\n    {\n      \"text\": \"Post the resulting Oracle reference back to this thread and the control workbook.\",\n      \"ts\": \"1768000043.000300\",\n      \"user\": \"U-CONTROLLER\"\n    }\n  ],\n  \"thread_ts\": \"1768000043.000100\"\n}\n",
+        "kind": "chat_thread",
+        "media_type": "application/json",
+        "path": "operations-slack-thread.json",
+        "sha256": "e1a9d1ad8edf88098885ea03b7b32f9995cc401704ef0c5c41d0257614e90647",
+        "source": "slack",
         "task_id": "factorybench-043",
-        "title": "Nonconformance policy"
+        "title": "Operations Slack thread"
       },
       {
-        "body": "Complete all operations before closing the work order. Record finished quantity and scrap, then post material, labor, and overhead variance for finance review.",
-        "category": "completion_costing",
-        "doc_id": "POL-08",
-        "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
+        "asset_id": "factorybench-043-approval",
+        "extracted_text": "{\n  \"approvalId\": \"approval-043\",\n  \"approvedScope\": \"Match the credit memo and manager approval to the existing hold before recording its release reason.\",\n  \"case\": \"CASE-043\",\n  \"effectiveDate\": \"2026-01-18\",\n  \"fileId\": \"drive-approval-043\",\n  \"requiredReviewers\": [\n    \"U-APPROVER\"\n  ],\n  \"reviewerResponses\": [\n    {\n      \"response\": \"APPROVED\",\n      \"reviewer\": \"U-APPROVER\"\n    }\n  ],\n  \"status\": \"IN_PROGRESS\"\n}\n",
+        "kind": "approval",
+        "media_type": "application/json",
+        "path": "drive-approval-record.json",
+        "sha256": "def255b4310f5f2faf7da650a6ec5dcf1edb6cfeffa10c61adfcc9454264319d",
+        "source": "google_drive",
         "task_id": "factorybench-043",
-        "title": "Work-order close policy"
+        "title": "Drive approval record"
       },
       {
-        "body": "Use unrestricted surplus from the donor plant, complete the interplant transfer, and reschedule the receiving work order no earlier than the transfer arrival date.",
-        "category": "transfer_reschedule",
-        "doc_id": "POL-09",
-        "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
+        "asset_id": "factorybench-043-erp",
+        "extracted_text": "{\n  \"case\": \"CASE-043\",\n  \"itemNumber\": \"NS-COMP-043\",\n  \"lastUpdateDate\": \"2026-01-12T08:00:00-08:00\",\n  \"organizationCode\": \"SEA\",\n  \"quantity\": 14,\n  \"recordId\": \"NS-000043\",\n  \"source\": \"Oracle Fusion Cloud 26a-shaped synthetic export\",\n  \"status\": \"Open\",\n  \"supplier\": \"Rainier Components\"\n}\n",
+        "kind": "erp_export",
+        "media_type": "application/json",
+        "path": "oracle-starting-record.json",
+        "sha256": "cc484a4c4a984045b06254c454d39951f595b14874108a08b6d65ceaeab6052c",
+        "source": "oracle_fusion",
         "task_id": "factorybench-043",
-        "title": "Interplant recovery policy"
+        "title": "Oracle starting-record export"
       },
       {
-        "body": "Open a high-priority maintenance work order for the failed workcenter. Reroute production only to a qualified active alternate and reschedule within that center's capacity.",
-        "category": "maintenance_recovery",
-        "doc_id": "POL-10",
-        "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
+        "asset_id": "factorybench-043-measurements",
+        "extracted_text": "sample,characteristic,value,unit,lower,upper,result\nS-043-1,dimension_a,24.97,mm,24.9,25.1,PASS\nS-043-2,dimension_a,25.04,mm,24.9,25.1,PASS\nS-043-3,dielectric,1513,V,1500,,PASS\n",
+        "kind": "quality_data",
+        "media_type": "text/csv",
+        "path": "inspection-measurements.csv",
+        "sha256": "49477901a8d97247cd86bd3c9de8b648076646220e1d2c42b831a43b0628a957",
+        "source": "laboratory_drive",
         "task_id": "factorybench-043",
-        "title": "Unplanned downtime policy"
-      }
-    ],
-    "items": [
-      {
-        "description": "Industrial control panel",
-        "item_id": "FG-PANEL",
-        "item_type": "finished_good",
-        "make_buy": "MAKE",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 910,
-        "uom": "EA"
+        "title": "Inspection measurements"
       },
       {
-        "description": "Powder-coated enclosure",
-        "item_id": "RM-HOUSING",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 210,
-        "uom": "EA"
+        "asset_id": "factorybench-043-risk",
+        "extracted_text": "[[\"risk_id\", \"case\", \"risk\", \"likelihood\", \"impact\", \"owner\", \"mitigation\", \"status\"], [\"R-043-A\", \"CASE-043\", \"incorrect record selection\", \"low\", \"high\", \"accounts_payable_specialist\", \"cross-check immutable identifiers\", \"OPEN\"], [\"R-043-B\", \"CASE-043\", \"unapproved scope expansion\", \"medium\", \"high\", \"U-APPROVER\", \"limit write to approved fields\", \"MITIGATED\"]]",
+        "kind": "spreadsheet",
+        "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "path": "workflow-risk-register.xlsx",
+        "sha256": "f1b78ee91907eaff119b0afbc15e25d9e41a8d7d142dbd3bdca55aa93d6e786e",
+        "source": "google_drive",
+        "task_id": "factorybench-043",
+        "title": "Workflow risk register"
       },
       {
-        "description": "Safety relay",
-        "item_id": "RM-RELAY",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 48,
-        "uom": "EA"
-      },
-      {
-        "description": "Copper busbar set",
-        "item_id": "RM-COPPER",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 72,
-        "uom": "EA"
+        "asset_id": "factorybench-043-spec",
+        "extracted_text": "# Technical specification NS-000043\n\nRevision: R2\nEffective: 2026-01-18\nItem: NS-COMP-043\nRequired control: Match the credit memo and manager approval to the existing hold before recording its release reason.\n",
+        "kind": "specification",
+        "media_type": "text/markdown",
+        "path": "technical-specification.md",
+        "sha256": "555a42edf0e561418624d97dfac00a8094c1c8a8795479e911b7b6765339ce01",
+        "source": "google_drive",
+        "task_id": "factorybench-043",
+        "title": "Technical specification"
       }
     ],
     "organizations": [
       {
         "ledger_currency": "USD",
         "name": "Northstar Controls Manufacturing",
-        "organization_id": "M1"
+        "organization_id": "NSC"
       }
     ],
-    "plants": [
+    "resource_state": [
       {
-        "name": "Seattle Assembly",
-        "organization_id": "M1",
-        "plant_id": "SEA",
-        "timezone": "America/Los_Angeles"
-      },
-      {
-        "name": "Portland Components",
-        "organization_id": "M1",
-        "plant_id": "PDX",
-        "timezone": "America/Los_Angeles"
-      }
-    ],
-    "purchase_order_lines": [
-      {
-        "item_id": "RM-COPPER",
-        "line_no": 1,
-        "ordered_qty": 23,
-        "purchase_order_id": "PO-I-003",
-        "received_qty": 23,
-        "unit_price": 72
-      }
-    ],
-    "purchase_orders": [
-      {
-        "approved_by": "U-MANAGER",
-        "buyer_id": "U-BUYER",
-        "promised_date": "2026-01-12",
-        "purchase_order_id": "PO-I-003",
-        "requisition_id": null,
-        "status": "Approved",
-        "supplier_id": "SUP-A",
-        "task_id": "factorybench-043",
-        "total_amount": 1656
-      }
-    ],
-    "receipt_lines": [
-      {
-        "accepted_qty": 23,
-        "item_id": "RM-COPPER",
-        "line_no": 1,
-        "lot_number": "LOT-I-003",
-        "quantity": 23,
-        "receipt_id": "RCV-I-003",
-        "rejected_qty": 0
-      }
-    ],
-    "receipts": [
-      {
-        "purchase_order_id": "PO-I-003",
-        "receipt_id": "RCV-I-003",
-        "received_at": "2026-01-12",
-        "receiver_id": "U-PLANNER",
-        "status": "Inspected",
+        "effective_at": "2026-01-12",
+        "payload_json": "{\"case\":\"CASE-043\",\"identifiers\":{\"invoicesUniqID\":\"invoicesUniqID-0043\"},\"quantity\":14,\"record\":\"NS-000043\"}",
+        "resource_id": "invoicesUniqID-0043",
+        "resource_type": "oracle_fusion.invoices",
+        "revision": 0,
+        "status": "Open",
+        "system": "oracle_fusion",
         "task_id": "factorybench-043"
-      }
-    ],
-    "suppliers": [
-      {
-        "approved": 1,
-        "name": "Cascade Industrial",
-        "on_time_rate": 0.94,
-        "payment_terms": "NET30",
-        "quality_score": 97.2,
-        "supplier_id": "SUP-A"
-      },
-      {
-        "approved": 1,
-        "name": "Rainier Components",
-        "on_time_rate": 0.98,
-        "payment_terms": "NET45",
-        "quality_score": 95.8,
-        "supplier_id": "SUP-B"
-      },
-      {
-        "approved": 0,
-        "name": "Frontier Supply",
-        "on_time_rate": 0.99,
-        "payment_terms": "NET30",
-        "quality_score": 99.1,
-        "supplier_id": "SUP-C"
       }
     ],
     "users": [
       {
         "approval_limit": 0,
-        "display_name": "Maya Chen",
-        "plant_id": "SEA",
-        "role": "production_planner",
-        "user_id": "U-PLANNER"
-      },
-      {
-        "approval_limit": 1000,
-        "display_name": "Diego Ruiz",
-        "plant_id": "SEA",
-        "role": "buyer",
-        "user_id": "U-BUYER"
+        "display_name": "Jordan Lee",
+        "role": "accounts_payable_specialist",
+        "user_id": "U-AGENT"
       },
       {
         "approval_limit": 250000,
         "display_name": "Avery Morgan",
-        "plant_id": "SEA",
-        "role": "plant_manager",
-        "user_id": "U-MANAGER"
+        "role": "authorized_approver",
+        "user_id": "U-APPROVER"
       },
       {
-        "approval_limit": 0,
-        "display_name": "Priya Shah",
-        "plant_id": "SEA",
-        "role": "quality_inspector",
-        "user_id": "U-INSPECTOR"
-      },
-      {
-        "approval_limit": 0,
-        "display_name": "Noah Williams",
-        "plant_id": "SEA",
-        "role": "quality_engineer",
-        "user_id": "U-QUALITY"
-      }
-    ],
-    "workcenters": [
-      {
-        "capacity_hours": 80,
-        "name": "Assembly Cell 1",
-        "plant_id": "SEA",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-ASM-1"
-      },
-      {
-        "capacity_hours": 64,
-        "name": "Assembly Cell 2",
-        "plant_id": "SEA",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-ASM-2"
-      },
-      {
-        "capacity_hours": 72,
-        "name": "Portland Fabrication",
-        "plant_id": "PDX",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-PDX-1"
+        "approval_limit": 25000,
+        "display_name": "Maya Chen",
+        "role": "operations_lead",
+        "user_id": "U-OPS-LEAD"
       }
     ]
   },
   "task_id": "factorybench-043",
-  "title": "Resolve three-way match for INV-0003",
+  "title": "Release a hold after the supplier credit arrives",
   "world": {
     "database": "SQLite",
-    "name": "Northstar Controls Oracle-shaped ERP",
-    "organization_id": "M1",
+    "id": "northstar-enterprise-fusion-v2",
+    "name": "Northstar Controls enterprise operations sandbox",
+    "organization_id": "NSC",
     "primary_plant": "SEA",
-    "servers": [
-      "oracle_erp",
-      "plant_docs",
-      "factory_harness"
+    "synthetic": true,
+    "systems": [
+      "factorybench",
+      "gmail",
+      "google_drive",
+      "google_sheets",
+      "oracle_fusion",
+      "slack"
     ]
   }
 }

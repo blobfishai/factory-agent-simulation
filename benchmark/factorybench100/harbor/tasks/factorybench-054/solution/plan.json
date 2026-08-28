@@ -1,56 +1,110 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "production_issue"
+      "fileId": "drive-approval-054",
+      "pageSize": 20
     },
-    "tool": "search_documents"
+    "tool": "google_drive.approvals.list"
   },
   {
     "arguments": {
-      "work_order_id": "WO-I-004"
-    },
-    "tool": "get_work_order"
-  },
-  {
-    "arguments": {
-      "item_ids": [
-        "RM-RELAY"
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
       ],
-      "plant_id": "SEA"
+      "spreadsheetId": "sheet-054",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_inventory"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "lot_number": "R-EARLY-004",
-      "occurred_at": "2026-01-12",
-      "plant_id": "SEA",
-      "quantity": 28,
-      "subinventory": "STORES",
-      "transaction_id": "TX-ISSUE-004",
-      "work_order_id": "WO-I-004"
+      "format": "full",
+      "id": "msg-054",
+      "userId": "me"
     },
-    "tool": "issue_material"
+    "tool": "gmail.messages.get"
   },
   {
     "arguments": {
-      "sequence": 10,
-      "work_order_id": "WO-I-004"
+      "file": "F-000054"
     },
-    "tool": "start_operation"
+    "tool": "slack.files_info"
   },
   {
     "arguments": {
-      "issued_lot": "R-EARLY-004",
-      "issued_quantity": 28,
-      "operation_status": "In Process",
-      "work_order_id": "WO-I-004"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-054'"
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.inspection_plans.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-054'"
+    },
+    "tool": "oracle_fusion.inventory_onhand_balances.list"
+  },
+  {
+    "arguments": {
+      "requestBody": {
+        "SourceSystemCode": "EXTERNAL",
+        "TransactionLines": [
+          {
+            "Item": "NS-COMP-054",
+            "LotNumber": "LOT-0054",
+            "OrganizationCode": "SEA",
+            "Subinventory": "STORES",
+            "TransactionQuantity": 25,
+            "TransactionType": "Subinventory Transfer",
+            "TransactionUnitOfMeasure": "EA",
+            "TransferSubinventory": "CONTROLLED"
+          }
+        ],
+        "TransactionMode": "ONLINE"
+      }
+    },
+    "tool": "oracle_fusion.inventory_transactions.create"
+  },
+  {
+    "arguments": {
+      "channel": "C-QUALITY",
+      "text": "CASE-054: Lot quarantined. Oracle reference REF-0054; control workbook updated.",
+      "thread_ts": "1768000054.000100"
+    },
+    "tool": "slack.chat_postMessage"
+  },
+  {
+    "arguments": {
+      "includeValuesInResponse": true,
+      "range": "Control!H16",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Control!H16",
+        "values": [
+          [
+            "Lot quarantined"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-054",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.update"
+  },
+  {
+    "arguments": {
+      "controlled_quantity": 25,
+      "inspection_reference": "INSP-0054",
+      "quality_result": "Lot quarantined"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

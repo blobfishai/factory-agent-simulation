@@ -1,81 +1,80 @@
 {
   "allowed_write_tables": [
-    "inventory_on_hand",
-    "material_reservations",
-    "material_requirements",
-    "material_transactions",
-    "work_order_operations",
-    "work_orders",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "issued_lot": {
-        "type": "string"
-      },
-      "issued_quantity": {
+      "controlled_quantity": {
         "type": "integer"
       },
-      "operation_status": {
+      "inspection_reference": {
         "type": "string"
       },
-      "work_order_id": {
+      "quality_result": {
         "type": "string"
       }
     },
     "required": [
-      "issued_lot",
-      "issued_quantity",
-      "operation_status",
-      "work_order_id"
+      "controlled_quantity",
+      "inspection_reference",
+      "quality_result"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "issued_lot": "R-EARLY-001",
-      "issued_quantity": 22,
-      "operation_status": "In Process",
-      "work_order_id": "WO-I-001"
+      "controlled_quantity": 22,
+      "inspection_reference": "INSP-0051",
+      "quality_result": "Inspection created"
     },
     "assertions": [
       {
-        "description": "The full requirement is issued from the reserved earliest-expiry lot.",
-        "id": "fefo_issue",
-        "table": "material_transactions",
+        "description": "oracle_fusion.quality_inspection_results.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "lot_number": "R-EARLY-001",
-          "quantity": 22,
-          "transaction_type": "WIP_ISSUE"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"DocumentNumber\":\"RCV-0051\",\"DocumentType\":\"RECEIVING\",\"InspectionPlanId\":1200051,\"InspectionPlanName\":\"PLAN-04\",\"InspectionStatus\":\"IN_PROGRESS\",\"ItemNumber\":\"NS-COMP-051\",\"LotNumber\":\"LOT-0051\",\"OrganizationCode\":\"SEA\",\"Quantity\":22,\"samples\":[{\"Result\":\"PASS\",\"SampleNumber\":1}]}},\"case\":\"CASE-051\",\"outcome\":\"Select the approved receiving inspection plan and create a result record tied to the receipt and supplier lot.\",\"tool\":\"oracle_fusion.quality_inspection_results.create\"}",
+          "resource_type": "oracle_fusion.quality_inspection_results",
+          "revision": 1,
+          "status": "Inspection created",
+          "system": "oracle_fusion"
         },
         "where": {
-          "transaction_id": "TX-ISSUE-001"
+          "resource_id": "factorybench-051-mutation-01",
+          "task_id": "factorybench-051"
         }
       },
       {
-        "description": "The material requirement reflects the full issue.",
-        "id": "requirement_issued",
-        "table": "material_requirements",
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "issued_qty": 22
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "work_order_id": "WO-I-001"
+          "resource_id": "factorybench-051-mutation-02",
+          "task_id": "factorybench-051"
         }
       },
       {
-        "description": "The first operation starts after material issue.",
-        "id": "operation_started",
-        "table": "work_order_operations",
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "status": "In Process"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "sequence": 10,
-          "work_order_id": "WO-I-001"
+          "resource_id": "factorybench-051-mutation-03",
+          "task_id": "factorybench-051"
         }
       }
     ]
@@ -83,40 +82,83 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "production_issue"
-      },
-      "tool": "search_documents"
-    },
-    {
-      "arguments": {
-        "work_order_id": "WO-I-001"
-      },
-      "tool": "get_work_order"
-    },
-    {
-      "arguments": {
-        "item_ids": [
-          "RM-RELAY"
+        "majorDimension": "ROWS",
+        "ranges": [
+          "Control!A1:H50",
+          "Approvals!A1:G20"
         ],
-        "plant_id": "SEA"
+        "spreadsheetId": "sheet-051",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.batchGet"
+    },
+    {
+      "arguments": {
+        "channel": "C-FINANCE",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-051\"",
+        "userId": "me"
+      },
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-051"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-051'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.inspection_plans.list"
+    },
+    {
+      "arguments": {
+        "HeaderInterfaceId": 700051,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-051'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.receiving_receipt_transactions.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order",
-    "get_inventory"
+    "factorybench.context.get",
+    "google_sheets.spreadsheets.values.batchGet",
+    "slack.conversations_history",
+    "gmail.messages.list",
+    "google_drive.files.get",
+    "oracle_fusion.inspection_plans.list",
+    "oracle_fusion.receiving_receipt_transactions.list"
   ],
   "task_id": "factorybench-051",
   "write_tools": [
-    "issue_material",
-    "start_operation",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "oracle_fusion.quality_inspection_results.create",
+    "slack.chat_postMessage"
   ]
 }

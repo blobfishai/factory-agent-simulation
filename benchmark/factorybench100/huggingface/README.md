@@ -23,10 +23,10 @@ configs:
 
 # FactoryBench-100
 
-FactoryBench-100 is a 100-task benchmark for long-horizon manufacturing ERP
-agents. Each task runs in an isolated SQLite snapshot and uses an Oracle-shaped,
-clean-room schema spanning order management, planning, procurement, receiving,
-inventory, manufacturing, quality, costing, and maintenance.
+FactoryBench-100 is a 100-task benchmark for long-horizon enterprise ERP agents.
+Each independently authored task runs in an isolated SQLite snapshot and exposes
+documented Oracle Fusion Cloud 26a REST operations alongside Gmail v1, Drive v3,
+Sheets v4, and Slack Web API operations over synthetic state.
 
 Harbor runs the authoritative SQLite state and trace in a private root-owned
 sidecar. The agent container receives only the task instruction, typed tool CLI,
@@ -50,11 +50,11 @@ reported only as supporting evidence.
 ## Qualification
 
 - Reference oracle: 100.00 FactoryScore, 100/100 strict passes
-- Incomplete-workflow control: 81.81
-- Read-only control: 46.00
-- No-control ablation: 15.34
+- Incomplete-workflow control: 85.71
+- Read-only control: 42.86
+- No-control ablation: 14.29
 - Deterministic replay sample: 10/10 matched
-- Single-mutation omission checks: 240/240 detected
+- Single-mutation omission checks: 300/300 detected
 
 These rows are measured controls, not claims about frontier models.
 
@@ -62,7 +62,7 @@ These rows are measured controls, not claims about frontier models.
 
 | Model | Harness | Coverage | FactoryScore | Strict passes | Selection |
 |---|---|---:|---:|---:|---|
-| [gpt-5.6-luna](model-runs/gpt-5.6-luna-stratified-10.json) | Harbor 0.21.0 / codex 0.150.1 / medium | 10/100 | 62.28 | 1/10 | Fixed 10-task stratified sample: one released task from each workflow family (10/100); not full-suite coverage. |
+| [gpt-5.6-luna](model-runs/gpt-5.6-luna-full-100.json) | Harbor 0.21.0 / codex 0.150.1 / medium | 100/100 | 85.29 | 0/100 | Full v2 suite (100/100 tasks). Codex 0.150.1 was preinstalled in the agent image; all prompts, tools, private sidecars, and verifiers were byte-identical to the released tasks. |
 
 Coverage is part of the result. A stratified subset is not presented as a
 100-task score. Full manifests and task-level traces are mirrored under
@@ -71,9 +71,9 @@ Coverage is part of the result. A stratified subset is not presented as a
 ## Fields
 
 Each JSONL row includes the natural-language prompt, role, workflow family,
-context-file paths, required tools and reads, allowed write tables, human-readable
-rubric, and metric contract. Executable worlds, oracle traces, exact verifier
-specifications, and Harbor tasks live in the source repository.
+12 heterogeneous context files, required tools and reads, allowed write tables,
+human-readable rubric, and metric contract. Executable worlds, oracle traces,
+exact verifier specifications, and Harbor tasks live in the source repository.
 
 ## Links
 

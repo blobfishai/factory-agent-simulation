@@ -1,74 +1,80 @@
 {
   "allowed_write_tables": [
-    "work_orders",
-    "work_order_operations",
-    "material_requirements",
-    "material_reservations",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "completion_date": {
+      "order_number": {
         "type": "string"
       },
-      "released_quantity": {
-        "type": "integer"
+      "revised_commit_date": {
+        "type": "string"
       },
-      "work_order_id": {
+      "supply_action": {
         "type": "string"
       }
     },
     "required": [
-      "completion_date",
-      "released_quantity",
-      "work_order_id"
+      "order_number",
+      "revised_commit_date",
+      "supply_action"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "completion_date": "2026-01-17",
-      "released_quantity": 6,
-      "work_order_id": "WO-0002"
+      "order_number": "ORD-0002",
+      "revised_commit_date": "2026-01-15",
+      "supply_action": "Partial supply created"
     },
     "assertions": [
       {
-        "description": "A released discrete work order links to the sales order.",
-        "id": "work_order_released",
-        "table": "work_orders",
+        "description": "oracle_fusion.supply_requests.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "quantity": 6,
-          "sales_order_id": "SO-0002",
-          "status": "Released"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0002\",\"SupplyRequestDate\":\"2026-01-15\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-002\",\"NeedByDate\":\"2026-01-20\",\"Quantity\":10,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}},\"case\":\"CASE-002\",\"outcome\":\"Separate the unrestricted domestic quantity from the export-controlled line, create supply only for the released demand, and document the split for compliance.\",\"tool\":\"oracle_fusion.supply_requests.create\"}",
+          "resource_type": "oracle_fusion.supply_requests",
+          "revision": 1,
+          "status": "Partial supply created",
+          "system": "oracle_fusion"
         },
         "where": {
-          "work_order_id": "WO-0002"
+          "resource_id": "factorybench-002-mutation-01",
+          "task_id": "factorybench-002"
         }
       },
       {
-        "count": 3,
-        "description": "All three BOM components are reserved.",
-        "id": "all_components_reserved",
-        "table": "material_reservations",
+        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_drive.approvals",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
+        },
         "where": {
-          "status": "Active",
-          "work_order_id": "WO-0002"
+          "resource_id": "factorybench-002-mutation-02",
+          "task_id": "factorybench-002"
         }
       },
       {
-        "description": "The two-per-assembly relay requirement is fully reserved.",
-        "id": "relay_requirement_reserved",
-        "table": "material_requirements",
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "required_qty": 12,
-          "reserved_qty": 12
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "work_order_id": "WO-0002"
+          "resource_id": "factorybench-002-mutation-03",
+          "task_id": "factorybench-002"
         }
       }
     ]
@@ -76,50 +82,77 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "order_release"
+        "count": 50,
+        "query": "\"CASE-002\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "slack.search_messages"
     },
     {
       "arguments": {
-        "sales_order_id": "SO-0002"
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000002.000100"
       },
-      "tool": "get_sales_order"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "as_of": "2026-01-12",
-        "item_id": "FG-PANEL"
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-002"
       },
-      "tool": "get_bom"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
-        "item_ids": [
-          "RM-HOUSING",
-          "RM-RELAY",
-          "RM-COPPER"
-        ],
-        "plant_id": "SEA"
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-002",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-002'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.sales_orders.list"
+    },
+    {
+      "arguments": {
+        "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0002"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.sales_orders.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_sales_order",
-    "get_bom",
-    "get_inventory"
+    "factorybench.context.get",
+    "slack.search_messages",
+    "slack.conversations_replies",
+    "google_drive.files.get",
+    "google_sheets.spreadsheets.values.get",
+    "oracle_fusion.sales_orders.list",
+    "oracle_fusion.sales_orders.get"
   ],
   "task_id": "factorybench-002",
   "write_tools": [
-    "create_work_order",
-    "reserve_material",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_drive.approvals.approve",
+    "oracle_fusion.supply_requests.create",
+    "slack.chat_postMessage"
   ]
 }

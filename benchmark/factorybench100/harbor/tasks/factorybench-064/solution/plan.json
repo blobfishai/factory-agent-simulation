@@ -1,46 +1,94 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "quality_exception"
+      "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+      "fileId": "drive-064"
     },
-    "tool": "search_documents"
+    "tool": "google_drive.files.get"
   },
   {
     "arguments": {
-      "inspection_id": "INSP-Q-004"
+      "majorDimension": "ROWS",
+      "range": "Control!A1:H50",
+      "spreadsheetId": "sheet-064",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_quality_context"
+    "tool": "google_sheets.spreadsheets.values.get"
   },
   {
     "arguments": {
-      "hold_id": "HOLD-0004",
-      "inspection_id": "INSP-Q-004",
-      "item_id": "FG-PANEL",
-      "lot_number": "FG-LOT-004",
-      "reason_code": "FUNCTIONAL_TEST_FAIL"
+      "count": 50,
+      "query": "\"CASE-064\"",
+      "sort": "timestamp",
+      "sort_dir": "asc"
     },
-    "tool": "place_quality_hold"
+    "tool": "slack.search_messages"
   },
   {
     "arguments": {
-      "disposition": "REWORK",
-      "inspection_id": "INSP-Q-004",
-      "nonconformance_id": "NC-0004",
-      "owner_id": "U-QUALITY"
+      "channel": "C-PRODUCTION",
+      "limit": 100,
+      "ts": "1768000064.000100"
     },
-    "tool": "create_nonconformance"
+    "tool": "slack.conversations_replies"
   },
   {
     "arguments": {
-      "disposition": "REWORK",
-      "hold_id": "HOLD-0004",
-      "inspection_id": "INSP-Q-004",
-      "nonconformance_id": "NC-0004"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-064'"
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.supply_requests.list"
+  },
+  {
+    "arguments": {
+      "WorkOrderId": 100064,
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-064'"
+    },
+    "tool": "oracle_fusion.work_order_materials.list"
+  },
+  {
+    "arguments": {
+      "WoOperationId": 200064,
+      "WoOperationMaterialId": 300064,
+      "WorkOrderId": 100064,
+      "requestBody": {
+        "SubstituteItemNumber": "NS-SUB-064",
+        "SubstituteQuantity": 35
+      }
+    },
+    "tool": "oracle_fusion.work_order_materials.replace_with_substitute"
+  },
+  {
+    "arguments": {
+      "approvalId": "approval-064",
+      "fileId": "drive-approval-064",
+      "requestBody": {
+        "message": "Approved for CASE-064 only."
+      }
+    },
+    "tool": "google_drive.approvals.approve"
+  },
+  {
+    "arguments": {
+      "channel": "C-PRODUCTION",
+      "text": "CASE-064: Planning substitute applied. Oracle reference REF-0064; control workbook updated.",
+      "thread_ts": "1768000064.000100"
+    },
+    "tool": "slack.chat_postMessage"
+  },
+  {
+    "arguments": {
+      "need_by_date": "2026-01-20",
+      "planning_action": "Planning substitute applied",
+      "supply_reference": "SUPPLY-0064"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

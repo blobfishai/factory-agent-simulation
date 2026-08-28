@@ -1,66 +1,80 @@
 {
   "allowed_write_tables": [
-    "purchase_orders",
-    "purchase_order_lines",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "purchase_order_id": {
+      "forecast_horizon": {
         "type": "string"
       },
-      "supplier_id": {
+      "generation_action": {
         "type": "string"
       },
-      "total_amount": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "program_code": {
+        "type": "string"
       }
     },
     "required": [
-      "purchase_order_id",
-      "supplier_id",
-      "total_amount"
+      "forecast_horizon",
+      "generation_action",
+      "program_code"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "purchase_order_id": "PO-0006",
-      "supplier_id": "SUP-B",
-      "total_amount": 2041.2
+      "forecast_horizon": "2026-01-20",
+      "generation_action": "Forecast window advanced",
+      "program_code": "PM-0026"
     },
     "assertions": [
       {
-        "description": "The purchase order is awarded to the best eligible supplier, meets the need-by date, and is approved.",
-        "id": "po_approved",
-        "table": "purchase_orders",
+        "description": "oracle_fusion.maintenance_programs.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "approved_by": "U-MANAGER",
-          "promised_date": "2026-01-16",
-          "requisition_id": "REQ-A-006",
-          "status": "Approved",
-          "supplier_id": "SUP-B",
-          "total_amount": 2041.2
+          "payload_json": "{\"arguments\":{\"MaintenanceProgramId\":500026,\"requestBody\":{\"ForecastEndDate\":\"2026-04-20\",\"ForecastStartDate\":\"2026-01-20\",\"StatusCode\":\"ACTIVE\"}},\"case\":\"CASE-026\",\"outcome\":\"Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.\",\"tool\":\"oracle_fusion.maintenance_programs.update\"}",
+          "resource_type": "oracle_fusion.maintenance_programs",
+          "revision": 1,
+          "status": "Forecast window advanced",
+          "system": "oracle_fusion"
         },
         "where": {
-          "purchase_order_id": "PO-0006"
+          "resource_id": "factorybench-026-mutation-01",
+          "task_id": "factorybench-026"
         }
       },
       {
-        "description": "The PO line preserves the approved requisition quantity.",
-        "id": "po_line_exact",
-        "table": "purchase_order_lines",
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "item_id": "RM-RELAY",
-          "ordered_qty": 42,
-          "unit_price": 48.6
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "line_no": 1,
-          "purchase_order_id": "PO-0006"
+          "resource_id": "factorybench-026-mutation-02",
+          "task_id": "factorybench-026"
+        }
+      },
+      {
+        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_drive.approvals",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
+        },
+        "where": {
+          "resource_id": "factorybench-026-mutation-03",
+          "task_id": "factorybench-026"
         }
       }
     ]
@@ -68,39 +82,77 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "supplier_selection"
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-026",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
-        "requisition_id": "REQ-A-006"
+        "count": 50,
+        "query": "\"CASE-026\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
       },
-      "tool": "get_requisition"
+      "match": "successful_tool_call",
+      "tool": "slack.search_messages"
     },
     {
       "arguments": {
-        "item_id": "RM-RELAY",
-        "need_by": "2026-02-01",
-        "task_id": "factorybench-026"
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000026.000100"
       },
-      "tool": "get_supplier_quotes"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-026"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-026'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.maintenance_programs.list"
+    },
+    {
+      "arguments": {
+        "MaintenanceProgramId": 500026
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.maintenance_programs.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_requisition",
-    "get_supplier_quotes"
+    "factorybench.context.get",
+    "google_sheets.spreadsheets.values.get",
+    "slack.search_messages",
+    "slack.conversations_replies",
+    "google_drive.files.get",
+    "oracle_fusion.maintenance_programs.list",
+    "oracle_fusion.maintenance_programs.get"
   ],
   "task_id": "factorybench-026",
   "write_tools": [
-    "approve_purchase_order",
-    "create_purchase_order",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_drive.approvals.approve",
+    "oracle_fusion.maintenance_programs.update",
+    "slack.chat_postMessage"
   ]
 }

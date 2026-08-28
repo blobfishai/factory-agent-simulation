@@ -1,84 +1,81 @@
 {
   "allowed_write_tables": [
-    "purchase_orders",
-    "purchase_order_lines",
-    "receipts",
-    "receipt_lines",
-    "quality_inspections",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "inspection_id": {
+      "committed_value": {
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "purchase_document": {
         "type": "string"
       },
-      "lot_number": {
+      "supplier_decision": {
         "type": "string"
-      },
-      "receipt_id": {
-        "type": "string"
-      },
-      "released_quantity": {
-        "type": "integer"
       }
     },
     "required": [
-      "inspection_id",
-      "lot_number",
-      "receipt_id",
-      "released_quantity"
+      "committed_value",
+      "purchase_document",
+      "supplier_decision"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "inspection_id": "INSP-R-003",
-      "lot_number": "LOT-R-0003",
-      "receipt_id": "RCV-0003",
-      "released_quantity": 27
+      "committed_value": 3325.51,
+      "purchase_document": "PO-0033",
+      "supplier_decision": "Unsafe supply canceled"
     },
     "assertions": [
       {
-        "description": "The approved PO quantity is received into a traceable lot.",
-        "id": "receipt_complete",
-        "table": "receipts",
+        "description": "oracle_fusion.purchase_orders.cancel produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "purchase_order_id": "PO-R-003",
-          "status": "Inspected"
+          "payload_json": "{\"arguments\":{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0033\",\"requestBody\":{\"cancelUnfulfilledDemandFlag\":true,\"cancellationReason\":\"Verify the affected material and remaining open quantity, then cancel the PO with the approved reason and notify stakeholders.\",\"initiatingParty\":\"buyer\"}},\"case\":\"CASE-033\",\"outcome\":\"Verify the affected material and remaining open quantity, then cancel the PO with the approved reason and notify stakeholders.\",\"tool\":\"oracle_fusion.purchase_orders.cancel\"}",
+          "resource_type": "oracle_fusion.purchase_orders",
+          "revision": 1,
+          "status": "Unsafe supply canceled",
+          "system": "oracle_fusion"
         },
         "where": {
-          "receipt_id": "RCV-0003"
+          "resource_id": "factorybench-033-mutation-01",
+          "task_id": "factorybench-033"
         }
       },
       {
-        "description": "The full receipt has a passing inspection.",
-        "id": "inspection_passed",
-        "table": "quality_inspections",
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "accepted_qty": 27,
-          "rejected_qty": 0,
-          "result": "Pass"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "inspection_id": "INSP-R-003"
+          "resource_id": "factorybench-033-mutation-02",
+          "task_id": "factorybench-033"
         }
       },
       {
-        "description": "Accepted stock is released to stores.",
-        "id": "accepted_stock_released",
-        "table": "inventory_on_hand",
+        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "quantity": 27,
-          "status": "Unrestricted"
+          "resource_type": "google_drive.approvals",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "lot_number": "LOT-R-0003",
-          "plant_id": "SEA",
-          "subinventory": "STORES"
+          "resource_id": "factorybench-033-mutation-03",
+          "task_id": "factorybench-033"
         }
       }
     ]
@@ -86,30 +83,80 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "inbound_receipt"
+        "channel": "C-PROCUREMENT",
+        "limit": 100,
+        "ts": "1768000033.000100"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-R-003"
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-033"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-033",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "count": 50,
+        "query": "\"CASE-033\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.search_messages"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-033'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.suppliers.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0033",
+        "q": "ReferenceNumber='CASE-033'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.purchase_order_lines.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order"
+    "factorybench.context.get",
+    "slack.conversations_replies",
+    "google_drive.files.get",
+    "google_sheets.spreadsheets.values.get",
+    "slack.search_messages",
+    "oracle_fusion.suppliers.list",
+    "oracle_fusion.purchase_order_lines.list"
   ],
   "task_id": "factorybench-033",
   "write_tools": [
-    "receive_purchase_order",
-    "record_inspection",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_drive.approvals.approve",
+    "oracle_fusion.purchase_orders.cancel",
+    "slack.chat_postMessage"
   ]
 }

@@ -1,92 +1,99 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "order_release"
+      "count": 50,
+      "query": "\"CASE-002\"",
+      "sort": "timestamp",
+      "sort_dir": "asc"
     },
-    "tool": "search_documents"
+    "tool": "slack.search_messages"
   },
   {
     "arguments": {
-      "sales_order_id": "SO-0002"
+      "channel": "C-QUALITY",
+      "limit": 100,
+      "ts": "1768000002.000100"
     },
-    "tool": "get_sales_order"
+    "tool": "slack.conversations_replies"
   },
   {
     "arguments": {
-      "as_of": "2026-01-12",
-      "item_id": "FG-PANEL"
+      "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+      "fileId": "drive-002"
     },
-    "tool": "get_bom"
+    "tool": "google_drive.files.get"
   },
   {
     "arguments": {
-      "item_ids": [
-        "RM-HOUSING",
-        "RM-RELAY",
-        "RM-COPPER"
-      ],
-      "plant_id": "SEA"
+      "majorDimension": "ROWS",
+      "range": "Control!A1:H50",
+      "spreadsheetId": "sheet-002",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_inventory"
+    "tool": "google_sheets.spreadsheets.values.get"
   },
   {
     "arguments": {
-      "item_id": "FG-PANEL",
-      "quantity": 6,
-      "sales_order_id": "SO-0002",
-      "scheduled_completion": "2026-01-17",
-      "scheduled_start": "2026-01-14",
-      "work_order_id": "WO-0002",
-      "workcenter_id": "WC-ASM-1"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-002'"
     },
-    "tool": "create_work_order"
+    "tool": "oracle_fusion.sales_orders.list"
   },
   {
     "arguments": {
-      "item_id": "RM-HOUSING",
-      "lot_number": "H-002",
-      "plant_id": "SEA",
-      "quantity": 6,
-      "reservation_id": "RES-H-002",
-      "subinventory": "STORES",
-      "work_order_id": "WO-0002"
+      "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0002"
     },
-    "tool": "reserve_material"
+    "tool": "oracle_fusion.sales_orders.get"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "lot_number": "R-002",
-      "plant_id": "SEA",
-      "quantity": 12,
-      "reservation_id": "RES-R-002",
-      "subinventory": "STORES",
-      "work_order_id": "WO-0002"
+      "requestBody": {
+        "SupplyOrderReferenceNumber": "SUPPLY-0002",
+        "SupplyRequestDate": "2026-01-15",
+        "SupplyRequestSystem": "EXT",
+        "supplyRequestLines": [
+          {
+            "DestinationOrganizationCode": "SEA",
+            "ItemNumber": "NS-COMP-002",
+            "NeedByDate": "2026-01-20",
+            "Quantity": 10,
+            "SupplyOrderSource": "EXT",
+            "SupplyType": "BUY"
+          }
+        ]
+      }
     },
-    "tool": "reserve_material"
+    "tool": "oracle_fusion.supply_requests.create"
   },
   {
     "arguments": {
-      "item_id": "RM-COPPER",
-      "lot_number": "C-002",
-      "plant_id": "SEA",
-      "quantity": 6,
-      "reservation_id": "RES-C-002",
-      "subinventory": "STORES",
-      "work_order_id": "WO-0002"
+      "approvalId": "approval-002",
+      "fileId": "drive-approval-002",
+      "requestBody": {
+        "message": "Approved for CASE-002 only."
+      }
     },
-    "tool": "reserve_material"
+    "tool": "google_drive.approvals.approve"
   },
   {
     "arguments": {
-      "completion_date": "2026-01-17",
-      "released_quantity": 6,
-      "work_order_id": "WO-0002"
+      "channel": "C-QUALITY",
+      "text": "CASE-002: Partial supply created. Oracle reference REF-0002; control workbook updated.",
+      "thread_ts": "1768000002.000100"
     },
-    "tool": "submit_answer"
+    "tool": "slack.chat_postMessage"
+  },
+  {
+    "arguments": {
+      "order_number": "ORD-0002",
+      "revised_commit_date": "2026-01-15",
+      "supply_action": "Partial supply created"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

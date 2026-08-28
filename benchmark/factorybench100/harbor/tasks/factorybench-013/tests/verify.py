@@ -33,8 +33,11 @@ def _missing_required_read_calls(
     for requirement in task["required_read_calls"]:
         if not any(
             entry["tool"] == requirement["tool"]
-            and _canonical_argument(entry.get("arguments", {}))
-            == _canonical_argument(requirement["arguments"])
+            and (
+                requirement.get("match") == "successful_tool_call"
+                or _canonical_argument(entry.get("arguments", {}))
+                == _canonical_argument(requirement["arguments"])
+            )
             for entry in successful
         ):
             missing.append(requirement)

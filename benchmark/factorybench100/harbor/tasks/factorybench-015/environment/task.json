@@ -1,453 +1,758 @@
 {
   "allowed_write_tables": [
-    "purchase_requisitions",
-    "requisition_lines",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "net_shortage": {
-        "type": "integer"
-      },
-      "requisition_id": {
+      "item_lot": {
         "type": "string"
       },
-      "supplier_id": {
+      "posted_quantity": {
+        "type": "integer"
+      },
+      "transaction_reference": {
         "type": "string"
       }
     },
     "required": [
-      "net_shortage",
-      "requisition_id",
-      "supplier_id"
+      "item_lot",
+      "posted_quantity",
+      "transaction_reference"
     ],
     "type": "object"
   },
   "as_of": "2026-01-12",
   "expected": {
     "answer": {
-      "net_shortage": 24,
-      "requisition_id": "REQ-0005",
-      "supplier_id": "SUP-A"
+      "item_lot": "FB-015",
+      "posted_quantity": 23,
+      "transaction_reference": "Resource actuals posted"
     },
     "assertions": [
       {
-        "description": "The shortage is covered by an approved requisition.",
-        "id": "requisition_approved",
-        "table": "purchase_requisitions",
+        "description": "oracle_fusion.resource_transactions.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "approved_by": "U-MANAGER",
-          "status": "Approved",
-          "supplier_id": "SUP-A",
-          "total_amount": 1692.0
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"ResourceTransactionDetail\":[{\"OrganizationCode\":\"SEA\",\"ResourceCode\":\"RES-015\",\"TransactionQuantity\":17.25,\"TransactionUnitOfMeasure\":\"HR\",\"WoOperationSequenceNumber\":10,\"WorkOrderNumber\":\"WO-0015\"}],\"SourceSystemCode\":\"FUSION_MOBILE\"}},\"case\":\"CASE-015\",\"outcome\":\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\",\"tool\":\"oracle_fusion.resource_transactions.create\"}",
+          "resource_type": "oracle_fusion.resource_transactions",
+          "revision": 1,
+          "status": "Resource actuals posted",
+          "system": "oracle_fusion"
         },
         "where": {
-          "requisition_id": "REQ-0005"
+          "resource_id": "factorybench-015-mutation-01",
+          "task_id": "factorybench-015"
         }
       },
       {
-        "description": "The requisition line equals net requirement after available stock.",
-        "id": "net_quantity_ordered",
-        "table": "requisition_lines",
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "item_id": "RM-COPPER",
-          "quantity": 24,
-          "unit_price": 70.5
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "line_no": 1,
-          "requisition_id": "REQ-0005"
+          "resource_id": "factorybench-015-mutation-02",
+          "task_id": "factorybench-015"
+        }
+      },
+      {
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
+        },
+        "where": {
+          "resource_id": "factorybench-015-mutation-03",
+          "task_id": "factorybench-015"
         }
       }
     ]
   },
-  "family": "material_shortage",
-  "instruction": "Work order WO-S-005 is short RM-COPPER. Net the 28 required units against available SEA stock, select a valid approved quote that meets the need-by date 2026-02-04, create the requisition, and obtain any required approval. Return the requisition ID, net shortage, and supplier.",
+  "family": "material_execution",
+  "instruction": "You are the shop floor controller for Northstar Controls. Resolve FACTORYBENCH-015 (Post calibrated test-bench labor actuals). Match the signed timecard and calibration window to the correct operation before posting resource usage. The case is an isolated snapshot as of 2026-01-12; correlate immutable IDs and effective revisions rather than matching names alone. Evidence is distributed across Oracle Fusion, Gmail, Drive, Sheets, and Slack, with inspectable files including `operating-policy.md`, `contract-or-service-control.md`, `supplier-quotation.pdf`, `supplier-lead-time-and-capacity.xlsx`, `approval-decision-log.csv`, `source-email-thread.eml`, `operations-slack-thread.json`, `drive-approval-record.json`. After the documented Oracle operation, send the scoped completion email; then add the Oracle result as a Drive comment. Return exactly: transaction_reference, item_lot, posted_quantity.",
   "level": "L3",
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "material_shortage"
-      },
-      "tool": "search_documents"
-    },
-    {
-      "arguments": {
-        "work_order_id": "WO-S-005"
-      },
-      "tool": "get_work_order"
-    },
-    {
-      "arguments": {
-        "item_ids": [
-          "RM-COPPER"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
         ],
-        "plant_id": "SEA"
+        "spreadsheetId": "sheet-015"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
-        "item_id": "RM-COPPER",
-        "need_by": "2026-02-04",
-        "task_id": "factorybench-015"
+        "maxResults": 20,
+        "q": "\"CASE-015\"",
+        "userId": "me"
       },
-      "tool": "get_supplier_quotes"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-015"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "channel": "C-FINANCE",
+        "limit": 100,
+        "ts": "1768000015.000100"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-015'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100015,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-015'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_resources.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order",
-    "get_inventory",
-    "get_supplier_quotes"
+    "factorybench.context.get",
+    "google_sheets.spreadsheets.get",
+    "gmail.messages.list",
+    "google_drive.files.download",
+    "slack.conversations_replies",
+    "oracle_fusion.inventory_onhand_balances.list",
+    "oracle_fusion.work_order_resources.list"
   ],
-  "role": "material_planner",
+  "role": "shop_floor_controller",
   "seed_tables": {
-    "bom_components": [
+    "api_fixtures": [
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-HOUSING",
-        "operation_sequence": 10,
-        "quantity_per": 1,
-        "yield_factor": 1
+        "arguments_json": "{\"includeGridData\":false,\"ranges\":[\"Control!A1:H50\"],\"spreadsheetId\":\"sheet-015\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-call-01",
+        "read_only": 1,
+        "response_json": "{\"developerMetadata\":[{\"metadataKey\":\"case\",\"metadataValue\":\"CASE-015\"},{\"metadataKey\":\"approvalStatus\",\"metadataValue\":\"APPROVED\"},{\"metadataKey\":\"approvedControlPacket\",\"metadataValue\":\"{\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H17\\\",\\\"decision\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.resource_transactions.create\\\",\\\"returnFields\\\":{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}}\"}],\"namedRanges\":[{\"name\":\"ApprovedDecision\",\"namedRangeId\":\"decision-015\"}],\"properties\":{\"title\":\"CASE-015 control workbook\"},\"sheets\":[{\"properties\":{\"sheetId\":0,\"title\":\"Control\"}}],\"spreadsheetId\":\"sheet-015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "google_sheets.spreadsheets.get"
       },
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-RELAY",
-        "operation_sequence": 20,
-        "quantity_per": 2,
-        "yield_factor": 1
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-015\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-call-02",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-015\",\"threadId\":\"thread-015\"}],\"resultSizeEstimate\":1}",
+        "task_id": "factorybench-015",
+        "tool_name": "gmail.messages.list"
       },
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-COPPER",
-        "operation_sequence": 20,
-        "quantity_per": 1,
-        "yield_factor": 1
+        "arguments_json": "{\"fileId\":\"drive-015\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-call-03",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-015 | APPROVED | Match the signed timecard and calibration window to the correct operation before posting resource usage. | Oracle operation oracle_fusion.resource_transactions.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H17\\\",\\\"decision\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.resource_transactions.create\\\",\\\"returnFields\\\":{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}}\",\"description\":\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\",\"id\":\"drive-015\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "google_drive.files.download"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-FINANCE\",\"limit\":100,\"ts\":\"1768000015.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-call-04",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"CASE-015: evidence checked.\",\"ts\":\"1768000015.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"CASE-015 | APPROVED | Match the signed timecard and calibration window to the correct operation before posting resource usage. | Oracle operation oracle_fusion.resource_transactions.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H17\\\",\\\"decision\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.resource_transactions.create\\\",\\\"returnFields\\\":{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}}\",\"ts\":\"1768000015.000200\",\"user\":\"U-APPROVER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-015",
+        "tool_name": "slack.conversations_replies"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-call-05",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.inventory_onhand_balances.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100015,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-call-06",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.work_order_resources.list"
+      },
+      {
+        "arguments_json": "{\"requestBody\":{\"ResourceTransactionDetail\":[{\"OrganizationCode\":\"SEA\",\"ResourceCode\":\"RES-015\",\"TransactionQuantity\":17.25,\"TransactionUnitOfMeasure\":\"HR\",\"WoOperationSequenceNumber\":10,\"WorkOrderNumber\":\"WO-0015\"}],\"SourceSystemCode\":\"FUSION_MOBILE\"}}",
+        "effect_json": "{\"effective_at\":\"2026-01-28\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"outcome\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"tool\\\":\\\"oracle_fusion.resource_transactions.create\\\"}\",\"resource_id\":\"factorybench-015-mutation-01\",\"resource_type\":\"oracle_fusion.resource_transactions\",\"revision\":1,\"status\":\"Resource actuals posted\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-015\"}",
+        "fixture_id": "factorybench-015-call-07",
+        "read_only": 0,
+        "response_json": "{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"Operation\":\"oracle_fusion.resource_transactions.create\",\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"RESOURCE_ACTUALS_POSTED\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"links\":[],\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.resource_transactions.create"
+      },
+      {
+        "arguments_json": "{\"raw\":\"RnJvbTogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogb3BlcmF0aW9ucy1jb250cm9sQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAxNSDigJQgQ29tcGxldGVkIGVudGVycHJpc2Ugd29ya2Zsb3cNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpSZXNvdXJjZSBhY3R1YWxzIHBvc3RlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDE1Lg0K\",\"threadId\":\"thread-015\",\"userId\":\"me\"}",
+        "effect_json": "{\"effective_at\":\"2026-01-28\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogb3BlcmF0aW9ucy1jb250cm9sQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAxNSDigJQgQ29tcGxldGVkIGVudGVycHJpc2Ugd29ya2Zsb3cNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpSZXNvdXJjZSBhY3R1YWxzIHBvc3RlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDE1Lg0K\\\",\\\"threadId\\\":\\\"thread-015\\\",\\\"userId\\\":\\\"me\\\"},\\\"case\\\":\\\"CASE-015\\\",\\\"outcome\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-015-mutation-02\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-015\"}",
+        "fixture_id": "factorybench-015-call-08",
+        "read_only": 0,
+        "response_json": "{\"id\":\"sent-015\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "gmail.messages.send"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-015\",\"requestBody\":{\"content\":\"CASE-015: Resource actuals posted; Oracle reference recorded.\"}}",
+        "effect_json": "{\"effective_at\":\"2026-01-28\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-015\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-015: Resource actuals posted; Oracle reference recorded.\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"outcome\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-015-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-015\"}",
+        "fixture_id": "factorybench-015-call-09",
+        "read_only": 0,
+        "response_json": "{\"content\":\"CASE-015: Resource actuals posted; Oracle reference recorded.\",\"id\":\"comment-015\",\"resolved\":false}",
+        "task_id": "factorybench-015",
+        "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"id\":\"att-015\",\"messageId\":\"msg-015\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-01",
+        "read_only": 1,
+        "response_json": "{\"data\":\"U3VwcGxpZXIgcXVvdGF0aW9uIGF0dGFjaG1lbnQgZm9yIENBU0UtMDE1OiBxdWFudGl0eSAyMy4gQ0FTRS0wMTUgfCBBUFBST1ZFRCB8IE1hdGNoIHRoZSBzaWduZWQgdGltZWNhcmQgYW5kIGNhbGlicmF0aW9uIHdpbmRvdyB0byB0aGUgY29ycmVjdCBvcGVyYXRpb24gYmVmb3JlIHBvc3RpbmcgcmVzb3VyY2UgdXNhZ2UuIHwgT3JhY2xlIG9wZXJhdGlvbiBvcmFjbGVfZnVzaW9uLnJlc291cmNlX3RyYW5zYWN0aW9ucy5jcmVhdGUgfCBhcHByb3ZlZCBjb250cm9sIHBhY2tldCB7ImFwcHJvdmFsU3RhdHVzIjoiQVBQUk9WRUQiLCJhcHByb3ZlZEFyZ3VtZW50cyI6eyJyZXF1ZXN0Qm9keSI6eyJSZXNvdXJjZVRyYW5zYWN0aW9uRGV0YWlsIjpbeyJPcmdhbml6YXRpb25Db2RlIjoiU0VBIiwiUmVzb3VyY2VDb2RlIjoiUkVTLTAxNSIsIlRyYW5zYWN0aW9uUXVhbnRpdHkiOjE3LjI1LCJUcmFuc2FjdGlvblVuaXRPZk1lYXN1cmUiOiJIUiIsIldvT3BlcmF0aW9uU2VxdWVuY2VOdW1iZXIiOjEwLCJXb3JrT3JkZXJOdW1iZXIiOiJXTy0wMDE1In1dLCJTb3VyY2VTeXN0ZW1Db2RlIjoiRlVTSU9OX01PQklMRSJ9fSwiY2FzZSI6IkNBU0UtMDE1IiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDE3IiwiZGVjaXNpb24iOiJNYXRjaCB0aGUgc2lnbmVkIHRpbWVjYXJkIGFuZCBjYWxpYnJhdGlvbiB3aW5kb3cgdG8gdGhlIGNvcnJlY3Qgb3BlcmF0aW9uIGJlZm9yZSBwb3N0aW5nIHJlc291cmNlIHVzYWdlLiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24ucmVzb3VyY2VfdHJhbnNhY3Rpb25zLmNyZWF0ZSIsInJldHVybkZpZWxkcyI6eyJpdGVtX2xvdCI6IkZCLTAxNSIsInBvc3RlZF9xdWFudGl0eSI6MjMsInRyYW5zYWN0aW9uX3JlZmVyZW5jZSI6IlJlc291cmNlIGFjdHVhbHMgcG9zdGVkIn19\",\"size\":966}",
+        "task_id": "factorybench-015",
+        "tool_name": "gmail.messages.attachments.get"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-015\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-02",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-015\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"Q0FTRS0wMTUgfCBBUFBST1ZFRCB8IE1hdGNoIHRoZSBzaWduZWQgdGltZWNhcmQgYW5kIGNhbGlicmF0aW9uIHdpbmRvdyB0byB0aGUgY29ycmVjdCBvcGVyYXRpb24gYmVmb3JlIHBvc3RpbmcgcmVzb3VyY2UgdXNhZ2UuIHwgT3JhY2xlIG9wZXJhdGlvbiBvcmFjbGVfZnVzaW9uLnJlc291cmNlX3RyYW5zYWN0aW9ucy5jcmVhdGUgfCBhcHByb3ZlZCBjb250cm9sIHBhY2tldCB7ImFwcHJvdmFsU3RhdHVzIjoiQVBQUk9WRUQiLCJhcHByb3ZlZEFyZ3VtZW50cyI6eyJyZXF1ZXN0Qm9keSI6eyJSZXNvdXJjZVRyYW5zYWN0aW9uRGV0YWlsIjpbeyJPcmdhbml6YXRpb25Db2RlIjoiU0VBIiwiUmVzb3VyY2VDb2RlIjoiUkVTLTAxNSIsIlRyYW5zYWN0aW9uUXVhbnRpdHkiOjE3LjI1LCJUcmFuc2FjdGlvblVuaXRPZk1lYXN1cmUiOiJIUiIsIldvT3BlcmF0aW9uU2VxdWVuY2VOdW1iZXIiOjEwLCJXb3JrT3JkZXJOdW1iZXIiOiJXTy0wMDE1In1dLCJTb3VyY2VTeXN0ZW1Db2RlIjoiRlVTSU9OX01PQklMRSJ9fSwiY2FzZSI6IkNBU0UtMDE1IiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDE3IiwiZGVjaXNpb24iOiJNYXRjaCB0aGUgc2lnbmVkIHRpbWVjYXJkIGFuZCBjYWxpYnJhdGlvbiB3aW5kb3cgdG8gdGhlIGNvcnJlY3Qgb3BlcmF0aW9uIGJlZm9yZSBwb3N0aW5nIHJlc291cmNlIHVzYWdlLiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24ucmVzb3VyY2VfdHJhbnNhY3Rpb25zLmNyZWF0ZSIsInJldHVybkZpZWxkcyI6eyJpdGVtX2xvdCI6IkZCLTAxNSIsInBvc3RlZF9xdWFudGl0eSI6MjMsInRyYW5zYWN0aW9uX3JlZmVyZW5jZSI6IlJlc291cmNlIGFjdHVhbHMgcG9zdGVkIn19\",\"size\":909},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-015 \\u2014 evidence and requested action\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-015\",\"size\":1024},\"filename\":\"supplier-quotation.pdf\"}]},\"snippet\":\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\",\"threadId\":\"thread-015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "gmail.messages.get"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"thread-015\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-04",
+        "read_only": 1,
+        "response_json": "{\"historyId\":\"900015\",\"id\":\"thread-015\",\"messages\":[{\"id\":\"msg-015\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"Q0FTRS0wMTUgfCBBUFBST1ZFRCB8IE1hdGNoIHRoZSBzaWduZWQgdGltZWNhcmQgYW5kIGNhbGlicmF0aW9uIHdpbmRvdyB0byB0aGUgY29ycmVjdCBvcGVyYXRpb24gYmVmb3JlIHBvc3RpbmcgcmVzb3VyY2UgdXNhZ2UuIHwgT3JhY2xlIG9wZXJhdGlvbiBvcmFjbGVfZnVzaW9uLnJlc291cmNlX3RyYW5zYWN0aW9ucy5jcmVhdGUgfCBhcHByb3ZlZCBjb250cm9sIHBhY2tldCB7ImFwcHJvdmFsU3RhdHVzIjoiQVBQUk9WRUQiLCJhcHByb3ZlZEFyZ3VtZW50cyI6eyJyZXF1ZXN0Qm9keSI6eyJSZXNvdXJjZVRyYW5zYWN0aW9uRGV0YWlsIjpbeyJPcmdhbml6YXRpb25Db2RlIjoiU0VBIiwiUmVzb3VyY2VDb2RlIjoiUkVTLTAxNSIsIlRyYW5zYWN0aW9uUXVhbnRpdHkiOjE3LjI1LCJUcmFuc2FjdGlvblVuaXRPZk1lYXN1cmUiOiJIUiIsIldvT3BlcmF0aW9uU2VxdWVuY2VOdW1iZXIiOjEwLCJXb3JrT3JkZXJOdW1iZXIiOiJXTy0wMDE1In1dLCJTb3VyY2VTeXN0ZW1Db2RlIjoiRlVTSU9OX01PQklMRSJ9fSwiY2FzZSI6IkNBU0UtMDE1IiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDE3IiwiZGVjaXNpb24iOiJNYXRjaCB0aGUgc2lnbmVkIHRpbWVjYXJkIGFuZCBjYWxpYnJhdGlvbiB3aW5kb3cgdG8gdGhlIGNvcnJlY3Qgb3BlcmF0aW9uIGJlZm9yZSBwb3N0aW5nIHJlc291cmNlIHVzYWdlLiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24ucmVzb3VyY2VfdHJhbnNhY3Rpb25zLmNyZWF0ZSIsInJldHVybkZpZWxkcyI6eyJpdGVtX2xvdCI6IkZCLTAxNSIsInBvc3RlZF9xdWFudGl0eSI6MjMsInRyYW5zYWN0aW9uX3JlZmVyZW5jZSI6IlJlc291cmNlIGFjdHVhbHMgcG9zdGVkIn19\",\"size\":909},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-015 \\u2014 approved enterprise action\"}]},\"snippet\":\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\",\"threadId\":\"thread-015\"}]}",
+        "task_id": "factorybench-015",
+        "tool_name": "gmail.threads.get"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-approval-015\",\"pageSize\":20}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-05",
+        "read_only": 1,
+        "response_json": "{\"approvals\":[{\"fileId\":\"drive-approval-015\",\"id\":\"approval-015\",\"reviewerResponses\":[{\"comment\":\"CASE-015 | APPROVED | Match the signed timecard and calibration window to the correct operation before posting resource usage. | Oracle operation oracle_fusion.resource_transactions.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H17\\\",\\\"decision\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.resource_transactions.create\\\",\\\"returnFields\\\":{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}}\",\"response\":\"APPROVED\",\"reviewer\":\"U-APPROVER\"}],\"status\":\"IN_PROGRESS\"}]}",
+        "task_id": "factorybench-015",
+        "tool_name": "google_drive.approvals.list"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-015\",\"mimeType\":\"text/plain\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-07",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-015 | APPROVED | Match the signed timecard and calibration window to the correct operation before posting resource usage. | Oracle operation oracle_fusion.resource_transactions.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H17\\\",\\\"decision\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.resource_transactions.create\\\",\\\"returnFields\\\":{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}}\",\"description\":\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\",\"id\":\"drive-015\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "google_drive.files.export"
+      },
+      {
+        "arguments_json": "{\"fields\":\"id,name,mimeType,modifiedTime,md5Checksum,description\",\"fileId\":\"drive-015\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-08",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-015 | APPROVED | Match the signed timecard and calibration window to the correct operation before posting resource usage. | Oracle operation oracle_fusion.resource_transactions.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H17\\\",\\\"decision\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.resource_transactions.create\\\",\\\"returnFields\\\":{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}}\",\"description\":\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\",\"id\":\"drive-015\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "google_drive.files.get"
+      },
+      {
+        "arguments_json": "{\"fields\":\"files(id,name,mimeType,modifiedTime,md5Checksum)\",\"pageSize\":50,\"q\":\"name contains 'CASE-015' and trashed = false\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-09",
+        "read_only": 1,
+        "response_json": "{\"files\":[{\"description\":\"CASE-015: Operating policy\",\"id\":\"drive-015-01\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"operating-policy.md\"},{\"description\":\"CASE-015: Contract / service control\",\"id\":\"drive-015\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"},{\"description\":\"CASE-015: Supplier quotation\",\"id\":\"drive-015-03\",\"mimeType\":\"application/pdf\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"supplier-quotation.pdf\"},{\"description\":\"CASE-015: Supplier lead-time and capacity workbook\",\"id\":\"drive-015-04\",\"mimeType\":\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"supplier-lead-time-and-capacity.xlsx\"},{\"description\":\"CASE-015: Approval decision log\",\"id\":\"drive-015-05\",\"mimeType\":\"text/csv\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"approval-decision-log.csv\"},{\"description\":\"CASE-015: Source email thread\",\"id\":\"drive-015-06\",\"mimeType\":\"message/rfc822\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"source-email-thread.eml\"},{\"description\":\"CASE-015: Operations Slack thread\",\"id\":\"drive-015-07\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"operations-slack-thread.json\"},{\"description\":\"CASE-015: Drive approval record\",\"id\":\"drive-approval-015\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"drive-approval-record.json\"},{\"description\":\"CASE-015: Oracle starting-record export\",\"id\":\"drive-015-09\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"oracle-starting-record.json\"},{\"description\":\"CASE-015: Inspection measurements\",\"id\":\"drive-015-10\",\"mimeType\":\"text/csv\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"inspection-measurements.csv\"},{\"description\":\"CASE-015: Workflow risk register\",\"id\":\"drive-015-11\",\"mimeType\":\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"workflow-risk-register.xlsx\"},{\"description\":\"CASE-015: Technical specification\",\"id\":\"drive-015-12\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"technical-specification.md\"}],\"kind\":\"drive#fileList\",\"nextPageToken\":null}",
+        "task_id": "factorybench-015",
+        "tool_name": "google_drive.files.list"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"ranges\":[\"Control!A1:H50\",\"Approvals!A1:G20\"],\"spreadsheetId\":\"sheet-015\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-11",
+        "read_only": 1,
+        "response_json": "{\"spreadsheetId\":\"sheet-015\",\"valueRanges\":[{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:E2\",\"values\":[[\"case\",\"record\",\"quantity\",\"approval\",\"approved_operation\",\"approved_arguments_json\",\"return_fields_json\"],[\"CASE-015\",\"NS-000015\",23,\"APPROVED\",\"oracle_fusion.resource_transactions.create\",\"{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}}\",\"{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}\"]]}]}",
+        "task_id": "factorybench-015",
+        "tool_name": "google_sheets.spreadsheets.values.batchGet"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:H50\",\"spreadsheetId\":\"sheet-015\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-12",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:E2\",\"values\":[[\"case\",\"record\",\"quantity\",\"approval\",\"approved_operation\",\"approved_arguments_json\",\"return_fields_json\"],[\"CASE-015\",\"NS-000015\",23,\"APPROVED\",\"oracle_fusion.resource_transactions.create\",\"{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}}\",\"{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}\"]]}",
+        "task_id": "factorybench-015",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-13",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.draft_purchase_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-14",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.inspection_plans.list"
+      },
+      {
+        "arguments_json": "{\"invoicesUniqID\":\"invoicesUniqID-0015\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-16",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.invoices.get"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100015,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-17",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.maintenance_documents.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100015,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-18",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.maintenance_operations.list"
+      },
+      {
+        "arguments_json": "{\"MaintenanceProgramId\":500015}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-19",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.maintenance_programs.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-20",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.maintenance_programs.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100015}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-21",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.maintenance_work_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-22",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.maintenance_work_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-23",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.purchase_order_lines.list"
+      },
+      {
+        "arguments_json": "{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-24",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.purchase_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-25",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.purchase_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-26",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.quality_inspection_results.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-27",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.receiving_receipt_requests.list"
+      },
+      {
+        "arguments_json": "{\"HeaderInterfaceId\":700015,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-28",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.receiving_receipt_transactions.list"
+      },
+      {
+        "arguments_json": "{\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-29",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.sales_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-30",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.sales_orders.list"
+      },
+      {
+        "arguments_json": "{\"SupplierId\":600015}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-31",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.suppliers.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-32",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.suppliers.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-33",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.supply_requests.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100015,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-34",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.work_order_materials.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100015,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-35",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.work_order_operations.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100015}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-37",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.work_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-38",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700015,\"HoldId\":1000015,\"InspectionId\":1100015,\"InterfaceTransactionId\":800015,\"InvoiceId\":900015,\"ItemNumber\":\"NS-COMP-015\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500015,\"OrderNumber\":\"ORD-0015\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000015,\"ReferenceNumber\":\"CASE-015\",\"StatusCode\":\"OPEN\",\"SupplierId\":600015,\"WoOperationId\":200015,\"WoOperationMaterialId\":300015,\"WoOperationResourceId\":400015,\"WorkOrderId\":100015,\"WorkOrderNumber\":\"WO-0015\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0015\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0015\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-015",
+        "tool_name": "oracle_fusion.work_orders.list"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-FINANCE\",\"inclusive\":true,\"limit\":100,\"oldest\":\"1768000000.000000\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-39",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"CASE-015: evidence checked.\",\"ts\":\"1768000015.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"CASE-015 | APPROVED | Match the signed timecard and calibration window to the correct operation before posting resource usage. | Oracle operation oracle_fusion.resource_transactions.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H17\\\",\\\"decision\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.resource_transactions.create\\\",\\\"returnFields\\\":{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}}\",\"ts\":\"1768000015.000200\",\"user\":\"U-APPROVER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-015",
+        "tool_name": "slack.conversations_history"
+      },
+      {
+        "arguments_json": "{\"file\":\"F-000015\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-41",
+        "read_only": 1,
+        "response_json": "{\"file\":{\"id\":\"F-000015\",\"mimetype\":\"application/pdf\",\"name\":\"inspection-evidence.pdf\",\"preview\":\"CASE-015 | APPROVED | Match the signed timecard and calibration window to the correct operation before posting resource usage. | Oracle operation oracle_fusion.resource_transactions.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H17\\\",\\\"decision\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.resource_transactions.create\\\",\\\"returnFields\\\":{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}}\",\"title\":\"CASE-015 inspection evidence\"},\"ok\":true}",
+        "task_id": "factorybench-015",
+        "tool_name": "slack.files_info"
+      },
+      {
+        "arguments_json": "{\"count\":50,\"query\":\"\\\"CASE-015\\\"\",\"sort\":\"timestamp\",\"sort_dir\":\"asc\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-discovery-42",
+        "read_only": 1,
+        "response_json": "{\"messages\":{\"matches\":[{\"channel\":{\"id\":\"C-FINANCE\"},\"text\":\"CASE-015 | APPROVED | Match the signed timecard and calibration window to the correct operation before posting resource usage. | Oracle operation oracle_fusion.resource_transactions.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":17.25,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"case\\\":\\\"CASE-015\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H17\\\",\\\"decision\\\":\\\"Match the signed timecard and calibration window to the correct operation before posting resource usage.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.resource_transactions.create\\\",\\\"returnFields\\\":{\\\"item_lot\\\":\\\"FB-015\\\",\\\"posted_quantity\\\":23,\\\"transaction_reference\\\":\\\"Resource actuals posted\\\"}}\",\"ts\":\"1768000015.000100\",\"user\":\"U-APPROVER\"}],\"total\":1},\"ok\":true,\"query\":\"\\\"CASE-015\\\"\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "slack.search_messages"
       }
     ],
-    "bom_headers": [
+    "evidence_files": [
       {
-        "assembly_item_id": "FG-PANEL",
-        "bom_id": "BOM-PANEL-C",
-        "effective_on": "2025-10-01",
-        "revision": "C",
-        "status": "Active"
-      }
-    ],
-    "documents": [
-      {
-        "body": "Release only when the customer is not on credit hold, an effective BOM exists, and every component has enough available stock. Reserve the exact BOM quantity.",
-        "category": "order_release",
-        "doc_id": "POL-01",
-        "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
+        "asset_id": "factorybench-015-policy",
+        "extracted_text": "# Post calibrated test-bench labor actuals \u2014 operating control\n\nScope: Post traceable material, inventory, operation, and resource transactions from controlled shop-floor evidence.\n\nThe operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.\n",
+        "kind": "policy",
+        "media_type": "text/markdown",
+        "path": "operating-policy.md",
+        "sha256": "77e04feba6b7fa3f93e6805eb11b1eb82f93b198c4c559679c2b8fd3c1f108c3",
+        "source": "google_drive",
         "task_id": "factorybench-015",
-        "title": "Order release control"
+        "title": "Operating policy"
       },
       {
-        "body": "Net requirements against unreserved on-hand. Use an approved supplier quote that is valid through the need-by date. Requisitions over the requester's limit require the plant manager's approval.",
-        "category": "material_shortage",
-        "doc_id": "POL-02",
-        "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
+        "asset_id": "factorybench-015-contract",
+        "extracted_text": "# Commercial or service control for CASE-015\n\nThe approved operational objective is: Match the signed timecard and calibration window to the correct operation before posting resource usage.\n\nEffective date: 2026-01-28\nReference record: NS-000015\nAny deviation affecting price, completion, inspected quantity, compliance, or customer commit requires explicit approval preserved in the case packet.\n",
+        "kind": "contract",
+        "media_type": "text/markdown",
+        "path": "contract-or-service-control.md",
+        "sha256": "a6a7ff40a11eabe4a79d87b4bde974653959b02dbd8a0d93f294bab7158601ac",
+        "source": "google_drive",
         "task_id": "factorybench-015",
-        "title": "Shortage requisition control"
+        "title": "Contract / service control"
       },
       {
-        "body": "Choose an approved supplier. Minimize landed price while meeting the need-by date; break ties by higher quality score, then higher on-time rate. Purchase orders above the buyer's limit require plant-manager approval.",
-        "category": "supplier_selection",
-        "doc_id": "POL-03",
-        "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
+        "asset_id": "factorybench-015-quote",
+        "extracted_text": "VENDOR QUOTATION CASE-015\nSupplier: Cascade Industrial\nItem: NS-COMP-015\nQuantity: 23 EA\nUnit price: USD 60.05\nExtended: USD 1381.15\nLead time: 7 calendar days\nValid through: 2026-02-27\nFreight: included\nQuality certificate: required with shipment\n",
+        "kind": "vendor_pdf",
+        "media_type": "application/pdf",
+        "path": "supplier-quotation.pdf",
+        "sha256": "6254acf503b60d84b6322480f964e73a61c85d7036c8045a746990176990013c",
+        "source": "gmail_attachment",
         "task_id": "factorybench-015",
-        "title": "Supplier award policy"
+        "title": "Supplier quotation"
       },
       {
-        "body": "Receive only against an approved purchase order. Put the lot in inspection status, record accepted and rejected quantities, and release only accepted quantity to stores.",
-        "category": "inbound_receipt",
-        "doc_id": "POL-04",
-        "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
+        "asset_id": "factorybench-015-leadtime",
+        "extracted_text": "[[\"supplier\", \"item\", \"quoted_days\", \"historical_p50\", \"historical_p90\", \"capacity_confirmed\", \"valid_through\"], [\"Cascade Industrial\", \"NS-COMP-015\", 7, 8, 9, \"YES\", \"2026-02-27\"], [\"Alternate Dynamics\", \"NS-COMP-015\", 14, 8, 15, \"NO\", \"2026-02-17\"]]",
+        "kind": "spreadsheet",
+        "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "path": "supplier-lead-time-and-capacity.xlsx",
+        "sha256": "fee67170db07c0dd7f077a5eeec54ba2b8bc897d9f50574572c00b5087fcb940",
+        "source": "google_drive",
         "task_id": "factorybench-015",
-        "title": "Receiving and inspection policy"
+        "title": "Supplier lead-time and capacity workbook"
       },
       {
-        "body": "Compare invoice, approved PO, and accepted receipt. Approve when quantity is covered and the amount variance is at most 2 percent; otherwise place a variance hold.",
-        "category": "invoice_match",
-        "doc_id": "POL-05",
-        "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
+        "asset_id": "factorybench-015-decision",
+        "extracted_text": "timestamp,case,actor,decision,scope,source\n2026-01-12T09:10:00-08:00,CASE-015,U-OPS-LEAD,evidence_verified,NS-000015,slack\n2026-01-12T10:05:00-08:00,CASE-015,U-APPROVER,approved,2026-01-28,drive_approval\n",
+        "kind": "spreadsheet_export",
+        "media_type": "text/csv",
+        "path": "approval-decision-log.csv",
+        "sha256": "b5070f69802866780223cb59f5d0a32fd086e7b54195dfe522752e73c4ee1128",
+        "source": "google_sheets",
         "task_id": "factorybench-015",
-        "title": "Three-way match policy"
+        "title": "Approval decision log"
       },
       {
-        "body": "Issue only reserved, unrestricted stock. Use FEFO across eligible lots and start the operation only after the full required quantity has been issued.",
-        "category": "production_issue",
-        "doc_id": "POL-06",
-        "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
+        "asset_id": "factorybench-015-email",
+        "extracted_text": "From: operations-15@northstar.example\nTo: shop.floor.controller@northstar.example\nDate: 2026-01-12\nMessage-ID: <msg-015@northstar.example>\nSubject: CASE-015 \u2014 evidence and requested action\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\n\nPlease complete: Match the signed timecard and calibration window to the correct operation before posting resource usage.\nUse record NS-000015; approved effective date is 2026-01-28. The supporting quotation and spreadsheet are attached. Reply with the Oracle reference.\n",
+        "kind": "email",
+        "media_type": "message/rfc822",
+        "path": "source-email-thread.eml",
+        "sha256": "9cde8bca183a1e816d456c853127fbdf721d2360b8454f637bdbdf137f0e9aa3",
+        "source": "gmail",
         "task_id": "factorybench-015",
-        "title": "Material issue policy"
+        "title": "Source email thread"
       },
       {
-        "body": "A failed inspection requires an immediate lot hold and an open nonconformance. Use REWORK when the defect is recoverable and assign it to the quality engineer.",
-        "category": "quality_exception",
-        "doc_id": "POL-07",
-        "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
+        "asset_id": "factorybench-015-slack",
+        "extracted_text": "{\n  \"channel\": \"C-FINANCE\",\n  \"messages\": [\n    {\n      \"text\": \"CASE-015: physical/operational evidence checked for NS-000015.\",\n      \"ts\": \"1768000015.000100\",\n      \"user\": \"U-OPS-LEAD\"\n    },\n    {\n      \"text\": \"Approved exactly as documented; effective 2026-01-28. No broader change authorized.\",\n      \"ts\": \"1768000015.000200\",\n      \"user\": \"U-APPROVER\"\n    },\n    {\n      \"text\": \"Post the resulting Oracle reference back to this thread and the control workbook.\",\n      \"ts\": \"1768000015.000300\",\n      \"user\": \"U-CONTROLLER\"\n    }\n  ],\n  \"thread_ts\": \"1768000015.000100\"\n}\n",
+        "kind": "chat_thread",
+        "media_type": "application/json",
+        "path": "operations-slack-thread.json",
+        "sha256": "e9996399164c615427d017009d68f6216e338bc51cf613cee2e45ab9e7839961",
+        "source": "slack",
         "task_id": "factorybench-015",
-        "title": "Nonconformance policy"
+        "title": "Operations Slack thread"
       },
       {
-        "body": "Complete all operations before closing the work order. Record finished quantity and scrap, then post material, labor, and overhead variance for finance review.",
-        "category": "completion_costing",
-        "doc_id": "POL-08",
-        "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
+        "asset_id": "factorybench-015-approval",
+        "extracted_text": "{\n  \"approvalId\": \"approval-015\",\n  \"approvedScope\": \"Match the signed timecard and calibration window to the correct operation before posting resource usage.\",\n  \"case\": \"CASE-015\",\n  \"effectiveDate\": \"2026-01-28\",\n  \"fileId\": \"drive-approval-015\",\n  \"requiredReviewers\": [\n    \"U-APPROVER\"\n  ],\n  \"reviewerResponses\": [\n    {\n      \"response\": \"APPROVED\",\n      \"reviewer\": \"U-APPROVER\"\n    }\n  ],\n  \"status\": \"IN_PROGRESS\"\n}\n",
+        "kind": "approval",
+        "media_type": "application/json",
+        "path": "drive-approval-record.json",
+        "sha256": "674014c1d35e2c228bcead5429b1f6186ec7f0b798b2c0af8033090cec9f9ef9",
+        "source": "google_drive",
         "task_id": "factorybench-015",
-        "title": "Work-order close policy"
+        "title": "Drive approval record"
       },
       {
-        "body": "Use unrestricted surplus from the donor plant, complete the interplant transfer, and reschedule the receiving work order no earlier than the transfer arrival date.",
-        "category": "transfer_reschedule",
-        "doc_id": "POL-09",
-        "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
+        "asset_id": "factorybench-015-erp",
+        "extracted_text": "{\n  \"case\": \"CASE-015\",\n  \"itemNumber\": \"NS-COMP-015\",\n  \"lastUpdateDate\": \"2026-01-12T08:00:00-08:00\",\n  \"organizationCode\": \"SEA\",\n  \"quantity\": 23,\n  \"recordId\": \"NS-000015\",\n  \"source\": \"Oracle Fusion Cloud 26a-shaped synthetic export\",\n  \"status\": \"Open\",\n  \"supplier\": \"Cascade Industrial\"\n}\n",
+        "kind": "erp_export",
+        "media_type": "application/json",
+        "path": "oracle-starting-record.json",
+        "sha256": "88a46ca9640f484b76c650fc889e7871d855be3a1c62fb814ff952e40f86e4e7",
+        "source": "oracle_fusion",
         "task_id": "factorybench-015",
-        "title": "Interplant recovery policy"
+        "title": "Oracle starting-record export"
       },
       {
-        "body": "Open a high-priority maintenance work order for the failed workcenter. Reroute production only to a qualified active alternate and reschedule within that center's capacity.",
-        "category": "maintenance_recovery",
-        "doc_id": "POL-10",
-        "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
+        "asset_id": "factorybench-015-measurements",
+        "extracted_text": "sample,characteristic,value,unit,lower,upper,result\nS-015-1,dimension_a,24.95,mm,24.9,25.1,PASS\nS-015-2,dimension_a,25.04,mm,24.9,25.1,PASS\nS-015-3,dielectric,1525,V,1500,,PASS\n",
+        "kind": "quality_data",
+        "media_type": "text/csv",
+        "path": "inspection-measurements.csv",
+        "sha256": "c2da31d683c2c30432faf8a476f6e850241c30574975a371f3a5d24754bc039f",
+        "source": "laboratory_drive",
         "task_id": "factorybench-015",
-        "title": "Unplanned downtime policy"
-      }
-    ],
-    "inventory_on_hand": [
-      {
-        "expiration_date": null,
-        "item_id": "RM-COPPER",
-        "lot_number": "CS-005",
-        "plant_id": "SEA",
-        "quantity": 4,
-        "reserved_qty": 0,
-        "status": "Unrestricted",
-        "subinventory": "STORES"
-      }
-    ],
-    "items": [
-      {
-        "description": "Industrial control panel",
-        "item_id": "FG-PANEL",
-        "item_type": "finished_good",
-        "make_buy": "MAKE",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 910,
-        "uom": "EA"
+        "title": "Inspection measurements"
       },
       {
-        "description": "Powder-coated enclosure",
-        "item_id": "RM-HOUSING",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 210,
-        "uom": "EA"
+        "asset_id": "factorybench-015-risk",
+        "extracted_text": "[[\"risk_id\", \"case\", \"risk\", \"likelihood\", \"impact\", \"owner\", \"mitigation\", \"status\"], [\"R-015-A\", \"CASE-015\", \"incorrect record selection\", \"low\", \"high\", \"shop_floor_controller\", \"cross-check immutable identifiers\", \"OPEN\"], [\"R-015-B\", \"CASE-015\", \"unapproved scope expansion\", \"medium\", \"high\", \"U-APPROVER\", \"limit write to approved fields\", \"MITIGATED\"]]",
+        "kind": "spreadsheet",
+        "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "path": "workflow-risk-register.xlsx",
+        "sha256": "a377626c08a27640eae94fc0dd47d969a7703399e79160a64c6ef3030f94b14b",
+        "source": "google_drive",
+        "task_id": "factorybench-015",
+        "title": "Workflow risk register"
       },
       {
-        "description": "Safety relay",
-        "item_id": "RM-RELAY",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 48,
-        "uom": "EA"
-      },
-      {
-        "description": "Copper busbar set",
-        "item_id": "RM-COPPER",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 72,
-        "uom": "EA"
-      }
-    ],
-    "material_requirements": [
-      {
-        "issued_qty": 0,
-        "item_id": "RM-COPPER",
-        "need_by": "2026-02-01",
-        "required_qty": 28,
-        "reserved_qty": 0,
-        "work_order_id": "WO-S-005"
+        "asset_id": "factorybench-015-spec",
+        "extracted_text": "# Technical specification NS-000015\n\nRevision: R2\nEffective: 2026-01-28\nItem: NS-COMP-015\nRequired control: Match the signed timecard and calibration window to the correct operation before posting resource usage.\n",
+        "kind": "specification",
+        "media_type": "text/markdown",
+        "path": "technical-specification.md",
+        "sha256": "319fa5b165f659f22800cca8873edc127bd702ff83cea5f9d1a9c40013479e63",
+        "source": "google_drive",
+        "task_id": "factorybench-015",
+        "title": "Technical specification"
       }
     ],
     "organizations": [
       {
         "ledger_currency": "USD",
         "name": "Northstar Controls Manufacturing",
-        "organization_id": "M1"
+        "organization_id": "NSC"
       }
     ],
-    "plants": [
+    "resource_state": [
       {
-        "name": "Seattle Assembly",
-        "organization_id": "M1",
-        "plant_id": "SEA",
-        "timezone": "America/Los_Angeles"
-      },
-      {
-        "name": "Portland Components",
-        "organization_id": "M1",
-        "plant_id": "PDX",
-        "timezone": "America/Los_Angeles"
-      }
-    ],
-    "supplier_quotes": [
-      {
-        "item_id": "RM-COPPER",
-        "lead_days": 5,
-        "minimum_qty": 5,
-        "quote_id": "QA-005",
-        "supplier_id": "SUP-A",
-        "task_id": "factorybench-015",
-        "unit_price": 70.5,
-        "valid_until": "2026-02-09"
-      },
-      {
-        "item_id": "RM-COPPER",
-        "lead_days": 3,
-        "minimum_qty": 5,
-        "quote_id": "QB-005",
-        "supplier_id": "SUP-B",
-        "task_id": "factorybench-015",
-        "unit_price": 72.5,
-        "valid_until": "2026-02-09"
-      }
-    ],
-    "suppliers": [
-      {
-        "approved": 1,
-        "name": "Cascade Industrial",
-        "on_time_rate": 0.94,
-        "payment_terms": "NET30",
-        "quality_score": 97.2,
-        "supplier_id": "SUP-A"
-      },
-      {
-        "approved": 1,
-        "name": "Rainier Components",
-        "on_time_rate": 0.98,
-        "payment_terms": "NET45",
-        "quality_score": 95.8,
-        "supplier_id": "SUP-B"
-      },
-      {
-        "approved": 0,
-        "name": "Frontier Supply",
-        "on_time_rate": 0.99,
-        "payment_terms": "NET30",
-        "quality_score": 99.1,
-        "supplier_id": "SUP-C"
+        "effective_at": "2026-01-12",
+        "payload_json": "{\"case\":\"CASE-015\",\"identifiers\":{\"WorkOrderId\":100015,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-015'\"},\"quantity\":23,\"record\":\"NS-000015\"}",
+        "resource_id": "100015",
+        "resource_type": "oracle_fusion.work_order_resources",
+        "revision": 0,
+        "status": "Open",
+        "system": "oracle_fusion",
+        "task_id": "factorybench-015"
       }
     ],
     "users": [
       {
         "approval_limit": 0,
-        "display_name": "Maya Chen",
-        "plant_id": "SEA",
-        "role": "production_planner",
-        "user_id": "U-PLANNER"
-      },
-      {
-        "approval_limit": 1000,
-        "display_name": "Diego Ruiz",
-        "plant_id": "SEA",
-        "role": "buyer",
-        "user_id": "U-BUYER"
+        "display_name": "Jordan Lee",
+        "role": "shop_floor_controller",
+        "user_id": "U-AGENT"
       },
       {
         "approval_limit": 250000,
         "display_name": "Avery Morgan",
-        "plant_id": "SEA",
-        "role": "plant_manager",
-        "user_id": "U-MANAGER"
+        "role": "authorized_approver",
+        "user_id": "U-APPROVER"
       },
       {
-        "approval_limit": 0,
-        "display_name": "Priya Shah",
-        "plant_id": "SEA",
-        "role": "quality_inspector",
-        "user_id": "U-INSPECTOR"
-      },
-      {
-        "approval_limit": 0,
-        "display_name": "Noah Williams",
-        "plant_id": "SEA",
-        "role": "quality_engineer",
-        "user_id": "U-QUALITY"
-      }
-    ],
-    "work_orders": [
-      {
-        "completed_qty": 0,
-        "item_id": "FG-PANEL",
-        "parent_work_order_id": null,
-        "quantity": 28,
-        "sales_order_id": null,
-        "scheduled_completion": "2026-02-04",
-        "scheduled_start": "2026-02-02",
-        "scrap_qty": 0,
-        "status": "Released",
-        "task_id": "factorybench-015",
-        "work_order_id": "WO-S-005",
-        "workcenter_id": "WC-ASM-1"
-      }
-    ],
-    "workcenters": [
-      {
-        "capacity_hours": 80,
-        "name": "Assembly Cell 1",
-        "plant_id": "SEA",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-ASM-1"
-      },
-      {
-        "capacity_hours": 64,
-        "name": "Assembly Cell 2",
-        "plant_id": "SEA",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-ASM-2"
-      },
-      {
-        "capacity_hours": 72,
-        "name": "Portland Fabrication",
-        "plant_id": "PDX",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-PDX-1"
+        "approval_limit": 25000,
+        "display_name": "Maya Chen",
+        "role": "operations_lead",
+        "user_id": "U-OPS-LEAD"
       }
     ]
   },
   "task_id": "factorybench-015",
-  "title": "Cover material shortage for WO-S-005",
+  "title": "Post calibrated test-bench labor actuals",
   "world": {
     "database": "SQLite",
-    "name": "Northstar Controls Oracle-shaped ERP",
-    "organization_id": "M1",
+    "id": "northstar-enterprise-fusion-v2",
+    "name": "Northstar Controls enterprise operations sandbox",
+    "organization_id": "NSC",
     "primary_plant": "SEA",
-    "servers": [
-      "oracle_erp",
-      "plant_docs",
-      "factory_harness"
+    "synthetic": true,
+    "systems": [
+      "factorybench",
+      "gmail",
+      "google_drive",
+      "google_sheets",
+      "oracle_fusion",
+      "slack"
     ]
   }
 }

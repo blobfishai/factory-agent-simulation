@@ -1,74 +1,80 @@
 {
   "allowed_write_tables": [
-    "work_orders",
-    "work_order_operations",
-    "material_requirements",
-    "material_reservations",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "completion_date": {
+      "order_number": {
         "type": "string"
       },
-      "released_quantity": {
-        "type": "integer"
+      "revised_commit_date": {
+        "type": "string"
       },
-      "work_order_id": {
+      "supply_action": {
         "type": "string"
       }
     },
     "required": [
-      "completion_date",
-      "released_quantity",
-      "work_order_id"
+      "order_number",
+      "revised_commit_date",
+      "supply_action"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "completion_date": "2026-01-19",
-      "released_quantity": 8,
-      "work_order_id": "WO-0004"
+      "order_number": "ORD-0004",
+      "revised_commit_date": "2026-01-17",
+      "supply_action": "Approved substitute applied"
     },
     "assertions": [
       {
-        "description": "A released discrete work order links to the sales order.",
-        "id": "work_order_released",
-        "table": "work_orders",
+        "description": "oracle_fusion.work_order_materials.replace_with_substitute produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "quantity": 8,
-          "sales_order_id": "SO-0004",
-          "status": "Released"
+          "payload_json": "{\"arguments\":{\"WoOperationId\":200004,\"WoOperationMaterialId\":300004,\"WorkOrderId\":100004,\"requestBody\":{\"SubstituteItemNumber\":\"NS-SUB-004\",\"SubstituteQuantity\":12}},\"case\":\"CASE-004\",\"outcome\":\"Confirm engineering approval for the replacement configuration and revise the open manufacturing material without changing the customer's contracted quantity.\",\"tool\":\"oracle_fusion.work_order_materials.replace_with_substitute\"}",
+          "resource_type": "oracle_fusion.work_order_materials",
+          "revision": 1,
+          "status": "Approved substitute applied",
+          "system": "oracle_fusion"
         },
         "where": {
-          "work_order_id": "WO-0004"
+          "resource_id": "factorybench-004-mutation-01",
+          "task_id": "factorybench-004"
         }
       },
       {
-        "count": 3,
-        "description": "All three BOM components are reserved.",
-        "id": "all_components_reserved",
-        "table": "material_reservations",
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
         "where": {
-          "status": "Active",
-          "work_order_id": "WO-0004"
+          "resource_id": "factorybench-004-mutation-02",
+          "task_id": "factorybench-004"
         }
       },
       {
-        "description": "The two-per-assembly relay requirement is fully reserved.",
-        "id": "relay_requirement_reserved",
-        "table": "material_requirements",
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "required_qty": 16,
-          "reserved_qty": 16
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "work_order_id": "WO-0004"
+          "resource_id": "factorybench-004-mutation-03",
+          "task_id": "factorybench-004"
         }
       }
     ]
@@ -76,50 +82,81 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "order_release"
+        "format": "full",
+        "id": "thread-004",
+        "userId": "me"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "gmail.threads.get"
     },
     {
       "arguments": {
-        "sales_order_id": "SO-0004"
+        "channel": "C-PRODUCTION",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
       },
-      "tool": "get_sales_order"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
     },
     {
       "arguments": {
-        "as_of": "2026-01-12",
-        "item_id": "FG-PANEL"
-      },
-      "tool": "get_bom"
-    },
-    {
-      "arguments": {
-        "item_ids": [
-          "RM-HOUSING",
-          "RM-RELAY",
-          "RM-COPPER"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
         ],
-        "plant_id": "SEA"
+        "spreadsheetId": "sheet-004"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-approval-004",
+        "pageSize": 20
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.approvals.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-004'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.sales_orders.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100004,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-004'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_materials.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_sales_order",
-    "get_bom",
-    "get_inventory"
+    "factorybench.context.get",
+    "gmail.threads.get",
+    "slack.conversations_history",
+    "google_sheets.spreadsheets.get",
+    "google_drive.approvals.list",
+    "oracle_fusion.sales_orders.list",
+    "oracle_fusion.work_order_materials.list"
   ],
   "task_id": "factorybench-004",
   "write_tools": [
-    "create_work_order",
-    "reserve_material",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "google_drive.comments.create",
+    "oracle_fusion.work_order_materials.replace_with_substitute"
   ]
 }

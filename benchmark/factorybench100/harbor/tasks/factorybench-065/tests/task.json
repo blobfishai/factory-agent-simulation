@@ -1,82 +1,80 @@
 {
   "allowed_write_tables": [
-    "quality_holds",
-    "nonconformances",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "disposition": {
+      "need_by_date": {
         "type": "string"
       },
-      "hold_id": {
+      "planning_action": {
         "type": "string"
       },
-      "inspection_id": {
-        "type": "string"
-      },
-      "nonconformance_id": {
+      "supply_reference": {
         "type": "string"
       }
     },
     "required": [
-      "disposition",
-      "hold_id",
-      "inspection_id",
-      "nonconformance_id"
+      "need_by_date",
+      "planning_action",
+      "supply_reference"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "disposition": "REWORK",
-      "hold_id": "HOLD-0005",
-      "inspection_id": "INSP-Q-005",
-      "nonconformance_id": "NC-0005"
+      "need_by_date": "2026-01-21",
+      "planning_action": "Priority supply created",
+      "supply_reference": "SUPPLY-0065"
     },
     "assertions": [
       {
-        "description": "The failed lot is on an active quality hold.",
-        "id": "lot_held",
-        "table": "quality_holds",
+        "description": "oracle_fusion.supply_requests.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "lot_number": "FG-LOT-005",
-          "reason_code": "FUNCTIONAL_TEST_FAIL",
-          "status": "Active"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0065\",\"SupplyRequestDate\":\"2026-01-21\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-065\",\"NeedByDate\":\"2026-01-24\",\"Quantity\":36,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}},\"case\":\"CASE-065\",\"outcome\":\"Honor the approved priority allocation and create the supply request with the correct destination and need-by date.\",\"tool\":\"oracle_fusion.supply_requests.create\"}",
+          "resource_type": "oracle_fusion.supply_requests",
+          "revision": 1,
+          "status": "Priority supply created",
+          "system": "oracle_fusion"
         },
         "where": {
-          "hold_id": "HOLD-0005"
+          "resource_id": "factorybench-065-mutation-01",
+          "task_id": "factorybench-065"
         }
       },
       {
-        "description": "A recoverable nonconformance is assigned for rework.",
-        "id": "nonconformance_opened",
-        "table": "nonconformances",
+        "description": "google_sheets.spreadsheets.values.append produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "disposition": "REWORK",
-          "inspection_id": "INSP-Q-005",
-          "owner_id": "U-QUALITY",
-          "status": "Open"
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
         },
         "where": {
-          "nonconformance_id": "NC-0005"
+          "resource_id": "factorybench-065-mutation-02",
+          "task_id": "factorybench-065"
         }
       },
       {
-        "description": "The affected inventory remains quarantined.",
-        "id": "inventory_quarantined",
-        "table": "inventory_on_hand",
+        "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "status": "Quality Hold"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "item_id": "FG-PANEL",
-          "lot_number": "FG-LOT-005",
-          "plant_id": "SEA",
-          "subinventory": "FG"
+          "resource_id": "factorybench-065-mutation-03",
+          "task_id": "factorybench-065"
         }
       }
     ]
@@ -84,30 +82,81 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "quality_exception"
+        "majorDimension": "ROWS",
+        "ranges": [
+          "Control!A1:H50",
+          "Approvals!A1:G20"
+        ],
+        "spreadsheetId": "sheet-065",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.batchGet"
     },
     {
       "arguments": {
-        "inspection_id": "INSP-Q-005"
+        "channel": "C-PROCUREMENT",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
       },
-      "tool": "get_quality_context"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-065' and trashed = false"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-065"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-065'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-065'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_quality_context"
+    "factorybench.context.get",
+    "google_sheets.spreadsheets.values.batchGet",
+    "slack.conversations_history",
+    "google_drive.files.list",
+    "google_drive.files.download",
+    "oracle_fusion.supply_requests.list",
+    "oracle_fusion.inventory_onhand_balances.list"
   ],
   "task_id": "factorybench-065",
   "write_tools": [
-    "create_nonconformance",
-    "place_quality_hold",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_sheets.spreadsheets.values.append",
+    "oracle_fusion.supply_requests.create",
+    "slack.reactions_add"
   ]
 }

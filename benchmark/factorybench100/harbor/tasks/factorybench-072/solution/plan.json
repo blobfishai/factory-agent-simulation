@@ -1,53 +1,116 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "completion_costing"
+      "fileId": "drive-072"
     },
-    "tool": "search_documents"
+    "tool": "google_drive.files.download"
   },
   {
     "arguments": {
-      "work_order_id": "WO-C-002"
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
+      ],
+      "spreadsheetId": "sheet-072",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_work_order"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "actual_hours": 11.2,
-      "sequence": 20,
-      "work_order_id": "WO-C-002"
+      "channel": "C-PRODUCTION",
+      "inclusive": true,
+      "limit": 100,
+      "oldest": "1768000000.000000"
     },
-    "tool": "complete_operation"
+    "tool": "slack.conversations_history"
   },
   {
     "arguments": {
-      "completed_qty": 12,
-      "scrap_qty": 2,
-      "work_order_id": "WO-C-002"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-072' and trashed = false"
     },
-    "tool": "complete_work_order"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "labor_variance": 0.0,
-      "material_variance": -37.5,
-      "overhead_variance": 7.5,
-      "variance_id": "VAR-0002",
-      "work_order_id": "WO-C-002"
+      "WorkOrderId": 100072
     },
-    "tool": "record_wip_variance"
+    "tool": "oracle_fusion.work_orders.get"
   },
   {
     "arguments": {
-      "completed_quantity": 12,
-      "scrap_quantity": 2,
-      "variance_id": "VAR-0002",
-      "work_order_id": "WO-C-002"
+      "WorkOrderId": 100072,
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-072'"
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.work_order_materials.list"
+  },
+  {
+    "arguments": {
+      "requestBody": {
+        "MaterialTransactionDetail": [
+          {
+            "InventoryItemNumber": "NS-COMP-072",
+            "LotNumber": "LOT-0072",
+            "OrganizationCode": "SEA",
+            "SubinventoryCode": "STORES",
+            "TransactionQuantity": 43,
+            "TransactionTypeCode": "MATERIAL_ISSUE",
+            "TransactionUnitOfMeasure": "EA",
+            "WorkOrderNumber": "WO-0072"
+          }
+        ],
+        "SourceSystemCode": "FUSION_MOBILE",
+        "SourceSystemType": "EXTERNAL"
+      }
+    },
+    "tool": "oracle_fusion.material_transactions.create"
+  },
+  {
+    "arguments": {
+      "channel": "C-PRODUCTION",
+      "name": "white_check_mark",
+      "timestamp": "1768000072.000100"
+    },
+    "tool": "slack.reactions_add"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-072",
+            "manufacturing_cost_accountant",
+            "Duplicate issue reversed",
+            "REF-0072",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-072",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "cost_reference": "REF-0072",
+      "posting_action": "Duplicate issue reversed",
+      "reconciled_amount": 5449.82
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

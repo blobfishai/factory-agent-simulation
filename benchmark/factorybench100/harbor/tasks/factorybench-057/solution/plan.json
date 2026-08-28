@@ -1,56 +1,94 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "production_issue"
+      "count": 50,
+      "query": "\"CASE-057\"",
+      "sort": "timestamp",
+      "sort_dir": "asc"
     },
-    "tool": "search_documents"
+    "tool": "slack.search_messages"
   },
   {
     "arguments": {
-      "work_order_id": "WO-I-007"
+      "channel": "C-PROCUREMENT",
+      "limit": 100,
+      "ts": "1768000057.000100"
     },
-    "tool": "get_work_order"
+    "tool": "slack.conversations_replies"
   },
   {
     "arguments": {
-      "item_ids": [
-        "RM-RELAY"
-      ],
-      "plant_id": "SEA"
+      "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+      "fileId": "drive-057"
     },
-    "tool": "get_inventory"
+    "tool": "google_drive.files.get"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "lot_number": "R-EARLY-007",
-      "occurred_at": "2026-01-12",
-      "plant_id": "SEA",
-      "quantity": 34,
-      "subinventory": "STORES",
-      "transaction_id": "TX-ISSUE-007",
-      "work_order_id": "WO-I-007"
+      "majorDimension": "ROWS",
+      "range": "Control!A1:H50",
+      "spreadsheetId": "sheet-057",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "issue_material"
+    "tool": "google_sheets.spreadsheets.values.get"
   },
   {
     "arguments": {
-      "sequence": 10,
-      "work_order_id": "WO-I-007"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-057'"
     },
-    "tool": "start_operation"
+    "tool": "oracle_fusion.inventory_onhand_balances.list"
   },
   {
     "arguments": {
-      "issued_lot": "R-EARLY-007",
-      "issued_quantity": 34,
-      "operation_status": "In Process",
-      "work_order_id": "WO-I-007"
+      "requestBody": {
+        "SourceSystemCode": "EXTERNAL",
+        "TransactionLines": [
+          {
+            "Item": "NS-COMP-057",
+            "LotNumber": "LOT-0057",
+            "OrganizationCode": "SEA",
+            "Subinventory": "STORES",
+            "TransactionQuantity": 28,
+            "TransactionType": "Subinventory Transfer",
+            "TransactionUnitOfMeasure": "EA",
+            "TransferSubinventory": "CONTROLLED"
+          }
+        ],
+        "TransactionMode": "ONLINE"
+      }
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.inventory_transactions.create"
+  },
+  {
+    "arguments": {
+      "approvalId": "approval-057",
+      "fileId": "drive-approval-057",
+      "requestBody": {
+        "message": "Approved for CASE-057 only."
+      }
+    },
+    "tool": "google_drive.approvals.approve"
+  },
+  {
+    "arguments": {
+      "channel": "C-PROCUREMENT",
+      "text": "CASE-057: Cycle count adjusted. Oracle reference REF-0057; control workbook updated.",
+      "thread_ts": "1768000057.000100"
+    },
+    "tool": "slack.chat_postMessage"
+  },
+  {
+    "arguments": {
+      "controlled_quantity": 28,
+      "from_to_location": "SEA-2",
+      "inventory_transaction": "Cycle count adjusted"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

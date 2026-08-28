@@ -1,79 +1,80 @@
 {
   "allowed_write_tables": [
-    "work_order_operations",
-    "work_orders",
-    "wip_variances",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "completed_quantity": {
-        "type": "integer"
-      },
-      "scrap_quantity": {
-        "type": "integer"
-      },
-      "variance_id": {
+      "manufacturing_record": {
         "type": "string"
       },
-      "work_order_id": {
+      "ownership_result": {
+        "type": "string"
+      },
+      "project_task": {
         "type": "string"
       }
     },
     "required": [
-      "completed_quantity",
-      "scrap_quantity",
-      "variance_id",
-      "work_order_id"
+      "manufacturing_record",
+      "ownership_result",
+      "project_task"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "completed_quantity": 18,
-      "scrap_quantity": 1,
-      "variance_id": "VAR-0007",
-      "work_order_id": "WO-C-007"
+      "manufacturing_record": "NS-0077",
+      "ownership_result": "Project supply requested",
+      "project_task": "PRJ-0077"
     },
     "assertions": [
       {
-        "count": 2,
-        "description": "All work-order operations are complete.",
-        "id": "operation_completed",
-        "table": "work_order_operations",
+        "description": "oracle_fusion.supply_requests.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
+        "values": {
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0077\",\"SupplyRequestDate\":\"2026-01-14\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-077\",\"NeedByDate\":\"2026-01-19\",\"Quantity\":11,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}},\"case\":\"CASE-077\",\"outcome\":\"Reconcile milestone approval and net availability before creating supply with the correct project destination.\",\"tool\":\"oracle_fusion.supply_requests.create\"}",
+          "resource_type": "oracle_fusion.supply_requests",
+          "revision": 1,
+          "status": "Project supply requested",
+          "system": "oracle_fusion"
+        },
         "where": {
-          "status": "Complete",
-          "work_order_id": "WO-C-007"
+          "resource_id": "factorybench-077-mutation-01",
+          "task_id": "factorybench-077"
         }
       },
       {
-        "description": "Finished and scrap quantities reconcile to the order quantity.",
-        "id": "work_order_completed",
-        "table": "work_orders",
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "completed_qty": 18,
-          "scrap_qty": 1,
-          "status": "Completed"
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "work_order_id": "WO-C-007"
+          "resource_id": "factorybench-077-mutation-02",
+          "task_id": "factorybench-077"
         }
       },
       {
-        "description": "WIP variance is posted for finance review.",
-        "id": "variance_posted",
-        "table": "wip_variances",
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "labor_variance": 18.0,
-          "material_variance": 25.0,
-          "overhead_variance": 0.0,
-          "status": "Posted"
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "variance_id": "VAR-0007"
+          "resource_id": "factorybench-077-mutation-03",
+          "task_id": "factorybench-077"
         }
       }
     ]
@@ -81,31 +82,78 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "completion_costing"
+        "channel": "C-PROCUREMENT",
+        "limit": 100,
+        "ts": "1768000077.000100"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "work_order_id": "WO-C-007"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
+        ],
+        "spreadsheetId": "sheet-077"
       },
-      "tool": "get_work_order"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-077\"",
+        "userId": "me"
+      },
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-077"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-077'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_orders.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-077'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.supply_requests.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order"
+    "factorybench.context.get",
+    "slack.conversations_replies",
+    "google_sheets.spreadsheets.get",
+    "gmail.messages.list",
+    "google_drive.files.download",
+    "oracle_fusion.work_orders.list",
+    "oracle_fusion.supply_requests.list"
   ],
   "task_id": "factorybench-077",
   "write_tools": [
-    "complete_operation",
-    "complete_work_order",
-    "record_wip_variance",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.messages.send",
+    "google_drive.comments.create",
+    "oracle_fusion.supply_requests.create"
   ]
 }

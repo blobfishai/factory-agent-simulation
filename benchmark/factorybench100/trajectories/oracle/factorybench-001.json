@@ -1,7 +1,7 @@
 {
   "checks": [
     {
-      "description": "Required policy and ERP reads completed before the first write.",
+      "description": "Required cross-system evidence reads completed before the first write.",
       "evidence": {
         "missing": []
       },
@@ -9,44 +9,44 @@
       "passed": true
     },
     {
-      "description": "A released discrete work order links to the sales order.",
+      "description": "oracle_fusion.work_orders.update produced the task-scoped, source-audited state transition.",
       "evidence": {
         "matching_rows": 1,
         "mismatches": {}
       },
-      "id": "work_order_released",
+      "id": "mutation_01",
       "passed": true
     },
     {
-      "description": "All three BOM components are reserved.",
-      "evidence": {
-        "expected_count": 3,
-        "matching_rows": 3
-      },
-      "id": "all_components_reserved",
-      "passed": true
-    },
-    {
-      "description": "The two-per-assembly relay requirement is fully reserved.",
+      "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
       "evidence": {
         "matching_rows": 1,
         "mismatches": {}
       },
-      "id": "relay_requirement_reserved",
+      "id": "mutation_02",
+      "passed": true
+    },
+    {
+      "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "mutation_03",
       "passed": true
     },
     {
       "description": "Submitted answer fields exactly match the ground truth.",
       "evidence": {
         "expected": {
-          "completion_date": "2026-01-16",
-          "released_quantity": "5",
-          "work_order_id": "WO-0001"
+          "order_number": "ORD-0001",
+          "revised_commit_date": "2026-01-14",
+          "supply_action": "Rescheduled"
         },
         "submitted": {
-          "completion_date": "2026-01-16",
-          "released_quantity": "5",
-          "work_order_id": "WO-0001"
+          "order_number": "ORD-0001",
+          "revised_commit_date": "2026-01-14",
+          "supply_action": "Rescheduled"
         }
       },
       "id": "exact_answer",
@@ -58,11 +58,7 @@
         "disallowed": [],
         "written_tables": [
           "answers",
-          "inventory_on_hand",
-          "material_requirements",
-          "material_reservations",
-          "work_order_operations",
-          "work_orders"
+          "resource_state"
         ]
       },
       "id": "write_scope",
@@ -85,19 +81,19 @@
     "answers": {
       "after": [
         {
-          "field": "completion_date",
+          "field": "order_number",
           "task_id": "factorybench-001",
-          "value": "2026-01-16"
+          "value": "ORD-0001"
         },
         {
-          "field": "released_quantity",
+          "field": "revised_commit_date",
           "task_id": "factorybench-001",
-          "value": "5"
+          "value": "2026-01-14"
         },
         {
-          "field": "work_order_id",
+          "field": "supply_action",
           "task_id": "factorybench-001",
-          "value": "WO-0001"
+          "value": "Rescheduled"
         }
       ],
       "after_count": 3,
@@ -107,337 +103,103 @@
     "audit_log": {
       "after": [
         {
-          "action": "insert",
+          "action": "upsert",
           "audit_id": 1,
-          "payload": "{\"completed_qty\": 0, \"item_id\": \"FG-PANEL\", \"parent_work_order_id\": null, \"quantity\": 5, \"sales_order_id\": \"SO-0001\", \"scheduled_completion\": \"2026-01-16\", \"scheduled_start\": \"2026-01-13\", \"scrap_qty\": 0, \"status\": \"Released\", \"task_id\": \"factorybench-001\", \"work_order_id\": \"WO-0001\", \"workcenter_id\": \"WC-ASM-1\"}",
-          "record_id": "WO-0001",
-          "table_name": "work_orders",
+          "payload": "{\"effective_at\": \"2026-01-14\", \"payload_json\": \"{\\\"arguments\\\":{\\\"WorkOrderId\\\":100001,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-18\\\",\\\"PlannedStartDate\\\":\\\"2026-01-14\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-001\\\",\\\"outcome\\\":\\\"Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team.\\\",\\\"tool\\\":\\\"oracle_fusion.work_orders.update\\\"}\", \"resource_id\": \"factorybench-001-mutation-01\", \"resource_type\": \"oracle_fusion.work_orders\", \"revision\": 1, \"status\": \"Rescheduled\", \"system\": \"oracle_fusion\", \"task_id\": \"factorybench-001\"}",
+          "record_id": "factorybench-001-mutation-01",
+          "table_name": "resource_state",
           "task_id": "factorybench-001",
-          "tool": "create_work_order"
+          "tool": "oracle_fusion.work_orders.update"
         },
         {
-          "action": "insert",
+          "action": "upsert",
           "audit_id": 2,
-          "payload": "{\"actual_hours\": 0, \"planned_hours\": 6.25, \"sequence\": 10, \"status\": \"Ready\", \"work_order_id\": \"WO-0001\", \"workcenter_id\": \"WC-ASM-1\"}",
-          "record_id": "WO-0001:10",
-          "table_name": "work_order_operations",
+          "payload": "{\"effective_at\": \"2026-01-14\", \"payload_json\": \"{\\\"arguments\\\":{\\\"includeValuesInResponse\\\":true,\\\"range\\\":\\\"Control!H3\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"range\\\":\\\"Control!H3\\\",\\\"values\\\":[[\\\"Rescheduled\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-001\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"case\\\":\\\"CASE-001\\\",\\\"outcome\\\":\\\"Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team.\\\",\\\"tool\\\":\\\"google_sheets.spreadsheets.values.update\\\"}\", \"resource_id\": \"factorybench-001-mutation-02\", \"resource_type\": \"google_sheets.spreadsheets.values\", \"revision\": 1, \"status\": \"Recorded\", \"system\": \"google_sheets\", \"task_id\": \"factorybench-001\"}",
+          "record_id": "factorybench-001-mutation-02",
+          "table_name": "resource_state",
           "task_id": "factorybench-001",
-          "tool": "create_work_order"
+          "tool": "google_sheets.spreadsheets.values.update"
         },
         {
-          "action": "insert",
+          "action": "upsert",
           "audit_id": 3,
-          "payload": "{\"issued_qty\": 0, \"item_id\": \"RM-COPPER\", \"need_by\": \"2026-01-13\", \"required_qty\": 5.0, \"reserved_qty\": 0, \"work_order_id\": \"WO-0001\"}",
-          "record_id": "WO-0001:RM-COPPER",
-          "table_name": "material_requirements",
+          "payload": "{\"effective_at\": \"2026-01-14\", \"payload_json\": \"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogb3JkZXIuZnVsZmlsbG1lbnQubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG9wZXJhdGlvbnMtY29udHJvbEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMDEg4oCUIERyYWZ0IGVudGVycHJpc2Ugd29ya2Zsb3cNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpSZXNjaGVkdWxlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDAxLg0K\\\",\\\"threadId\\\":\\\"thread-001\\\"},\\\"userId\\\":\\\"me\\\"},\\\"case\\\":\\\"CASE-001\\\",\\\"outcome\\\":\\\"Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team.\\\",\\\"tool\\\":\\\"gmail.drafts.create\\\"}\", \"resource_id\": \"factorybench-001-mutation-03\", \"resource_type\": \"gmail.drafts\", \"revision\": 1, \"status\": \"Recorded\", \"system\": \"gmail\", \"task_id\": \"factorybench-001\"}",
+          "record_id": "factorybench-001-mutation-03",
+          "table_name": "resource_state",
           "task_id": "factorybench-001",
-          "tool": "create_work_order"
+          "tool": "gmail.drafts.create"
         },
         {
-          "action": "insert",
+          "action": "submit",
           "audit_id": 4,
-          "payload": "{\"issued_qty\": 0, \"item_id\": \"RM-HOUSING\", \"need_by\": \"2026-01-13\", \"required_qty\": 5.0, \"reserved_qty\": 0, \"work_order_id\": \"WO-0001\"}",
-          "record_id": "WO-0001:RM-HOUSING",
-          "table_name": "material_requirements",
-          "task_id": "factorybench-001",
-          "tool": "create_work_order"
-        },
-        {
-          "action": "insert",
-          "audit_id": 5,
-          "payload": "{\"issued_qty\": 0, \"item_id\": \"RM-RELAY\", \"need_by\": \"2026-01-13\", \"required_qty\": 10.0, \"reserved_qty\": 0, \"work_order_id\": \"WO-0001\"}",
-          "record_id": "WO-0001:RM-RELAY",
-          "table_name": "material_requirements",
-          "task_id": "factorybench-001",
-          "tool": "create_work_order"
-        },
-        {
-          "action": "insert",
-          "audit_id": 6,
-          "payload": "{\"item_id\": \"RM-HOUSING\", \"lot_number\": \"H-001\", \"plant_id\": \"SEA\", \"quantity\": 5, \"reservation_id\": \"RES-H-001\", \"status\": \"Active\", \"subinventory\": \"STORES\", \"task_id\": \"factorybench-001\", \"work_order_id\": \"WO-0001\"}",
-          "record_id": "RES-H-001",
-          "table_name": "material_reservations",
-          "task_id": "factorybench-001",
-          "tool": "reserve_material"
-        },
-        {
-          "action": "update",
-          "audit_id": 7,
-          "payload": "{\"reserved_delta\": 5}",
-          "record_id": "SEA:STORES:RM-HOUSING:H-001",
-          "table_name": "inventory_on_hand",
-          "task_id": "factorybench-001",
-          "tool": "reserve_material"
-        },
-        {
-          "action": "update",
-          "audit_id": 8,
-          "payload": "{\"reserved_delta\": 5}",
-          "record_id": "WO-0001:RM-HOUSING",
-          "table_name": "material_requirements",
-          "task_id": "factorybench-001",
-          "tool": "reserve_material"
-        },
-        {
-          "action": "insert",
-          "audit_id": 9,
-          "payload": "{\"item_id\": \"RM-RELAY\", \"lot_number\": \"R-001\", \"plant_id\": \"SEA\", \"quantity\": 10, \"reservation_id\": \"RES-R-001\", \"status\": \"Active\", \"subinventory\": \"STORES\", \"task_id\": \"factorybench-001\", \"work_order_id\": \"WO-0001\"}",
-          "record_id": "RES-R-001",
-          "table_name": "material_reservations",
-          "task_id": "factorybench-001",
-          "tool": "reserve_material"
-        },
-        {
-          "action": "update",
-          "audit_id": 10,
-          "payload": "{\"reserved_delta\": 10}",
-          "record_id": "SEA:STORES:RM-RELAY:R-001",
-          "table_name": "inventory_on_hand",
-          "task_id": "factorybench-001",
-          "tool": "reserve_material"
-        },
-        {
-          "action": "update",
-          "audit_id": 11,
-          "payload": "{\"reserved_delta\": 10}",
-          "record_id": "WO-0001:RM-RELAY",
-          "table_name": "material_requirements",
-          "task_id": "factorybench-001",
-          "tool": "reserve_material"
-        },
-        {
-          "action": "insert",
-          "audit_id": 12,
-          "payload": "{\"item_id\": \"RM-COPPER\", \"lot_number\": \"C-001\", \"plant_id\": \"SEA\", \"quantity\": 5, \"reservation_id\": \"RES-C-001\", \"status\": \"Active\", \"subinventory\": \"STORES\", \"task_id\": \"factorybench-001\", \"work_order_id\": \"WO-0001\"}",
-          "record_id": "RES-C-001",
-          "table_name": "material_reservations",
-          "task_id": "factorybench-001",
-          "tool": "reserve_material"
-        },
-        {
-          "action": "update",
-          "audit_id": 13,
-          "payload": "{\"reserved_delta\": 5}",
-          "record_id": "SEA:STORES:RM-COPPER:C-001",
-          "table_name": "inventory_on_hand",
-          "task_id": "factorybench-001",
-          "tool": "reserve_material"
-        },
-        {
-          "action": "update",
-          "audit_id": 14,
-          "payload": "{\"reserved_delta\": 5}",
-          "record_id": "WO-0001:RM-COPPER",
-          "table_name": "material_requirements",
-          "task_id": "factorybench-001",
-          "tool": "reserve_material"
-        },
-        {
-          "action": "upsert",
-          "audit_id": 15,
-          "payload": "{\"value\": \"WO-0001\"}",
-          "record_id": "factorybench-001:work_order_id",
+          "payload": "{\"order_number\": \"ORD-0001\", \"revised_commit_date\": \"2026-01-14\", \"supply_action\": \"Rescheduled\"}",
+          "record_id": "factorybench-001",
           "table_name": "answers",
           "task_id": "factorybench-001",
-          "tool": "submit_answer"
-        },
-        {
-          "action": "upsert",
-          "audit_id": 16,
-          "payload": "{\"value\": \"5\"}",
-          "record_id": "factorybench-001:released_quantity",
-          "table_name": "answers",
-          "task_id": "factorybench-001",
-          "tool": "submit_answer"
-        },
-        {
-          "action": "upsert",
-          "audit_id": 17,
-          "payload": "{\"value\": \"2026-01-16\"}",
-          "record_id": "factorybench-001:completion_date",
-          "table_name": "answers",
-          "task_id": "factorybench-001",
-          "tool": "submit_answer"
+          "tool": "factorybench.submit_answer"
         }
       ],
-      "after_count": 17,
+      "after_count": 4,
       "before": [],
       "before_count": 0
     },
-    "inventory_on_hand": {
+    "resource_state": {
       "after": [
         {
-          "expiration_date": null,
-          "item_id": "RM-COPPER",
-          "lot_number": "C-001",
-          "plant_id": "SEA",
-          "quantity": 7.0,
-          "reserved_qty": 5.0,
-          "status": "Unrestricted",
-          "subinventory": "STORES"
+          "effective_at": "2026-01-14",
+          "payload_json": "{\"arguments\":{\"message\":{\"raw\":\"RnJvbTogb3JkZXIuZnVsZmlsbG1lbnQubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG9wZXJhdGlvbnMtY29udHJvbEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMDEg4oCUIERyYWZ0IGVudGVycHJpc2Ugd29ya2Zsb3cNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpSZXNjaGVkdWxlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDAxLg0K\",\"threadId\":\"thread-001\"},\"userId\":\"me\"},\"case\":\"CASE-001\",\"outcome\":\"Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team.\",\"tool\":\"gmail.drafts.create\"}",
+          "resource_id": "factorybench-001-mutation-03",
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail",
+          "task_id": "factorybench-001"
         },
         {
-          "expiration_date": null,
-          "item_id": "RM-HOUSING",
-          "lot_number": "H-001",
-          "plant_id": "SEA",
-          "quantity": 8.0,
-          "reserved_qty": 5.0,
-          "status": "Unrestricted",
-          "subinventory": "STORES"
+          "effective_at": "2026-01-14",
+          "payload_json": "{\"arguments\":{\"includeValuesInResponse\":true,\"range\":\"Control!H3\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"range\":\"Control!H3\",\"values\":[[\"Rescheduled\"]]},\"spreadsheetId\":\"sheet-001\",\"valueInputOption\":\"RAW\"},\"case\":\"CASE-001\",\"outcome\":\"Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team.\",\"tool\":\"google_sheets.spreadsheets.values.update\"}",
+          "resource_id": "factorybench-001-mutation-02",
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets",
+          "task_id": "factorybench-001"
         },
         {
-          "expiration_date": "2027-06-30",
-          "item_id": "RM-RELAY",
-          "lot_number": "R-001",
-          "plant_id": "SEA",
-          "quantity": 14.0,
-          "reserved_qty": 10.0,
-          "status": "Unrestricted",
-          "subinventory": "STORES"
+          "effective_at": "2026-01-12",
+          "payload_json": "{\"case\":\"CASE-001\",\"identifiers\":{\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0001\"},\"quantity\":9,\"record\":\"NS-000001\"}",
+          "resource_id": "salesOrdersForOrderHubUniqID-0001",
+          "resource_type": "oracle_fusion.sales_orders",
+          "revision": 0,
+          "status": "Open",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-001"
+        },
+        {
+          "effective_at": "2026-01-14",
+          "payload_json": "{\"arguments\":{\"WorkOrderId\":100001,\"requestBody\":{\"PlannedCompletionDate\":\"2026-01-18\",\"PlannedStartDate\":\"2026-01-14\",\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-001\",\"outcome\":\"Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team.\",\"tool\":\"oracle_fusion.work_orders.update\"}",
+          "resource_id": "factorybench-001-mutation-01",
+          "resource_type": "oracle_fusion.work_orders",
+          "revision": 1,
+          "status": "Rescheduled",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-001"
         }
       ],
-      "after_count": 3,
+      "after_count": 4,
       "before": [
         {
-          "expiration_date": null,
-          "item_id": "RM-COPPER",
-          "lot_number": "C-001",
-          "plant_id": "SEA",
-          "quantity": 7.0,
-          "reserved_qty": 0.0,
-          "status": "Unrestricted",
-          "subinventory": "STORES"
-        },
-        {
-          "expiration_date": null,
-          "item_id": "RM-HOUSING",
-          "lot_number": "H-001",
-          "plant_id": "SEA",
-          "quantity": 8.0,
-          "reserved_qty": 0.0,
-          "status": "Unrestricted",
-          "subinventory": "STORES"
-        },
-        {
-          "expiration_date": "2027-06-30",
-          "item_id": "RM-RELAY",
-          "lot_number": "R-001",
-          "plant_id": "SEA",
-          "quantity": 14.0,
-          "reserved_qty": 0.0,
-          "status": "Unrestricted",
-          "subinventory": "STORES"
+          "effective_at": "2026-01-12",
+          "payload_json": "{\"case\":\"CASE-001\",\"identifiers\":{\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0001\"},\"quantity\":9,\"record\":\"NS-000001\"}",
+          "resource_id": "salesOrdersForOrderHubUniqID-0001",
+          "resource_type": "oracle_fusion.sales_orders",
+          "revision": 0,
+          "status": "Open",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-001"
         }
       ],
-      "before_count": 3
-    },
-    "material_requirements": {
-      "after": [
-        {
-          "issued_qty": 0.0,
-          "item_id": "RM-COPPER",
-          "need_by": "2026-01-13",
-          "required_qty": 5.0,
-          "reserved_qty": 5.0,
-          "work_order_id": "WO-0001"
-        },
-        {
-          "issued_qty": 0.0,
-          "item_id": "RM-HOUSING",
-          "need_by": "2026-01-13",
-          "required_qty": 5.0,
-          "reserved_qty": 5.0,
-          "work_order_id": "WO-0001"
-        },
-        {
-          "issued_qty": 0.0,
-          "item_id": "RM-RELAY",
-          "need_by": "2026-01-13",
-          "required_qty": 10.0,
-          "reserved_qty": 10.0,
-          "work_order_id": "WO-0001"
-        }
-      ],
-      "after_count": 3,
-      "before": [],
-      "before_count": 0
-    },
-    "material_reservations": {
-      "after": [
-        {
-          "item_id": "RM-COPPER",
-          "lot_number": "C-001",
-          "plant_id": "SEA",
-          "quantity": 5.0,
-          "reservation_id": "RES-C-001",
-          "status": "Active",
-          "subinventory": "STORES",
-          "task_id": "factorybench-001",
-          "work_order_id": "WO-0001"
-        },
-        {
-          "item_id": "RM-HOUSING",
-          "lot_number": "H-001",
-          "plant_id": "SEA",
-          "quantity": 5.0,
-          "reservation_id": "RES-H-001",
-          "status": "Active",
-          "subinventory": "STORES",
-          "task_id": "factorybench-001",
-          "work_order_id": "WO-0001"
-        },
-        {
-          "item_id": "RM-RELAY",
-          "lot_number": "R-001",
-          "plant_id": "SEA",
-          "quantity": 10.0,
-          "reservation_id": "RES-R-001",
-          "status": "Active",
-          "subinventory": "STORES",
-          "task_id": "factorybench-001",
-          "work_order_id": "WO-0001"
-        }
-      ],
-      "after_count": 3,
-      "before": [],
-      "before_count": 0
-    },
-    "work_order_operations": {
-      "after": [
-        {
-          "actual_hours": 0.0,
-          "planned_hours": 6.25,
-          "sequence": 10,
-          "status": "Ready",
-          "work_order_id": "WO-0001",
-          "workcenter_id": "WC-ASM-1"
-        }
-      ],
-      "after_count": 1,
-      "before": [],
-      "before_count": 0
-    },
-    "work_orders": {
-      "after": [
-        {
-          "completed_qty": 0.0,
-          "item_id": "FG-PANEL",
-          "parent_work_order_id": null,
-          "quantity": 5.0,
-          "sales_order_id": "SO-0001",
-          "scheduled_completion": "2026-01-16",
-          "scheduled_start": "2026-01-13",
-          "scrap_qty": 0.0,
-          "status": "Released",
-          "task_id": "factorybench-001",
-          "work_order_id": "WO-0001",
-          "workcenter_id": "WC-ASM-1"
-        }
-      ],
-      "after_count": 1,
-      "before": [],
-      "before_count": 0
+      "before_count": 1
     }
   },
   "strict_pass": true,
@@ -448,511 +210,594 @@
       "arguments": {},
       "index": 0,
       "result": {
-        "available_documents": [
+        "evidence_index": [
           {
-            "category": "order_release",
-            "doc_id": "POL-01",
-            "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
-            "title": "Order release control"
+            "asset_id": "factorybench-001-decision",
+            "kind": "spreadsheet_export",
+            "media_type": "text/csv",
+            "path": "approval-decision-log.csv",
+            "sha256": "58540665b11405cde2bb78b8fe4a8a18a2c1abf7991b940b22494c7809c27618",
+            "source": "google_sheets",
+            "title": "Approval decision log"
           },
           {
-            "category": "material_shortage",
-            "doc_id": "POL-02",
-            "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
-            "title": "Shortage requisition control"
+            "asset_id": "factorybench-001-contract",
+            "kind": "contract",
+            "media_type": "text/markdown",
+            "path": "contract-or-service-control.md",
+            "sha256": "9f82edd770a9c846d12f38967356b2b00772c066b4959cba520f92a75649c3f5",
+            "source": "google_drive",
+            "title": "Contract / service control"
           },
           {
-            "category": "supplier_selection",
-            "doc_id": "POL-03",
-            "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
-            "title": "Supplier award policy"
+            "asset_id": "factorybench-001-approval",
+            "kind": "approval",
+            "media_type": "application/json",
+            "path": "drive-approval-record.json",
+            "sha256": "37e668c871613e55dc025b70aac5eb193417d108ea07e434347853d1da3a2e32",
+            "source": "google_drive",
+            "title": "Drive approval record"
           },
           {
-            "category": "inbound_receipt",
-            "doc_id": "POL-04",
-            "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
-            "title": "Receiving and inspection policy"
+            "asset_id": "factorybench-001-measurements",
+            "kind": "quality_data",
+            "media_type": "text/csv",
+            "path": "inspection-measurements.csv",
+            "sha256": "4ccc9b95eb0ed927fc1d81bb06f33c0e95b6cb1ccbbd1b22bc22e80af27b76b4",
+            "source": "laboratory_drive",
+            "title": "Inspection measurements"
           },
           {
-            "category": "invoice_match",
-            "doc_id": "POL-05",
-            "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
-            "title": "Three-way match policy"
+            "asset_id": "factorybench-001-policy",
+            "kind": "policy",
+            "media_type": "text/markdown",
+            "path": "operating-policy.md",
+            "sha256": "7378a5b0ed1bf30e67b2982f5f55ca2ac0615f7db7e67fd731dae4e4aca9241e",
+            "source": "google_drive",
+            "title": "Operating policy"
           },
           {
-            "category": "production_issue",
-            "doc_id": "POL-06",
-            "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
-            "title": "Material issue policy"
+            "asset_id": "factorybench-001-slack",
+            "kind": "chat_thread",
+            "media_type": "application/json",
+            "path": "operations-slack-thread.json",
+            "sha256": "a5fc9f48d3a03326ad5ae01510141d196630012cf7f4a63546565a1cbb385ec8",
+            "source": "slack",
+            "title": "Operations Slack thread"
           },
           {
-            "category": "quality_exception",
-            "doc_id": "POL-07",
-            "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
-            "title": "Nonconformance policy"
+            "asset_id": "factorybench-001-erp",
+            "kind": "erp_export",
+            "media_type": "application/json",
+            "path": "oracle-starting-record.json",
+            "sha256": "a4e9883fb5a5aa8fcb23261ff694e320b9ae85c0f3b49e61c5beb0c11b48eb1e",
+            "source": "oracle_fusion",
+            "title": "Oracle starting-record export"
           },
           {
-            "category": "completion_costing",
-            "doc_id": "POL-08",
-            "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
-            "title": "Work-order close policy"
+            "asset_id": "factorybench-001-email",
+            "kind": "email",
+            "media_type": "message/rfc822",
+            "path": "source-email-thread.eml",
+            "sha256": "83e9e25435f3b3d66ce76723c4e62babf2553bbc2fa09745a984308f6a011278",
+            "source": "gmail",
+            "title": "Source email thread"
           },
           {
-            "category": "transfer_reschedule",
-            "doc_id": "POL-09",
-            "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
-            "title": "Interplant recovery policy"
+            "asset_id": "factorybench-001-leadtime",
+            "kind": "spreadsheet",
+            "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "path": "supplier-lead-time-and-capacity.xlsx",
+            "sha256": "13b4d2b1cec54fae2ff894a87ced64a44c4b0ee6f212f7f6e4993878a62f2a1c",
+            "source": "google_drive",
+            "title": "Supplier lead-time and capacity workbook"
           },
           {
-            "category": "maintenance_recovery",
-            "doc_id": "POL-10",
-            "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
-            "title": "Unplanned downtime policy"
+            "asset_id": "factorybench-001-quote",
+            "kind": "vendor_pdf",
+            "media_type": "application/pdf",
+            "path": "supplier-quotation.pdf",
+            "sha256": "7872e5e0cc8545011404045f616898c4c37a181c7a2a72c2588fea4ae919eeff",
+            "source": "gmail_attachment",
+            "title": "Supplier quotation"
+          },
+          {
+            "asset_id": "factorybench-001-spec",
+            "kind": "specification",
+            "media_type": "text/markdown",
+            "path": "technical-specification.md",
+            "sha256": "398ea0087637d2c7dd03e3bf45a497736490a3b700ef31e2082a00a740c32d70",
+            "source": "google_drive",
+            "title": "Technical specification"
+          },
+          {
+            "asset_id": "factorybench-001-risk",
+            "kind": "spreadsheet",
+            "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "path": "workflow-risk-register.xlsx",
+            "sha256": "c7c284589738bb7b8cbd75d557c8d656ac585d566c63ec865e32e546c8517c4c",
+            "source": "google_drive",
+            "title": "Workflow risk register"
+          }
+        ],
+        "identity": [
+          {
+            "approval_limit": 0.0,
+            "display_name": "Jordan Lee",
+            "role": "order_fulfillment_manager",
+            "user_id": "U-AGENT"
+          },
+          {
+            "approval_limit": 250000.0,
+            "display_name": "Avery Morgan",
+            "role": "authorized_approver",
+            "user_id": "U-APPROVER"
+          },
+          {
+            "approval_limit": 25000.0,
+            "display_name": "Maya Chen",
+            "role": "operations_lead",
+            "user_id": "U-OPS-LEAD"
           }
         ],
         "organization": {
-          "organization_id": "M1",
+          "organization_id": "NSC",
           "primary_plant": "SEA",
-          "world": "Northstar Controls Oracle-shaped ERP"
+          "world": "Northstar Controls enterprise operations sandbox",
+          "world_id": "northstar-enterprise-fusion-v2"
         },
-        "reference_data": {
-          "items": [
-            {
-              "description": "Industrial control panel",
-              "item_id": "FG-PANEL",
-              "item_type": "finished_good",
-              "make_buy": "MAKE",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Copper busbar set",
-              "item_id": "RM-COPPER",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Powder-coated enclosure",
-              "item_id": "RM-HOUSING",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Safety relay",
-              "item_id": "RM-RELAY",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
+        "reference_records": {
+          "case_reference": "CASE-001",
+          "gmail": {
+            "search_query": "\"CASE-001\"",
+            "userId": "me"
+          },
+          "google_drive": {
+            "approval_file_id": "drive-approval-001",
+            "primary_file_id": "drive-001",
+            "search_query": "name contains 'CASE-001' and trashed = false"
+          },
+          "google_sheets": {
+            "audit_append_range": "Audit!A:F",
+            "decision_range": "Control!A1:H50",
+            "outcome_write_range": "Control!H3",
+            "spreadsheet_id": "sheet-001"
+          },
+          "oracle_fusion": {
+            "filter": "ReferenceNumber='CASE-001'",
+            "only_data": true,
+            "record_handles": {
+              "HeaderInterfaceId": 700001,
+              "MaintenanceProgramId": 500001,
+              "SupplierId": 600001,
+              "WorkOrderId": 100001,
+              "invoicesUniqID": "invoicesUniqID-0001",
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0001",
+              "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0001"
             }
-          ],
-          "plants": [
-            {
-              "name": "Portland Components",
-              "organization_id": "M1",
-              "plant_id": "PDX",
-              "timezone": "America/Los_Angeles"
-            },
-            {
-              "name": "Seattle Assembly",
-              "organization_id": "M1",
-              "plant_id": "SEA",
-              "timezone": "America/Los_Angeles"
-            }
-          ],
-          "suppliers": [
-            {
-              "approved": 1,
-              "name": "Cascade Industrial",
-              "on_time_rate": 0.94,
-              "payment_terms": "NET30",
-              "quality_score": 97.2,
-              "supplier_id": "SUP-A"
-            },
-            {
-              "approved": 1,
-              "name": "Rainier Components",
-              "on_time_rate": 0.98,
-              "payment_terms": "NET45",
-              "quality_score": 95.8,
-              "supplier_id": "SUP-B"
-            },
-            {
-              "approved": 0,
-              "name": "Frontier Supply",
-              "on_time_rate": 0.99,
-              "payment_terms": "NET30",
-              "quality_score": 99.1,
-              "supplier_id": "SUP-C"
-            }
-          ],
-          "users": [
-            {
-              "approval_limit": 1000.0,
-              "display_name": "Diego Ruiz",
-              "plant_id": "SEA",
-              "role": "buyer",
-              "user_id": "U-BUYER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Priya Shah",
-              "plant_id": "SEA",
-              "role": "quality_inspector",
-              "user_id": "U-INSPECTOR"
-            },
-            {
-              "approval_limit": 250000.0,
-              "display_name": "Avery Morgan",
-              "plant_id": "SEA",
-              "role": "plant_manager",
-              "user_id": "U-MANAGER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Maya Chen",
-              "plant_id": "SEA",
-              "role": "production_planner",
-              "user_id": "U-PLANNER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Noah Williams",
-              "plant_id": "SEA",
-              "role": "quality_engineer",
-              "user_id": "U-QUALITY"
-            }
-          ],
-          "workcenters": [
-            {
-              "capacity_hours": 80.0,
-              "name": "Assembly Cell 1",
-              "plant_id": "SEA",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-ASM-1"
-            },
-            {
-              "capacity_hours": 64.0,
-              "name": "Assembly Cell 2",
-              "plant_id": "SEA",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-ASM-2"
-            },
-            {
-              "capacity_hours": 72.0,
-              "name": "Portland Fabrication",
-              "plant_id": "PDX",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-PDX-1"
-            }
-          ]
+          },
+          "slack": {
+            "channel": "C-PROCUREMENT",
+            "search_query": "\"CASE-001\"",
+            "thread_ts": "1768000001.000100"
+          }
         },
+        "starting_records": [
+          {
+            "effective_at": "2026-01-12",
+            "resource_id": "salesOrdersForOrderHubUniqID-0001",
+            "resource_type": "oracle_fusion.sales_orders",
+            "revision": 0,
+            "status": "Open",
+            "system": "oracle_fusion"
+          }
+        ],
         "state": {
+          "network": "closed",
           "persistence": "episode-local SQLite",
           "scope": "isolated task snapshot"
         },
         "task": {
           "as_of": "2026-01-12",
-          "family": "order_release",
-          "role": "production_planner",
+          "family": "customer_commitment",
+          "role": "order_fulfillment_manager",
           "task_id": "factorybench-001"
         },
         "tool_servers": [
           {
-            "description": "Query and mutate the synthetic manufacturing ERP.",
-            "name": "oracle_erp",
+            "description": "Benchmark-only discovery and answer submission controls.",
+            "name": "factorybench",
             "tools": [
-              "approve_invoice",
-              "approve_purchase_order",
-              "approve_requisition",
-              "complete_operation",
-              "complete_transfer",
-              "complete_work_order",
-              "create_maintenance_work_order",
-              "create_nonconformance",
-              "create_purchase_order",
-              "create_requisition",
-              "create_transfer",
-              "create_work_order",
-              "get_bom",
-              "get_environment_context",
-              "get_inventory",
-              "get_invoice_match",
-              "get_maintenance_context",
-              "get_purchase_order",
-              "get_quality_context",
-              "get_receipt",
-              "get_requisition",
-              "get_sales_order",
-              "get_schedule",
-              "get_supplier_quotes",
-              "get_work_order",
-              "hold_invoice",
-              "issue_material",
-              "place_quality_hold",
-              "receive_purchase_order",
-              "record_inspection",
-              "record_wip_variance",
-              "reroute_operation",
-              "reschedule_work_order",
-              "reserve_material",
-              "start_operation"
+              "factorybench.context.get",
+              "factorybench.submit_answer"
             ]
           },
           {
-            "description": "Search versioned operating policies and task assets.",
-            "name": "plant_docs",
+            "description": "Documented Gmail API operations over task-scoped messages and attachments.",
+            "name": "gmail",
             "tools": [
-              "search_documents"
+              "gmail.drafts.create",
+              "gmail.messages.attachments.get",
+              "gmail.messages.get",
+              "gmail.messages.list",
+              "gmail.messages.send",
+              "gmail.threads.get"
             ]
           },
           {
-            "description": "Submit exact answer fields for deterministic verification.",
-            "name": "factory_harness",
+            "description": "Documented Google Drive API operations over task-scoped files and approvals.",
+            "name": "google_drive",
             "tools": [
-              "submit_answer"
+              "google_drive.approvals.approve",
+              "google_drive.approvals.list",
+              "google_drive.comments.create",
+              "google_drive.files.download",
+              "google_drive.files.export",
+              "google_drive.files.get",
+              "google_drive.files.list"
+            ]
+          },
+          {
+            "description": "Documented Google Sheets API operations over task-scoped workbooks.",
+            "name": "google_sheets",
+            "tools": [
+              "google_sheets.spreadsheets.get",
+              "google_sheets.spreadsheets.values.append",
+              "google_sheets.spreadsheets.values.batchGet",
+              "google_sheets.spreadsheets.values.get",
+              "google_sheets.spreadsheets.values.update"
+            ]
+          },
+          {
+            "description": "Documented Oracle Fusion Cloud ERP/SCM REST operations over synthetic task state.",
+            "name": "oracle_fusion",
+            "tools": [
+              "oracle_fusion.draft_purchase_orders.create",
+              "oracle_fusion.draft_purchase_orders.list",
+              "oracle_fusion.inspection_plans.list",
+              "oracle_fusion.inventory_onhand_balances.list",
+              "oracle_fusion.inventory_transactions.create",
+              "oracle_fusion.invoice_holds.create",
+              "oracle_fusion.invoice_holds.update",
+              "oracle_fusion.invoices.create",
+              "oracle_fusion.invoices.get",
+              "oracle_fusion.invoices.update",
+              "oracle_fusion.invoices.validate",
+              "oracle_fusion.maintenance_documents.create",
+              "oracle_fusion.maintenance_documents.list",
+              "oracle_fusion.maintenance_operations.list",
+              "oracle_fusion.maintenance_operations.update",
+              "oracle_fusion.maintenance_programs.create",
+              "oracle_fusion.maintenance_programs.generate_forecasts",
+              "oracle_fusion.maintenance_programs.generate_work_orders",
+              "oracle_fusion.maintenance_programs.get",
+              "oracle_fusion.maintenance_programs.list",
+              "oracle_fusion.maintenance_programs.update",
+              "oracle_fusion.maintenance_work_orders.create",
+              "oracle_fusion.maintenance_work_orders.get",
+              "oracle_fusion.maintenance_work_orders.list",
+              "oracle_fusion.maintenance_work_orders.update",
+              "oracle_fusion.material_transactions.create",
+              "oracle_fusion.operation_transactions.create",
+              "oracle_fusion.purchase_order_lines.list",
+              "oracle_fusion.purchase_orders.acknowledge",
+              "oracle_fusion.purchase_orders.cancel",
+              "oracle_fusion.purchase_orders.close",
+              "oracle_fusion.purchase_orders.get",
+              "oracle_fusion.purchase_orders.list",
+              "oracle_fusion.quality_inspection_results.create",
+              "oracle_fusion.quality_inspection_results.list",
+              "oracle_fusion.quality_inspection_results.update",
+              "oracle_fusion.receiving_receipt_requests.create",
+              "oracle_fusion.receiving_receipt_requests.list",
+              "oracle_fusion.receiving_receipt_transactions.create",
+              "oracle_fusion.receiving_receipt_transactions.list",
+              "oracle_fusion.receiving_receipt_transactions.update",
+              "oracle_fusion.resource_transactions.create",
+              "oracle_fusion.sales_orders.get",
+              "oracle_fusion.sales_orders.list",
+              "oracle_fusion.suppliers.get",
+              "oracle_fusion.suppliers.list",
+              "oracle_fusion.supply_requests.create",
+              "oracle_fusion.supply_requests.list",
+              "oracle_fusion.work_order_materials.list",
+              "oracle_fusion.work_order_materials.replace_with_substitute",
+              "oracle_fusion.work_order_materials.update",
+              "oracle_fusion.work_order_operations.create",
+              "oracle_fusion.work_order_operations.list",
+              "oracle_fusion.work_order_operations.update",
+              "oracle_fusion.work_order_resources.create",
+              "oracle_fusion.work_order_resources.list",
+              "oracle_fusion.work_order_resources.update",
+              "oracle_fusion.work_orders.create",
+              "oracle_fusion.work_orders.get",
+              "oracle_fusion.work_orders.list",
+              "oracle_fusion.work_orders.update"
             ]
           }
         ]
       },
       "success": true,
-      "tool": "get_environment_context"
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "order_release"
+        "maxResults": 20,
+        "q": "\"CASE-001\"",
+        "userId": "me"
       },
       "index": 1,
       "result": {
-        "documents": [
+        "messages": [
           {
-            "body": "Release only when the customer is not on credit hold, an effective BOM exists, and every component has enough available stock. Reserve the exact BOM quantity.",
-            "category": "order_release",
-            "doc_id": "POL-01",
-            "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
-            "title": "Order release control"
+            "id": "msg-001",
+            "threadId": "thread-001"
           }
-        ]
+        ],
+        "resultSizeEstimate": 1
       },
       "success": true,
-      "tool": "search_documents"
+      "tool": "gmail.messages.list"
     },
     {
       "arguments": {
-        "sales_order_id": "SO-0001"
+        "format": "full",
+        "id": "msg-001",
+        "userId": "me"
       },
       "index": 2,
       "result": {
-        "header": {
-          "credit_hold": 0,
-          "customer_name": "Atlas Systems 1",
-          "priority": "Standard",
-          "requested_date": "2026-01-16",
-          "sales_order_id": "SO-0001",
-          "status": "Booked",
-          "task_id": "factorybench-001"
+        "id": "msg-001",
+        "labelIds": [
+          "INBOX"
+        ],
+        "payload": {
+          "body": {
+            "data": "Q0FTRS0wMDEgfCBBUFBST1ZFRCB8IFZlcmlmeSB0aGUgc2lnbmVkIHNlcnZpY2UtbGV2ZWwgYWRkZW5kdW0gYW5kIHBsYW5uZXIgYXBwcm92YWwsIHRoZW4gbW92ZSB0aGUgbGlua2VkIHByb2R1Y3Rpb24gc3VwcGx5IHRvIHRoZSBhcHByb3ZlZCBjb21taXQgZGF0ZSBhbmQgbm90aWZ5IHRoZSBhY2NvdW50IHRlYW0uIHwgT3JhY2xlIG9wZXJhdGlvbiBvcmFjbGVfZnVzaW9uLndvcmtfb3JkZXJzLnVwZGF0ZSB8IGFwcHJvdmVkIGNvbnRyb2wgcGFja2V0IHsiYXBwcm92YWxTdGF0dXMiOiJBUFBST1ZFRCIsImFwcHJvdmVkQXJndW1lbnRzIjp7IldvcmtPcmRlcklkIjoxMDAwMDEsInJlcXVlc3RCb2R5Ijp7IlBsYW5uZWRDb21wbGV0aW9uRGF0ZSI6IjIwMjYtMDEtMTgiLCJQbGFubmVkU3RhcnREYXRlIjoiMjAyNi0wMS0xNCIsIldvcmtPcmRlclN0YXR1c0NvZGUiOiJSZWxlYXNlZCJ9fSwiY2FzZSI6IkNBU0UtMDAxIiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDMiLCJkZWNpc2lvbiI6IlZlcmlmeSB0aGUgc2lnbmVkIHNlcnZpY2UtbGV2ZWwgYWRkZW5kdW0gYW5kIHBsYW5uZXIgYXBwcm92YWwsIHRoZW4gbW92ZSB0aGUgbGlua2VkIHByb2R1Y3Rpb24gc3VwcGx5IHRvIHRoZSBhcHByb3ZlZCBjb21taXQgZGF0ZSBhbmQgbm90aWZ5IHRoZSBhY2NvdW50IHRlYW0uIiwib3JhY2xlT3BlcmF0aW9uIjoib3JhY2xlX2Z1c2lvbi53b3JrX29yZGVycy51cGRhdGUiLCJyZXR1cm5GaWVsZHMiOnsib3JkZXJfbnVtYmVyIjoiT1JELTAwMDEiLCJyZXZpc2VkX2NvbW1pdF9kYXRlIjoiMjAyNi0wMS0xNCIsInN1cHBseV9hY3Rpb24iOiJSZXNjaGVkdWxlZCJ9fQ",
+            "size": 883
+          },
+          "headers": [
+            {
+              "name": "Subject",
+              "value": "CASE-001 \u2014 evidence and requested action"
+            }
+          ],
+          "parts": [
+            {
+              "body": {
+                "attachmentId": "att-001",
+                "size": 1024
+              },
+              "filename": "supplier-quotation.pdf"
+            }
+          ]
         },
-        "lines": [
-          {
-            "item_id": "FG-PANEL",
-            "line_no": 1,
-            "ordered_qty": 5.0,
-            "sales_order_id": "SO-0001",
-            "shipped_qty": 0.0
-          }
-        ]
+        "snippet": "Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team.",
+        "threadId": "thread-001"
       },
       "success": true,
-      "tool": "get_sales_order"
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
-        "as_of": "2026-01-12",
-        "item_id": "FG-PANEL"
+        "id": "att-001",
+        "messageId": "msg-001",
+        "userId": "me"
       },
       "index": 3,
       "result": {
-        "components": [
-          {
-            "bom_id": "BOM-PANEL-C",
-            "component_item_id": "RM-HOUSING",
-            "operation_sequence": 10,
-            "quantity_per": 1.0,
-            "yield_factor": 1.0
-          },
-          {
-            "bom_id": "BOM-PANEL-C",
-            "component_item_id": "RM-COPPER",
-            "operation_sequence": 20,
-            "quantity_per": 1.0,
-            "yield_factor": 1.0
-          },
-          {
-            "bom_id": "BOM-PANEL-C",
-            "component_item_id": "RM-RELAY",
-            "operation_sequence": 20,
-            "quantity_per": 2.0,
-            "yield_factor": 1.0
-          }
-        ],
-        "header": {
-          "assembly_item_id": "FG-PANEL",
-          "bom_id": "BOM-PANEL-C",
-          "effective_on": "2025-10-01",
-          "revision": "C",
-          "status": "Active"
-        }
+        "data": "U3VwcGxpZXIgcXVvdGF0aW9uIGF0dGFjaG1lbnQgZm9yIENBU0UtMDAxOiBxdWFudGl0eSA5LiBDQVNFLTAwMSB8IEFQUFJPVkVEIHwgVmVyaWZ5IHRoZSBzaWduZWQgc2VydmljZS1sZXZlbCBhZGRlbmR1bSBhbmQgcGxhbm5lciBhcHByb3ZhbCwgdGhlbiBtb3ZlIHRoZSBsaW5rZWQgcHJvZHVjdGlvbiBzdXBwbHkgdG8gdGhlIGFwcHJvdmVkIGNvbW1pdCBkYXRlIGFuZCBub3RpZnkgdGhlIGFjY291bnQgdGVhbS4gfCBPcmFjbGUgb3BlcmF0aW9uIG9yYWNsZV9mdXNpb24ud29ya19vcmRlcnMudXBkYXRlIHwgYXBwcm92ZWQgY29udHJvbCBwYWNrZXQgeyJhcHByb3ZhbFN0YXR1cyI6IkFQUFJPVkVEIiwiYXBwcm92ZWRBcmd1bWVudHMiOnsiV29ya09yZGVySWQiOjEwMDAwMSwicmVxdWVzdEJvZHkiOnsiUGxhbm5lZENvbXBsZXRpb25EYXRlIjoiMjAyNi0wMS0xOCIsIlBsYW5uZWRTdGFydERhdGUiOiIyMDI2LTAxLTE0IiwiV29ya09yZGVyU3RhdHVzQ29kZSI6IlJlbGVhc2VkIn19LCJjYXNlIjoiQ0FTRS0wMDEiLCJjb250cm9sV29ya2Jvb2tBdWRpdFJhbmdlIjoiQXVkaXQhQTpGIiwiY29udHJvbFdvcmtib29rT3V0Y29tZVJhbmdlIjoiQ29udHJvbCFIMyIsImRlY2lzaW9uIjoiVmVyaWZ5IHRoZSBzaWduZWQgc2VydmljZS1sZXZlbCBhZGRlbmR1bSBhbmQgcGxhbm5lciBhcHByb3ZhbCwgdGhlbiBtb3ZlIHRoZSBsaW5rZWQgcHJvZHVjdGlvbiBzdXBwbHkgdG8gdGhlIGFwcHJvdmVkIGNvbW1pdCBkYXRlIGFuZCBub3RpZnkgdGhlIGFjY291bnQgdGVhbS4iLCJvcmFjbGVPcGVyYXRpb24iOiJvcmFjbGVfZnVzaW9uLndvcmtfb3JkZXJzLnVwZGF0ZSIsInJldHVybkZpZWxkcyI6eyJvcmRlcl9udW1iZXIiOiJPUkQtMDAwMSIsInJldmlzZWRfY29tbWl0X2RhdGUiOiIyMDI2LTAxLTE0Iiwic3VwcGx5X2FjdGlvbiI6IlJlc2NoZWR1bGVkIn19",
+        "size": 939
       },
       "success": true,
-      "tool": "get_bom"
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
-        "item_ids": [
-          "RM-HOUSING",
-          "RM-RELAY",
-          "RM-COPPER"
-        ],
-        "plant_id": "SEA"
+        "fileId": "drive-approval-001",
+        "pageSize": 20
       },
       "index": 4,
       "result": {
-        "lots": [
+        "approvals": [
           {
-            "available_qty": 7.0,
-            "expiration_date": null,
-            "item_id": "RM-COPPER",
-            "lot_number": "C-001",
-            "plant_id": "SEA",
-            "quantity": 7.0,
-            "reserved_qty": 0.0,
-            "status": "Unrestricted",
-            "subinventory": "STORES"
-          },
-          {
-            "available_qty": 8.0,
-            "expiration_date": null,
-            "item_id": "RM-HOUSING",
-            "lot_number": "H-001",
-            "plant_id": "SEA",
-            "quantity": 8.0,
-            "reserved_qty": 0.0,
-            "status": "Unrestricted",
-            "subinventory": "STORES"
-          },
-          {
-            "available_qty": 14.0,
-            "expiration_date": "2027-06-30",
-            "item_id": "RM-RELAY",
-            "lot_number": "R-001",
-            "plant_id": "SEA",
-            "quantity": 14.0,
-            "reserved_qty": 0.0,
-            "status": "Unrestricted",
-            "subinventory": "STORES"
+            "fileId": "drive-approval-001",
+            "id": "approval-001",
+            "reviewerResponses": [
+              {
+                "comment": "CASE-001 | APPROVED | Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team. | Oracle operation oracle_fusion.work_orders.update | approved control packet {\"approvalStatus\":\"APPROVED\",\"approvedArguments\":{\"WorkOrderId\":100001,\"requestBody\":{\"PlannedCompletionDate\":\"2026-01-18\",\"PlannedStartDate\":\"2026-01-14\",\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-001\",\"controlWorkbookAuditRange\":\"Audit!A:F\",\"controlWorkbookOutcomeRange\":\"Control!H3\",\"decision\":\"Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team.\",\"oracleOperation\":\"oracle_fusion.work_orders.update\",\"returnFields\":{\"order_number\":\"ORD-0001\",\"revised_commit_date\":\"2026-01-14\",\"supply_action\":\"Rescheduled\"}}",
+                "response": "APPROVED",
+                "reviewer": "U-APPROVER"
+              }
+            ],
+            "status": "IN_PROGRESS"
           }
         ]
       },
       "success": true,
-      "tool": "get_inventory"
+      "tool": "google_drive.approvals.list"
     },
     {
       "arguments": {
-        "item_id": "FG-PANEL",
-        "quantity": 5,
-        "sales_order_id": "SO-0001",
-        "scheduled_completion": "2026-01-16",
-        "scheduled_start": "2026-01-13",
-        "work_order_id": "WO-0001",
-        "workcenter_id": "WC-ASM-1"
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-001'"
       },
       "index": 5,
       "result": {
-        "requirements_created": 3,
-        "status": "Released",
-        "work_order_id": "WO-0001"
+        "count": 1,
+        "hasMore": false,
+        "items": [
+          {
+            "HeaderInterfaceId": 700001,
+            "HoldId": 1000001,
+            "InspectionId": 1100001,
+            "InterfaceTransactionId": 800001,
+            "InvoiceId": 900001,
+            "ItemNumber": "NS-COMP-001",
+            "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+            "MaintenanceProgramId": 500001,
+            "OrderNumber": "ORD-0001",
+            "OrganizationCode": "SEA",
+            "Quantity": 9,
+            "RecordId": 10000001,
+            "ReferenceNumber": "CASE-001",
+            "StatusCode": "OPEN",
+            "SupplierId": 600001,
+            "WoOperationId": 200001,
+            "WoOperationMaterialId": 300001,
+            "WoOperationResourceId": 400001,
+            "WorkOrderId": 100001,
+            "WorkOrderNumber": "WO-0001",
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0001",
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0001"
+          }
+        ],
+        "limit": 50,
+        "links": [],
+        "offset": 0
       },
       "success": true,
-      "tool": "create_work_order"
+      "tool": "oracle_fusion.sales_orders.list"
     },
     {
       "arguments": {
-        "item_id": "RM-HOUSING",
-        "lot_number": "H-001",
-        "plant_id": "SEA",
-        "quantity": 5,
-        "reservation_id": "RES-H-001",
-        "subinventory": "STORES",
-        "work_order_id": "WO-0001"
+        "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0001"
       },
       "index": 6,
       "result": {
-        "reservation_id": "RES-H-001",
-        "status": "Active"
+        "HeaderInterfaceId": 700001,
+        "HoldId": 1000001,
+        "InspectionId": 1100001,
+        "InterfaceTransactionId": 800001,
+        "InvoiceId": 900001,
+        "ItemNumber": "NS-COMP-001",
+        "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+        "MaintenanceProgramId": 500001,
+        "OrderNumber": "ORD-0001",
+        "OrganizationCode": "SEA",
+        "Quantity": 9,
+        "RecordId": 10000001,
+        "ReferenceNumber": "CASE-001",
+        "StatusCode": "OPEN",
+        "SupplierId": 600001,
+        "WoOperationId": 200001,
+        "WoOperationMaterialId": 300001,
+        "WoOperationResourceId": 400001,
+        "WorkOrderId": 100001,
+        "WorkOrderNumber": "WO-0001",
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0001",
+        "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0001"
       },
       "success": true,
-      "tool": "reserve_material"
+      "tool": "oracle_fusion.sales_orders.get"
     },
     {
       "arguments": {
-        "item_id": "RM-RELAY",
-        "lot_number": "R-001",
-        "plant_id": "SEA",
-        "quantity": 10,
-        "reservation_id": "RES-R-001",
-        "subinventory": "STORES",
-        "work_order_id": "WO-0001"
+        "WorkOrderId": 100001,
+        "requestBody": {
+          "PlannedCompletionDate": "2026-01-18",
+          "PlannedStartDate": "2026-01-14",
+          "WorkOrderStatusCode": "Released"
+        }
       },
       "index": 7,
       "result": {
-        "reservation_id": "RES-R-001",
-        "status": "Active"
+        "HeaderInterfaceId": 700001,
+        "HoldId": 1000001,
+        "InspectionId": 1100001,
+        "InterfaceTransactionId": 800001,
+        "InvoiceId": 900001,
+        "ItemNumber": "NS-COMP-001",
+        "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+        "MaintenanceProgramId": 500001,
+        "Operation": "oracle_fusion.work_orders.update",
+        "OrderNumber": "ORD-0001",
+        "OrganizationCode": "SEA",
+        "Quantity": 9,
+        "RecordId": 10000001,
+        "ReferenceNumber": "CASE-001",
+        "StatusCode": "RESCHEDULED",
+        "SupplierId": 600001,
+        "WoOperationId": 200001,
+        "WoOperationMaterialId": 300001,
+        "WoOperationResourceId": 400001,
+        "WorkOrderId": 100001,
+        "WorkOrderNumber": "WO-0001",
+        "links": [],
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0001",
+        "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0001"
       },
       "success": true,
-      "tool": "reserve_material"
+      "tool": "oracle_fusion.work_orders.update"
     },
     {
       "arguments": {
-        "item_id": "RM-COPPER",
-        "lot_number": "C-001",
-        "plant_id": "SEA",
-        "quantity": 5,
-        "reservation_id": "RES-C-001",
-        "subinventory": "STORES",
-        "work_order_id": "WO-0001"
+        "includeValuesInResponse": true,
+        "range": "Control!H3",
+        "requestBody": {
+          "majorDimension": "ROWS",
+          "range": "Control!H3",
+          "values": [
+            [
+              "Rescheduled"
+            ]
+          ]
+        },
+        "spreadsheetId": "sheet-001",
+        "valueInputOption": "RAW"
       },
       "index": 8,
       "result": {
-        "reservation_id": "RES-C-001",
-        "status": "Active"
+        "spreadsheetId": "sheet-001",
+        "updatedCells": 1,
+        "updatedColumns": 1,
+        "updatedRange": "Control!H3",
+        "updatedRows": 1
       },
       "success": true,
-      "tool": "reserve_material"
+      "tool": "google_sheets.spreadsheets.values.update"
     },
     {
       "arguments": {
-        "completion_date": "2026-01-16",
-        "released_quantity": 5,
-        "work_order_id": "WO-0001"
+        "message": {
+          "raw": "RnJvbTogb3JkZXIuZnVsZmlsbG1lbnQubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG9wZXJhdGlvbnMtY29udHJvbEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMDEg4oCUIERyYWZ0IGVudGVycHJpc2Ugd29ya2Zsb3cNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpSZXNjaGVkdWxlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDAxLg0K",
+          "threadId": "thread-001"
+        },
+        "userId": "me"
       },
       "index": 9,
       "result": {
-        "submitted": {
-          "completion_date": "2026-01-16",
-          "released_quantity": "5",
-          "work_order_id": "WO-0001"
+        "id": "draft-001",
+        "message": {
+          "id": "draft-msg-001",
+          "labelIds": [
+            "DRAFT"
+          ],
+          "threadId": "thread-001"
+        }
+      },
+      "success": true,
+      "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "order_number": "ORD-0001",
+        "revised_commit_date": "2026-01-14",
+        "supply_action": "Rescheduled"
+      },
+      "index": 10,
+      "result": {
+        "accepted": true,
+        "fields": {
+          "order_number": "ORD-0001",
+          "revised_commit_date": "2026-01-14",
+          "supply_action": "Rescheduled"
         },
         "task_id": "factorybench-001"
       },
       "success": true,
-      "tool": "submit_answer"
+      "tool": "factorybench.submit_answer"
     }
   ]
 }

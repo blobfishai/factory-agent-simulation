@@ -1,440 +1,755 @@
 {
   "allowed_write_tables": [
-    "purchase_orders",
-    "purchase_order_lines",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "purchase_order_id": {
+      "asset_or_resource": {
         "type": "string"
       },
-      "supplier_id": {
+      "maintenance_order": {
         "type": "string"
       },
-      "total_amount": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "planned_finish": {
+        "type": "string"
       }
     },
     "required": [
-      "purchase_order_id",
-      "supplier_id",
-      "total_amount"
+      "asset_or_resource",
+      "maintenance_order",
+      "planned_finish"
     ],
     "type": "object"
   },
   "as_of": "2026-01-12",
   "expected": {
     "answer": {
-      "purchase_order_id": "PO-0002",
-      "supplier_id": "SUP-B",
-      "total_amount": 1638.8
+      "asset_or_resource": "FB-022",
+      "maintenance_order": "MWO-0022",
+      "planned_finish": "2026-01-16"
     },
     "assertions": [
       {
-        "description": "The purchase order is awarded to the best eligible supplier, meets the need-by date, and is approved.",
-        "id": "po_approved",
-        "table": "purchase_orders",
+        "description": "oracle_fusion.maintenance_work_orders.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "approved_by": "U-MANAGER",
-          "promised_date": "2026-01-16",
-          "requisition_id": "REQ-A-002",
-          "status": "Approved",
-          "supplier_id": "SUP-B",
-          "total_amount": 1638.8
+          "payload_json": "{\"arguments\":{\"WorkOrderId\":100022,\"requestBody\":{\"PlannedCompletionDate\":\"2026-01-21\",\"WorkOrderDescription\":\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-022\",\"outcome\":\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\"tool\":\"oracle_fusion.maintenance_work_orders.update\"}",
+          "resource_type": "oracle_fusion.maintenance_work_orders",
+          "revision": 1,
+          "status": "Repair scope revised",
+          "system": "oracle_fusion"
         },
         "where": {
-          "purchase_order_id": "PO-0002"
+          "resource_id": "factorybench-022-mutation-01",
+          "task_id": "factorybench-022"
         }
       },
       {
-        "description": "The PO line preserves the approved requisition quantity.",
-        "id": "po_line_exact",
-        "table": "purchase_order_lines",
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "item_id": "RM-RELAY",
-          "ordered_qty": 34,
-          "unit_price": 48.2
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "line_no": 1,
-          "purchase_order_id": "PO-0002"
+          "resource_id": "factorybench-022-mutation-02",
+          "task_id": "factorybench-022"
+        }
+      },
+      {
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
+        "where": {
+          "resource_id": "factorybench-022-mutation-03",
+          "task_id": "factorybench-022"
         }
       }
     ]
   },
-  "family": "supplier_selection",
-  "instruction": "Source requisition REQ-A-002 for 34 RM-RELAY units by 2026-01-28. Compare current quotes, exclude ineligible suppliers, award the purchase order, and obtain the approval required by policy. Return the PO ID, chosen supplier, and total amount.",
+  "family": "corrective_maintenance",
+  "instruction": "You are the maintenance planner for Northstar Controls. Resolve FACTORYBENCH-022 (Extend a pump repair after teardown findings). Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description. The case is an isolated snapshot as of 2026-01-12; correlate immutable IDs and effective revisions rather than matching names alone. Evidence is distributed across Oracle Fusion, Gmail, Drive, Sheets, and Slack, with inspectable files including `operating-policy.md`, `contract-or-service-control.md`, `supplier-quotation.pdf`, `supplier-lead-time-and-capacity.xlsx`, `approval-decision-log.csv`, `source-email-thread.eml`, `operations-slack-thread.json`, `drive-approval-record.json`. After the documented Oracle operation, add the Oracle result as a Drive comment; then send the scoped completion email. Return exactly: maintenance_order, asset_or_resource, planned_finish.",
   "level": "L3",
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "supplier_selection"
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000022.000100"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "requisition_id": "REQ-A-002"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
+        ],
+        "spreadsheetId": "sheet-022"
       },
-      "tool": "get_requisition"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
-        "item_id": "RM-RELAY",
-        "need_by": "2026-01-28",
-        "task_id": "factorybench-022"
+        "maxResults": 20,
+        "q": "\"CASE-022\"",
+        "userId": "me"
       },
-      "tool": "get_supplier_quotes"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-022"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-022'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.maintenance_work_orders.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100022
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.maintenance_work_orders.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_requisition",
-    "get_supplier_quotes"
+    "factorybench.context.get",
+    "slack.conversations_replies",
+    "google_sheets.spreadsheets.get",
+    "gmail.messages.list",
+    "google_drive.files.download",
+    "oracle_fusion.maintenance_work_orders.list",
+    "oracle_fusion.maintenance_work_orders.get"
   ],
-  "role": "buyer",
+  "role": "maintenance_planner",
   "seed_tables": {
-    "bom_components": [
+    "api_fixtures": [
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-HOUSING",
-        "operation_sequence": 10,
-        "quantity_per": 1,
-        "yield_factor": 1
+        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000022.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-call-01",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"CASE-022: evidence checked.\",\"ts\":\"1768000022.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"CASE-022 | APPROVED | Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description. | Oracle operation oracle_fusion.maintenance_work_orders.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H24\\\",\\\"decision\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.maintenance_work_orders.update\\\",\\\"returnFields\\\":{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}}\",\"ts\":\"1768000022.000200\",\"user\":\"U-APPROVER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-022",
+        "tool_name": "slack.conversations_replies"
       },
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-RELAY",
-        "operation_sequence": 20,
-        "quantity_per": 2,
-        "yield_factor": 1
+        "arguments_json": "{\"includeGridData\":false,\"ranges\":[\"Control!A1:H50\"],\"spreadsheetId\":\"sheet-022\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-call-02",
+        "read_only": 1,
+        "response_json": "{\"developerMetadata\":[{\"metadataKey\":\"case\",\"metadataValue\":\"CASE-022\"},{\"metadataKey\":\"approvalStatus\",\"metadataValue\":\"APPROVED\"},{\"metadataKey\":\"approvedControlPacket\",\"metadataValue\":\"{\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H24\\\",\\\"decision\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.maintenance_work_orders.update\\\",\\\"returnFields\\\":{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}}\"}],\"namedRanges\":[{\"name\":\"ApprovedDecision\",\"namedRangeId\":\"decision-022\"}],\"properties\":{\"title\":\"CASE-022 control workbook\"},\"sheets\":[{\"properties\":{\"sheetId\":0,\"title\":\"Control\"}}],\"spreadsheetId\":\"sheet-022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "google_sheets.spreadsheets.get"
       },
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-COPPER",
-        "operation_sequence": 20,
-        "quantity_per": 1,
-        "yield_factor": 1
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-022\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-call-03",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-022\",\"threadId\":\"thread-022\"}],\"resultSizeEstimate\":1}",
+        "task_id": "factorybench-022",
+        "tool_name": "gmail.messages.list"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-022\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-call-04",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-022 | APPROVED | Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description. | Oracle operation oracle_fusion.maintenance_work_orders.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H24\\\",\\\"decision\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.maintenance_work_orders.update\\\",\\\"returnFields\\\":{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}}\",\"description\":\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\"id\":\"drive-022\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "google_drive.files.download"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-call-05",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.maintenance_work_orders.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100022}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-call-06",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.maintenance_work_orders.get"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100022,\"requestBody\":{\"PlannedCompletionDate\":\"2026-01-21\",\"WorkOrderDescription\":\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\"WorkOrderStatusCode\":\"Released\"}}",
+        "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"outcome\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"tool\\\":\\\"oracle_fusion.maintenance_work_orders.update\\\"}\",\"resource_id\":\"factorybench-022-mutation-01\",\"resource_type\":\"oracle_fusion.maintenance_work_orders\",\"revision\":1,\"status\":\"Repair scope revised\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-022\"}",
+        "fixture_id": "factorybench-022-call-07",
+        "read_only": 0,
+        "response_json": "{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"Operation\":\"oracle_fusion.maintenance_work_orders.update\",\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"REPAIR_SCOPE_REVISED\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"links\":[],\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.maintenance_work_orders.update"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-022\",\"requestBody\":{\"content\":\"CASE-022: Repair scope revised; Oracle reference recorded.\"}}",
+        "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-022\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-022: Repair scope revised; Oracle reference recorded.\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"outcome\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-022-mutation-02\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-022\"}",
+        "fixture_id": "factorybench-022-call-08",
+        "read_only": 0,
+        "response_json": "{\"content\":\"CASE-022: Repair scope revised; Oracle reference recorded.\",\"id\":\"comment-022\",\"resolved\":false}",
+        "task_id": "factorybench-022",
+        "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"raw\":\"RnJvbTogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG9wZXJhdGlvbnMtY29udHJvbEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMjIg4oCUIENvbXBsZXRlZCBlbnRlcnByaXNlIHdvcmtmbG93DQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KUmVwYWlyIHNjb3BlIHJldmlzZWQuIE9yYWNsZSBhbmQgY29sbGFib3JhdGlvbiByZWZlcmVuY2VzIGFyZSByZWNvcmRlZCB1bmRlciBDQVNFLTAyMi4NCg\",\"threadId\":\"thread-022\",\"userId\":\"me\"}",
+        "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG9wZXJhdGlvbnMtY29udHJvbEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMjIg4oCUIENvbXBsZXRlZCBlbnRlcnByaXNlIHdvcmtmbG93DQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KUmVwYWlyIHNjb3BlIHJldmlzZWQuIE9yYWNsZSBhbmQgY29sbGFib3JhdGlvbiByZWZlcmVuY2VzIGFyZSByZWNvcmRlZCB1bmRlciBDQVNFLTAyMi4NCg\\\",\\\"threadId\\\":\\\"thread-022\\\",\\\"userId\\\":\\\"me\\\"},\\\"case\\\":\\\"CASE-022\\\",\\\"outcome\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-022-mutation-03\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-022\"}",
+        "fixture_id": "factorybench-022-call-09",
+        "read_only": 0,
+        "response_json": "{\"id\":\"sent-022\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "gmail.messages.send"
+      },
+      {
+        "arguments_json": "{\"id\":\"att-022\",\"messageId\":\"msg-022\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-01",
+        "read_only": 1,
+        "response_json": "{\"data\":\"U3VwcGxpZXIgcXVvdGF0aW9uIGF0dGFjaG1lbnQgZm9yIENBU0UtMDIyOiBxdWFudGl0eSAzMC4gQ0FTRS0wMjIgfCBBUFBST1ZFRCB8IFVzZSB0aGUgdGVhcmRvd24gcGhvdG9zLCBwYXJ0cyBxdW90ZSwgYW5kIGFwcHJvdmVkIHNjb3BlIGNoYW5nZSB0byB1cGRhdGUgdGhlIGV4aXN0aW5nIG1haW50ZW5hbmNlIG9yZGVyIGRhdGVzIGFuZCBkZXNjcmlwdGlvbi4gfCBPcmFjbGUgb3BlcmF0aW9uIG9yYWNsZV9mdXNpb24ubWFpbnRlbmFuY2Vfd29ya19vcmRlcnMudXBkYXRlIHwgYXBwcm92ZWQgY29udHJvbCBwYWNrZXQgeyJhcHByb3ZhbFN0YXR1cyI6IkFQUFJPVkVEIiwiYXBwcm92ZWRBcmd1bWVudHMiOnsiV29ya09yZGVySWQiOjEwMDAyMiwicmVxdWVzdEJvZHkiOnsiUGxhbm5lZENvbXBsZXRpb25EYXRlIjoiMjAyNi0wMS0yMSIsIldvcmtPcmRlckRlc2NyaXB0aW9uIjoiVXNlIHRoZSB0ZWFyZG93biBwaG90b3MsIHBhcnRzIHF1b3RlLCBhbmQgYXBwcm92ZWQgc2NvcGUgY2hhbmdlIHRvIHVwZGF0ZSB0aGUgZXhpc3RpbmcgbWFpbnRlbmFuY2Ugb3JkZXIgZGF0ZXMgYW5kIGRlc2NyaXB0aW9uLiIsIldvcmtPcmRlclN0YXR1c0NvZGUiOiJSZWxlYXNlZCJ9fSwiY2FzZSI6IkNBU0UtMDIyIiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDI0IiwiZGVjaXNpb24iOiJVc2UgdGhlIHRlYXJkb3duIHBob3RvcywgcGFydHMgcXVvdGUsIGFuZCBhcHByb3ZlZCBzY29wZSBjaGFuZ2UgdG8gdXBkYXRlIHRoZSBleGlzdGluZyBtYWludGVuYW5jZSBvcmRlciBkYXRlcyBhbmQgZGVzY3JpcHRpb24uIiwib3JhY2xlT3BlcmF0aW9uIjoib3JhY2xlX2Z1c2lvbi5tYWludGVuYW5jZV93b3JrX29yZGVycy51cGRhdGUiLCJyZXR1cm5GaWVsZHMiOnsiYXNzZXRfb3JfcmVzb3VyY2UiOiJGQi0wMjIiLCJtYWludGVuYW5jZV9vcmRlciI6Ik1XTy0wMDIyIiwicGxhbm5lZF9maW5pc2giOiIyMDI2LTAxLTE2In19\",\"size\":1023}",
+        "task_id": "factorybench-022",
+        "tool_name": "gmail.messages.attachments.get"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-022\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-02",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-022\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"Q0FTRS0wMjIgfCBBUFBST1ZFRCB8IFVzZSB0aGUgdGVhcmRvd24gcGhvdG9zLCBwYXJ0cyBxdW90ZSwgYW5kIGFwcHJvdmVkIHNjb3BlIGNoYW5nZSB0byB1cGRhdGUgdGhlIGV4aXN0aW5nIG1haW50ZW5hbmNlIG9yZGVyIGRhdGVzIGFuZCBkZXNjcmlwdGlvbi4gfCBPcmFjbGUgb3BlcmF0aW9uIG9yYWNsZV9mdXNpb24ubWFpbnRlbmFuY2Vfd29ya19vcmRlcnMudXBkYXRlIHwgYXBwcm92ZWQgY29udHJvbCBwYWNrZXQgeyJhcHByb3ZhbFN0YXR1cyI6IkFQUFJPVkVEIiwiYXBwcm92ZWRBcmd1bWVudHMiOnsiV29ya09yZGVySWQiOjEwMDAyMiwicmVxdWVzdEJvZHkiOnsiUGxhbm5lZENvbXBsZXRpb25EYXRlIjoiMjAyNi0wMS0yMSIsIldvcmtPcmRlckRlc2NyaXB0aW9uIjoiVXNlIHRoZSB0ZWFyZG93biBwaG90b3MsIHBhcnRzIHF1b3RlLCBhbmQgYXBwcm92ZWQgc2NvcGUgY2hhbmdlIHRvIHVwZGF0ZSB0aGUgZXhpc3RpbmcgbWFpbnRlbmFuY2Ugb3JkZXIgZGF0ZXMgYW5kIGRlc2NyaXB0aW9uLiIsIldvcmtPcmRlclN0YXR1c0NvZGUiOiJSZWxlYXNlZCJ9fSwiY2FzZSI6IkNBU0UtMDIyIiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDI0IiwiZGVjaXNpb24iOiJVc2UgdGhlIHRlYXJkb3duIHBob3RvcywgcGFydHMgcXVvdGUsIGFuZCBhcHByb3ZlZCBzY29wZSBjaGFuZ2UgdG8gdXBkYXRlIHRoZSBleGlzdGluZyBtYWludGVuYW5jZSBvcmRlciBkYXRlcyBhbmQgZGVzY3JpcHRpb24uIiwib3JhY2xlT3BlcmF0aW9uIjoib3JhY2xlX2Z1c2lvbi5tYWludGVuYW5jZV93b3JrX29yZGVycy51cGRhdGUiLCJyZXR1cm5GaWVsZHMiOnsiYXNzZXRfb3JfcmVzb3VyY2UiOiJGQi0wMjIiLCJtYWludGVuYW5jZV9vcmRlciI6Ik1XTy0wMDIyIiwicGxhbm5lZF9maW5pc2giOiIyMDI2LTAxLTE2In19\",\"size\":966},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-022 \\u2014 evidence and requested action\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-022\",\"size\":1024},\"filename\":\"supplier-quotation.pdf\"}]},\"snippet\":\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\"threadId\":\"thread-022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "gmail.messages.get"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"thread-022\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-04",
+        "read_only": 1,
+        "response_json": "{\"historyId\":\"900022\",\"id\":\"thread-022\",\"messages\":[{\"id\":\"msg-022\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"Q0FTRS0wMjIgfCBBUFBST1ZFRCB8IFVzZSB0aGUgdGVhcmRvd24gcGhvdG9zLCBwYXJ0cyBxdW90ZSwgYW5kIGFwcHJvdmVkIHNjb3BlIGNoYW5nZSB0byB1cGRhdGUgdGhlIGV4aXN0aW5nIG1haW50ZW5hbmNlIG9yZGVyIGRhdGVzIGFuZCBkZXNjcmlwdGlvbi4gfCBPcmFjbGUgb3BlcmF0aW9uIG9yYWNsZV9mdXNpb24ubWFpbnRlbmFuY2Vfd29ya19vcmRlcnMudXBkYXRlIHwgYXBwcm92ZWQgY29udHJvbCBwYWNrZXQgeyJhcHByb3ZhbFN0YXR1cyI6IkFQUFJPVkVEIiwiYXBwcm92ZWRBcmd1bWVudHMiOnsiV29ya09yZGVySWQiOjEwMDAyMiwicmVxdWVzdEJvZHkiOnsiUGxhbm5lZENvbXBsZXRpb25EYXRlIjoiMjAyNi0wMS0yMSIsIldvcmtPcmRlckRlc2NyaXB0aW9uIjoiVXNlIHRoZSB0ZWFyZG93biBwaG90b3MsIHBhcnRzIHF1b3RlLCBhbmQgYXBwcm92ZWQgc2NvcGUgY2hhbmdlIHRvIHVwZGF0ZSB0aGUgZXhpc3RpbmcgbWFpbnRlbmFuY2Ugb3JkZXIgZGF0ZXMgYW5kIGRlc2NyaXB0aW9uLiIsIldvcmtPcmRlclN0YXR1c0NvZGUiOiJSZWxlYXNlZCJ9fSwiY2FzZSI6IkNBU0UtMDIyIiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDI0IiwiZGVjaXNpb24iOiJVc2UgdGhlIHRlYXJkb3duIHBob3RvcywgcGFydHMgcXVvdGUsIGFuZCBhcHByb3ZlZCBzY29wZSBjaGFuZ2UgdG8gdXBkYXRlIHRoZSBleGlzdGluZyBtYWludGVuYW5jZSBvcmRlciBkYXRlcyBhbmQgZGVzY3JpcHRpb24uIiwib3JhY2xlT3BlcmF0aW9uIjoib3JhY2xlX2Z1c2lvbi5tYWludGVuYW5jZV93b3JrX29yZGVycy51cGRhdGUiLCJyZXR1cm5GaWVsZHMiOnsiYXNzZXRfb3JfcmVzb3VyY2UiOiJGQi0wMjIiLCJtYWludGVuYW5jZV9vcmRlciI6Ik1XTy0wMDIyIiwicGxhbm5lZF9maW5pc2giOiIyMDI2LTAxLTE2In19\",\"size\":966},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-022 \\u2014 approved enterprise action\"}]},\"snippet\":\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\"threadId\":\"thread-022\"}]}",
+        "task_id": "factorybench-022",
+        "tool_name": "gmail.threads.get"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-approval-022\",\"pageSize\":20}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-05",
+        "read_only": 1,
+        "response_json": "{\"approvals\":[{\"fileId\":\"drive-approval-022\",\"id\":\"approval-022\",\"reviewerResponses\":[{\"comment\":\"CASE-022 | APPROVED | Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description. | Oracle operation oracle_fusion.maintenance_work_orders.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H24\\\",\\\"decision\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.maintenance_work_orders.update\\\",\\\"returnFields\\\":{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}}\",\"response\":\"APPROVED\",\"reviewer\":\"U-APPROVER\"}],\"status\":\"IN_PROGRESS\"}]}",
+        "task_id": "factorybench-022",
+        "tool_name": "google_drive.approvals.list"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-022\",\"mimeType\":\"text/plain\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-07",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-022 | APPROVED | Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description. | Oracle operation oracle_fusion.maintenance_work_orders.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H24\\\",\\\"decision\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.maintenance_work_orders.update\\\",\\\"returnFields\\\":{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}}\",\"description\":\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\"id\":\"drive-022\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "google_drive.files.export"
+      },
+      {
+        "arguments_json": "{\"fields\":\"id,name,mimeType,modifiedTime,md5Checksum,description\",\"fileId\":\"drive-022\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-08",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-022 | APPROVED | Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description. | Oracle operation oracle_fusion.maintenance_work_orders.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H24\\\",\\\"decision\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.maintenance_work_orders.update\\\",\\\"returnFields\\\":{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}}\",\"description\":\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\"id\":\"drive-022\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "google_drive.files.get"
+      },
+      {
+        "arguments_json": "{\"fields\":\"files(id,name,mimeType,modifiedTime,md5Checksum)\",\"pageSize\":50,\"q\":\"name contains 'CASE-022' and trashed = false\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-09",
+        "read_only": 1,
+        "response_json": "{\"files\":[{\"description\":\"CASE-022: Operating policy\",\"id\":\"drive-022-01\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"operating-policy.md\"},{\"description\":\"CASE-022: Contract / service control\",\"id\":\"drive-022\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"},{\"description\":\"CASE-022: Supplier quotation\",\"id\":\"drive-022-03\",\"mimeType\":\"application/pdf\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"supplier-quotation.pdf\"},{\"description\":\"CASE-022: Supplier lead-time and capacity workbook\",\"id\":\"drive-022-04\",\"mimeType\":\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"supplier-lead-time-and-capacity.xlsx\"},{\"description\":\"CASE-022: Approval decision log\",\"id\":\"drive-022-05\",\"mimeType\":\"text/csv\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"approval-decision-log.csv\"},{\"description\":\"CASE-022: Source email thread\",\"id\":\"drive-022-06\",\"mimeType\":\"message/rfc822\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"source-email-thread.eml\"},{\"description\":\"CASE-022: Operations Slack thread\",\"id\":\"drive-022-07\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"operations-slack-thread.json\"},{\"description\":\"CASE-022: Drive approval record\",\"id\":\"drive-approval-022\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"drive-approval-record.json\"},{\"description\":\"CASE-022: Oracle starting-record export\",\"id\":\"drive-022-09\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"oracle-starting-record.json\"},{\"description\":\"CASE-022: Inspection measurements\",\"id\":\"drive-022-10\",\"mimeType\":\"text/csv\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"inspection-measurements.csv\"},{\"description\":\"CASE-022: Workflow risk register\",\"id\":\"drive-022-11\",\"mimeType\":\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"workflow-risk-register.xlsx\"},{\"description\":\"CASE-022: Technical specification\",\"id\":\"drive-022-12\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"technical-specification.md\"}],\"kind\":\"drive#fileList\",\"nextPageToken\":null}",
+        "task_id": "factorybench-022",
+        "tool_name": "google_drive.files.list"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"ranges\":[\"Control!A1:H50\",\"Approvals!A1:G20\"],\"spreadsheetId\":\"sheet-022\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-11",
+        "read_only": 1,
+        "response_json": "{\"spreadsheetId\":\"sheet-022\",\"valueRanges\":[{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:E2\",\"values\":[[\"case\",\"record\",\"quantity\",\"approval\",\"approved_operation\",\"approved_arguments_json\",\"return_fields_json\"],[\"CASE-022\",\"NS-000022\",30,\"APPROVED\",\"oracle_fusion.maintenance_work_orders.update\",\"{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}}\",\"{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}\"]]}]}",
+        "task_id": "factorybench-022",
+        "tool_name": "google_sheets.spreadsheets.values.batchGet"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:H50\",\"spreadsheetId\":\"sheet-022\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-12",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:E2\",\"values\":[[\"case\",\"record\",\"quantity\",\"approval\",\"approved_operation\",\"approved_arguments_json\",\"return_fields_json\"],[\"CASE-022\",\"NS-000022\",30,\"APPROVED\",\"oracle_fusion.maintenance_work_orders.update\",\"{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}}\",\"{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}\"]]}",
+        "task_id": "factorybench-022",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-13",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.draft_purchase_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-14",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.inspection_plans.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-15",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.inventory_onhand_balances.list"
+      },
+      {
+        "arguments_json": "{\"invoicesUniqID\":\"invoicesUniqID-0022\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-16",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.invoices.get"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100022,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-17",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.maintenance_documents.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100022,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-18",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.maintenance_operations.list"
+      },
+      {
+        "arguments_json": "{\"MaintenanceProgramId\":500022}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-19",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.maintenance_programs.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-20",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.maintenance_programs.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-23",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.purchase_order_lines.list"
+      },
+      {
+        "arguments_json": "{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-24",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.purchase_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-25",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.purchase_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-26",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.quality_inspection_results.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-27",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.receiving_receipt_requests.list"
+      },
+      {
+        "arguments_json": "{\"HeaderInterfaceId\":700022,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-28",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.receiving_receipt_transactions.list"
+      },
+      {
+        "arguments_json": "{\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-29",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.sales_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-30",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.sales_orders.list"
+      },
+      {
+        "arguments_json": "{\"SupplierId\":600022}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-31",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.suppliers.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-32",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.suppliers.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-33",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.supply_requests.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100022,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-34",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.work_order_materials.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100022,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-35",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.work_order_operations.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100022,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-36",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.work_order_resources.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100022}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-37",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.work_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-022'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-38",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700022,\"HoldId\":1000022,\"InspectionId\":1100022,\"InterfaceTransactionId\":800022,\"InvoiceId\":900022,\"ItemNumber\":\"NS-COMP-022\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500022,\"OrderNumber\":\"ORD-0022\",\"OrganizationCode\":\"SEA\",\"Quantity\":30,\"RecordId\":10000022,\"ReferenceNumber\":\"CASE-022\",\"StatusCode\":\"OPEN\",\"SupplierId\":600022,\"WoOperationId\":200022,\"WoOperationMaterialId\":300022,\"WoOperationResourceId\":400022,\"WorkOrderId\":100022,\"WorkOrderNumber\":\"WO-0022\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0022\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0022\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-022",
+        "tool_name": "oracle_fusion.work_orders.list"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-QUALITY\",\"inclusive\":true,\"limit\":100,\"oldest\":\"1768000000.000000\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-39",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"CASE-022: evidence checked.\",\"ts\":\"1768000022.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"CASE-022 | APPROVED | Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description. | Oracle operation oracle_fusion.maintenance_work_orders.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H24\\\",\\\"decision\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.maintenance_work_orders.update\\\",\\\"returnFields\\\":{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}}\",\"ts\":\"1768000022.000200\",\"user\":\"U-APPROVER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-022",
+        "tool_name": "slack.conversations_history"
+      },
+      {
+        "arguments_json": "{\"file\":\"F-000022\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-41",
+        "read_only": 1,
+        "response_json": "{\"file\":{\"id\":\"F-000022\",\"mimetype\":\"application/pdf\",\"name\":\"inspection-evidence.pdf\",\"preview\":\"CASE-022 | APPROVED | Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description. | Oracle operation oracle_fusion.maintenance_work_orders.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H24\\\",\\\"decision\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.maintenance_work_orders.update\\\",\\\"returnFields\\\":{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}}\",\"title\":\"CASE-022 inspection evidence\"},\"ok\":true}",
+        "task_id": "factorybench-022",
+        "tool_name": "slack.files_info"
+      },
+      {
+        "arguments_json": "{\"count\":50,\"query\":\"\\\"CASE-022\\\"\",\"sort\":\"timestamp\",\"sort_dir\":\"asc\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-022-discovery-42",
+        "read_only": 1,
+        "response_json": "{\"messages\":{\"matches\":[{\"channel\":{\"id\":\"C-QUALITY\"},\"text\":\"CASE-022 | APPROVED | Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description. | Oracle operation oracle_fusion.maintenance_work_orders.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"WorkOrderId\\\":100022,\\\"requestBody\\\":{\\\"PlannedCompletionDate\\\":\\\"2026-01-21\\\",\\\"WorkOrderDescription\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-022\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H24\\\",\\\"decision\\\":\\\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.maintenance_work_orders.update\\\",\\\"returnFields\\\":{\\\"asset_or_resource\\\":\\\"FB-022\\\",\\\"maintenance_order\\\":\\\"MWO-0022\\\",\\\"planned_finish\\\":\\\"2026-01-16\\\"}}\",\"ts\":\"1768000022.000100\",\"user\":\"U-APPROVER\"}],\"total\":1},\"ok\":true,\"query\":\"\\\"CASE-022\\\"\"}",
+        "task_id": "factorybench-022",
+        "tool_name": "slack.search_messages"
       }
     ],
-    "bom_headers": [
+    "evidence_files": [
       {
-        "assembly_item_id": "FG-PANEL",
-        "bom_id": "BOM-PANEL-C",
-        "effective_on": "2025-10-01",
-        "revision": "C",
-        "status": "Active"
-      }
-    ],
-    "documents": [
-      {
-        "body": "Release only when the customer is not on credit hold, an effective BOM exists, and every component has enough available stock. Reserve the exact BOM quantity.",
-        "category": "order_release",
-        "doc_id": "POL-01",
-        "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
+        "asset_id": "factorybench-022-policy",
+        "extracted_text": "# Extend a pump repair after teardown findings \u2014 operating control\n\nScope: Convert equipment failures into auditable maintenance work, routing, resources, and technical references.\n\nThe operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.\n",
+        "kind": "policy",
+        "media_type": "text/markdown",
+        "path": "operating-policy.md",
+        "sha256": "6a209676dd6096016ec774a92d6b591173f142593b8aea84fdbcfb546d7297b1",
+        "source": "google_drive",
         "task_id": "factorybench-022",
-        "title": "Order release control"
+        "title": "Operating policy"
       },
       {
-        "body": "Net requirements against unreserved on-hand. Use an approved supplier quote that is valid through the need-by date. Requisitions over the requester's limit require the plant manager's approval.",
-        "category": "material_shortage",
-        "doc_id": "POL-02",
-        "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
+        "asset_id": "factorybench-022-contract",
+        "extracted_text": "# Commercial or service control for CASE-022\n\nThe approved operational objective is: Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\n\nEffective date: 2026-01-16\nReference record: NS-000022\nAny deviation affecting price, completion, inspected quantity, compliance, or customer commit requires explicit approval preserved in the case packet.\n",
+        "kind": "contract",
+        "media_type": "text/markdown",
+        "path": "contract-or-service-control.md",
+        "sha256": "3f42e5c7170e4593605eac900124b71aa60b28a548466de5afaad03a4ac8300b",
+        "source": "google_drive",
         "task_id": "factorybench-022",
-        "title": "Shortage requisition control"
+        "title": "Contract / service control"
       },
       {
-        "body": "Choose an approved supplier. Minimize landed price while meeting the need-by date; break ties by higher quality score, then higher on-time rate. Purchase orders above the buyer's limit require plant-manager approval.",
-        "category": "supplier_selection",
-        "doc_id": "POL-03",
-        "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
+        "asset_id": "factorybench-022-quote",
+        "extracted_text": "VENDOR QUOTATION CASE-022\nSupplier: Rainier Components\nItem: NS-COMP-022\nQuantity: 30 EA\nUnit price: USD 68.24\nExtended: USD 2047.20\nLead time: 3 calendar days\nValid through: 2026-02-15\nFreight: included\nQuality certificate: required with shipment\n",
+        "kind": "vendor_pdf",
+        "media_type": "application/pdf",
+        "path": "supplier-quotation.pdf",
+        "sha256": "80a801d4fb91a94cee34499d0b6a683b3596508afec36adb809ed8c59a8fbebe",
+        "source": "gmail_attachment",
         "task_id": "factorybench-022",
-        "title": "Supplier award policy"
+        "title": "Supplier quotation"
       },
       {
-        "body": "Receive only against an approved purchase order. Put the lot in inspection status, record accepted and rejected quantities, and release only accepted quantity to stores.",
-        "category": "inbound_receipt",
-        "doc_id": "POL-04",
-        "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
+        "asset_id": "factorybench-022-leadtime",
+        "extracted_text": "[[\"supplier\", \"item\", \"quoted_days\", \"historical_p50\", \"historical_p90\", \"capacity_confirmed\", \"valid_through\"], [\"Rainier Components\", \"NS-COMP-022\", 3, 7, 11, \"YES\", \"2026-02-15\"], [\"Alternate Dynamics\", \"NS-COMP-022\", 13, 8, 15, \"NO\", \"2026-02-05\"]]",
+        "kind": "spreadsheet",
+        "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "path": "supplier-lead-time-and-capacity.xlsx",
+        "sha256": "68bfe4915ebe7f26457234d329f38ec506b89f833693dcfc0bdc330bab9f52ba",
+        "source": "google_drive",
         "task_id": "factorybench-022",
-        "title": "Receiving and inspection policy"
+        "title": "Supplier lead-time and capacity workbook"
       },
       {
-        "body": "Compare invoice, approved PO, and accepted receipt. Approve when quantity is covered and the amount variance is at most 2 percent; otherwise place a variance hold.",
-        "category": "invoice_match",
-        "doc_id": "POL-05",
-        "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
+        "asset_id": "factorybench-022-decision",
+        "extracted_text": "timestamp,case,actor,decision,scope,source\n2026-01-12T09:10:00-08:00,CASE-022,U-OPS-LEAD,evidence_verified,NS-000022,slack\n2026-01-12T10:05:00-08:00,CASE-022,U-APPROVER,approved,2026-01-16,drive_approval\n",
+        "kind": "spreadsheet_export",
+        "media_type": "text/csv",
+        "path": "approval-decision-log.csv",
+        "sha256": "2d086d249ca8605d7cadf15ca338ab26699491d4f65c8dd1e9f2b42eacce3363",
+        "source": "google_sheets",
         "task_id": "factorybench-022",
-        "title": "Three-way match policy"
+        "title": "Approval decision log"
       },
       {
-        "body": "Issue only reserved, unrestricted stock. Use FEFO across eligible lots and start the operation only after the full required quantity has been issued.",
-        "category": "production_issue",
-        "doc_id": "POL-06",
-        "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
+        "asset_id": "factorybench-022-email",
+        "extracted_text": "From: operations-22@northstar.example\nTo: maintenance.planner@northstar.example\nDate: 2026-01-12\nMessage-ID: <msg-022@northstar.example>\nSubject: CASE-022 \u2014 evidence and requested action\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\n\nPlease complete: Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\nUse record NS-000022; approved effective date is 2026-01-16. The supporting quotation and spreadsheet are attached. Reply with the Oracle reference.\n",
+        "kind": "email",
+        "media_type": "message/rfc822",
+        "path": "source-email-thread.eml",
+        "sha256": "b3b1b5548e10a6a39cab7a029b14c4c23c7175cad743ae644e466cb6cea1193e",
+        "source": "gmail",
         "task_id": "factorybench-022",
-        "title": "Material issue policy"
+        "title": "Source email thread"
       },
       {
-        "body": "A failed inspection requires an immediate lot hold and an open nonconformance. Use REWORK when the defect is recoverable and assign it to the quality engineer.",
-        "category": "quality_exception",
-        "doc_id": "POL-07",
-        "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
+        "asset_id": "factorybench-022-slack",
+        "extracted_text": "{\n  \"channel\": \"C-QUALITY\",\n  \"messages\": [\n    {\n      \"text\": \"CASE-022: physical/operational evidence checked for NS-000022.\",\n      \"ts\": \"1768000022.000100\",\n      \"user\": \"U-OPS-LEAD\"\n    },\n    {\n      \"text\": \"Approved exactly as documented; effective 2026-01-16. No broader change authorized.\",\n      \"ts\": \"1768000022.000200\",\n      \"user\": \"U-APPROVER\"\n    },\n    {\n      \"text\": \"Post the resulting Oracle reference back to this thread and the control workbook.\",\n      \"ts\": \"1768000022.000300\",\n      \"user\": \"U-CONTROLLER\"\n    }\n  ],\n  \"thread_ts\": \"1768000022.000100\"\n}\n",
+        "kind": "chat_thread",
+        "media_type": "application/json",
+        "path": "operations-slack-thread.json",
+        "sha256": "72e7e2e4701cc76574b870abfaeffa0eee60cffd8b1c99a574b714e6fc67a6b1",
+        "source": "slack",
         "task_id": "factorybench-022",
-        "title": "Nonconformance policy"
+        "title": "Operations Slack thread"
       },
       {
-        "body": "Complete all operations before closing the work order. Record finished quantity and scrap, then post material, labor, and overhead variance for finance review.",
-        "category": "completion_costing",
-        "doc_id": "POL-08",
-        "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
+        "asset_id": "factorybench-022-approval",
+        "extracted_text": "{\n  \"approvalId\": \"approval-022\",\n  \"approvedScope\": \"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\n  \"case\": \"CASE-022\",\n  \"effectiveDate\": \"2026-01-16\",\n  \"fileId\": \"drive-approval-022\",\n  \"requiredReviewers\": [\n    \"U-APPROVER\"\n  ],\n  \"reviewerResponses\": [\n    {\n      \"response\": \"APPROVED\",\n      \"reviewer\": \"U-APPROVER\"\n    }\n  ],\n  \"status\": \"IN_PROGRESS\"\n}\n",
+        "kind": "approval",
+        "media_type": "application/json",
+        "path": "drive-approval-record.json",
+        "sha256": "0e48a57d3768f02ee514a51575176a8709aa27ee5ea91fc3033806d5f585f7df",
+        "source": "google_drive",
         "task_id": "factorybench-022",
-        "title": "Work-order close policy"
+        "title": "Drive approval record"
       },
       {
-        "body": "Use unrestricted surplus from the donor plant, complete the interplant transfer, and reschedule the receiving work order no earlier than the transfer arrival date.",
-        "category": "transfer_reschedule",
-        "doc_id": "POL-09",
-        "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
+        "asset_id": "factorybench-022-erp",
+        "extracted_text": "{\n  \"case\": \"CASE-022\",\n  \"itemNumber\": \"NS-COMP-022\",\n  \"lastUpdateDate\": \"2026-01-12T08:00:00-08:00\",\n  \"organizationCode\": \"SEA\",\n  \"quantity\": 30,\n  \"recordId\": \"NS-000022\",\n  \"source\": \"Oracle Fusion Cloud 26a-shaped synthetic export\",\n  \"status\": \"Open\",\n  \"supplier\": \"Rainier Components\"\n}\n",
+        "kind": "erp_export",
+        "media_type": "application/json",
+        "path": "oracle-starting-record.json",
+        "sha256": "d358fd00bf75df5b0e15b648dfac00e830ea66b7a0165a77b34c747bfd9f3396",
+        "source": "oracle_fusion",
         "task_id": "factorybench-022",
-        "title": "Interplant recovery policy"
+        "title": "Oracle starting-record export"
       },
       {
-        "body": "Open a high-priority maintenance work order for the failed workcenter. Reroute production only to a qualified active alternate and reschedule within that center's capacity.",
-        "category": "maintenance_recovery",
-        "doc_id": "POL-10",
-        "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
+        "asset_id": "factorybench-022-measurements",
+        "extracted_text": "sample,characteristic,value,unit,lower,upper,result\nS-022-1,dimension_a,24.97,mm,24.9,25.1,PASS\nS-022-2,dimension_a,25.01,mm,24.9,25.1,PASS\nS-022-3,dielectric,1532,V,1500,,PASS\n",
+        "kind": "quality_data",
+        "media_type": "text/csv",
+        "path": "inspection-measurements.csv",
+        "sha256": "f9f3092e481ac2793c6837d5e14f1f5aefc50f564272149d49321e393d72b2ad",
+        "source": "laboratory_drive",
         "task_id": "factorybench-022",
-        "title": "Unplanned downtime policy"
-      }
-    ],
-    "items": [
-      {
-        "description": "Industrial control panel",
-        "item_id": "FG-PANEL",
-        "item_type": "finished_good",
-        "make_buy": "MAKE",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 910,
-        "uom": "EA"
+        "title": "Inspection measurements"
       },
       {
-        "description": "Powder-coated enclosure",
-        "item_id": "RM-HOUSING",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 210,
-        "uom": "EA"
+        "asset_id": "factorybench-022-risk",
+        "extracted_text": "[[\"risk_id\", \"case\", \"risk\", \"likelihood\", \"impact\", \"owner\", \"mitigation\", \"status\"], [\"R-022-A\", \"CASE-022\", \"incorrect record selection\", \"low\", \"high\", \"maintenance_planner\", \"cross-check immutable identifiers\", \"OPEN\"], [\"R-022-B\", \"CASE-022\", \"unapproved scope expansion\", \"medium\", \"high\", \"U-APPROVER\", \"limit write to approved fields\", \"MITIGATED\"]]",
+        "kind": "spreadsheet",
+        "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "path": "workflow-risk-register.xlsx",
+        "sha256": "1a1816d14df709d77294b6091e8733ece05d3bc59518382a240ea0837e8457a7",
+        "source": "google_drive",
+        "task_id": "factorybench-022",
+        "title": "Workflow risk register"
       },
       {
-        "description": "Safety relay",
-        "item_id": "RM-RELAY",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 48,
-        "uom": "EA"
-      },
-      {
-        "description": "Copper busbar set",
-        "item_id": "RM-COPPER",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 72,
-        "uom": "EA"
+        "asset_id": "factorybench-022-spec",
+        "extracted_text": "# Technical specification NS-000022\n\nRevision: R2\nEffective: 2026-01-16\nItem: NS-COMP-022\nRequired control: Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\n",
+        "kind": "specification",
+        "media_type": "text/markdown",
+        "path": "technical-specification.md",
+        "sha256": "af9de0116c40d924fe5a2c72f98b8feb749e767d6c8712b6be3cdbe690e07865",
+        "source": "google_drive",
+        "task_id": "factorybench-022",
+        "title": "Technical specification"
       }
     ],
     "organizations": [
       {
         "ledger_currency": "USD",
         "name": "Northstar Controls Manufacturing",
-        "organization_id": "M1"
+        "organization_id": "NSC"
       }
     ],
-    "plants": [
+    "resource_state": [
       {
-        "name": "Seattle Assembly",
-        "organization_id": "M1",
-        "plant_id": "SEA",
-        "timezone": "America/Los_Angeles"
-      },
-      {
-        "name": "Portland Components",
-        "organization_id": "M1",
-        "plant_id": "PDX",
-        "timezone": "America/Los_Angeles"
-      }
-    ],
-    "purchase_requisitions": [
-      {
-        "approved_by": "U-MANAGER",
-        "need_by": "2026-01-28",
-        "requester_id": "U-PLANNER",
-        "requisition_id": "REQ-A-002",
-        "status": "Approved",
-        "supplier_id": null,
-        "task_id": "factorybench-022",
-        "total_amount": 0,
-        "work_order_id": null
-      }
-    ],
-    "requisition_lines": [
-      {
-        "item_id": "RM-RELAY",
-        "line_no": 1,
-        "quantity": 34,
-        "requisition_id": "REQ-A-002",
-        "unit_price": 0
-      }
-    ],
-    "supplier_quotes": [
-      {
-        "item_id": "RM-RELAY",
-        "lead_days": 6,
-        "minimum_qty": 10,
-        "quote_id": "SQA-002",
-        "supplier_id": "SUP-A",
-        "task_id": "factorybench-022",
-        "unit_price": 49.7,
-        "valid_until": "2026-01-29"
-      },
-      {
-        "item_id": "RM-RELAY",
-        "lead_days": 4,
-        "minimum_qty": 10,
-        "quote_id": "SQB-002",
-        "supplier_id": "SUP-B",
-        "task_id": "factorybench-022",
-        "unit_price": 48.2,
-        "valid_until": "2026-01-29"
-      },
-      {
-        "item_id": "RM-RELAY",
-        "lead_days": 2,
-        "minimum_qty": 10,
-        "quote_id": "SQC-002",
-        "supplier_id": "SUP-C",
-        "task_id": "factorybench-022",
-        "unit_price": 44.2,
-        "valid_until": "2026-01-29"
-      }
-    ],
-    "suppliers": [
-      {
-        "approved": 1,
-        "name": "Cascade Industrial",
-        "on_time_rate": 0.94,
-        "payment_terms": "NET30",
-        "quality_score": 97.2,
-        "supplier_id": "SUP-A"
-      },
-      {
-        "approved": 1,
-        "name": "Rainier Components",
-        "on_time_rate": 0.98,
-        "payment_terms": "NET45",
-        "quality_score": 95.8,
-        "supplier_id": "SUP-B"
-      },
-      {
-        "approved": 0,
-        "name": "Frontier Supply",
-        "on_time_rate": 0.99,
-        "payment_terms": "NET30",
-        "quality_score": 99.1,
-        "supplier_id": "SUP-C"
+        "effective_at": "2026-01-12",
+        "payload_json": "{\"case\":\"CASE-022\",\"identifiers\":{\"WorkOrderId\":100022},\"quantity\":30,\"record\":\"NS-000022\"}",
+        "resource_id": "100022",
+        "resource_type": "oracle_fusion.maintenance_work_orders",
+        "revision": 0,
+        "status": "Open",
+        "system": "oracle_fusion",
+        "task_id": "factorybench-022"
       }
     ],
     "users": [
       {
         "approval_limit": 0,
-        "display_name": "Maya Chen",
-        "plant_id": "SEA",
-        "role": "production_planner",
-        "user_id": "U-PLANNER"
-      },
-      {
-        "approval_limit": 1000,
-        "display_name": "Diego Ruiz",
-        "plant_id": "SEA",
-        "role": "buyer",
-        "user_id": "U-BUYER"
+        "display_name": "Jordan Lee",
+        "role": "maintenance_planner",
+        "user_id": "U-AGENT"
       },
       {
         "approval_limit": 250000,
         "display_name": "Avery Morgan",
-        "plant_id": "SEA",
-        "role": "plant_manager",
-        "user_id": "U-MANAGER"
+        "role": "authorized_approver",
+        "user_id": "U-APPROVER"
       },
       {
-        "approval_limit": 0,
-        "display_name": "Priya Shah",
-        "plant_id": "SEA",
-        "role": "quality_inspector",
-        "user_id": "U-INSPECTOR"
-      },
-      {
-        "approval_limit": 0,
-        "display_name": "Noah Williams",
-        "plant_id": "SEA",
-        "role": "quality_engineer",
-        "user_id": "U-QUALITY"
-      }
-    ],
-    "workcenters": [
-      {
-        "capacity_hours": 80,
-        "name": "Assembly Cell 1",
-        "plant_id": "SEA",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-ASM-1"
-      },
-      {
-        "capacity_hours": 64,
-        "name": "Assembly Cell 2",
-        "plant_id": "SEA",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-ASM-2"
-      },
-      {
-        "capacity_hours": 72,
-        "name": "Portland Fabrication",
-        "plant_id": "PDX",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-PDX-1"
+        "approval_limit": 25000,
+        "display_name": "Maya Chen",
+        "role": "operations_lead",
+        "user_id": "U-OPS-LEAD"
       }
     ]
   },
   "task_id": "factorybench-022",
-  "title": "Award sourcing event REQ-A-002",
+  "title": "Extend a pump repair after teardown findings",
   "world": {
     "database": "SQLite",
-    "name": "Northstar Controls Oracle-shaped ERP",
-    "organization_id": "M1",
+    "id": "northstar-enterprise-fusion-v2",
+    "name": "Northstar Controls enterprise operations sandbox",
+    "organization_id": "NSC",
     "primary_plant": "SEA",
-    "servers": [
-      "oracle_erp",
-      "plant_docs",
-      "factory_harness"
+    "synthetic": true,
+    "systems": [
+      "factorybench",
+      "gmail",
+      "google_drive",
+      "google_sheets",
+      "oracle_fusion",
+      "slack"
     ]
   }
 }

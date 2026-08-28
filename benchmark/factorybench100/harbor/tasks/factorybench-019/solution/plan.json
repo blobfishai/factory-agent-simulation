@@ -1,63 +1,93 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "material_shortage"
+      "count": 50,
+      "query": "\"CASE-019\"",
+      "sort": "timestamp",
+      "sort_dir": "asc"
     },
-    "tool": "search_documents"
+    "tool": "slack.search_messages"
   },
   {
     "arguments": {
-      "work_order_id": "WO-S-009"
+      "channel": "C-FINANCE",
+      "limit": 100,
+      "ts": "1768000019.000100"
     },
-    "tool": "get_work_order"
+    "tool": "slack.conversations_replies"
   },
   {
     "arguments": {
-      "item_ids": [
-        "RM-COPPER"
-      ],
-      "plant_id": "SEA"
+      "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+      "fileId": "drive-019"
     },
-    "tool": "get_inventory"
+    "tool": "google_drive.files.get"
   },
   {
     "arguments": {
-      "item_id": "RM-COPPER",
-      "need_by": "2026-02-08",
-      "task_id": "factorybench-019"
+      "majorDimension": "ROWS",
+      "range": "Control!A1:H50",
+      "spreadsheetId": "sheet-019",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_supplier_quotes"
+    "tool": "google_sheets.spreadsheets.values.get"
   },
   {
     "arguments": {
-      "item_id": "RM-COPPER",
-      "need_by": "2026-02-08",
-      "quantity": 32,
-      "requester_id": "U-BUYER",
-      "requisition_id": "REQ-0009",
-      "supplier_id": "SUP-A",
-      "unit_price": 70.9,
-      "work_order_id": "WO-S-009"
+      "WorkOrderId": 100019,
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-019'"
     },
-    "tool": "create_requisition"
+    "tool": "oracle_fusion.work_order_operations.list"
   },
   {
     "arguments": {
-      "approver_id": "U-MANAGER",
-      "requisition_id": "REQ-0009"
+      "WorkOrderId": 100019
     },
-    "tool": "approve_requisition"
+    "tool": "oracle_fusion.work_orders.get"
   },
   {
     "arguments": {
-      "net_shortage": 32,
-      "requisition_id": "REQ-0009",
-      "supplier_id": "SUP-A"
+      "WoOperationId": 200019,
+      "WorkOrderId": 100019,
+      "requestBody": {
+        "OperationName": "Controlled operation CASE-019",
+        "PlannedCompletionDate": "2026-01-20",
+        "PlannedStartDate": "2026-01-13",
+        "WorkCenterCode": "WC-ALT-2"
+      }
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.work_order_operations.update"
+  },
+  {
+    "arguments": {
+      "approvalId": "approval-019",
+      "fileId": "drive-approval-019",
+      "requestBody": {
+        "message": "Approved for CASE-019 only."
+      }
+    },
+    "tool": "google_drive.approvals.approve"
+  },
+  {
+    "arguments": {
+      "channel": "C-FINANCE",
+      "text": "CASE-019: Overtime plan applied. Oracle reference REF-0019; control workbook updated.",
+      "thread_ts": "1768000019.000100"
+    },
+    "tool": "slack.chat_postMessage"
+  },
+  {
+    "arguments": {
+      "affected_order": "ORD-0019",
+      "recovery_route": "SEA-4",
+      "revised_completion": "2026-01-13"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

@@ -1,79 +1,80 @@
 {
   "allowed_write_tables": [
-    "work_order_operations",
-    "work_orders",
-    "wip_variances",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "completed_quantity": {
-        "type": "integer"
-      },
-      "scrap_quantity": {
-        "type": "integer"
-      },
-      "variance_id": {
+      "manufacturing_record": {
         "type": "string"
       },
-      "work_order_id": {
+      "ownership_result": {
+        "type": "string"
+      },
+      "project_task": {
         "type": "string"
       }
     },
     "required": [
-      "completed_quantity",
-      "scrap_quantity",
-      "variance_id",
-      "work_order_id"
+      "manufacturing_record",
+      "ownership_result",
+      "project_task"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "completed_quantity": 21,
-      "scrap_quantity": 0,
-      "variance_id": "VAR-0009",
-      "work_order_id": "WO-C-009"
+      "manufacturing_record": "NS-0079",
+      "ownership_result": "Project material returned",
+      "project_task": "PRJ-0079"
     },
     "assertions": [
       {
-        "count": 2,
-        "description": "All work-order operations are complete.",
-        "id": "operation_completed",
-        "table": "work_order_operations",
+        "description": "oracle_fusion.material_transactions.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
+        "values": {
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"MaterialTransactionDetail\":[{\"InventoryItemNumber\":\"NS-COMP-079\",\"LotNumber\":\"LOT-0079\",\"OrganizationCode\":\"SEA\",\"SubinventoryCode\":\"STORES\",\"TransactionQuantity\":13,\"TransactionTypeCode\":\"MATERIAL_ISSUE\",\"TransactionUnitOfMeasure\":\"EA\",\"WorkOrderNumber\":\"WO-0079\"}],\"SourceSystemCode\":\"FUSION_MOBILE\",\"SourceSystemType\":\"EXTERNAL\"}},\"case\":\"CASE-079\",\"outcome\":\"Match operation cancellation and physical count before returning the project lot from the work order.\",\"tool\":\"oracle_fusion.material_transactions.create\"}",
+          "resource_type": "oracle_fusion.material_transactions",
+          "revision": 1,
+          "status": "Project material returned",
+          "system": "oracle_fusion"
+        },
         "where": {
-          "status": "Complete",
-          "work_order_id": "WO-C-009"
+          "resource_id": "factorybench-079-mutation-01",
+          "task_id": "factorybench-079"
         }
       },
       {
-        "description": "Finished and scrap quantities reconcile to the order quantity.",
-        "id": "work_order_completed",
-        "table": "work_orders",
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "completed_qty": 21,
-          "scrap_qty": 0,
-          "status": "Completed"
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "work_order_id": "WO-C-009"
+          "resource_id": "factorybench-079-mutation-02",
+          "task_id": "factorybench-079"
         }
       },
       {
-        "description": "WIP variance is posted for finance review.",
-        "id": "variance_posted",
-        "table": "wip_variances",
+        "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "labor_variance": -18.0,
-          "material_variance": 50.0,
-          "overhead_variance": -7.5,
-          "status": "Posted"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "variance_id": "VAR-0009"
+          "resource_id": "factorybench-079-mutation-03",
+          "task_id": "factorybench-079"
         }
       }
     ]
@@ -81,31 +82,81 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "completion_costing"
+        "channel": "C-FINANCE",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
     },
     {
       "arguments": {
-        "work_order_id": "WO-C-009"
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-079",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_work_order"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-079' and trashed = false"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "id": "att-079",
+        "messageId": "msg-079",
+        "userId": "me"
+      },
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.attachments.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-079'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_orders.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100079,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-079'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_materials.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order"
+    "factorybench.context.get",
+    "slack.conversations_history",
+    "google_sheets.spreadsheets.values.get",
+    "google_drive.files.list",
+    "gmail.messages.attachments.get",
+    "oracle_fusion.work_orders.list",
+    "oracle_fusion.work_order_materials.list"
   ],
   "task_id": "factorybench-079",
   "write_tools": [
-    "complete_operation",
-    "complete_work_order",
-    "record_wip_variance",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "oracle_fusion.material_transactions.create",
+    "slack.reactions_add"
   ]
 }

@@ -1,74 +1,80 @@
 {
   "allowed_write_tables": [
-    "work_orders",
-    "work_order_operations",
-    "material_requirements",
-    "material_reservations",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "completion_date": {
+      "effective_timestamp": {
         "type": "string"
       },
-      "released_quantity": {
-        "type": "integer"
+      "production_decision": {
+        "type": "string"
       },
-      "work_order_id": {
+      "work_order": {
         "type": "string"
       }
     },
     "required": [
-      "completion_date",
-      "released_quantity",
-      "work_order_id"
+      "effective_timestamp",
+      "production_decision",
+      "work_order"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "completion_date": "2026-01-23",
-      "released_quantity": 12,
-      "work_order_id": "WO-0008"
+      "effective_timestamp": "2026-01-21T16:00:00-08:00",
+      "production_decision": "Rework operation added",
+      "work_order": "ORD-0008"
     },
     "assertions": [
       {
-        "description": "A released discrete work order links to the sales order.",
-        "id": "work_order_released",
-        "table": "work_orders",
+        "description": "oracle_fusion.work_order_operations.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "quantity": 12,
-          "sales_order_id": "SO-0008",
-          "status": "Released"
+          "payload_json": "{\"arguments\":{\"WorkOrderId\":100008,\"requestBody\":{\"OperationName\":\"Approved rework CASE-008\",\"OperationSequenceNumber\":38,\"PlannedCompletionDate\":\"2026-01-27\",\"PlannedStartDate\":\"2026-01-21\",\"WorkCenterCode\":\"WC-REWORK\"}},\"case\":\"CASE-008\",\"outcome\":\"Confirm the quality disposition and approved routing note, then add the rework step to the active order and alert the cell lead.\",\"tool\":\"oracle_fusion.work_order_operations.create\"}",
+          "resource_type": "oracle_fusion.work_order_operations",
+          "revision": 1,
+          "status": "Rework operation added",
+          "system": "oracle_fusion"
         },
         "where": {
-          "work_order_id": "WO-0008"
+          "resource_id": "factorybench-008-mutation-01",
+          "task_id": "factorybench-008"
         }
       },
       {
-        "count": 3,
-        "description": "All three BOM components are reserved.",
-        "id": "all_components_reserved",
-        "table": "material_reservations",
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
         "where": {
-          "status": "Active",
-          "work_order_id": "WO-0008"
+          "resource_id": "factorybench-008-mutation-02",
+          "task_id": "factorybench-008"
         }
       },
       {
-        "description": "The two-per-assembly relay requirement is fully reserved.",
-        "id": "relay_requirement_reserved",
-        "table": "material_requirements",
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "required_qty": 24,
-          "reserved_qty": 24
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "work_order_id": "WO-0008"
+          "resource_id": "factorybench-008-mutation-03",
+          "task_id": "factorybench-008"
         }
       }
     ]
@@ -76,50 +82,78 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "order_release"
+        "fileId": "drive-008"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "sales_order_id": "SO-0008"
+        "channel": "C-PRODUCTION",
+        "limit": 100,
+        "ts": "1768000008.000100"
       },
-      "tool": "get_sales_order"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "as_of": "2026-01-12",
-        "item_id": "FG-PANEL"
-      },
-      "tool": "get_bom"
-    },
-    {
-      "arguments": {
-        "item_ids": [
-          "RM-HOUSING",
-          "RM-RELAY",
-          "RM-COPPER"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
         ],
-        "plant_id": "SEA"
+        "spreadsheetId": "sheet-008"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-008\"",
+        "userId": "me"
+      },
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-008'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_orders.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-008'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.quality_inspection_results.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_sales_order",
-    "get_bom",
-    "get_inventory"
+    "factorybench.context.get",
+    "google_drive.files.download",
+    "slack.conversations_replies",
+    "google_sheets.spreadsheets.get",
+    "gmail.messages.list",
+    "oracle_fusion.work_orders.list",
+    "oracle_fusion.quality_inspection_results.list"
   ],
   "task_id": "factorybench-008",
   "write_tools": [
-    "create_work_order",
-    "reserve_material",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.messages.send",
+    "google_drive.comments.create",
+    "oracle_fusion.work_order_operations.create"
   ]
 }

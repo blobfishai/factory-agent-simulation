@@ -1,84 +1,81 @@
 {
   "allowed_write_tables": [
-    "purchase_orders",
-    "purchase_order_lines",
-    "receipts",
-    "receipt_lines",
-    "quality_inspections",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "inspection_id": {
+      "committed_value": {
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "purchase_document": {
         "type": "string"
       },
-      "lot_number": {
+      "supplier_decision": {
         "type": "string"
-      },
-      "receipt_id": {
-        "type": "string"
-      },
-      "released_quantity": {
-        "type": "integer"
       }
     },
     "required": [
-      "inspection_id",
-      "lot_number",
-      "receipt_id",
-      "released_quantity"
+      "committed_value",
+      "purchase_document",
+      "supplier_decision"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "inspection_id": "INSP-R-004",
-      "lot_number": "LOT-R-0004",
-      "receipt_id": "RCV-0004",
-      "released_quantity": 28
+      "committed_value": 3455.76,
+      "purchase_document": "PO-0034",
+      "supplier_decision": "Purchase order closed"
     },
     "assertions": [
       {
-        "description": "The approved PO quantity is received into a traceable lot.",
-        "id": "receipt_complete",
-        "table": "receipts",
+        "description": "oracle_fusion.purchase_orders.close produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "purchase_order_id": "PO-R-004",
-          "status": "Inspected"
+          "payload_json": "{\"arguments\":{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0034\",\"requestBody\":{\"closeAction\":\"finallyClose\",\"closeReason\":\"Reconcile accepted service entry, invoice status, and buyer approval before closing the PO for receiving and invoicing.\"}},\"case\":\"CASE-034\",\"outcome\":\"Reconcile accepted service entry, invoice status, and buyer approval before closing the PO for receiving and invoicing.\",\"tool\":\"oracle_fusion.purchase_orders.close\"}",
+          "resource_type": "oracle_fusion.purchase_orders",
+          "revision": 1,
+          "status": "Purchase order closed",
+          "system": "oracle_fusion"
         },
         "where": {
-          "receipt_id": "RCV-0004"
+          "resource_id": "factorybench-034-mutation-01",
+          "task_id": "factorybench-034"
         }
       },
       {
-        "description": "The full receipt has a passing inspection.",
-        "id": "inspection_passed",
-        "table": "quality_inspections",
+        "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "accepted_qty": 28,
-          "rejected_qty": 0,
-          "result": "Pass"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "inspection_id": "INSP-R-004"
+          "resource_id": "factorybench-034-mutation-02",
+          "task_id": "factorybench-034"
         }
       },
       {
-        "description": "Accepted stock is released to stores.",
-        "id": "accepted_stock_released",
-        "table": "inventory_on_hand",
+        "description": "google_sheets.spreadsheets.values.append produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "quantity": 28,
-          "status": "Unrestricted"
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "lot_number": "LOT-R-0004",
-          "plant_id": "SEA",
-          "subinventory": "STORES"
+          "resource_id": "factorybench-034-mutation-03",
+          "task_id": "factorybench-034"
         }
       }
     ]
@@ -86,30 +83,79 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "inbound_receipt"
+        "fileId": "drive-034"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-R-004"
+        "majorDimension": "ROWS",
+        "ranges": [
+          "Control!A1:H50",
+          "Approvals!A1:G20"
+        ],
+        "spreadsheetId": "sheet-034",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.batchGet"
+    },
+    {
+      "arguments": {
+        "channel": "C-QUALITY",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-034' and trashed = false"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-034'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.suppliers.list"
+    },
+    {
+      "arguments": {
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0034"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.purchase_orders.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order"
+    "factorybench.context.get",
+    "google_drive.files.download",
+    "google_sheets.spreadsheets.values.batchGet",
+    "slack.conversations_history",
+    "google_drive.files.list",
+    "oracle_fusion.suppliers.list",
+    "oracle_fusion.purchase_orders.get"
   ],
   "task_id": "factorybench-034",
   "write_tools": [
-    "receive_purchase_order",
-    "record_inspection",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_sheets.spreadsheets.values.append",
+    "oracle_fusion.purchase_orders.close",
+    "slack.reactions_add"
   ]
 }

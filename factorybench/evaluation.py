@@ -62,7 +62,7 @@ def verify_episode(task: dict[str, Any], world: FactoryWorld) -> dict[str, Any]:
     checks.append(
         {
             "id": "read_before_write",
-            "description": "Required policy and ERP reads completed before the first write.",
+            "description": "Required cross-system evidence reads completed before the first write.",
             "passed": not missing_reads,
             "evidence": {"missing": missing_reads},
         }
@@ -178,7 +178,7 @@ def policy_steps(task: dict[str, Any], policy: str) -> list[dict[str, Any]]:
     if policy == "no_control":
         return [step for step in steps if not step.get("control")]
     if policy == "incomplete_workflow":
-        mutable = [index for index, step in enumerate(steps) if step["tool"] in WRITE_TOOLS - {"submit_answer"}]
+        mutable = [index for index, step in enumerate(steps) if step["tool"] in WRITE_TOOLS - {"factorybench.submit_answer"}]
         if not mutable:
             return steps[:-1]
         omitted = mutable[-1]
@@ -253,7 +253,7 @@ def evaluate_mutation_omissions(tasks: Iterable[dict[str, Any]] | None = None) -
             mutable_steps = [
                 index
                 for index, step in enumerate(task["oracle_steps"])
-                if step["tool"] in WRITE_TOOLS - {"submit_answer"}
+                if step["tool"] in WRITE_TOOLS - {"factorybench.submit_answer"}
             ]
             for omitted_index in mutable_steps:
                 total += 1

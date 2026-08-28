@@ -1,79 +1,80 @@
 {
   "allowed_write_tables": [
-    "maintenance_work_orders",
-    "work_order_operations",
-    "work_orders",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "alternate_workcenter": {
+      "accepted_output": {
         "type": "string"
       },
-      "maintenance_id": {
+      "execution_action": {
         "type": "string"
       },
-      "new_completion": {
-        "type": "string"
-      },
-      "work_order_id": {
+      "supplier_operation": {
         "type": "string"
       }
     },
     "required": [
-      "alternate_workcenter",
-      "maintenance_id",
-      "new_completion",
-      "work_order_id"
+      "accepted_output",
+      "execution_action",
+      "supplier_operation"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "alternate_workcenter": "WC-ASM-2",
-      "maintenance_id": "MWO-0007",
-      "new_completion": "2026-01-15",
-      "work_order_id": "WO-M-007"
+      "accepted_output": "FB-097",
+      "execution_action": "Processed units received",
+      "supplier_operation": "SUP-0097"
     },
     "assertions": [
       {
-        "description": "High-priority maintenance is opened for the failed center.",
-        "id": "maintenance_opened",
-        "table": "maintenance_work_orders",
+        "description": "oracle_fusion.receiving_receipt_transactions.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "priority": "High",
-          "status": "Open",
-          "workcenter_id": "WC-ASM-1"
+          "payload_json": "{\"arguments\":{\"HeaderInterfaceId\":700097,\"requestBody\":{\"InspectionQualityCode\":\"ACCEPT\",\"ItemNumber\":\"NS-COMP-097\",\"Quantity\":31,\"TransactionType\":\"RECEIVE\",\"lotItemLots\":[{\"LotNumber\":\"LOT-0097\",\"PrimaryQuantity\":31}]}},\"case\":\"CASE-097\",\"outcome\":\"Reconcile packing slip, operation quantity, and inspection certificate before creating the receipt transaction.\",\"tool\":\"oracle_fusion.receiving_receipt_transactions.create\"}",
+          "resource_type": "oracle_fusion.receiving_receipt_transactions",
+          "revision": 1,
+          "status": "Processed units received",
+          "system": "oracle_fusion"
         },
         "where": {
-          "maintenance_id": "MWO-0007"
+          "resource_id": "factorybench-097-mutation-01",
+          "task_id": "factorybench-097"
         }
       },
       {
-        "description": "The operation moves to an active qualified alternate.",
-        "id": "operation_rerouted",
-        "table": "work_order_operations",
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "workcenter_id": "WC-ASM-2"
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "sequence": 10,
-          "work_order_id": "WO-M-007"
+          "resource_id": "factorybench-097-mutation-02",
+          "task_id": "factorybench-097"
         }
       },
       {
-        "description": "The work-order dates and primary center reflect the recovery plan.",
-        "id": "schedule_recovered",
-        "table": "work_orders",
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "scheduled_completion": "2026-01-15",
-          "scheduled_start": "2026-01-13",
-          "workcenter_id": "WC-ASM-2"
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "work_order_id": "WO-M-007"
+          "resource_id": "factorybench-097-mutation-03",
+          "task_id": "factorybench-097"
         }
       }
     ]
@@ -81,39 +82,79 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "maintenance_recovery"
+        "format": "full",
+        "id": "thread-097",
+        "userId": "me"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "gmail.threads.get"
     },
     {
       "arguments": {
-        "plant_id": "SEA",
-        "work_order_id": "WO-M-007"
+        "channel": "C-PROCUREMENT",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
       },
-      "tool": "get_schedule"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
     },
     {
       "arguments": {
-        "workcenter_id": "WC-ASM-1"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
+        ],
+        "spreadsheetId": "sheet-097"
       },
-      "tool": "get_maintenance_context"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-approval-097",
+        "pageSize": 20
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.approvals.list"
+    },
+    {
+      "arguments": {
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0097"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.purchase_orders.get"
+    },
+    {
+      "arguments": {
+        "HeaderInterfaceId": 700097,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-097'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.receiving_receipt_transactions.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_schedule",
-    "get_maintenance_context"
+    "factorybench.context.get",
+    "gmail.threads.get",
+    "slack.conversations_history",
+    "google_sheets.spreadsheets.get",
+    "google_drive.approvals.list",
+    "oracle_fusion.purchase_orders.get",
+    "oracle_fusion.receiving_receipt_transactions.list"
   ],
   "task_id": "factorybench-097",
   "write_tools": [
-    "create_maintenance_work_order",
-    "reroute_operation",
-    "reschedule_work_order",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "google_drive.comments.create",
+    "oracle_fusion.receiving_receipt_transactions.create"
   ]
 }

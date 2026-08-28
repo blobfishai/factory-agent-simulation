@@ -1,46 +1,109 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "quality_exception"
+      "includeGridData": false,
+      "ranges": [
+        "Control!A1:H50"
+      ],
+      "spreadsheetId": "sheet-069"
     },
-    "tool": "search_documents"
+    "tool": "google_sheets.spreadsheets.get"
   },
   {
     "arguments": {
-      "inspection_id": "INSP-Q-009"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-069' and trashed = false"
     },
-    "tool": "get_quality_context"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "hold_id": "HOLD-0009",
-      "inspection_id": "INSP-Q-009",
-      "item_id": "FG-PANEL",
-      "lot_number": "FG-LOT-009",
-      "reason_code": "FUNCTIONAL_TEST_FAIL"
+      "count": 50,
+      "query": "\"CASE-069\"",
+      "sort": "timestamp",
+      "sort_dir": "asc"
     },
-    "tool": "place_quality_hold"
+    "tool": "slack.search_messages"
   },
   {
     "arguments": {
-      "disposition": "REWORK",
-      "inspection_id": "INSP-Q-009",
-      "nonconformance_id": "NC-0009",
-      "owner_id": "U-QUALITY"
+      "format": "full",
+      "id": "thread-069",
+      "userId": "me"
     },
-    "tool": "create_nonconformance"
+    "tool": "gmail.threads.get"
   },
   {
     "arguments": {
-      "disposition": "REWORK",
-      "hold_id": "HOLD-0009",
-      "inspection_id": "INSP-Q-009",
-      "nonconformance_id": "NC-0009"
+      "WorkOrderId": 100069
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.work_orders.get"
+  },
+  {
+    "arguments": {
+      "WorkOrderId": 100069,
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-069'"
+    },
+    "tool": "oracle_fusion.maintenance_documents.list"
+  },
+  {
+    "arguments": {
+      "WorkOrderId": 100069,
+      "requestBody": {
+        "Description": "Confirm document revision and asset applicability before creating the maintenance document reference.",
+        "DocumentName": "CASE-069-technical-evidence",
+        "DocumentNumber": "DOC-0069",
+        "DocumentType": "URL"
+      }
+    },
+    "tool": "oracle_fusion.maintenance_documents.create"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-069",
+            "manufacturing_engineer",
+            "Bulletin attached",
+            "REF-0069",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-069",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "approvalId": "approval-069",
+      "fileId": "drive-approval-069",
+      "requestBody": {
+        "message": "Approved for CASE-069 only."
+      }
+    },
+    "tool": "google_drive.approvals.approve"
+  },
+  {
+    "arguments": {
+      "affected_work_order": "ORD-0069",
+      "change_order": "ORD-0069",
+      "implementation_result": "Bulletin attached"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

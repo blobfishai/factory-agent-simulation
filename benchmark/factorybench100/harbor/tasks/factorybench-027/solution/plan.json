@@ -1,54 +1,104 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "supplier_selection"
+      "channel": "C-FINANCE",
+      "inclusive": true,
+      "limit": 100,
+      "oldest": "1768000000.000000"
     },
-    "tool": "search_documents"
+    "tool": "slack.conversations_history"
   },
   {
     "arguments": {
-      "requisition_id": "REQ-A-007"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-027' and trashed = false"
     },
-    "tool": "get_requisition"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "need_by": "2026-02-02",
-      "task_id": "factorybench-027"
+      "fileId": "drive-027"
     },
-    "tool": "get_supplier_quotes"
+    "tool": "google_drive.files.download"
   },
   {
     "arguments": {
-      "buyer_id": "U-BUYER",
-      "item_id": "RM-RELAY",
-      "promised_date": "2026-01-16",
-      "purchase_order_id": "PO-0007",
-      "quantity": 44,
-      "requisition_id": "REQ-A-007",
-      "supplier_id": "SUP-B",
-      "unit_price": 48.7
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
+      ],
+      "spreadsheetId": "sheet-027",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "create_purchase_order"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "approver_id": "U-MANAGER",
-      "purchase_order_id": "PO-0007"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-027'"
     },
-    "tool": "approve_purchase_order"
+    "tool": "oracle_fusion.maintenance_programs.list"
   },
   {
     "arguments": {
-      "purchase_order_id": "PO-0007",
-      "supplier_id": "SUP-B",
-      "total_amount": 2142.8
+      "MaintenanceProgramId": 500027
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.maintenance_programs.get"
+  },
+  {
+    "arguments": {
+      "requestBody": {
+        "ForecastEndDate": "2026-04-21",
+        "ForecastStartDate": "2026-01-21",
+        "MaintenanceProgramCode": "PM-0027"
+      }
+    },
+    "tool": "oracle_fusion.maintenance_programs.generate_forecasts"
+  },
+  {
+    "arguments": {
+      "channel": "C-FINANCE",
+      "name": "white_check_mark",
+      "timestamp": "1768000027.000100"
+    },
+    "tool": "slack.reactions_add"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-027",
+            "reliability_engineer",
+            "Forecast generated",
+            "REF-0027",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-027",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "forecast_horizon": "2026-01-21",
+      "generation_action": "Forecast generated",
+      "program_code": "PM-0027"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

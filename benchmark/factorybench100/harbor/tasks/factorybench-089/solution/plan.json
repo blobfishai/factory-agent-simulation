@@ -1,73 +1,118 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "transfer_reschedule"
+      "fileId": "drive-089"
     },
-    "tool": "search_documents"
+    "tool": "google_drive.files.download"
   },
   {
     "arguments": {
-      "work_order_id": "WO-T-009"
-    },
-    "tool": "get_work_order"
-  },
-  {
-    "arguments": {
-      "item_ids": [
-        "RM-COPPER"
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
       ],
-      "plant_id": "PDX"
+      "spreadsheetId": "sheet-089",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_inventory"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "plant_id": "SEA",
-      "work_order_id": "WO-T-009"
+      "channel": "C-PROCUREMENT",
+      "inclusive": true,
+      "limit": 100,
+      "oldest": "1768000000.000000"
     },
-    "tool": "get_schedule"
+    "tool": "slack.conversations_history"
   },
   {
     "arguments": {
-      "from_plant": "PDX",
-      "from_subinventory": "STORES",
-      "item_id": "RM-COPPER",
-      "lot_number": "PDX-C-009",
-      "quantity": 16,
-      "to_plant": "SEA",
-      "to_subinventory": "STORES",
-      "transfer_id": "TRF-0009",
-      "transferred_at": "2026-01-12"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-089' and trashed = false"
     },
-    "tool": "create_transfer"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "arrival_date": "2026-01-14",
-      "transfer_id": "TRF-0009"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-089'"
     },
-    "tool": "complete_transfer"
+    "tool": "oracle_fusion.quality_inspection_results.list"
   },
   {
     "arguments": {
-      "scheduled_completion": "2026-01-17",
-      "scheduled_start": "2026-01-14",
-      "work_order_id": "WO-T-009",
-      "workcenter_id": "WC-ASM-1"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-089'"
     },
-    "tool": "reschedule_work_order"
+    "tool": "oracle_fusion.inspection_plans.list"
   },
   {
     "arguments": {
-      "new_completion": "2026-01-17",
-      "new_start": "2026-01-14",
-      "transfer_id": "TRF-0009",
-      "work_order_id": "WO-T-009"
+      "requestBody": {
+        "DocumentNumber": "RCV-0089",
+        "DocumentType": "RECEIVING",
+        "InspectionPlanId": 1200089,
+        "InspectionPlanName": "PLAN-06",
+        "InspectionStatus": "IN_PROGRESS",
+        "ItemNumber": "NS-COMP-089",
+        "LotNumber": "LOT-0089",
+        "OrganizationCode": "SEA",
+        "Quantity": 23,
+        "samples": [
+          {
+            "Result": "PASS",
+            "SampleNumber": 1
+          }
+        ]
+      }
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.quality_inspection_results.create"
+  },
+  {
+    "arguments": {
+      "channel": "C-PROCUREMENT",
+      "name": "white_check_mark",
+      "timestamp": "1768000089.000100"
+    },
+    "tool": "slack.reactions_add"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-089",
+            "compliance_manager",
+            "Compliance inspection created",
+            "REF-0089",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-089",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "compliance_case": "CASE-0089",
+      "contained_record": "NS-0089",
+      "evidence_reference": "REF-0089"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

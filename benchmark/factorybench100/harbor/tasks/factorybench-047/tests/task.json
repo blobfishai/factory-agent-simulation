@@ -1,47 +1,80 @@
 {
   "allowed_write_tables": [
-    "ap_invoices",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "decision": {
+      "case_reference": {
         "type": "string"
       },
-      "invoice_id": {
+      "governance_action": {
         "type": "string"
       },
-      "variance_percent": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "supplier": {
+        "type": "string"
       }
     },
     "required": [
-      "decision",
-      "invoice_id",
-      "variance_percent"
+      "case_reference",
+      "governance_action",
+      "supplier"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "decision": "Approved",
-      "invoice_id": "INV-0007",
-      "variance_percent": 1.0
+      "case_reference": "CASE-0047",
+      "governance_action": "Mitigation acknowledged",
+      "supplier": "SUP-0047"
     },
     "assertions": [
       {
-        "description": "The invoice receives the policy-correct three-way-match decision.",
-        "id": "invoice_decision",
-        "table": "ap_invoices",
+        "description": "oracle_fusion.purchase_orders.acknowledge produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "hold_reason": null,
-          "status": "Approved"
+          "payload_json": "{\"arguments\":{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0047\",\"requestBody\":{\"acknowledgementNote\":\"Combine supplier master, open PO exposure, spend workbook, and controller approval before recording the mitigation action.\",\"supplierOrder\":\"SUP-ACK-0047\"}},\"case\":\"CASE-047\",\"outcome\":\"Combine supplier master, open PO exposure, spend workbook, and controller approval before recording the mitigation action.\",\"tool\":\"oracle_fusion.purchase_orders.acknowledge\"}",
+          "resource_type": "oracle_fusion.purchase_orders",
+          "revision": 1,
+          "status": "Mitigation acknowledged",
+          "system": "oracle_fusion"
         },
         "where": {
-          "invoice_id": "INV-0007"
+          "resource_id": "factorybench-047-mutation-01",
+          "task_id": "factorybench-047"
+        }
+      },
+      {
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
+        },
+        "where": {
+          "resource_id": "factorybench-047-mutation-02",
+          "task_id": "factorybench-047"
+        }
+      },
+      {
+        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
+        },
+        "where": {
+          "resource_id": "factorybench-047-mutation-03",
+          "task_id": "factorybench-047"
         }
       }
     ]
@@ -49,43 +82,79 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "invoice_match"
+        "format": "full",
+        "id": "msg-047",
+        "userId": "me"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-I-007"
+        "file": "F-000047"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "slack.files_info"
     },
     {
       "arguments": {
-        "receipt_id": "RCV-I-007"
+        "fileId": "drive-approval-047",
+        "pageSize": 20
       },
-      "tool": "get_receipt"
+      "match": "successful_tool_call",
+      "tool": "google_drive.approvals.list"
     },
     {
       "arguments": {
-        "invoice_id": "INV-0007"
+        "majorDimension": "ROWS",
+        "ranges": [
+          "Control!A1:H50",
+          "Approvals!A1:G20"
+        ],
+        "spreadsheetId": "sheet-047",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_invoice_match"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.batchGet"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-047'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.suppliers.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-047'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.purchase_orders.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order",
-    "get_receipt",
-    "get_invoice_match"
+    "factorybench.context.get",
+    "gmail.messages.get",
+    "slack.files_info",
+    "google_drive.approvals.list",
+    "google_sheets.spreadsheets.values.batchGet",
+    "oracle_fusion.suppliers.list",
+    "oracle_fusion.purchase_orders.list"
   ],
   "task_id": "factorybench-047",
   "write_tools": [
-    "approve_invoice",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_sheets.spreadsheets.values.update",
+    "oracle_fusion.purchase_orders.acknowledge",
+    "slack.chat_postMessage"
   ]
 }

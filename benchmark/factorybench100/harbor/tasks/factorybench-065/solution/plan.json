@@ -1,46 +1,116 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "quality_exception"
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
+      ],
+      "spreadsheetId": "sheet-065",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "search_documents"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "inspection_id": "INSP-Q-005"
+      "channel": "C-PROCUREMENT",
+      "inclusive": true,
+      "limit": 100,
+      "oldest": "1768000000.000000"
     },
-    "tool": "get_quality_context"
+    "tool": "slack.conversations_history"
   },
   {
     "arguments": {
-      "hold_id": "HOLD-0005",
-      "inspection_id": "INSP-Q-005",
-      "item_id": "FG-PANEL",
-      "lot_number": "FG-LOT-005",
-      "reason_code": "FUNCTIONAL_TEST_FAIL"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-065' and trashed = false"
     },
-    "tool": "place_quality_hold"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "disposition": "REWORK",
-      "inspection_id": "INSP-Q-005",
-      "nonconformance_id": "NC-0005",
-      "owner_id": "U-QUALITY"
+      "fileId": "drive-065"
     },
-    "tool": "create_nonconformance"
+    "tool": "google_drive.files.download"
   },
   {
     "arguments": {
-      "disposition": "REWORK",
-      "hold_id": "HOLD-0005",
-      "inspection_id": "INSP-Q-005",
-      "nonconformance_id": "NC-0005"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-065'"
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.supply_requests.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-065'"
+    },
+    "tool": "oracle_fusion.inventory_onhand_balances.list"
+  },
+  {
+    "arguments": {
+      "requestBody": {
+        "SupplyOrderReferenceNumber": "SUPPLY-0065",
+        "SupplyRequestDate": "2026-01-21",
+        "SupplyRequestSystem": "EXT",
+        "supplyRequestLines": [
+          {
+            "DestinationOrganizationCode": "SEA",
+            "ItemNumber": "NS-COMP-065",
+            "NeedByDate": "2026-01-24",
+            "Quantity": 36,
+            "SupplyOrderSource": "EXT",
+            "SupplyType": "BUY"
+          }
+        ]
+      }
+    },
+    "tool": "oracle_fusion.supply_requests.create"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-065",
+            "supply_planner",
+            "Priority supply created",
+            "REF-0065",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-065",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "channel": "C-PROCUREMENT",
+      "name": "white_check_mark",
+      "timestamp": "1768000065.000100"
+    },
+    "tool": "slack.reactions_add"
+  },
+  {
+    "arguments": {
+      "need_by_date": "2026-01-21",
+      "planning_action": "Priority supply created",
+      "supply_reference": "SUPPLY-0065"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

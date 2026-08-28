@@ -1,92 +1,112 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "order_release"
+      "count": 50,
+      "query": "\"CASE-007\"",
+      "sort": "timestamp",
+      "sort_dir": "asc"
     },
-    "tool": "search_documents"
+    "tool": "slack.search_messages"
   },
   {
     "arguments": {
-      "sales_order_id": "SO-0007"
+      "format": "full",
+      "id": "thread-007",
+      "userId": "me"
     },
-    "tool": "get_sales_order"
+    "tool": "gmail.threads.get"
   },
   {
     "arguments": {
-      "as_of": "2026-01-12",
-      "item_id": "FG-PANEL"
-    },
-    "tool": "get_bom"
-  },
-  {
-    "arguments": {
-      "item_ids": [
-        "RM-HOUSING",
-        "RM-RELAY",
-        "RM-COPPER"
+      "includeGridData": false,
+      "ranges": [
+        "Control!A1:H50"
       ],
-      "plant_id": "SEA"
+      "spreadsheetId": "sheet-007"
     },
-    "tool": "get_inventory"
+    "tool": "google_sheets.spreadsheets.get"
   },
   {
     "arguments": {
-      "item_id": "FG-PANEL",
-      "quantity": 11,
-      "sales_order_id": "SO-0007",
-      "scheduled_completion": "2026-01-22",
-      "scheduled_start": "2026-01-19",
-      "work_order_id": "WO-0007",
-      "workcenter_id": "WC-ASM-1"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-007' and trashed = false"
     },
-    "tool": "create_work_order"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "item_id": "RM-HOUSING",
-      "lot_number": "H-007",
-      "plant_id": "SEA",
-      "quantity": 11,
-      "reservation_id": "RES-H-007",
-      "subinventory": "STORES",
-      "work_order_id": "WO-0007"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-007'"
     },
-    "tool": "reserve_material"
+    "tool": "oracle_fusion.work_orders.list"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "lot_number": "R-007",
-      "plant_id": "SEA",
-      "quantity": 22,
-      "reservation_id": "RES-R-007",
-      "subinventory": "STORES",
-      "work_order_id": "WO-0007"
+      "WorkOrderId": 100007,
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-007'"
     },
-    "tool": "reserve_material"
+    "tool": "oracle_fusion.work_order_operations.list"
   },
   {
     "arguments": {
-      "item_id": "RM-COPPER",
-      "lot_number": "C-007",
-      "plant_id": "SEA",
-      "quantity": 11,
-      "reservation_id": "RES-C-007",
-      "subinventory": "STORES",
-      "work_order_id": "WO-0007"
+      "WoOperationId": 200007,
+      "WorkOrderId": 100007,
+      "requestBody": {
+        "OperationName": "Controlled operation CASE-007",
+        "PlannedCompletionDate": "2026-01-25",
+        "PlannedStartDate": "2026-01-20",
+        "WorkCenterCode": "WC-ALT-2"
+      }
     },
-    "tool": "reserve_material"
+    "tool": "oracle_fusion.work_order_operations.update"
   },
   {
     "arguments": {
-      "completion_date": "2026-01-22",
-      "released_quantity": 11,
-      "work_order_id": "WO-0007"
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-007",
+            "production_planner",
+            "Operation resequenced",
+            "REF-0007",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-007",
+      "valueInputOption": "RAW"
     },
-    "tool": "submit_answer"
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "approvalId": "approval-007",
+      "fileId": "drive-approval-007",
+      "requestBody": {
+        "message": "Approved for CASE-007 only."
+      }
+    },
+    "tool": "google_drive.approvals.approve"
+  },
+  {
+    "arguments": {
+      "effective_timestamp": "2026-01-20T16:00:00-08:00",
+      "production_decision": "Operation resequenced",
+      "work_order": "ORD-0007"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

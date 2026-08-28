@@ -1,54 +1,111 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "supplier_selection"
+      "format": "full",
+      "id": "thread-021",
+      "userId": "me"
     },
-    "tool": "search_documents"
+    "tool": "gmail.threads.get"
   },
   {
     "arguments": {
-      "requisition_id": "REQ-A-001"
+      "includeGridData": false,
+      "ranges": [
+        "Control!A1:H50"
+      ],
+      "spreadsheetId": "sheet-021"
     },
-    "tool": "get_requisition"
+    "tool": "google_sheets.spreadsheets.get"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "need_by": "2026-01-27",
-      "task_id": "factorybench-021"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-021' and trashed = false"
     },
-    "tool": "get_supplier_quotes"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "buyer_id": "U-BUYER",
-      "item_id": "RM-RELAY",
-      "promised_date": "2026-01-16",
-      "purchase_order_id": "PO-0001",
-      "quantity": 32,
-      "requisition_id": "REQ-A-001",
-      "supplier_id": "SUP-B",
-      "unit_price": 48.1
+      "count": 50,
+      "query": "\"CASE-021\"",
+      "sort": "timestamp",
+      "sort_dir": "asc"
     },
-    "tool": "create_purchase_order"
+    "tool": "slack.search_messages"
   },
   {
     "arguments": {
-      "approver_id": "U-MANAGER",
-      "purchase_order_id": "PO-0001"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-021'"
     },
-    "tool": "approve_purchase_order"
+    "tool": "oracle_fusion.maintenance_work_orders.list"
   },
   {
     "arguments": {
-      "purchase_order_id": "PO-0001",
-      "supplier_id": "SUP-B",
-      "total_amount": 1539.2
+      "MaintenanceProgramId": 500021
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.maintenance_programs.get"
+  },
+  {
+    "arguments": {
+      "requestBody": {
+        "AssetNumber": "ASSET-021",
+        "OrganizationCode": "SEA",
+        "PlannedCompletionDate": "2026-01-19",
+        "PlannedStartDate": "2026-01-15",
+        "WorkOrderDescription": "Correlate the alarm email, technician Slack thread, fault-history export, and service manual before opening the high-priority asset work order.",
+        "WorkOrderNumber": "MWO-0021",
+        "WorkOrderStatusCode": "Released",
+        "WorkOrderTypeCode": "CORRECTIVE"
+      }
+    },
+    "tool": "oracle_fusion.maintenance_work_orders.create"
+  },
+  {
+    "arguments": {
+      "approvalId": "approval-021",
+      "fileId": "drive-approval-021",
+      "requestBody": {
+        "message": "Approved for CASE-021 only."
+      }
+    },
+    "tool": "google_drive.approvals.approve"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-021",
+            "maintenance_planner",
+            "Corrective work opened",
+            "REF-0021",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-021",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "asset_or_resource": "FB-021",
+      "maintenance_order": "MWO-0021",
+      "planned_finish": "2026-01-15"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

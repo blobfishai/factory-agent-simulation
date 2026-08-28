@@ -1,63 +1,80 @@
 {
   "allowed_write_tables": [
-    "purchase_requisitions",
-    "requisition_lines",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "net_shortage": {
-        "type": "integer"
-      },
-      "requisition_id": {
+      "affected_order": {
         "type": "string"
       },
-      "supplier_id": {
+      "recovery_route": {
+        "type": "string"
+      },
+      "revised_completion": {
         "type": "string"
       }
     },
     "required": [
-      "net_shortage",
-      "requisition_id",
-      "supplier_id"
+      "affected_order",
+      "recovery_route",
+      "revised_completion"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "net_shortage": 31,
-      "requisition_id": "REQ-0008",
-      "supplier_id": "SUP-A"
+      "affected_order": "ORD-0018",
+      "recovery_route": "SEA-3",
+      "revised_completion": "2026-01-31"
     },
     "assertions": [
       {
-        "description": "The shortage is covered by an approved requisition.",
-        "id": "requisition_approved",
-        "table": "purchase_requisitions",
+        "description": "oracle_fusion.work_order_resources.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "approved_by": "U-MANAGER",
-          "status": "Approved",
-          "supplier_id": "SUP-A",
-          "total_amount": 2194.8
+          "payload_json": "{\"arguments\":{\"WoOperationResourceId\":400018,\"WorkOrderId\":100018,\"requestBody\":{\"AssignedUnits\":1,\"ResourceCode\":\"RES-ALT-018\",\"UsageRate\":1.0}},\"case\":\"CASE-018\",\"outcome\":\"Reconcile the supplier notice, open PO line, and qualified alternate before revising the outside-processing resource.\",\"tool\":\"oracle_fusion.work_order_resources.update\"}",
+          "resource_type": "oracle_fusion.work_order_resources",
+          "revision": 1,
+          "status": "Supplier operation rerouted",
+          "system": "oracle_fusion"
         },
         "where": {
-          "requisition_id": "REQ-0008"
+          "resource_id": "factorybench-018-mutation-01",
+          "task_id": "factorybench-018"
         }
       },
       {
-        "description": "The requisition line equals net requirement after available stock.",
-        "id": "net_quantity_ordered",
-        "table": "requisition_lines",
+        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "item_id": "RM-COPPER",
-          "quantity": 31,
-          "unit_price": 70.8
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
         },
         "where": {
-          "line_no": 1,
-          "requisition_id": "REQ-0008"
+          "resource_id": "factorybench-018-mutation-02",
+          "task_id": "factorybench-018"
+        }
+      },
+      {
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
+        "where": {
+          "resource_id": "factorybench-018-mutation-03",
+          "task_id": "factorybench-018"
         }
       }
     ]
@@ -65,49 +82,79 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "material_shortage"
+        "maxResults": 20,
+        "q": "\"CASE-018\"",
+        "userId": "me"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
     },
     {
       "arguments": {
-        "work_order_id": "WO-S-008"
+        "format": "full",
+        "id": "msg-018",
+        "userId": "me"
       },
-      "tool": "get_work_order"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
-        "item_ids": [
-          "RM-COPPER"
-        ],
-        "plant_id": "SEA"
+        "id": "att-018",
+        "messageId": "msg-018",
+        "userId": "me"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
-        "item_id": "RM-COPPER",
-        "need_by": "2026-02-07",
-        "task_id": "factorybench-018"
+        "fileId": "drive-approval-018",
+        "pageSize": 20
       },
-      "tool": "get_supplier_quotes"
+      "match": "successful_tool_call",
+      "tool": "google_drive.approvals.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100018,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-018'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0018",
+        "q": "ReferenceNumber='CASE-018'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.purchase_order_lines.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order",
-    "get_inventory",
-    "get_supplier_quotes"
+    "factorybench.context.get",
+    "gmail.messages.list",
+    "gmail.messages.get",
+    "gmail.messages.attachments.get",
+    "google_drive.approvals.list",
+    "oracle_fusion.work_order_operations.list",
+    "oracle_fusion.purchase_order_lines.list"
   ],
   "task_id": "factorybench-018",
   "write_tools": [
-    "approve_requisition",
-    "create_requisition",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "google_sheets.spreadsheets.values.update",
+    "oracle_fusion.work_order_resources.update"
   ]
 }

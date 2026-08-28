@@ -1,83 +1,40 @@
-"""SQLite-backed Oracle-shaped manufacturing ERP simulation."""
+"""Closed, stateful multi-system sandbox for FactoryBench tasks."""
 
 from __future__ import annotations
 
+import base64
 import json
+import re
 import sqlite3
-from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Iterable
 
-READ_TOOLS = {
-    "get_environment_context",
-    "search_documents",
-    "get_sales_order",
-    "get_bom",
-    "get_inventory",
-    "get_work_order",
-    "get_requisition",
-    "get_supplier_quotes",
-    "get_purchase_order",
-    "get_receipt",
-    "get_invoice_match",
-    "get_quality_context",
-    "get_schedule",
-    "get_maintenance_context",
-}
+try:
+    from .contracts import READ_TOOLS, TOOL_BY_NAME, WRITE_TOOLS
+except ImportError:  # Standalone Harbor/service bundle.
+    from contracts import READ_TOOLS, TOOL_BY_NAME, WRITE_TOOLS  # type: ignore[no-redef]
 
-WRITE_TOOLS = {
-    "create_work_order",
-    "reserve_material",
-    "create_requisition",
-    "approve_requisition",
-    "create_purchase_order",
-    "approve_purchase_order",
-    "receive_purchase_order",
-    "record_inspection",
-    "approve_invoice",
-    "hold_invoice",
-    "issue_material",
-    "start_operation",
-    "place_quality_hold",
-    "create_nonconformance",
-    "complete_operation",
-    "complete_work_order",
-    "record_wip_variance",
-    "create_transfer",
-    "complete_transfer",
-    "reschedule_work_order",
-    "create_maintenance_work_order",
-    "reroute_operation",
-    "submit_answer",
-}
 
+TOOL_DESCRIPTIONS = {name: tool["description"] for name, tool in TOOL_BY_NAME.items()}
+_SERVER_DESCRIPTIONS = {
+    "oracle_fusion": "Documented Oracle Fusion Cloud ERP/SCM REST operations over synthetic task state.",
+    "gmail": "Documented Gmail API operations over task-scoped messages and attachments.",
+    "google_drive": "Documented Google Drive API operations over task-scoped files and approvals.",
+    "google_sheets": "Documented Google Sheets API operations over task-scoped workbooks.",
+    "slack": "Documented Slack Web API operations over task-scoped conversations and files.",
+    "factorybench": "Benchmark-only discovery and answer submission controls.",
+}
 TOOL_CONTRACTS = {
-    "oracle_erp": {
-        "description": "Query and mutate the synthetic manufacturing ERP.",
-        "tools": sorted((READ_TOOLS | WRITE_TOOLS) - {"search_documents", "submit_answer"}),
-    },
-    "plant_docs": {
-        "description": "Search versioned operating policies and task assets.",
-        "tools": ["search_documents"],
-    },
-    "factory_harness": {
-        "description": "Submit exact answer fields for deterministic verification.",
-        "tools": ["submit_answer"],
-    },
-}
-
-TOOL_DESCRIPTIONS = {
-    "get_environment_context": (
-        "Start here. Discover the current task identity, ERP scope, available policy documents, "
-        "mounted tool servers, and valid reference-record identifiers before making task-specific calls."
-    ),
-    "search_documents": (
-        "Read the governing policy for an exact category returned by get_environment_context."
-    ),
-    "submit_answer": (
-        "Finish the workflow by submitting exactly the task-specific answer fields in this schema."
-    ),
+    server: {
+        "description": description,
+        "tools": sorted(
+            name
+            for name, tool in TOOL_BY_NAME.items()
+            if tool["_meta"]["factorybench"]["server"] == server
+        ),
+    }
+    for server, description in _SERVER_DESCRIPTIONS.items()
 }
 
 _SCHEMA_PATH = Path(__file__).with_name("schema.sql")
@@ -87,9 +44,12 @@ def _canonical_argument(value: Any) -> Any:
     if isinstance(value, dict):
         return tuple(sorted((key, _canonical_argument(item)) for key, item in value.items()))
     if isinstance(value, list):
-        normalized = [_canonical_argument(item) for item in value]
-        return tuple(sorted(normalized, key=repr))
+        return tuple(_canonical_argument(item) for item in value)
     return value
+
+
+def _canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
 
 
 def missing_required_read_calls(
@@ -98,7 +58,7 @@ def missing_required_read_calls(
     *,
     before_index: int | None = None,
 ) -> list[dict[str, Any]]:
-    """Return task-bound read calls absent from the successful trace prefix."""
+    """Return task-bound read calls absent from a successful trace prefix."""
 
     requirements = task.get("required_read_calls")
     if requirements is None:
@@ -114,7 +74,8 @@ def missing_required_read_calls(
         matched = any(
             entry["tool"] == requirement["tool"]
             and (
-                expected_arguments is None
+                requirement.get("match") == "successful_tool_call"
+                or expected_arguments is None
                 or _canonical_argument(entry.get("arguments", {}))
                 == _canonical_argument(expected_arguments)
             )
@@ -123,6 +84,43 @@ def missing_required_read_calls(
         if not matched:
             missing.append(requirement)
     return missing
+
+
+def _contains_expected(actual: Any, expected: Any, path: str = "arguments") -> None:
+    """Require an approved Oracle payload while allowing harmless extra fields."""
+
+    if isinstance(expected, dict):
+        if not isinstance(actual, dict):
+            raise ValueError(f"{path} must be an object")
+        for key, value in expected.items():
+            if key not in actual:
+                raise ValueError(f"{path} is missing approved field {key}")
+            _contains_expected(actual[key], value, f"{path}.{key}")
+        return
+    if isinstance(expected, list):
+        if not isinstance(actual, list) or len(actual) != len(expected):
+            raise ValueError(f"{path} must contain the approved {len(expected)} item(s)")
+        for index, value in enumerate(expected):
+            _contains_expected(actual[index], value, f"{path}[{index}]")
+        return
+    if actual != expected:
+        raise ValueError(f"{path} does not match the approved value")
+
+
+def _decoded_text(value: Any) -> str:
+    if isinstance(value, dict):
+        return " ".join(_decoded_text(item) for item in value.values())
+    if isinstance(value, list):
+        return " ".join(_decoded_text(item) for item in value)
+    if not isinstance(value, str):
+        return str(value)
+    variants = [value]
+    try:
+        padded = value + "=" * (-len(value) % 4)
+        variants.append(base64.urlsafe_b64decode(padded).decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        pass
+    return " ".join(variants)
 
 
 def normalize_answer_fields(task: dict[str, Any], fields: dict[str, Any]) -> dict[str, str]:
@@ -171,6 +169,58 @@ def normalize_answer_fields(task: dict[str, Any], fields: dict[str, Any]) -> dic
     return normalized
 
 
+def _type_matches(value: Any, expected: str) -> bool:
+    if expected == "any":
+        return True
+    if expected == "object":
+        return isinstance(value, dict)
+    if expected == "array":
+        return isinstance(value, list)
+    if expected == "string":
+        return isinstance(value, str)
+    if expected == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
+    if expected == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
+    if expected == "boolean":
+        return isinstance(value, bool)
+    return True
+
+
+def _validate_schema(value: Any, schema: dict[str, Any], path: str = "arguments") -> None:
+    expected_type = schema.get("type")
+    if isinstance(expected_type, list):
+        if not any(_type_matches(value, candidate) for candidate in expected_type):
+            raise ValueError(f"{path} must match one of {expected_type}")
+    elif isinstance(expected_type, str) and not _type_matches(value, expected_type):
+        raise ValueError(f"{path} must be {expected_type}")
+    if "const" in schema and value != schema["const"]:
+        raise ValueError(f"{path} must equal {schema['const']!r}")
+    if "enum" in schema and value not in schema["enum"]:
+        raise ValueError(f"{path} must be one of {schema['enum']}")
+    if isinstance(value, dict):
+        properties = schema.get("properties", {})
+        required = schema.get("required", [])
+        missing = [name for name in required if name not in value]
+        if missing:
+            raise ValueError(f"{path} missing required properties: {missing}")
+        if schema.get("additionalProperties") is False:
+            unexpected = sorted(set(value) - set(properties))
+            if unexpected:
+                raise ValueError(f"{path} has unexpected properties: {unexpected}")
+        for name, item in value.items():
+            if name in properties:
+                _validate_schema(item, properties[name], f"{path}.{name}")
+    if isinstance(value, list) and "items" in schema:
+        for index, item in enumerate(value):
+            _validate_schema(item, schema["items"], f"{path}[{index}]")
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if "minimum" in schema and value < schema["minimum"]:
+            raise ValueError(f"{path} must be >= {schema['minimum']}")
+        if "maximum" in schema and value > schema["maximum"]:
+            raise ValueError(f"{path} must be <= {schema['maximum']}")
+
+
 def seed_database(task: dict[str, Any], path: str | Path) -> Path:
     """Create a fresh deterministic SQLite world for one task."""
 
@@ -202,7 +252,7 @@ def seed_database(task: dict[str, Any], path: str | Path) -> Path:
 
 
 class FactoryWorld:
-    """An isolated task world with auditable tool calls and transactional writes."""
+    """An isolated task world with schema validation and transactional writes."""
 
     def __init__(self, task: dict[str, Any], database_path: str | Path):
         self.task = task
@@ -226,20 +276,49 @@ class FactoryWorld:
     def __exit__(self, *_: Any) -> None:
         self.close()
 
+    def _one(self, query: str, params: Iterable[Any] = ()) -> dict[str, Any]:
+        row = self.connection.execute(query, tuple(params)).fetchone()
+        if row is None:
+            raise ValueError("record not found")
+        return dict(row)
+
+    def _all(self, query: str, params: Iterable[Any] = ()) -> list[dict[str, Any]]:
+        return [dict(row) for row in self.connection.execute(query, tuple(params)).fetchall()]
+
+    def snapshot(self) -> dict[str, list[dict[str, Any]]]:
+        tables = [
+            row["name"]
+            for row in self.connection.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+            )
+        ]
+        snapshot: dict[str, list[dict[str, Any]]] = {}
+        for table in tables:
+            columns = [row["name"] for row in self.connection.execute(f"PRAGMA table_info({table})")]
+            order = ", ".join(columns)
+            rows = self.connection.execute(f"SELECT * FROM {table} ORDER BY {order}").fetchall()
+            snapshot[table] = [dict(row) for row in rows]
+        return snapshot
+
     def call_tool(self, tool: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
         arguments = arguments or {}
-        if tool not in READ_TOOLS | WRITE_TOOLS:
+        if tool not in TOOL_BY_NAME:
             result = {"error": f"unknown tool: {tool}"}
             self.trace.append({"index": len(self.trace), "tool": tool, "arguments": arguments, "success": False, "result": result})
             return result
         try:
+            _validate_schema(arguments, self._input_schema(tool))
             if tool in WRITE_TOOLS:
                 self._require_preflight()
-            handler = getattr(self, f"_tool_{tool}")
-            result = handler(**arguments)
+            if tool == "factorybench.context.get":
+                result = self._context()
+            elif tool == "factorybench.submit_answer":
+                result = self._submit_answer(arguments)
+            else:
+                result = self._call_fixture(tool, arguments)
             self.connection.commit()
             success = True
-        except (KeyError, TypeError, ValueError, sqlite3.Error) as exc:
+        except (KeyError, TypeError, ValueError, sqlite3.Error, json.JSONDecodeError) as exc:
             self.connection.rollback()
             result = {"error": str(exc)}
             success = False
@@ -254,22 +333,10 @@ class FactoryWorld:
         )
         return result
 
-    def snapshot(self) -> dict[str, list[dict[str, Any]]]:
-        tables = [
-            row["name"]
-            for row in self.connection.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
-            )
-        ]
-        snapshot: dict[str, list[dict[str, Any]]] = {}
-        for table in tables:
-            order = ", ".join(row["name"] for row in self.connection.execute(f"PRAGMA table_info({table})"))
-            rows = self.connection.execute(f"SELECT * FROM {table} ORDER BY {order}").fetchall()
-            snapshot[table] = [dict(row) for row in rows]
-        return snapshot
-
-    def _successful_tools(self) -> set[str]:
-        return {entry["tool"] for entry in self.trace if entry["success"]}
+    def _input_schema(self, tool: str) -> dict[str, Any]:
+        if tool == "factorybench.submit_answer":
+            return self.task["answer_schema"]
+        return TOOL_BY_NAME[tool]["inputSchema"]
 
     def _require_preflight(self) -> None:
         missing = missing_required_read_calls(self.task, self.trace)
@@ -280,35 +347,57 @@ class FactoryWorld:
             )
             raise ValueError(f"read-before-write control failed; missing: {rendered}")
 
-    def _one(self, query: str, params: Iterable[Any] = ()) -> dict[str, Any]:
-        row = self.connection.execute(query, tuple(params)).fetchone()
-        if row is None:
-            raise ValueError("record not found")
-        return dict(row)
-
-    def _all(self, query: str, params: Iterable[Any] = ()) -> list[dict[str, Any]]:
-        return [dict(row) for row in self.connection.execute(query, tuple(params)).fetchall()]
-
     def _audit(self, tool: str, table: str, record_id: str, action: str, payload: dict[str, Any]) -> None:
         self.connection.execute(
             "INSERT INTO audit_log (task_id, tool, table_name, record_id, action, payload) VALUES (?, ?, ?, ?, ?, ?)",
             (self.task["task_id"], tool, table, record_id, action, json.dumps(payload, sort_keys=True)),
         )
 
-    def _tool_search_documents(self, category: str) -> dict[str, Any]:
-        rows = self._all(
-            "SELECT doc_id, title, category, body, sha256 FROM documents WHERE task_id = ? AND category = ? ORDER BY doc_id",
-            (self.task["task_id"], category),
-        )
-        if not rows:
-            raise ValueError(f"no documents found for category {category}")
-        return {"documents": rows}
-
-    def _tool_get_environment_context(self) -> dict[str, Any]:
-        documents = self._all(
-            "SELECT doc_id, title, category, sha256 FROM documents WHERE task_id = ? ORDER BY doc_id",
+    def _context(self) -> dict[str, Any]:
+        evidence = self._all(
+            "SELECT asset_id, path, title, kind, source, media_type, sha256 FROM evidence_files WHERE task_id = ? ORDER BY path",
             (self.task["task_id"],),
         )
+        starting_records = self._all(
+            "SELECT system, resource_type, resource_id, status, effective_at, revision FROM resource_state WHERE task_id = ? ORDER BY resource_id",
+            (self.task["task_id"],),
+        )
+        mounted_servers = [
+            {
+                "name": server,
+                "description": TOOL_CONTRACTS[server]["description"],
+                "tools": TOOL_CONTRACTS[server]["tools"],
+            }
+            for server in self.task["world"]["systems"]
+        ]
+        ordinal = int(self.task["task_id"].rsplit("-", 1)[1])
+        case = f"CASE-{ordinal:03d}"
+        channel = ("C-PRODUCTION", "C-PROCUREMENT", "C-QUALITY", "C-FINANCE")[ordinal % 4]
+        reference_records = {
+            "case_reference": case,
+            "gmail": {"userId": "me", "search_query": f'"{case}"'},
+            "google_drive": {
+                "search_query": f"name contains '{case}' and trashed = false",
+                "primary_file_id": f"drive-{ordinal:03d}",
+                "approval_file_id": f"drive-approval-{ordinal:03d}",
+            },
+            "google_sheets": {
+                "spreadsheet_id": f"sheet-{ordinal:03d}",
+                "decision_range": "Control!A1:H50",
+                "outcome_write_range": f"Control!H{2 + ordinal % 40}",
+                "audit_append_range": "Audit!A:F",
+            },
+            "slack": {
+                "search_query": f'"{case}"',
+                "channel": channel,
+                "thread_ts": f"1768{ordinal:06d}.000100",
+            },
+            "oracle_fusion": {
+                "filter": f"ReferenceNumber='{case}'",
+                "only_data": True,
+                "record_handles": self._oracle_record_handles(),
+            },
+        }
         return {
             "task": {
                 "task_id": self.task["task_id"],
@@ -319,439 +408,231 @@ class FactoryWorld:
             "organization": {
                 "organization_id": self.task["world"]["organization_id"],
                 "primary_plant": self.task["world"]["primary_plant"],
+                "world_id": self.task["world"]["id"],
                 "world": self.task["world"]["name"],
             },
             "state": {
                 "scope": "isolated task snapshot",
                 "persistence": "episode-local SQLite",
+                "network": "closed",
             },
-            "reference_data": {
-                "plants": self._all(
-                    "SELECT plant_id, organization_id, name, timezone FROM plants ORDER BY plant_id"
-                ),
-                "users": self._all(
-                    "SELECT user_id, display_name, role, plant_id, approval_limit FROM users ORDER BY user_id"
-                ),
-                "items": self._all(
-                    "SELECT item_id, description, item_type, uom, make_buy, status FROM items ORDER BY item_id"
-                ),
-                "suppliers": self._all(
-                    "SELECT supplier_id, name, approved, quality_score, on_time_rate, payment_terms FROM suppliers ORDER BY supplier_id"
-                ),
-                "workcenters": self._all(
-                    "SELECT workcenter_id, plant_id, name, status, capacity_hours, qualified_item_class FROM workcenters ORDER BY workcenter_id"
-                ),
-            },
-            "available_documents": documents,
-            "tool_servers": [
-                {
-                    "name": name,
-                    "description": contract["description"],
-                    "tools": contract["tools"],
-                }
-                for name, contract in TOOL_CONTRACTS.items()
-            ],
+            "identity": self._all("SELECT user_id, display_name, role, approval_limit FROM users ORDER BY user_id"),
+            "starting_records": starting_records,
+            "reference_records": reference_records,
+            "evidence_index": evidence,
+            "tool_servers": mounted_servers,
         }
 
-    def _tool_get_sales_order(self, sales_order_id: str) -> dict[str, Any]:
-        header = self._one("SELECT * FROM sales_orders WHERE sales_order_id = ?", (sales_order_id,))
-        lines = self._all("SELECT * FROM sales_order_lines WHERE sales_order_id = ? ORDER BY line_no", (sales_order_id,))
-        return {"header": header, "lines": lines}
+    def _oracle_record_handles(self) -> dict[str, Any]:
+        ignored = {
+            "requestBody",
+            "q",
+            "finder",
+            "fields",
+            "expand",
+            "limit",
+            "offset",
+            "onlyData",
+            "totalResults",
+        }
+        handles: dict[str, Any] = {}
+        rows = self.connection.execute(
+            "SELECT arguments_json FROM api_fixtures WHERE task_id = ? "
+            "AND tool_name LIKE 'oracle_fusion.%' ORDER BY fixture_id",
+            (self.task["task_id"],),
+        ).fetchall()
+        for row in rows:
+            for key, value in json.loads(row["arguments_json"]).items():
+                if key not in ignored:
+                    handles.setdefault(key, value)
+        return handles
 
-    def _tool_get_bom(self, item_id: str, as_of: str) -> dict[str, Any]:
-        header = self._one(
-            "SELECT * FROM bom_headers WHERE assembly_item_id = ? AND status = 'Active' AND effective_on <= ? ORDER BY effective_on DESC LIMIT 1",
-            (item_id, as_of),
-        )
-        components = self._all("SELECT * FROM bom_components WHERE bom_id = ? ORDER BY operation_sequence, component_item_id", (header["bom_id"],))
-        return {"header": header, "components": components}
+    def _fixture_rows(self, tool: str) -> list[sqlite3.Row]:
+        return self.connection.execute(
+            "SELECT response_json, effect_json, read_only, arguments_json FROM api_fixtures "
+            "WHERE task_id = ? AND tool_name = ? ORDER BY fixture_id",
+            (self.task["task_id"], tool),
+        ).fetchall()
 
-    def _tool_get_inventory(self, plant_id: str, item_ids: list[str]) -> dict[str, Any]:
-        if not item_ids:
-            raise ValueError("item_ids must not be empty")
-        placeholders = ", ".join("?" for _ in item_ids)
-        rows = self._all(
-            f"SELECT *, quantity - reserved_qty AS available_qty FROM inventory_on_hand WHERE plant_id = ? AND item_id IN ({placeholders}) ORDER BY item_id, expiration_date, lot_number",
-            (plant_id, *item_ids),
-        )
-        return {"lots": rows}
+    @staticmethod
+    def _path_parameter_names(tool: str) -> set[str]:
+        path = TOOL_BY_NAME[tool]["_meta"]["factorybench"]["upstream"]["path"]
+        return set(re.findall(r"\{([^{}]+)\}", path))
 
-    def _tool_get_work_order(self, work_order_id: str) -> dict[str, Any]:
-        header = self._one("SELECT * FROM work_orders WHERE work_order_id = ?", (work_order_id,))
-        operations = self._all("SELECT * FROM work_order_operations WHERE work_order_id = ? ORDER BY sequence", (work_order_id,))
-        requirements = self._all("SELECT * FROM material_requirements WHERE work_order_id = ? ORDER BY item_id", (work_order_id,))
-        reservations = self._all("SELECT * FROM material_reservations WHERE work_order_id = ? ORDER BY reservation_id", (work_order_id,))
-        return {"header": header, "operations": operations, "requirements": requirements, "reservations": reservations}
-
-    def _tool_get_requisition(self, requisition_id: str) -> dict[str, Any]:
-        header = self._one("SELECT * FROM purchase_requisitions WHERE requisition_id = ?", (requisition_id,))
-        lines = self._all("SELECT * FROM requisition_lines WHERE requisition_id = ? ORDER BY line_no", (requisition_id,))
-        return {"header": header, "lines": lines}
-
-    def _tool_get_supplier_quotes(self, task_id: str, item_id: str, need_by: str) -> dict[str, Any]:
-        rows = self._all(
-            "SELECT q.*, s.name, s.approved, s.quality_score, s.on_time_rate FROM supplier_quotes q JOIN suppliers s ON s.supplier_id = q.supplier_id WHERE q.task_id = ? AND q.item_id = ? AND q.valid_until >= ? ORDER BY q.unit_price, s.quality_score DESC, s.on_time_rate DESC",
-            (task_id, item_id, need_by),
-        )
-        return {"quotes": rows}
-
-    def _tool_get_purchase_order(self, purchase_order_id: str) -> dict[str, Any]:
-        header = self._one("SELECT * FROM purchase_orders WHERE purchase_order_id = ?", (purchase_order_id,))
-        lines = self._all("SELECT * FROM purchase_order_lines WHERE purchase_order_id = ? ORDER BY line_no", (purchase_order_id,))
-        return {"header": header, "lines": lines}
-
-    def _tool_get_receipt(self, receipt_id: str) -> dict[str, Any]:
-        header = self._one("SELECT * FROM receipts WHERE receipt_id = ?", (receipt_id,))
-        lines = self._all("SELECT * FROM receipt_lines WHERE receipt_id = ? ORDER BY line_no", (receipt_id,))
-        return {"header": header, "lines": lines}
-
-    def _tool_get_invoice_match(self, invoice_id: str) -> dict[str, Any]:
-        invoice = self._one("SELECT * FROM ap_invoices WHERE invoice_id = ?", (invoice_id,))
-        po = self._one("SELECT * FROM purchase_orders WHERE purchase_order_id = ?", (invoice["purchase_order_id"],))
-        received = self._one(
-            "SELECT COALESCE(SUM(accepted_qty), 0) AS accepted_qty FROM receipt_lines WHERE receipt_id = ?",
-            (invoice["receipt_id"],),
-        )
-        ordered = self._one(
-            "SELECT COALESCE(SUM(ordered_qty), 0) AS ordered_qty FROM purchase_order_lines WHERE purchase_order_id = ?",
-            (invoice["purchase_order_id"],),
-        )
-        variance = (invoice["invoice_amount"] - po["total_amount"]) / po["total_amount"] * 100
-        return {"invoice": invoice, "po": po, "ordered_qty": ordered["ordered_qty"], "accepted_qty": received["accepted_qty"], "variance_percent": round(variance, 4)}
-
-    def _tool_get_quality_context(self, inspection_id: str) -> dict[str, Any]:
-        inspection = self._one("SELECT * FROM quality_inspections WHERE inspection_id = ?", (inspection_id,))
-        inventory = self._all("SELECT * FROM inventory_on_hand WHERE item_id = ? AND lot_number = ?", (inspection["item_id"], inspection["lot_number"]))
-        return {"inspection": inspection, "inventory": inventory}
-
-    def _tool_get_schedule(self, plant_id: str, work_order_id: str) -> dict[str, Any]:
-        work_order = self._one("SELECT * FROM work_orders WHERE work_order_id = ?", (work_order_id,))
-        centers = self._all("SELECT * FROM workcenters WHERE plant_id = ? ORDER BY workcenter_id", (plant_id,))
-        operations = self._all("SELECT * FROM work_order_operations WHERE work_order_id = ? ORDER BY sequence", (work_order_id,))
-        return {"work_order": work_order, "operations": operations, "workcenters": centers}
-
-    def _tool_get_maintenance_context(self, workcenter_id: str) -> dict[str, Any]:
-        center = self._one("SELECT * FROM workcenters WHERE workcenter_id = ?", (workcenter_id,))
-        alternates = self._all(
-            "SELECT * FROM workcenters WHERE plant_id = ? AND workcenter_id != ? AND status = 'Active' AND qualified_item_class = ? ORDER BY capacity_hours DESC",
-            (center["plant_id"], workcenter_id, center["qualified_item_class"]),
-        )
-        return {"failed_workcenter": center, "qualified_alternates": alternates}
-
-    def _tool_create_work_order(
+    def _validate_read_identity(
         self,
-        work_order_id: str,
-        sales_order_id: str,
-        item_id: str,
-        quantity: float,
-        scheduled_start: str,
-        scheduled_completion: str,
-        workcenter_id: str,
-    ) -> dict[str, Any]:
-        order = self._one("SELECT * FROM sales_orders WHERE sales_order_id = ?", (sales_order_id,))
-        if order["credit_hold"] or order["status"] != "Booked":
-            raise ValueError("sales order is not eligible for release")
-        bom = self._one("SELECT * FROM bom_headers WHERE assembly_item_id = ? AND status = 'Active' ORDER BY effective_on DESC LIMIT 1", (item_id,))
-        center = self._one("SELECT * FROM workcenters WHERE workcenter_id = ?", (workcenter_id,))
-        if center["status"] != "Active":
-            raise ValueError("workcenter is not active")
-        payload = {
-            "work_order_id": work_order_id,
-            "task_id": self.task["task_id"],
-            "sales_order_id": sales_order_id,
-            "item_id": item_id,
-            "quantity": quantity,
-            "completed_qty": 0,
-            "scrap_qty": 0,
-            "status": "Released",
-            "scheduled_start": scheduled_start,
-            "scheduled_completion": scheduled_completion,
-            "parent_work_order_id": None,
-            "workcenter_id": workcenter_id,
+        tool: str,
+        arguments: dict[str, Any],
+        expected: dict[str, Any],
+    ) -> None:
+        # Collection endpoints behave like their real APIs: a caller may use a
+        # broad or alternate valid filter. Item endpoints still require the
+        # immutable identifier discovered from a collection or task context.
+        if tool in {
+            "google_drive.files.get",
+            "google_drive.files.download",
+            "google_drive.files.export",
+        }:
+            self._drive_file_response(tool, str(arguments["fileId"]))
+            return
+        if tool.endswith(".list") or tool in {
+            "gmail.messages.list",
+            "google_drive.files.list",
+            "slack.search_messages",
+        }:
+            return
+        identity_keys = self._path_parameter_names(tool)
+        if tool == "slack.conversations_history":
+            identity_keys = {"channel"}
+        elif tool == "slack.conversations_replies":
+            identity_keys = {"channel", "ts"}
+        elif tool == "slack.files_info":
+            identity_keys = {"file"}
+        elif tool in {
+            "google_sheets.spreadsheets.values.get",
+            "google_sheets.spreadsheets.values.batchGet",
+        }:
+            identity_keys = {"spreadsheetId"}
+        for key in identity_keys:
+            if key in expected and arguments.get(key) != expected[key]:
+                raise ValueError(f"{tool} record not found for {key}={arguments.get(key)!r}")
+
+    def _validate_write_arguments(
+        self,
+        tool: str,
+        arguments: dict[str, Any],
+        expected: dict[str, Any],
+    ) -> None:
+        server = TOOL_BY_NAME[tool]["_meta"]["factorybench"]["server"]
+        if server == "oracle_fusion":
+            _contains_expected(arguments, expected)
+            return
+
+        target_keys = {
+            "userId",
+            "messageId",
+            "id",
+            "fileId",
+            "approvalId",
+            "spreadsheetId",
+            "range",
+            "channel",
+            "thread_ts",
+            "timestamp",
+            "file",
         }
-        self.connection.execute(
-            "INSERT INTO work_orders VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            tuple(payload.values()),
+        for key in target_keys:
+            if key in expected and key in arguments and arguments[key] != expected[key]:
+                raise ValueError(f"{tool} targets the wrong {key}")
+        if tool in {
+            "gmail.drafts.create",
+            "gmail.messages.send",
+            "google_drive.comments.create",
+            "google_sheets.spreadsheets.values.append",
+            "google_sheets.spreadsheets.values.update",
+            "slack.chat_postMessage",
+        }:
+            searchable = _decoded_text(arguments)
+            ordinal = int(self.task["task_id"].rsplit("-", 1)[1])
+            case = f"CASE-{ordinal:03d}"
+            expected_values = [str(value) for value in self.task["expected"]["answer"].values()]
+            if case not in searchable and not any(value in searchable for value in expected_values):
+                raise ValueError(f"{tool} content must reference the approved case or outcome")
+
+    def _drive_file_response(self, tool: str, file_id: str) -> dict[str, Any]:
+        ordinal = int(self.task["task_id"].rsplit("-", 1)[1])
+        rows = self._all(
+            "SELECT path, title, kind, source, media_type, extracted_text, sha256 "
+            "FROM evidence_files WHERE task_id = ? ORDER BY rowid",
+            (self.task["task_id"],),
         )
-        self._audit("create_work_order", "work_orders", work_order_id, "insert", payload)
-        operation = {"work_order_id": work_order_id, "sequence": 10, "workcenter_id": workcenter_id, "status": "Ready", "planned_hours": round(quantity * 1.25, 2), "actual_hours": 0}
-        self.connection.execute("INSERT INTO work_order_operations VALUES (?, ?, ?, ?, ?, ?)", tuple(operation.values()))
-        self._audit("create_work_order", "work_order_operations", f"{work_order_id}:10", "insert", operation)
-        components = self._all("SELECT * FROM bom_components WHERE bom_id = ?", (bom["bom_id"],))
-        for component in components:
-            required = round(quantity * component["quantity_per"] / component["yield_factor"], 6)
-            requirement = {"work_order_id": work_order_id, "item_id": component["component_item_id"], "required_qty": required, "reserved_qty": 0, "issued_qty": 0, "need_by": scheduled_start}
-            self.connection.execute("INSERT INTO material_requirements VALUES (?, ?, ?, ?, ?, ?)", tuple(requirement.values()))
-            self._audit("create_work_order", "material_requirements", f"{work_order_id}:{component['component_item_id']}", "insert", requirement)
-        return {"work_order_id": work_order_id, "status": "Released", "requirements_created": len(components)}
+        by_id: dict[str, dict[str, Any]] = {}
+        for index, row in enumerate(rows, start=1):
+            if row["path"] == "contract-or-service-control.md":
+                mounted_id = f"drive-{ordinal:03d}"
+            elif row["path"] == "drive-approval-record.json":
+                mounted_id = f"drive-approval-{ordinal:03d}"
+            else:
+                mounted_id = f"drive-{ordinal:03d}-{index:02d}"
+            by_id[mounted_id] = row
+        if file_id not in by_id:
+            raise ValueError(f"{tool} record not found for fileId={file_id!r}")
+        row = by_id[file_id]
+        return {
+            "kind": "drive#file",
+            "id": file_id,
+            "name": row["path"],
+            "mimeType": row["media_type"],
+            "description": row["title"],
+            "modifiedTime": f"{self.task['as_of']}T09:00:00Z",
+            "md5Checksum": row["sha256"],
+            "content": row["extracted_text"],
+        }
 
-    def _tool_reserve_material(self, reservation_id: str, work_order_id: str, item_id: str, plant_id: str, subinventory: str, lot_number: str, quantity: float) -> dict[str, Any]:
-        requirement = self._one("SELECT * FROM material_requirements WHERE work_order_id = ? AND item_id = ?", (work_order_id, item_id))
-        remaining = requirement["required_qty"] - requirement["reserved_qty"]
-        if abs(quantity - remaining) > 1e-6:
-            raise ValueError(f"reservation must equal remaining requirement {remaining}")
-        lot = self._one("SELECT * FROM inventory_on_hand WHERE plant_id = ? AND subinventory = ? AND item_id = ? AND lot_number = ?", (plant_id, subinventory, item_id, lot_number))
-        if lot["status"] != "Unrestricted" or lot["quantity"] - lot["reserved_qty"] < quantity:
-            raise ValueError("insufficient eligible on-hand quantity")
-        payload = {"reservation_id": reservation_id, "task_id": self.task["task_id"], "work_order_id": work_order_id, "item_id": item_id, "plant_id": plant_id, "subinventory": subinventory, "lot_number": lot_number, "quantity": quantity, "status": "Active"}
-        self.connection.execute("INSERT INTO material_reservations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", tuple(payload.values()))
-        self.connection.execute("UPDATE inventory_on_hand SET reserved_qty = reserved_qty + ? WHERE plant_id = ? AND subinventory = ? AND item_id = ? AND lot_number = ?", (quantity, plant_id, subinventory, item_id, lot_number))
-        self.connection.execute("UPDATE material_requirements SET reserved_qty = reserved_qty + ? WHERE work_order_id = ? AND item_id = ?", (quantity, work_order_id, item_id))
-        self._audit("reserve_material", "material_reservations", reservation_id, "insert", payload)
-        self._audit("reserve_material", "inventory_on_hand", f"{plant_id}:{subinventory}:{item_id}:{lot_number}", "update", {"reserved_delta": quantity})
-        self._audit("reserve_material", "material_requirements", f"{work_order_id}:{item_id}", "update", {"reserved_delta": quantity})
-        return {"reservation_id": reservation_id, "status": "Active"}
-
-    def _tool_create_requisition(self, requisition_id: str, requester_id: str, work_order_id: str, supplier_id: str, item_id: str, quantity: float, unit_price: float, need_by: str) -> dict[str, Any]:
-        supplier = self._one("SELECT * FROM suppliers WHERE supplier_id = ?", (supplier_id,))
-        if not supplier["approved"]:
-            raise ValueError("supplier is not approved")
-        total = round(quantity * unit_price, 2)
-        payload = {"requisition_id": requisition_id, "task_id": self.task["task_id"], "requester_id": requester_id, "work_order_id": work_order_id, "status": "Pending Approval", "supplier_id": supplier_id, "total_amount": total, "need_by": need_by, "approved_by": None}
-        self.connection.execute("INSERT INTO purchase_requisitions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", tuple(payload.values()))
-        line = {"requisition_id": requisition_id, "line_no": 1, "item_id": item_id, "quantity": quantity, "unit_price": unit_price}
-        self.connection.execute("INSERT INTO requisition_lines VALUES (?, ?, ?, ?, ?)", tuple(line.values()))
-        self._audit("create_requisition", "purchase_requisitions", requisition_id, "insert", payload)
-        self._audit("create_requisition", "requisition_lines", f"{requisition_id}:1", "insert", line)
-        return {"requisition_id": requisition_id, "status": "Pending Approval", "total_amount": total}
-
-    def _tool_approve_requisition(self, requisition_id: str, approver_id: str) -> dict[str, Any]:
-        requisition = self._one("SELECT * FROM purchase_requisitions WHERE requisition_id = ?", (requisition_id,))
-        approver = self._one("SELECT * FROM users WHERE user_id = ?", (approver_id,))
-        if approver["approval_limit"] < requisition["total_amount"]:
-            raise ValueError("approver limit is insufficient")
-        self.connection.execute("UPDATE purchase_requisitions SET status = 'Approved', approved_by = ? WHERE requisition_id = ?", (approver_id, requisition_id))
-        self._audit("approve_requisition", "purchase_requisitions", requisition_id, "update", {"status": "Approved", "approved_by": approver_id})
-        return {"requisition_id": requisition_id, "status": "Approved"}
-
-    def _tool_create_purchase_order(self, purchase_order_id: str, requisition_id: str, supplier_id: str, buyer_id: str, item_id: str, quantity: float, unit_price: float, promised_date: str) -> dict[str, Any]:
-        requisition = self._one("SELECT * FROM purchase_requisitions WHERE requisition_id = ?", (requisition_id,))
-        line = self._one("SELECT * FROM requisition_lines WHERE requisition_id = ? AND item_id = ?", (requisition_id, item_id))
-        supplier = self._one("SELECT * FROM suppliers WHERE supplier_id = ?", (supplier_id,))
-        if requisition["status"] != "Approved" or not supplier["approved"]:
-            raise ValueError("requisition or supplier is not eligible")
-        quote = self._one("SELECT * FROM supplier_quotes WHERE task_id = ? AND supplier_id = ? AND item_id = ?", (self.task["task_id"], supplier_id, item_id))
-        if abs(float(quote["unit_price"]) - unit_price) > 1e-6:
-            raise ValueError("selected price does not match a current task quote")
-        if abs(float(line["quantity"]) - quantity) > 1e-6 or quantity < quote["minimum_qty"]:
-            raise ValueError("purchase order quantity must match the requisition and quote minimum")
-        need_by = date.fromisoformat(requisition["need_by"])
-        if date.fromisoformat(quote["valid_until"]) < need_by:
-            raise ValueError("selected quote is not valid through the requisition need-by date")
-        promised = date.fromisoformat(promised_date)
-        earliest_delivery = date.fromisoformat(self.task["as_of"]) + timedelta(days=int(quote["lead_days"]))
-        if promised < earliest_delivery or promised > need_by:
-            raise ValueError("promised date does not satisfy quoted lead time and requisition need-by")
-        total = round(quantity * unit_price, 2)
-        payload = {"purchase_order_id": purchase_order_id, "task_id": self.task["task_id"], "requisition_id": requisition_id, "supplier_id": supplier_id, "buyer_id": buyer_id, "status": "Pending Approval", "total_amount": total, "promised_date": promised_date, "approved_by": None}
-        self.connection.execute("INSERT INTO purchase_orders VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", tuple(payload.values()))
-        line = {"purchase_order_id": purchase_order_id, "line_no": 1, "item_id": item_id, "ordered_qty": quantity, "received_qty": 0, "unit_price": unit_price}
-        self.connection.execute("INSERT INTO purchase_order_lines VALUES (?, ?, ?, ?, ?, ?)", tuple(line.values()))
-        self._audit("create_purchase_order", "purchase_orders", purchase_order_id, "insert", payload)
-        self._audit("create_purchase_order", "purchase_order_lines", f"{purchase_order_id}:1", "insert", line)
-        return {"purchase_order_id": purchase_order_id, "status": "Pending Approval", "total_amount": total}
-
-    def _tool_approve_purchase_order(self, purchase_order_id: str, approver_id: str) -> dict[str, Any]:
-        order = self._one("SELECT * FROM purchase_orders WHERE purchase_order_id = ?", (purchase_order_id,))
-        approver = self._one("SELECT * FROM users WHERE user_id = ?", (approver_id,))
-        if approver["approval_limit"] < order["total_amount"]:
-            raise ValueError("approver limit is insufficient")
-        self.connection.execute("UPDATE purchase_orders SET status = 'Approved', approved_by = ? WHERE purchase_order_id = ?", (approver_id, purchase_order_id))
-        self._audit("approve_purchase_order", "purchase_orders", purchase_order_id, "update", {"status": "Approved", "approved_by": approver_id})
-        return {"purchase_order_id": purchase_order_id, "status": "Approved"}
-
-    def _tool_receive_purchase_order(self, receipt_id: str, purchase_order_id: str, receiver_id: str, item_id: str, quantity: float, lot_number: str, received_at: str) -> dict[str, Any]:
-        order = self._one("SELECT * FROM purchase_orders WHERE purchase_order_id = ?", (purchase_order_id,))
-        line = self._one("SELECT * FROM purchase_order_lines WHERE purchase_order_id = ? AND item_id = ?", (purchase_order_id, item_id))
-        if order["status"] != "Approved" or line["received_qty"] + quantity > line["ordered_qty"]:
-            raise ValueError("receipt exceeds an eligible approved PO quantity")
-        receipt = {"receipt_id": receipt_id, "task_id": self.task["task_id"], "purchase_order_id": purchase_order_id, "status": "Pending Inspection", "received_at": received_at, "receiver_id": receiver_id}
-        self.connection.execute("INSERT INTO receipts VALUES (?, ?, ?, ?, ?, ?)", tuple(receipt.values()))
-        receipt_line = {"receipt_id": receipt_id, "line_no": 1, "item_id": item_id, "quantity": quantity, "accepted_qty": 0, "rejected_qty": 0, "lot_number": lot_number}
-        self.connection.execute("INSERT INTO receipt_lines VALUES (?, ?, ?, ?, ?, ?, ?)", tuple(receipt_line.values()))
-        self.connection.execute("UPDATE purchase_order_lines SET received_qty = received_qty + ? WHERE purchase_order_id = ? AND item_id = ?", (quantity, purchase_order_id, item_id))
-        self.connection.execute("INSERT INTO inventory_on_hand VALUES ('SEA', 'RECEIVING', ?, ?, ?, 0, NULL, 'Inspection')", (item_id, lot_number, quantity))
-        self._audit("receive_purchase_order", "receipts", receipt_id, "insert", receipt)
-        self._audit("receive_purchase_order", "receipt_lines", f"{receipt_id}:1", "insert", receipt_line)
-        self._audit("receive_purchase_order", "purchase_order_lines", f"{purchase_order_id}:1", "update", {"received_delta": quantity})
-        self._audit("receive_purchase_order", "inventory_on_hand", f"SEA:RECEIVING:{item_id}:{lot_number}", "insert", {"quantity": quantity, "status": "Inspection"})
-        return {"receipt_id": receipt_id, "status": "Pending Inspection"}
-
-    def _tool_record_inspection(self, inspection_id: str, source_type: str, source_id: str, item_id: str, lot_number: str, inspected_qty: float, accepted_qty: float, rejected_qty: float, result: str, inspector_id: str) -> dict[str, Any]:
-        if abs(accepted_qty + rejected_qty - inspected_qty) > 1e-6:
-            raise ValueError("inspection quantities do not reconcile")
-        receipt = self._one("SELECT * FROM receipts WHERE receipt_id = ?", (source_id,))
-        line = self._one("SELECT * FROM receipt_lines WHERE receipt_id = ? AND item_id = ?", (source_id, item_id))
-        if line["quantity"] != inspected_qty or receipt["status"] != "Pending Inspection":
-            raise ValueError("inspection does not match the pending receipt")
-        payload = {"inspection_id": inspection_id, "task_id": self.task["task_id"], "source_type": source_type, "source_id": source_id, "item_id": item_id, "lot_number": lot_number, "inspected_qty": inspected_qty, "accepted_qty": accepted_qty, "rejected_qty": rejected_qty, "result": result, "inspector_id": inspector_id}
-        self.connection.execute("INSERT INTO quality_inspections VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", tuple(payload.values()))
-        self.connection.execute("UPDATE receipt_lines SET accepted_qty = ?, rejected_qty = ? WHERE receipt_id = ? AND item_id = ?", (accepted_qty, rejected_qty, source_id, item_id))
-        self.connection.execute("UPDATE receipts SET status = 'Inspected' WHERE receipt_id = ?", (source_id,))
-        self.connection.execute("DELETE FROM inventory_on_hand WHERE plant_id = 'SEA' AND subinventory = 'RECEIVING' AND item_id = ? AND lot_number = ?", (item_id, lot_number))
-        if accepted_qty:
-            self.connection.execute("INSERT INTO inventory_on_hand VALUES ('SEA', 'STORES', ?, ?, ?, 0, NULL, 'Unrestricted')", (item_id, lot_number, accepted_qty))
-        if rejected_qty:
-            self.connection.execute("INSERT INTO inventory_on_hand VALUES ('SEA', 'QUARANTINE', ?, ?, ?, 0, NULL, 'Quality Hold')", (item_id, lot_number, rejected_qty))
-        self._audit("record_inspection", "quality_inspections", inspection_id, "insert", payload)
-        self._audit("record_inspection", "receipt_lines", f"{source_id}:1", "update", {"accepted_qty": accepted_qty, "rejected_qty": rejected_qty})
-        self._audit("record_inspection", "receipts", source_id, "update", {"status": "Inspected"})
-        self._audit("record_inspection", "inventory_on_hand", f"SEA:{item_id}:{lot_number}", "move", {"accepted_qty": accepted_qty, "rejected_qty": rejected_qty})
-        return {"inspection_id": inspection_id, "result": result, "released_quantity": accepted_qty}
-
-    def _invoice_eligible(self, invoice_id: str) -> tuple[dict[str, Any], float, bool]:
-        match = self._tool_get_invoice_match(invoice_id)
-        variance = abs(match["variance_percent"])
-        quantity_ok = match["accepted_qty"] >= match["ordered_qty"]
-        return match["invoice"], variance, quantity_ok
-
-    def _tool_approve_invoice(self, invoice_id: str) -> dict[str, Any]:
-        _, variance, quantity_ok = self._invoice_eligible(invoice_id)
-        if variance > 2.0 or not quantity_ok:
-            raise ValueError("invoice exceeds three-way-match tolerance")
-        self.connection.execute("UPDATE ap_invoices SET status = 'Approved', hold_reason = NULL WHERE invoice_id = ?", (invoice_id,))
-        self._audit("approve_invoice", "ap_invoices", invoice_id, "update", {"status": "Approved", "hold_reason": None})
-        return {"invoice_id": invoice_id, "status": "Approved"}
-
-    def _tool_hold_invoice(self, invoice_id: str, reason: str) -> dict[str, Any]:
-        _, variance, quantity_ok = self._invoice_eligible(invoice_id)
-        if variance <= 2.0 and quantity_ok:
-            raise ValueError("invoice is within tolerance and should not be held")
-        self.connection.execute("UPDATE ap_invoices SET status = 'Hold', hold_reason = ? WHERE invoice_id = ?", (reason, invoice_id))
-        self._audit("hold_invoice", "ap_invoices", invoice_id, "update", {"status": "Hold", "hold_reason": reason})
-        return {"invoice_id": invoice_id, "status": "Hold", "hold_reason": reason}
-
-    def _tool_issue_material(self, transaction_id: str, work_order_id: str, item_id: str, plant_id: str, subinventory: str, lot_number: str, quantity: float, occurred_at: str) -> dict[str, Any]:
-        reservation = self._one("SELECT * FROM material_reservations WHERE work_order_id = ? AND item_id = ? AND lot_number = ? AND status = 'Active'", (work_order_id, item_id, lot_number))
-        lot = self._one("SELECT * FROM inventory_on_hand WHERE plant_id = ? AND subinventory = ? AND item_id = ? AND lot_number = ?", (plant_id, subinventory, item_id, lot_number))
-        earliest = self._one("SELECT lot_number FROM inventory_on_hand WHERE plant_id = ? AND subinventory = ? AND item_id = ? AND status = 'Unrestricted' AND reserved_qty > 0 ORDER BY expiration_date, lot_number LIMIT 1", (plant_id, subinventory, item_id))
-        if earliest["lot_number"] != lot_number or reservation["quantity"] != quantity or lot["reserved_qty"] < quantity:
-            raise ValueError("issue violates reservation or FEFO control")
-        payload = {"transaction_id": transaction_id, "task_id": self.task["task_id"], "transaction_type": "WIP_ISSUE", "work_order_id": work_order_id, "item_id": item_id, "plant_id": plant_id, "subinventory": subinventory, "lot_number": lot_number, "quantity": quantity, "occurred_at": occurred_at, "reference": reservation["reservation_id"]}
-        self.connection.execute("INSERT INTO material_transactions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", tuple(payload.values()))
-        self.connection.execute("UPDATE inventory_on_hand SET quantity = quantity - ?, reserved_qty = reserved_qty - ? WHERE plant_id = ? AND subinventory = ? AND item_id = ? AND lot_number = ?", (quantity, quantity, plant_id, subinventory, item_id, lot_number))
-        self.connection.execute("UPDATE material_reservations SET status = 'Consumed' WHERE reservation_id = ?", (reservation["reservation_id"],))
-        self.connection.execute("UPDATE material_requirements SET issued_qty = issued_qty + ? WHERE work_order_id = ? AND item_id = ?", (quantity, work_order_id, item_id))
-        self._audit("issue_material", "material_transactions", transaction_id, "insert", payload)
-        self._audit("issue_material", "inventory_on_hand", f"{plant_id}:{subinventory}:{item_id}:{lot_number}", "update", {"quantity_delta": -quantity, "reserved_delta": -quantity})
-        self._audit("issue_material", "material_reservations", reservation["reservation_id"], "update", {"status": "Consumed"})
-        self._audit("issue_material", "material_requirements", f"{work_order_id}:{item_id}", "update", {"issued_delta": quantity})
-        return {"transaction_id": transaction_id, "lot_number": lot_number, "quantity": quantity}
-
-    def _tool_start_operation(self, work_order_id: str, sequence: int) -> dict[str, Any]:
-        remaining = self._one("SELECT COUNT(*) AS count FROM material_requirements WHERE work_order_id = ? AND issued_qty < required_qty", (work_order_id,))
-        if remaining["count"]:
-            raise ValueError("materials are not fully issued")
-        self.connection.execute("UPDATE work_order_operations SET status = 'In Process' WHERE work_order_id = ? AND sequence = ?", (work_order_id, sequence))
-        self.connection.execute("UPDATE work_orders SET status = 'In Process' WHERE work_order_id = ?", (work_order_id,))
-        self._audit("start_operation", "work_order_operations", f"{work_order_id}:{sequence}", "update", {"status": "In Process"})
-        self._audit("start_operation", "work_orders", work_order_id, "update", {"status": "In Process"})
-        return {"work_order_id": work_order_id, "sequence": sequence, "status": "In Process"}
-
-    def _tool_place_quality_hold(self, hold_id: str, inspection_id: str, item_id: str, lot_number: str, reason_code: str) -> dict[str, Any]:
-        inspection = self._one("SELECT * FROM quality_inspections WHERE inspection_id = ?", (inspection_id,))
-        if inspection["result"] != "Fail" or inspection["lot_number"] != lot_number:
-            raise ValueError("inspection does not support a quality hold")
-        payload = {"hold_id": hold_id, "task_id": self.task["task_id"], "item_id": item_id, "lot_number": lot_number, "reason_code": reason_code, "status": "Active", "source_id": inspection_id}
-        self.connection.execute("INSERT INTO quality_holds VALUES (?, ?, ?, ?, ?, ?, ?)", tuple(payload.values()))
-        self.connection.execute("UPDATE inventory_on_hand SET status = 'Quality Hold' WHERE item_id = ? AND lot_number = ?", (item_id, lot_number))
-        self._audit("place_quality_hold", "quality_holds", hold_id, "insert", payload)
-        self._audit("place_quality_hold", "inventory_on_hand", f"{item_id}:{lot_number}", "update", {"status": "Quality Hold"})
-        return {"hold_id": hold_id, "status": "Active"}
-
-    def _tool_create_nonconformance(self, nonconformance_id: str, inspection_id: str, disposition: str, owner_id: str) -> dict[str, Any]:
-        inspection = self._one("SELECT * FROM quality_inspections WHERE inspection_id = ?", (inspection_id,))
-        if inspection["result"] != "Fail" or disposition not in {"REWORK", "SCRAP", "RETURN"}:
-            raise ValueError("invalid nonconformance disposition")
-        payload = {"nonconformance_id": nonconformance_id, "task_id": self.task["task_id"], "inspection_id": inspection_id, "disposition": disposition, "status": "Open", "owner_id": owner_id}
-        self.connection.execute("INSERT INTO nonconformances VALUES (?, ?, ?, ?, ?, ?)", tuple(payload.values()))
-        self._audit("create_nonconformance", "nonconformances", nonconformance_id, "insert", payload)
-        return {"nonconformance_id": nonconformance_id, "status": "Open", "disposition": disposition}
-
-    def _tool_complete_operation(self, work_order_id: str, sequence: int, actual_hours: float) -> dict[str, Any]:
-        operation = self._one("SELECT * FROM work_order_operations WHERE work_order_id = ? AND sequence = ?", (work_order_id, sequence))
-        if operation["status"] not in {"Ready", "In Process"}:
-            raise ValueError("operation cannot be completed from its current status")
-        self.connection.execute("UPDATE work_order_operations SET status = 'Complete', actual_hours = ? WHERE work_order_id = ? AND sequence = ?", (actual_hours, work_order_id, sequence))
-        self._audit("complete_operation", "work_order_operations", f"{work_order_id}:{sequence}", "update", {"status": "Complete", "actual_hours": actual_hours})
-        return {"work_order_id": work_order_id, "sequence": sequence, "status": "Complete"}
-
-    def _tool_complete_work_order(self, work_order_id: str, completed_qty: float, scrap_qty: float) -> dict[str, Any]:
-        order = self._one("SELECT * FROM work_orders WHERE work_order_id = ?", (work_order_id,))
-        open_operations = self._one("SELECT COUNT(*) AS count FROM work_order_operations WHERE work_order_id = ? AND status != 'Complete'", (work_order_id,))
-        if open_operations["count"] or abs(completed_qty + scrap_qty - order["quantity"]) > 1e-6:
-            raise ValueError("operations or completion quantities do not reconcile")
-        self.connection.execute("UPDATE work_orders SET status = 'Completed', completed_qty = ?, scrap_qty = ? WHERE work_order_id = ?", (completed_qty, scrap_qty, work_order_id))
-        lot_number = f"COMP-{work_order_id}"
-        self.connection.execute("INSERT INTO inventory_on_hand VALUES ('SEA', 'FG', ?, ?, ?, 0, NULL, 'Unrestricted')", (order["item_id"], lot_number, completed_qty))
-        self._audit("complete_work_order", "work_orders", work_order_id, "update", {"status": "Completed", "completed_qty": completed_qty, "scrap_qty": scrap_qty})
-        self._audit("complete_work_order", "inventory_on_hand", f"SEA:FG:{order['item_id']}:{lot_number}", "insert", {"quantity": completed_qty})
-        return {"work_order_id": work_order_id, "status": "Completed", "completed_qty": completed_qty, "scrap_qty": scrap_qty}
-
-    def _tool_record_wip_variance(self, variance_id: str, work_order_id: str, material_variance: float, labor_variance: float, overhead_variance: float) -> dict[str, Any]:
-        order = self._one("SELECT * FROM work_orders WHERE work_order_id = ?", (work_order_id,))
-        if order["status"] != "Completed":
-            raise ValueError("work order must be completed before variance posting")
-        payload = {"variance_id": variance_id, "task_id": self.task["task_id"], "work_order_id": work_order_id, "material_variance": material_variance, "labor_variance": labor_variance, "overhead_variance": overhead_variance, "status": "Posted"}
-        self.connection.execute("INSERT INTO wip_variances VALUES (?, ?, ?, ?, ?, ?, ?)", tuple(payload.values()))
-        self._audit("record_wip_variance", "wip_variances", variance_id, "insert", payload)
-        return {"variance_id": variance_id, "status": "Posted"}
-
-    def _tool_create_transfer(self, transfer_id: str, item_id: str, lot_number: str, from_plant: str, from_subinventory: str, to_plant: str, to_subinventory: str, quantity: float, transferred_at: str) -> dict[str, Any]:
-        lot = self._one("SELECT * FROM inventory_on_hand WHERE plant_id = ? AND subinventory = ? AND item_id = ? AND lot_number = ?", (from_plant, from_subinventory, item_id, lot_number))
-        if lot["status"] != "Unrestricted" or lot["quantity"] - lot["reserved_qty"] < quantity:
-            raise ValueError("donor plant lacks unrestricted surplus")
-        payload = {"transfer_id": transfer_id, "task_id": self.task["task_id"], "item_id": item_id, "lot_number": lot_number, "from_plant": from_plant, "from_subinventory": from_subinventory, "to_plant": to_plant, "to_subinventory": to_subinventory, "quantity": quantity, "status": "In Transit", "transferred_at": transferred_at}
-        self.connection.execute("INSERT INTO inventory_transfers VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", tuple(payload.values()))
-        self.connection.execute("UPDATE inventory_on_hand SET quantity = quantity - ? WHERE plant_id = ? AND subinventory = ? AND item_id = ? AND lot_number = ?", (quantity, from_plant, from_subinventory, item_id, lot_number))
-        self._audit("create_transfer", "inventory_transfers", transfer_id, "insert", payload)
-        self._audit("create_transfer", "inventory_on_hand", f"{from_plant}:{from_subinventory}:{item_id}:{lot_number}", "update", {"quantity_delta": -quantity})
-        return {"transfer_id": transfer_id, "status": "In Transit"}
-
-    def _tool_complete_transfer(self, transfer_id: str, arrival_date: str) -> dict[str, Any]:
-        transfer = self._one("SELECT * FROM inventory_transfers WHERE transfer_id = ?", (transfer_id,))
-        if transfer["status"] != "In Transit":
-            raise ValueError("transfer is not in transit")
-        self.connection.execute("UPDATE inventory_transfers SET status = 'Completed', transferred_at = ? WHERE transfer_id = ?", (arrival_date, transfer_id))
-        self.connection.execute(
-            "INSERT INTO inventory_on_hand (plant_id, subinventory, item_id, lot_number, quantity, reserved_qty, expiration_date, status) VALUES (?, ?, ?, ?, ?, 0, NULL, 'Unrestricted') ON CONFLICT(plant_id, subinventory, item_id, lot_number) DO UPDATE SET quantity = quantity + excluded.quantity",
-            (transfer["to_plant"], transfer["to_subinventory"], transfer["item_id"], transfer["lot_number"], transfer["quantity"]),
-        )
-        self._audit("complete_transfer", "inventory_transfers", transfer_id, "update", {"status": "Completed", "arrival_date": arrival_date})
-        self._audit("complete_transfer", "inventory_on_hand", f"{transfer['to_plant']}:{transfer['to_subinventory']}:{transfer['item_id']}:{transfer['lot_number']}", "upsert", {"quantity_delta": transfer["quantity"]})
-        return {"transfer_id": transfer_id, "status": "Completed", "arrival_date": arrival_date}
-
-    def _tool_reschedule_work_order(self, work_order_id: str, scheduled_start: str, scheduled_completion: str, workcenter_id: str) -> dict[str, Any]:
-        center = self._one("SELECT * FROM workcenters WHERE workcenter_id = ?", (workcenter_id,))
-        if center["status"] != "Active" or scheduled_completion < scheduled_start:
-            raise ValueError("schedule or workcenter is infeasible")
-        self.connection.execute("UPDATE work_orders SET scheduled_start = ?, scheduled_completion = ?, workcenter_id = ? WHERE work_order_id = ?", (scheduled_start, scheduled_completion, workcenter_id, work_order_id))
-        self._audit("reschedule_work_order", "work_orders", work_order_id, "update", {"scheduled_start": scheduled_start, "scheduled_completion": scheduled_completion, "workcenter_id": workcenter_id})
-        return {"work_order_id": work_order_id, "scheduled_start": scheduled_start, "scheduled_completion": scheduled_completion, "workcenter_id": workcenter_id}
-
-    def _tool_create_maintenance_work_order(self, maintenance_id: str, workcenter_id: str, priority: str, scheduled_start: str, expected_finish: str, failure_code: str) -> dict[str, Any]:
-        center = self._one("SELECT * FROM workcenters WHERE workcenter_id = ?", (workcenter_id,))
-        if center["status"] != "Down":
-            raise ValueError("maintenance requires a down workcenter")
-        payload = {"maintenance_id": maintenance_id, "task_id": self.task["task_id"], "workcenter_id": workcenter_id, "priority": priority, "status": "Open", "scheduled_start": scheduled_start, "expected_finish": expected_finish, "failure_code": failure_code}
-        self.connection.execute("INSERT INTO maintenance_work_orders VALUES (?, ?, ?, ?, ?, ?, ?, ?)", tuple(payload.values()))
-        self._audit("create_maintenance_work_order", "maintenance_work_orders", maintenance_id, "insert", payload)
-        return {"maintenance_id": maintenance_id, "status": "Open"}
-
-    def _tool_reroute_operation(self, work_order_id: str, sequence: int, workcenter_id: str) -> dict[str, Any]:
-        center = self._one("SELECT * FROM workcenters WHERE workcenter_id = ?", (workcenter_id,))
-        if center["status"] != "Active" or center["qualified_item_class"] != "control_panel" or center["capacity_hours"] <= 0:
-            raise ValueError("alternate workcenter is not qualified and available")
-        self.connection.execute("UPDATE work_order_operations SET workcenter_id = ? WHERE work_order_id = ? AND sequence = ?", (workcenter_id, work_order_id, sequence))
-        self._audit("reroute_operation", "work_order_operations", f"{work_order_id}:{sequence}", "update", {"workcenter_id": workcenter_id})
-        return {"work_order_id": work_order_id, "sequence": sequence, "workcenter_id": workcenter_id}
-
-    def _tool_submit_answer(self, **fields: Any) -> dict[str, Any]:
-        normalized_fields = normalize_answer_fields(self.task, fields)
-        for field, normalized in normalized_fields.items():
+    def _call_fixture(self, tool: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        row = self.connection.execute(
+            "SELECT response_json, effect_json, read_only FROM api_fixtures WHERE task_id = ? AND tool_name = ? AND arguments_json = ?",
+            (self.task["task_id"], tool, _canonical_json(arguments)),
+        ).fetchone()
+        if row is None:
+            rows = self._fixture_rows(tool)
+            if not rows:
+                raise ValueError(f"no task-scoped resource is mounted for {tool}")
+            row = rows[0]
+            expected_arguments = json.loads(row["arguments_json"])
+            if tool in READ_TOOLS:
+                self._validate_read_identity(tool, arguments, expected_arguments)
+            else:
+                self._validate_write_arguments(tool, arguments, expected_arguments)
+        if bool(row["read_only"]) != (tool in READ_TOOLS):
+            raise ValueError(f"fixture mutability does not match the pinned contract for {tool}")
+        response = json.loads(row["response_json"])
+        if tool in {
+            "google_drive.files.get",
+            "google_drive.files.download",
+            "google_drive.files.export",
+        }:
+            response = self._drive_file_response(tool, str(arguments["fileId"]))
+        if row["effect_json"] is not None:
+            effect = json.loads(row["effect_json"])
+            payload = json.loads(effect["payload_json"])
+            payload["arguments"] = arguments
+            effect["payload_json"] = _canonical_json(payload)
             self.connection.execute(
-                "INSERT INTO answers (task_id, field, value) VALUES (?, ?, ?) ON CONFLICT(task_id, field) DO UPDATE SET value = excluded.value",
-                (self.task["task_id"], field, normalized),
+                "INSERT INTO resource_state (task_id, system, resource_type, resource_id, status, effective_at, payload_json, revision) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    effect["task_id"],
+                    effect["system"],
+                    effect["resource_type"],
+                    effect["resource_id"],
+                    effect["status"],
+                    effect["effective_at"],
+                    effect["payload_json"],
+                    effect["revision"],
+                ),
             )
-            self._audit("submit_answer", "answers", f"{self.task['task_id']}:{field}", "upsert", {"value": normalized})
-        return {"task_id": self.task["task_id"], "submitted": normalized_fields}
+            self._audit(tool, "resource_state", effect["resource_id"], "upsert", effect)
+        return response
+
+    def _submit_answer(self, fields: dict[str, Any]) -> dict[str, Any]:
+        normalized = normalize_answer_fields(self.task, fields)
+        for field, value in normalized.items():
+            self.connection.execute(
+                "INSERT INTO answers (task_id, field, value) VALUES (?, ?, ?) "
+                "ON CONFLICT(task_id, field) DO UPDATE SET value = excluded.value",
+                (self.task["task_id"], field, value),
+            )
+        self._audit("factorybench.submit_answer", "answers", self.task["task_id"], "submit", normalized)
+        return {"accepted": True, "task_id": self.task["task_id"], "fields": normalized}
+
+
+__all__ = [
+    "FactoryWorld",
+    "READ_TOOLS",
+    "TOOL_CONTRACTS",
+    "TOOL_DESCRIPTIONS",
+    "WRITE_TOOLS",
+    "missing_required_read_calls",
+    "normalize_answer_fields",
+    "seed_database",
+]

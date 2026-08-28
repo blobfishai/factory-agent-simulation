@@ -1,54 +1,108 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "inbound_receipt"
+      "file": "F-000040"
     },
-    "tool": "search_documents"
+    "tool": "slack.files_info"
   },
   {
     "arguments": {
-      "purchase_order_id": "PO-R-010"
+      "fileId": "drive-approval-040",
+      "pageSize": 20
     },
-    "tool": "get_purchase_order"
+    "tool": "google_drive.approvals.list"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "lot_number": "LOT-R-0010",
-      "purchase_order_id": "PO-R-010",
-      "quantity": 34,
-      "receipt_id": "RCV-0010",
-      "received_at": "2026-01-12",
-      "receiver_id": "U-PLANNER"
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
+      ],
+      "spreadsheetId": "sheet-040",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "receive_purchase_order"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "accepted_qty": 34,
-      "inspected_qty": 34,
-      "inspection_id": "INSP-R-010",
-      "inspector_id": "U-INSPECTOR",
-      "item_id": "RM-RELAY",
-      "lot_number": "LOT-R-0010",
-      "rejected_qty": 0,
-      "result": "Pass",
-      "source_id": "RCV-0010",
-      "source_type": "receipt"
+      "format": "full",
+      "id": "msg-040",
+      "userId": "me"
     },
-    "tool": "record_inspection"
+    "tool": "gmail.messages.get"
   },
   {
     "arguments": {
-      "inspection_id": "INSP-R-010",
-      "lot_number": "LOT-R-0010",
-      "receipt_id": "RCV-0010",
-      "released_quantity": 34
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-040'"
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.receiving_receipt_requests.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0040",
+      "q": "ReferenceNumber='CASE-040'"
+    },
+    "tool": "oracle_fusion.purchase_order_lines.list"
+  },
+  {
+    "arguments": {
+      "HeaderInterfaceId": 700040,
+      "requestBody": {
+        "InspectionQualityCode": "ACCEPT",
+        "ItemNumber": "NS-COMP-040",
+        "Quantity": 11,
+        "TransactionType": "RECEIVE",
+        "lotItemLots": [
+          {
+            "LotNumber": "LOT-0040",
+            "PrimaryQuantity": 11
+          }
+        ]
+      }
+    },
+    "tool": "oracle_fusion.receiving_receipt_transactions.create"
+  },
+  {
+    "arguments": {
+      "includeValuesInResponse": true,
+      "range": "Control!H2",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Control!H2",
+        "values": [
+          [
+            "Return transaction created"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-040",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.update"
+  },
+  {
+    "arguments": {
+      "channel": "C-PRODUCTION",
+      "text": "CASE-040: Return transaction created. Oracle reference REF-0040; control workbook updated.",
+      "thread_ts": "1768000040.000100"
+    },
+    "tool": "slack.chat_postMessage"
+  },
+  {
+    "arguments": {
+      "accepted_quantity": 11,
+      "inspection_disposition": "Return transaction created",
+      "receipt_reference": "RCV-0040"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

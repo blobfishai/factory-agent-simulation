@@ -1,62 +1,105 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "maintenance_recovery"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-096' and trashed = false"
     },
-    "tool": "search_documents"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "plant_id": "SEA",
-      "work_order_id": "WO-M-006"
+      "fileId": "drive-096"
     },
-    "tool": "get_schedule"
+    "tool": "google_drive.files.download"
   },
   {
     "arguments": {
-      "workcenter_id": "WC-ASM-1"
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
+      ],
+      "spreadsheetId": "sheet-096",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_maintenance_context"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "expected_finish": "2026-01-13",
-      "failure_code": "UNPLANNED_DOWNTIME",
-      "maintenance_id": "MWO-0006",
-      "priority": "High",
-      "scheduled_start": "2026-01-12",
-      "workcenter_id": "WC-ASM-1"
+      "channel": "C-PRODUCTION",
+      "inclusive": true,
+      "limit": 100,
+      "oldest": "1768000000.000000"
     },
-    "tool": "create_maintenance_work_order"
+    "tool": "slack.conversations_history"
   },
   {
     "arguments": {
-      "sequence": 10,
-      "work_order_id": "WO-M-006",
-      "workcenter_id": "WC-ASM-2"
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0096"
     },
-    "tool": "reroute_operation"
+    "tool": "oracle_fusion.purchase_orders.get"
   },
   {
     "arguments": {
-      "scheduled_completion": "2026-01-15",
-      "scheduled_start": "2026-01-13",
-      "work_order_id": "WO-M-006",
-      "workcenter_id": "WC-ASM-2"
+      "limit": 50,
+      "onlyData": true,
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0096",
+      "q": "ReferenceNumber='CASE-096'"
     },
-    "tool": "reschedule_work_order"
+    "tool": "oracle_fusion.purchase_order_lines.list"
   },
   {
     "arguments": {
-      "alternate_workcenter": "WC-ASM-2",
-      "maintenance_id": "MWO-0006",
-      "new_completion": "2026-01-15",
-      "work_order_id": "WO-M-006"
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0096",
+      "requestBody": {
+        "acknowledgementNote": "Match the supplier email to the correct outside-processing PO and record the new supplier order reference.",
+        "supplierOrder": "SUP-ACK-0096"
+      }
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.purchase_orders.acknowledge"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-096",
+            "outside_processing_coordinator",
+            "Revised promise acknowledged",
+            "REF-0096",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-096",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "channel": "C-PRODUCTION",
+      "name": "white_check_mark",
+      "timestamp": "1768000096.000100"
+    },
+    "tool": "slack.reactions_add"
+  },
+  {
+    "arguments": {
+      "accepted_output": "FB-096",
+      "execution_action": "Revised promise acknowledged",
+      "supplier_operation": "SUP-0096"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]
