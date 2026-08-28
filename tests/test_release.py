@@ -7,7 +7,7 @@ import zipfile
 from pathlib import Path
 
 from factorybench.catalog import WORLD_ID, build_catalog
-from factorybench.release import HARBOR_PYTHON_IMAGE
+from factorybench.release import HARBOR_PYTHON_IMAGE, _write_xlsx
 from factorybench.server import handle_request, tool_definitions
 from factorybench.world import FactoryWorld
 
@@ -86,6 +86,21 @@ def test_released_pdf_and_excel_assets_are_real_files() -> None:
     with zipfile.ZipFile(asset_root / "planning-inputs.xlsx") as workbook:
         assert "xl/workbook.xml" in workbook.namelist()
         assert "xl/worksheets/sheet1.xml" in workbook.namelist()
+
+
+def test_xlsx_writer_is_byte_deterministic(tmp_path: Path) -> None:
+    rows = [["part", "quantity"], ["NS-COMP-001", 42]]
+    first = tmp_path / "first.xlsx"
+    second = tmp_path / "second.xlsx"
+
+    _write_xlsx(first, rows)
+    _write_xlsx(second, rows)
+
+    assert first.read_bytes() == second.read_bytes()
+    with zipfile.ZipFile(first) as workbook:
+        assert {member.date_time for member in workbook.infolist()} == {
+            (1980, 1, 1, 0, 0, 0)
+        }
 
 
 def test_harbor_tasks_protect_authoritative_state() -> None:
