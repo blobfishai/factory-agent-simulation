@@ -1,47 +1,80 @@
 {
   "allowed_write_tables": [
-    "ap_invoices",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "decision": {
+      "hold_or_reference": {
         "type": "string"
       },
-      "invoice_id": {
+      "invoice_number": {
         "type": "string"
       },
-      "variance_percent": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "validation_outcome": {
+        "type": "string"
       }
     },
     "required": [
-      "decision",
-      "invoice_id",
-      "variance_percent"
+      "hold_or_reference",
+      "invoice_number",
+      "validation_outcome"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "decision": "Approved",
-      "invoice_id": "INV-0003",
-      "variance_percent": 1.0
+      "hold_or_reference": "REF-0043",
+      "invoice_number": "INV-0043",
+      "validation_outcome": "Hold released"
     },
     "assertions": [
       {
-        "description": "The invoice receives the policy-correct three-way-match decision.",
-        "id": "invoice_decision",
-        "table": "ap_invoices",
+        "description": "oracle_fusion.invoice_holds.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "hold_reason": null,
-          "status": "Approved"
+          "payload_json": "{\"arguments\":{\"HoldId\":1000043,\"requestBody\":{\"ReleaseName\":\"APPROVED EVIDENCE\",\"ReleaseReason\":\"Match the credit memo and manager approval to the existing hold before recording its release reason.\"}},\"case\":\"CASE-043\",\"outcome\":\"Match the credit memo and manager approval to the existing hold before recording its release reason.\",\"tool\":\"oracle_fusion.invoice_holds.update\"}",
+          "resource_type": "oracle_fusion.invoice_holds",
+          "revision": 1,
+          "status": "Hold released",
+          "system": "oracle_fusion"
         },
         "where": {
-          "invoice_id": "INV-0003"
+          "resource_id": "factorybench-043-mutation-01",
+          "task_id": "factorybench-043"
+        }
+      },
+      {
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
+        "where": {
+          "resource_id": "factorybench-043-mutation-02",
+          "task_id": "factorybench-043"
+        }
+      },
+      {
+        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
+        },
+        "where": {
+          "resource_id": "factorybench-043-mutation-03",
+          "task_id": "factorybench-043"
         }
       }
     ]
@@ -49,43 +82,64 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "invoice_match"
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-043",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-I-003"
+        "fileId": "drive-043",
+        "mimeType": "text/plain"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.export"
     },
     {
       "arguments": {
-        "receipt_id": "RCV-I-003"
+        "file": "F-000043"
       },
-      "tool": "get_receipt"
+      "match": "successful_tool_call",
+      "tool": "slack.files_info"
     },
     {
       "arguments": {
-        "invoice_id": "INV-0003"
+        "format": "full",
+        "id": "msg-043",
+        "userId": "me"
       },
-      "tool": "get_invoice_match"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.get"
+    },
+    {
+      "arguments": {
+        "invoicesUniqID": "invoicesUniqID-0043"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.invoices.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order",
-    "get_receipt",
-    "get_invoice_match"
+    "factorybench.context.get",
+    "google_sheets.spreadsheets.values.get",
+    "google_drive.files.export",
+    "slack.files_info",
+    "gmail.messages.get",
+    "oracle_fusion.invoices.get"
   ],
   "task_id": "factorybench-043",
   "write_tools": [
-    "approve_invoice",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.messages.send",
+    "google_sheets.spreadsheets.values.update",
+    "oracle_fusion.invoice_holds.update"
   ]
 }

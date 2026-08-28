@@ -4,16 +4,26 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import json
 import shutil
 import statistics
 import tempfile
 import tomllib
+import zipfile
 from pathlib import Path
 from typing import Any
 
-from .catalog import BENCHMARK_NAME, BENCHMARK_VERSION, FAMILIES, build_catalog
+from .catalog import (
+    BENCHMARK_NAME,
+    BENCHMARK_VERSION,
+    FAMILIES,
+    WORLD_ID,
+    build_catalog,
+    catalog_quality_report,
+)
 from .evaluation import POLICIES, policy_steps, qualify, run_episode
+from .scenarios import FAMILY_DESCRIPTIONS, FAMILY_LABELS
 from .server import tool_definitions
 from .world import READ_TOOLS
 
@@ -26,33 +36,6 @@ HARBOR_URL = "https://hub.harborframework.com/datasets/blobfishai/factorybench-1
 PAGE_URL = "https://blobfish.ai/benchmarks/factorybench-100"
 HARBOR_PYTHON_IMAGE = "python:3.12-slim@sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17"
 MCP_CONFIG_PATH = "environment/mcp.json"
-
-FAMILY_LABELS = {
-    "order_release": "Order release",
-    "material_shortage": "Material shortage",
-    "supplier_selection": "Supplier selection",
-    "inbound_receipt": "Inbound receipt",
-    "invoice_match": "Three-way match",
-    "production_issue": "Production issue",
-    "quality_exception": "Quality exception",
-    "completion_costing": "Completion & costing",
-    "transfer_reschedule": "Transfer & reschedule",
-    "maintenance_recovery": "Maintenance recovery",
-}
-
-FAMILY_DESCRIPTIONS = {
-    "order_release": "Validate credit, ATP, and BOM controls before releasing and reserving a discrete work order.",
-    "material_shortage": "Net requirements against usable stock, source the shortage, and route approval.",
-    "supplier_selection": "Evaluate eligibility, price, lead time, quality, and approval limits before PO award.",
-    "inbound_receipt": "Receive an approved PO, inspect the lot, and release only accepted stock.",
-    "invoice_match": "Apply deterministic PO-receipt-invoice quantity and amount tolerances.",
-    "production_issue": "Issue reserved material by FEFO and start production only after full staging.",
-    "quality_exception": "Quarantine a failed lot and open an owned nonconformance with disposition.",
-    "completion_costing": "Complete operations, reconcile output and scrap, and post WIP variance.",
-    "transfer_reschedule": "Move surplus between plants and recover the dependent production schedule.",
-    "maintenance_recovery": "Open maintenance, select a qualified alternate center, reroute, and reschedule.",
-}
-
 
 def _write_text(path: Path, value: str, *, executable: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -67,6 +50,112 @@ def _write_json(path: Path, value: Any) -> None:
 
 def _write_jsonl(path: Path, values: list[dict[str, Any]]) -> None:
     _write_text(path, "".join(json.dumps(value, sort_keys=True) + "\n" for value in values))
+
+
+def _write_pdf(path: Path, text: str) -> None:
+    """Write a small valid PDF containing the task-specific extracted text."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [line[:92] for line in text.splitlines() if line.strip()][:42]
+    commands = ["BT", "/F1 10 Tf", "54 750 Td", "12 TL"]
+    for index, line in enumerate(lines):
+        escaped = line.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+        if index:
+            commands.append("T*")
+        commands.append(f"({escaped}) Tj")
+    commands.append("ET")
+    stream = "\n".join(commands).encode("latin-1", errors="replace")
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>",
+        f"<< /Length {len(stream)} >>\nstream\n".encode() + stream + b"\nendstream",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    output = bytearray(b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n")
+    offsets = [0]
+    for number, body in enumerate(objects, start=1):
+        offsets.append(len(output))
+        output.extend(f"{number} 0 obj\n".encode())
+        output.extend(body)
+        output.extend(b"\nendobj\n")
+    xref = len(output)
+    output.extend(f"xref\n0 {len(objects) + 1}\n".encode())
+    output.extend(b"0000000000 65535 f \n")
+    for offset in offsets[1:]:
+        output.extend(f"{offset:010d} 00000 n \n".encode())
+    output.extend(f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode())
+    path.write_bytes(bytes(output))
+
+
+def _column_name(index: int) -> str:
+    name = ""
+    while index:
+        index, remainder = divmod(index - 1, 26)
+        name = chr(65 + remainder) + name
+    return name
+
+
+def _write_xlsx(path: Path, rows: list[list[Any]]) -> None:
+    """Write a dependency-free, standards-shaped one-sheet XLSX workbook."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    sheet_rows = []
+    for row_number, row in enumerate(rows, start=1):
+        cells = []
+        for column_number, value in enumerate(row, start=1):
+            reference = f"{_column_name(column_number)}{row_number}"
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                cells.append(f'<c r="{reference}"><v>{value}</v></c>')
+            else:
+                cells.append(f'<c r="{reference}" t="inlineStr"><is><t>{html.escape(str(value))}</t></is></c>')
+        sheet_rows.append(f'<row r="{row_number}">{"".join(cells)}</row>')
+    sheet = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        f'<sheetData>{"".join(sheet_rows)}</sheetData></worksheet>'
+    )
+    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr(
+            "[Content_Types].xml",
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+            '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+            '<Default Extension="xml" ContentType="application/xml"/>'
+            '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+            '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+            '</Types>',
+        )
+        archive.writestr(
+            "_rels/.rels",
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+            '</Relationships>',
+        )
+        archive.writestr(
+            "xl/workbook.xml",
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+            '<sheets><sheet name="Evidence" sheetId="1" r:id="rId1"/></sheets></workbook>',
+        )
+        archive.writestr(
+            "xl/_rels/workbook.xml.rels",
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+            '</Relationships>',
+        )
+        archive.writestr("xl/worksheets/sheet1.xml", sheet)
+
+
+def _write_asset(path: Path, asset: dict[str, Any]) -> None:
+    if asset["media_type"] == "application/pdf":
+        _write_pdf(path, asset["content"])
+    elif asset["media_type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        _write_xlsx(path, asset["rows"])
+    else:
+        _write_text(path, asset["content"])
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -85,7 +174,7 @@ def _load_model_runs() -> list[dict[str, Any]]:
         if run.get("schema_version") != "factorybench.model-run.v1":
             raise ValueError(f"unsupported model-run schema: {path}")
         if run.get("benchmark_version") != BENCHMARK_VERSION:
-            raise ValueError(f"model run does not match {BENCHMARK_VERSION}: {path}")
+            continue
         trials = run.get("trials")
         if not isinstance(trials, list) or len(trials) != run.get("aggregate", {}).get("tasks"):
             raise ValueError(f"model-run trial count mismatch: {path}")
@@ -93,8 +182,38 @@ def _load_model_runs() -> list[dict[str, Any]]:
             artifact = MODEL_RUNS_ROOT / str(trial["artifact"])
             if not artifact.is_file():
                 raise ValueError(f"missing model-run trial artifact: {artifact}")
+        runtime_overlay = run.get("runtime_overlay")
+        if runtime_overlay is not None:
+            if not isinstance(runtime_overlay, dict) or not runtime_overlay.get("artifact"):
+                raise ValueError(f"invalid model-run runtime overlay: {path}")
+            overlay_artifact = MODEL_RUNS_ROOT / str(runtime_overlay["artifact"])
+            if not overlay_artifact.is_file():
+                raise ValueError(f"missing model-run runtime overlay: {overlay_artifact}")
         runs.append(run)
     return runs
+
+
+def _copy_model_run_artifacts(runs: list[dict[str, Any]], destination: Path) -> None:
+    """Mirror only manifests and trials pinned to the current benchmark release."""
+
+    for run in runs:
+        manifest = MODEL_RUNS_ROOT / f"{run['run_slug']}.json"
+        if not manifest.is_file():
+            raise ValueError(f"missing model-run manifest: {manifest}")
+        target = destination / manifest.name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(manifest, target)
+        for trial in run["trials"]:
+            source = MODEL_RUNS_ROOT / str(trial["artifact"])
+            target = destination / str(trial["artifact"])
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+        runtime_overlay = run.get("runtime_overlay")
+        if runtime_overlay is not None:
+            source = MODEL_RUNS_ROOT / str(runtime_overlay["artifact"])
+            target = destination / str(runtime_overlay["artifact"])
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
 
 
 def _sha256(path: Path) -> str:
@@ -158,13 +277,14 @@ def _public_task(task: dict[str, Any]) -> dict[str, Any]:
     return {
         "task_id": task["task_id"],
         "task_name": task["title"],
-        "world_id": "northstar-controls-erp-v1",
+        "world_id": WORLD_ID,
         "prompt": task["instruction"],
         "role": task["role"],
         "family": task["family"],
         "level": task["level"],
         "as_of": task["as_of"],
-        "context_files": [f"assets/{task['task_id']}/policy.md", f"assets/{task['task_id']}/starting-state.json"],
+        "context_files": [f"assets/{task['task_id']}/{asset['path']}" for asset in task["assets"]]
+        + [f"assets/{task['task_id']}/starting-state.json"],
         "required_tools": [step["tool"] for step in task["oracle_steps"]],
         "required_reads": task["required_reads"],
         "required_read_calls": task["required_read_calls"],
@@ -183,21 +303,25 @@ def _public_task(task: dict[str, Any]) -> dict[str, Any]:
             "benchmark_version": BENCHMARK_VERSION,
             "organization": "Northstar Controls Manufacturing",
             "primary_plant": "SEA",
-            "source_shape": "synthetic Oracle-shaped manufacturing ERP",
+            "source_shape": "synthetic Oracle Fusion 26a operation-mapped enterprise world",
+            "systems": task["world"]["systems"],
+            "evidence_files": len(task["assets"]),
             "synthetic": True,
         },
     }
 
 
 def _stage_for_tool(tool: str) -> str:
-    if tool == "get_environment_context":
+    if tool == "factorybench.context.get":
         return "discover"
-    if tool == "search_documents":
-        return "policy"
+    if tool.startswith(("gmail.", "google_drive.", "google_sheets.", "slack.")) and tool in READ_TOOLS:
+        return "evidence"
     if tool in READ_TOOLS:
         return "inspect"
-    if tool == "submit_answer":
+    if tool == "factorybench.submit_answer":
         return "submit"
+    if tool.startswith(("gmail.", "google_drive.", "google_sheets.", "slack.")):
+        return "communicate"
     return "transact"
 
 
@@ -209,10 +333,6 @@ def _website_data(
     model_runs: list[dict[str, Any]],
 ) -> dict[str, Any]:
     tools = tool_definitions()
-    tool_server = {
-        "search_documents": "plant_docs",
-        "submit_answer": "factory_harness",
-    }
     reference_calls = sorted(len(task["oracle_steps"]) for task in tasks)
     result_by_policy = {result["policy"]: result for result in qualification["results"]}
     names = {
@@ -279,13 +399,9 @@ def _website_data(
     samples: dict[str, Any] = {}
     for ordinal, task in enumerate(tasks, start=1):
         task_id = task["task_id"]
-        policy_doc = next(row for row in task["seed_tables"]["documents"] if row["category"] == task["family"])
         populated_tables = {table: rows for table, rows in task["seed_tables"].items() if rows}
-        asset_paths = {
-            "policy": Path("assets") / task_id / "policy.md",
-            "state": Path("assets") / task_id / "starting-state.json",
-            "checks": Path("assets") / task_id / "expected-checks.json",
-        }
+        state_path = Path("assets") / task_id / "starting-state.json"
+        checks_path = Path("assets") / task_id / "expected-checks.json"
         summaries.append(
             {
                 "id": task_id,
@@ -295,7 +411,7 @@ def _website_data(
                 "organization": "Northstar Controls Manufacturing",
                 "asOf": task["as_of"],
                 "summary": task["instruction"],
-                "documents": 2,
+                "documents": len(task["assets"]) + 2,
                 "referenceToolCalls": len(task["oracle_steps"]),
                 "sample": True,
                 "datasetUrl": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/tasks/{task_id}.json",
@@ -308,31 +424,43 @@ def _website_data(
             + ["Read-before-write control", "Exact answer fields", "Write-scope containment", "Error-free execution"],
             "assets": [
                 {
-                    "path": asset_paths["policy"].as_posix(),
-                    "url": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/{asset_paths['policy'].as_posix()}",
-                    "name": "policy.md",
-                    "format": "Markdown",
-                    "bytes": (release_root / asset_paths["policy"]).stat().st_size,
-                    "preview": policy_doc["body"],
-                    "role": "governing_policy",
-                    "note": "Versioned synthetic operating policy retrieved through plant_docs.",
-                },
+                    "path": (Path("assets") / task_id / asset["path"]).as_posix(),
+                    "url": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/{(Path('assets') / task_id / asset['path']).as_posix()}",
+                    "name": asset["path"],
+                    "format": {
+                        "application/pdf": "PDF",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel",
+                        "application/json": "JSON",
+                        "text/csv": "CSV",
+                        "text/markdown": "Markdown",
+                        "message/rfc822": "Email",
+                    }.get(asset["media_type"], asset["media_type"]),
+                    "bytes": (release_root / "assets" / task_id / asset["path"]).stat().st_size,
+                    "preview": asset["preview"],
+                    "role": asset["kind"],
+                    "note": f"Synthetic task evidence surfaced through {asset['source']}.",
+                    "source": asset["source"],
+                    "mediaType": asset["media_type"],
+                }
+                for asset in task["assets"]
+            ]
+            + [
                 {
-                    "path": asset_paths["state"].as_posix(),
-                    "url": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/{asset_paths['state'].as_posix()}",
+                    "path": state_path.as_posix(),
+                    "url": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/{state_path.as_posix()}",
                     "name": "starting-state.json",
                     "format": "JSON",
-                    "bytes": (release_root / asset_paths["state"]).stat().st_size,
-                    "preview": f"{sum(len(rows) for rows in populated_tables.values())} seeded records across {len(populated_tables)} populated ERP tables.",
+                    "bytes": (release_root / state_path).stat().st_size,
+                    "preview": f"{sum(len(rows) for rows in populated_tables.values())} seeded records across {len(populated_tables)} multi-system state tables.",
                     "role": "primary",
-                    "note": "Exact synthetic records used to seed the isolated SQLite world.",
+                    "note": "Exact synthetic records and API fixtures used to seed the isolated SQLite world.",
                 },
                 {
-                    "path": asset_paths["checks"].as_posix(),
-                    "url": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/{asset_paths['checks'].as_posix()}",
+                    "path": checks_path.as_posix(),
+                    "url": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/{checks_path.as_posix()}",
                     "name": "expected-checks.json",
                     "format": "JSON",
-                    "bytes": (release_root / asset_paths["checks"]).stat().st_size,
+                    "bytes": (release_root / checks_path).stat().st_size,
                     "preview": f"{len(task['expected']['assertions']) + 4} deterministic workflow checks plus exact answer fields.",
                     "role": "verifier",
                     "note": "Public check contract; no LLM judge participates in scoring.",
@@ -405,9 +533,10 @@ def _website_data(
                 "verifierUrl": artifact_url,
                 "stages": [
                     {"key": "discover", "label": "Discover"},
-                    {"key": "policy", "label": "Policy"},
+                    {"key": "evidence", "label": "Evidence"},
                     {"key": "inspect", "label": "Inspect"},
                     {"key": "transact", "label": "Transact"},
+                    {"key": "communicate", "label": "Communicate"},
                     {"key": "submit", "label": "Submit"},
                 ],
                 "events": events,
@@ -456,9 +585,10 @@ def _website_data(
                 "verifierUrl": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/verifiers/{task_id}.json",
                 "stages": [
                     {"key": "discover", "label": "Discover"},
-                    {"key": "policy", "label": "Policy"},
+                    {"key": "evidence", "label": "Evidence"},
                     {"key": "inspect", "label": "Inspect"},
                     {"key": "transact", "label": "Transact"},
+                    {"key": "communicate", "label": "Communicate"},
                     {"key": "submit", "label": "Submit"},
                 ],
                 "events": events,
@@ -470,12 +600,12 @@ def _website_data(
         "benchmark": {
             "name": BENCHMARK_NAME,
             "version": BENCHMARK_VERSION,
-            "tagline": "100 executable manufacturing ERP workflows over an Oracle-shaped factory world.",
-            "question": "Can an agent run the factory workflow—not just describe the next screen?",
+            "tagline": "100 distinct, executable Oracle Fusion enterprise workflows across ERP and collaboration systems.",
+            "question": "Can an agent reconcile real enterprise evidence, execute the documented ERP operation, and close the loop across collaboration systems?",
             "taskCount": len(tasks),
             "categoryNoun": "workflow family",
-            "categories": [{"key": family, "label": FAMILY_LABELS[family], "count": 10} for family in FAMILIES],
-            "world": {"tools": len(tools), "tables": 33, "documents": 10},
+            "categories": [{"key": family, "label": FAMILY_LABELS[family], "count": sum(task["family"] == family for task in tasks)} for family in FAMILIES],
+            "world": {"tools": len(tools), "tables": 7, "documents": sum(len(task["assets"]) for task in tasks)},
             "referenceCalls": {"min": min(reference_calls), "median": statistics.median(reference_calls), "max": max(reference_calls)},
             "deterministicVerifier": True,
             "mcp": {
@@ -490,8 +620,10 @@ def _website_data(
                 "sandboxSessionUrl": "/api/v1/benchmarks/factorybench-100/sandbox/sessions",
             },
             "contractPins": [
-                {"name": "World", "value": "northstar-controls-erp-v1"},
-                {"name": "Database", "value": "SQLite task snapshot"},
+                {"name": "World", "value": WORLD_ID},
+                {"name": "ERP contract", "value": "Oracle Fusion Cloud 26a documented REST operations"},
+                {"name": "Collaboration contracts", "value": "Gmail v1 · Drive v3 · Sheets v4 · Slack Web API"},
+                {"name": "Database", "value": "SQLite isolated multi-system snapshot"},
                 {"name": "Harbor base image", "value": HARBOR_PYTHON_IMAGE},
                 {"name": "Network in reward path", "value": "none"},
             ],
@@ -514,7 +646,7 @@ def _website_data(
         "tools": [
             {
                 **tool,
-                "server": tool_server.get(tool["name"], "oracle_erp"),
+                "server": tool["_meta"]["factorybench"]["server"],
             }
             for tool in tools
         ],
@@ -522,11 +654,11 @@ def _website_data(
         "methodology": [
             {
                 "title": "One metric, inspectable evidence",
-                "body": "FactoryScore is the mean percentage of deterministic checks passed. Each task checks required reads before writes, exact ERP state transitions, exact answer fields, write-scope containment, and tool-call validity. Strict completion is shown as supporting evidence, not a second benchmark metric.",
+                "body": "FactoryScore is the mean percentage of deterministic checks passed. Each task checks required cross-system reads before writes, exact Oracle and collaboration state transitions, exact answer fields, write-scope containment, and tool-call validity. Strict completion is supporting evidence, not a second benchmark metric.",
             },
             {
                 "title": "Real workflow shape, synthetic company data",
-                "body": "The suite is a clean-room simulation shaped by real manufacturing operations: multi-record order intake, SKU and supplier preflight, approval limits, transactional rollback, lot-level inventory, tax-and-amount reconciliation, and production recovery. It contains no Oracle binaries, proprietary screens, customer records, or copied benchmark tasks.",
+                "body": "The suite is a clean-room simulation shaped by production ERP work: evidence in email, Drive, spreadsheets, Slack, vendor PDFs, technical specifications, and Oracle records; explicit approvals; lot and serial traceability; transactional rollback; and required write-back. It contains no Oracle binaries, proprietary screens, customer records, or copied benchmark tasks.",
             },
             {
                 "title": "Qualification before publication",
@@ -539,13 +671,13 @@ def _website_data(
         ],
         "architectureComparison": {
             "title": "The same evaluation spine, assembled for manufacturing ERP",
-            "intro": "Archipelago and FactoryBench share the central idea that an agent should act through tools in an isolated world and be graded from observable outcomes. FactoryBench adds a released Oracle-shaped schema, task-level control checks, exact answer fields, and full public oracle replays.",
+            "intro": "Archipelago and FactoryBench share the central idea that an agent should act through tools in an isolated world and be graded from observable outcomes. FactoryBench adds endpoint-mapped enterprise APIs, heterogeneous evidence, task-level control checks, exact answer fields, and full public oracle replays.",
             "leftLabel": "Mercor Archipelago",
             "rightLabel": "Blobfish FactoryBench-100",
             "rows": [
-                {"layer": "Environment", "left": "Containerized task environments with snapshot lifecycle", "right": "Per-task SQLite snapshots generated from public synthetic seed records"},
-                {"layer": "Tool surface", "left": "MCP gateway and environment servers", "right": "Three MCP namespaces: oracle_erp, plant_docs, factory_harness"},
-                {"layer": "Agent run", "left": "Agent runner records tool interaction", "right": "Harness records every read, transaction, rejection, and submission"},
+                {"layer": "Environment", "left": "Containerized task environments with snapshot lifecycle", "right": "Per-task SQLite snapshots for Oracle, Gmail, Drive, Sheets, and Slack state"},
+                {"layer": "Tool surface", "left": "MCP gateway and environment servers", "right": "One tool per documented upstream API operation, with method/path/source pins"},
+                {"layer": "Agent run", "left": "Agent runner records tool interaction", "right": "Harness records every evidence read, ERP mutation, collaboration write, rejection, and submission"},
                 {"layer": "Grading", "left": "Before/after snapshot graders", "right": "State assertions + read order + exact answer + write scope + errors"},
                 {"layer": "Distribution", "left": "Open-source framework and role benchmarks", "right": "GitHub world, Hugging Face rows, Harbor tasks, and website explorer"},
             ],
@@ -568,6 +700,7 @@ def _harbor_task(root: Path, task: dict[str, Any]) -> None:
     tests.mkdir(parents=True, exist_ok=True)
     solution.mkdir(parents=True, exist_ok=True)
     shutil.copy2(REPO_ROOT / "factorybench" / "world.py", environment / "runtime.py")
+    shutil.copy2(REPO_ROOT / "factorybench" / "contracts.py", environment / "contracts.py")
     shutil.copy2(REPO_ROOT / "factorybench" / "schema.sql", environment / "schema.sql")
     shutil.copy2(REPO_ROOT / "factorybench" / "harbor_service.py", environment / "service.py")
     shutil.copy2(REPO_ROOT / "factorybench" / "harbor_tool.py", environment / "tool")
@@ -615,9 +748,9 @@ CMD ["sh", "-c", "sleep infinity"]
         f"""FROM {HARBOR_PYTHON_IMAGE}
 RUN install -d -o root -g root -m 0700 /var/lib/factorybench \\
     && install -d -o root -g root -m 0755 /opt/factorybench
-COPY runtime.py schema.sql service.py task.json /opt/factorybench/
+COPY runtime.py contracts.py schema.sql service.py task.json /opt/factorybench/
 RUN chmod 0755 /opt/factorybench/service.py \\
-    && chmod 0444 /opt/factorybench/runtime.py /opt/factorybench/schema.sql /opt/factorybench/task.json
+    && chmod 0444 /opt/factorybench/runtime.py /opt/factorybench/contracts.py /opt/factorybench/schema.sql /opt/factorybench/task.json
 ENV FACTORYBENCH_ROOT=/opt/factorybench \\
     FACTORYBENCH_BIND_HOST=0.0.0.0 \\
     PYTHONUNBUFFERED=1
@@ -661,7 +794,7 @@ volumes:
     _write_text(
         task_dir / "instruction.md",
         task["instruction"]
-        + "\n\nUse `tool list`, `tool schema NAME`, and `tool call NAME JSON` to inspect and operate the ERP world. Start with `get_environment_context`; it returns the scoped task identity, available policy category, and mounted tool servers. Finish by calling `submit_answer` with the requested fields.\n",
+        + "\n\nUse `tool list`, `tool schema NAME`, and `tool call NAME JSON` to inspect and operate the isolated enterprise world. Start with `factorybench.context.get`; it returns the scoped task identity, evidence index, reference records, and mounted systems. Finish with `factorybench.submit_answer` using exactly the requested fields.\n",
     )
     description = json.dumps(task["instruction"])
     _write_text(
@@ -673,7 +806,7 @@ name = "{harbor_task_name}"
 version = "{BENCHMARK_VERSION}"
 description = {description}
 authors = [{{ name = "Blobfish AI" }}]
-keywords = ["manufacturing", "erp", "oracle-shaped", "stateful", "deterministic"]
+keywords = ["manufacturing", "erp", "oracle-fusion", "multi-system", "stateful", "deterministic"]
 
 [agent]
 user = "agent"
@@ -692,7 +825,7 @@ gpus = 0
 
 [metadata]
 benchmark = "FactoryBench-100"
-world_id = "northstar-controls-erp-v1"
+world_id = "{WORLD_ID}"
 task_id = "{task['task_id']}"
 category = "{task['family']}"
 difficulty = "{task['level']}"
@@ -792,10 +925,10 @@ configs:
 
 # FactoryBench-100
 
-FactoryBench-100 is a 100-task benchmark for long-horizon manufacturing ERP
-agents. Each task runs in an isolated SQLite snapshot and uses an Oracle-shaped,
-clean-room schema spanning order management, planning, procurement, receiving,
-inventory, manufacturing, quality, costing, and maintenance.
+FactoryBench-100 is a 100-task benchmark for long-horizon enterprise ERP agents.
+Each independently authored task runs in an isolated SQLite snapshot and exposes
+documented Oracle Fusion Cloud 26a REST operations alongside Gmail v1, Drive v3,
+Sheets v4, and Slack Web API operations over synthetic state.
 
 Harbor runs the authoritative SQLite state and trace in a private root-owned
 sidecar. The agent container receives only the task instruction, typed tool CLI,
@@ -838,9 +971,9 @@ Coverage is part of the result. A stratified subset is not presented as a
 ## Fields
 
 Each JSONL row includes the natural-language prompt, role, workflow family,
-context-file paths, required tools and reads, allowed write tables, human-readable
-rubric, and metric contract. Executable worlds, oracle traces, exact verifier
-specifications, and Harbor tasks live in the source repository.
+12 heterogeneous context files, required tools and reads, allowed write tables,
+human-readable rubric, and metric contract. Executable worlds, oracle traces,
+exact verifier specifications, and Harbor tasks live in the source repository.
 
 ## Links
 
@@ -870,10 +1003,10 @@ def _release_readme(
     model_run_table = _model_run_markdown(model_runs)
     return f"""# FactoryBench-100 release
 
-FactoryBench-100 contains 100 executable manufacturing ERP tasks across ten
-workflow families. Every task includes a prompt, synthetic starting-state
-records, a policy asset, tool contracts, an oracle replay, exact state and answer
-checks, a Harbor 1.4 task, and a Hugging Face row.
+FactoryBench-100 contains 100 distinct executable enterprise workflows across
+20 families. Every task includes a prompt, 12 synthetic evidence artifacts,
+multi-system starting state, endpoint-pinned tool contracts, an oracle replay,
+exact state and answer checks, a Harbor 1.4 task, and a Hugging Face row.
 
 Each Harbor task isolates the authoritative ERP state and trace in a private
 root-owned sidecar. The agent container contains no database, runtime, verifier,
@@ -901,7 +1034,7 @@ Subset coverage is explicit and is never extrapolated to all 100 tasks.
 ## Layout
 
 - `tasks/`: full public task specifications
-- `assets/`: governing policy, starting state, and expected check contract
+- `assets/`: policy, email, Slack, PDFs, Excel workbooks, specifications, starting state, and expected checks
 - `environment/`: schema and MCP-style tool contracts
 - `trajectories/oracle/`: real replayed tool traces and state diffs
 - `model-runs/`: pinned model manifests and task-level traces
@@ -911,9 +1044,9 @@ Subset coverage is explicit and is never extrapolated to all 100 tasks.
 - `harbor/`: 100 portable Harbor task packages
 - `website-data.json`: validated input for the Blobfish benchmark explorer
 
-The world is clean-room and Oracle-shaped. “Oracle” describes familiar ERP
-entities and controls; this repository does not distribute or emulate Oracle
-proprietary code, UI, or customer data.
+The world is clean-room and maps each Oracle tool to a documented Fusion Cloud
+26a REST operation. The implementation and records are independently authored;
+the repository does not distribute Oracle code, proprietary UI, or customer data.
 """
 
 
@@ -927,10 +1060,18 @@ def build_release(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         shutil.rmtree(output)
     output.mkdir(parents=True)
     tools = tool_definitions()
+    grouped_tools = [
+        {
+            "server": server,
+            "tools": [tool for tool in tools if tool["_meta"]["factorybench"]["server"] == server],
+        }
+        for server in sorted({tool["_meta"]["factorybench"]["server"] for tool in tools})
+    ]
 
     _write_text(output / "README.md", _release_readme(qualification, model_runs))
     _write_json(output / "reports" / "qualification.json", qualification)
-    _write_json(output / "environment" / "tool-contracts.json", {"servers": [{"server": "factorybench", "tools": tools}]})
+    _write_json(output / "reports" / "catalog-fidelity.json", catalog_quality_report(tasks))
+    _write_json(output / "environment" / "tool-contracts.json", {"servers": grouped_tools})
     _write_json(
         output / MCP_CONFIG_PATH,
         {
@@ -962,21 +1103,21 @@ def build_release(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
             _write_json(output / "tasks" / f"{task_id}.json", task)
             public = _public_task(task)
             public_rows.append(public)
-            policy = next(row for row in task["seed_tables"]["documents"] if row["category"] == task["family"])
-            _write_text(output / "assets" / task_id / "policy.md", f"# {policy['title']}\n\n{policy['body']}\n")
+            for asset in task["assets"]:
+                _write_asset(output / "assets" / task_id / asset["path"], asset)
             _write_json(output / "assets" / task_id / "starting-state.json", task["seed_tables"])
             _write_json(output / "assets" / task_id / "expected-checks.json", task["expected"])
             episode = run_episode(task, "oracle", scratch / f"{task_id}.db")
             _write_json(output / "trajectories" / "oracle" / f"{task_id}.json", episode)
             _write_json(output / "verifiers" / f"{task_id}.json", {key: value for key, value in episode.items() if key not in {"trace", "state_diff"}})
-            if task["variant"] == 1:
+            if task["family"] not in representative_episodes:
                 representative_episodes[task["family"]] = episode
             _harbor_task(output / "harbor", task)
 
     demo_harbor_task = output / "harbor" / "tasks" / "factorybench-001"
     sandbox_bundle = output / "sandbox" / "factorybench-001"
     sandbox_bundle.mkdir(parents=True)
-    for name in ("runtime.py", "schema.sql", "task.json", "tools.json"):
+    for name in ("runtime.py", "contracts.py", "schema.sql", "task.json", "tools.json"):
         shutil.copy2(demo_harbor_task / "environment" / name, sandbox_bundle / name)
     shutil.copy2(REPO_ROOT / "factorybench" / "sandbox_bridge.py", sandbox_bundle / "bridge.py")
     _write_text(
@@ -993,12 +1134,11 @@ shell commands, package installation, or arbitrary paths.
     _write_jsonl(output / "tasks" / "tasks.jsonl", public_rows)
     _write_text(output / "huggingface" / "README.md", _dataset_card(tasks, qualification, model_runs))
     _write_jsonl(output / "huggingface" / "data" / "tasks.jsonl", public_rows)
-    _write_json(output / "huggingface" / "contracts" / "tool-contracts.json", {"servers": [{"server": "factorybench", "tools": tools}]})
+    _write_json(output / "huggingface" / "contracts" / "tool-contracts.json", {"servers": grouped_tools})
     shutil.copy2(output / MCP_CONFIG_PATH, output / "huggingface" / "contracts" / "mcp.json")
     shutil.copytree(output / "assets", output / "huggingface" / "assets")
-    if MODEL_RUNS_ROOT.exists():
-        shutil.copytree(MODEL_RUNS_ROOT, output / "model-runs")
-        shutil.copytree(MODEL_RUNS_ROOT, output / "huggingface" / "model-runs")
+    _copy_model_run_artifacts(model_runs, output / "model-runs")
+    _copy_model_run_artifacts(model_runs, output / "huggingface" / "model-runs")
     _write_text(output / "huggingface" / ".gitattributes", "*.jsonl filter=lfs diff=lfs merge=lfs -text\n")
 
     _write_text(
@@ -1006,6 +1146,7 @@ shell commands, package installation, or arbitrary paths.
         _harbor_dataset_manifest(output / "harbor" / "tasks"),
     )
     _write_text(output / "harbor" / "README.md", _dataset_card(tasks, qualification, model_runs))
+    _copy_model_run_artifacts(model_runs, output / "harbor" / "model-runs")
 
     shutil.copy2(REPO_ROOT / "LICENSE", output / "LICENSE")
     shutil.copy2(REPO_ROOT / "NOTICE", output / "NOTICE")
@@ -1020,6 +1161,7 @@ shell commands, package installation, or arbitrary paths.
     _write_json(output / "website-data.json", website)
 
     artifact_files = sorted(path for path in output.rglob("*") if path.is_file())
+    fidelity = catalog_quality_report(tasks)
     build_report = {
         "benchmark": BENCHMARK_NAME,
         "version": BENCHMARK_VERSION,
@@ -1028,6 +1170,9 @@ shell commands, package installation, or arbitrary paths.
         "tool_count": len(tools),
         "metric": "FactoryScore",
         "model_run_count": len(model_runs),
+        "source_asset_count": sum(len(task["assets"]) for task in tasks),
+        "unique_tool_sequences": fidelity["unique_sequences"],
+        "catalog_fidelity_passed": fidelity["passed"],
         "harbor_python_image": HARBOR_PYTHON_IMAGE,
         "qualification_passed": True,
         "artifact_file_count_before_report": len(artifact_files),

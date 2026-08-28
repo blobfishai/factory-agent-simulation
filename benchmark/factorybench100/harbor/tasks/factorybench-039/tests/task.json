@@ -1,84 +1,80 @@
 {
   "allowed_write_tables": [
-    "purchase_orders",
-    "purchase_order_lines",
-    "receipts",
-    "receipt_lines",
-    "quality_inspections",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "inspection_id": {
-        "type": "string"
-      },
-      "lot_number": {
-        "type": "string"
-      },
-      "receipt_id": {
-        "type": "string"
-      },
-      "released_quantity": {
+      "accepted_quantity": {
         "type": "integer"
+      },
+      "inspection_disposition": {
+        "type": "string"
+      },
+      "receipt_reference": {
+        "type": "string"
       }
     },
     "required": [
-      "inspection_id",
-      "lot_number",
-      "receipt_id",
-      "released_quantity"
+      "accepted_quantity",
+      "inspection_disposition",
+      "receipt_reference"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "inspection_id": "INSP-R-009",
-      "lot_number": "LOT-R-0009",
-      "receipt_id": "RCV-0009",
-      "released_quantity": 33
+      "accepted_quantity": 10,
+      "inspection_disposition": "Accepted stock delivered",
+      "receipt_reference": "RCV-0039"
     },
     "assertions": [
       {
-        "description": "The approved PO quantity is received into a traceable lot.",
-        "id": "receipt_complete",
-        "table": "receipts",
+        "description": "oracle_fusion.inventory_transactions.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "purchase_order_id": "PO-R-009",
-          "status": "Inspected"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"SourceSystemCode\":\"EXTERNAL\",\"TransactionLines\":[{\"Item\":\"NS-COMP-039\",\"LotNumber\":\"LOT-0039\",\"OrganizationCode\":\"SEA\",\"Subinventory\":\"STORES\",\"TransactionQuantity\":10,\"TransactionType\":\"Subinventory Transfer\",\"TransactionUnitOfMeasure\":\"EA\",\"TransferSubinventory\":\"CONTROLLED\"}],\"TransactionMode\":\"ONLINE\"}},\"case\":\"CASE-039\",\"outcome\":\"Verify inspection acceptance and project ownership before posting the inventory delivery transaction to the controlled subinventory.\",\"tool\":\"oracle_fusion.inventory_transactions.create\"}",
+          "resource_type": "oracle_fusion.inventory_transactions",
+          "revision": 1,
+          "status": "Accepted stock delivered",
+          "system": "oracle_fusion"
         },
         "where": {
-          "receipt_id": "RCV-0009"
+          "resource_id": "factorybench-039-mutation-01",
+          "task_id": "factorybench-039"
         }
       },
       {
-        "description": "The full receipt has a passing inspection.",
-        "id": "inspection_passed",
-        "table": "quality_inspections",
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "accepted_qty": 33,
-          "rejected_qty": 0,
-          "result": "Pass"
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "inspection_id": "INSP-R-009"
+          "resource_id": "factorybench-039-mutation-02",
+          "task_id": "factorybench-039"
         }
       },
       {
-        "description": "Accepted stock is released to stores.",
-        "id": "accepted_stock_released",
-        "table": "inventory_on_hand",
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "quantity": 33,
-          "status": "Unrestricted"
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "lot_number": "LOT-R-0009",
-          "plant_id": "SEA",
-          "subinventory": "STORES"
+          "resource_id": "factorybench-039-mutation-03",
+          "task_id": "factorybench-039"
         }
       }
     ]
@@ -86,30 +82,78 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "inbound_receipt"
+        "channel": "C-FINANCE",
+        "limit": 100,
+        "ts": "1768000039.000100"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-R-009"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
+        ],
+        "spreadsheetId": "sheet-039"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-039\"",
+        "userId": "me"
+      },
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-039"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-039'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.receiving_receipt_requests.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-039'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.quality_inspection_results.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order"
+    "factorybench.context.get",
+    "slack.conversations_replies",
+    "google_sheets.spreadsheets.get",
+    "gmail.messages.list",
+    "google_drive.files.download",
+    "oracle_fusion.receiving_receipt_requests.list",
+    "oracle_fusion.quality_inspection_results.list"
   ],
   "task_id": "factorybench-039",
   "write_tools": [
-    "receive_purchase_order",
-    "record_inspection",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.messages.send",
+    "google_drive.comments.create",
+    "oracle_fusion.inventory_transactions.create"
   ]
 }

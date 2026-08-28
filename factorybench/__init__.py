@@ -1,4 +1,4 @@
-"""FactoryBench-100: an executable Oracle-shaped manufacturing ERP benchmark."""
+"""FactoryBench-100: an executable multi-system Oracle Fusion benchmark."""
 
 from .catalog import BENCHMARK_NAME, BENCHMARK_VERSION, build_catalog
 from .world import FactoryWorld, seed_database

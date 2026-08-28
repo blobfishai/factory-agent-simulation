@@ -1,54 +1,93 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "inbound_receipt"
+      "channel": "C-PROCUREMENT",
+      "limit": 100,
+      "ts": "1768000033.000100"
     },
-    "tool": "search_documents"
+    "tool": "slack.conversations_replies"
   },
   {
     "arguments": {
-      "purchase_order_id": "PO-R-003"
+      "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+      "fileId": "drive-033"
     },
-    "tool": "get_purchase_order"
+    "tool": "google_drive.files.get"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "lot_number": "LOT-R-0003",
-      "purchase_order_id": "PO-R-003",
-      "quantity": 27,
-      "receipt_id": "RCV-0003",
-      "received_at": "2026-01-12",
-      "receiver_id": "U-PLANNER"
+      "majorDimension": "ROWS",
+      "range": "Control!A1:H50",
+      "spreadsheetId": "sheet-033",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "receive_purchase_order"
+    "tool": "google_sheets.spreadsheets.values.get"
   },
   {
     "arguments": {
-      "accepted_qty": 27,
-      "inspected_qty": 27,
-      "inspection_id": "INSP-R-003",
-      "inspector_id": "U-INSPECTOR",
-      "item_id": "RM-RELAY",
-      "lot_number": "LOT-R-0003",
-      "rejected_qty": 0,
-      "result": "Pass",
-      "source_id": "RCV-0003",
-      "source_type": "receipt"
+      "count": 50,
+      "query": "\"CASE-033\"",
+      "sort": "timestamp",
+      "sort_dir": "asc"
     },
-    "tool": "record_inspection"
+    "tool": "slack.search_messages"
   },
   {
     "arguments": {
-      "inspection_id": "INSP-R-003",
-      "lot_number": "LOT-R-0003",
-      "receipt_id": "RCV-0003",
-      "released_quantity": 27
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-033'"
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.suppliers.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0033",
+      "q": "ReferenceNumber='CASE-033'"
+    },
+    "tool": "oracle_fusion.purchase_order_lines.list"
+  },
+  {
+    "arguments": {
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0033",
+      "requestBody": {
+        "cancelUnfulfilledDemandFlag": true,
+        "cancellationReason": "Verify the affected material and remaining open quantity, then cancel the PO with the approved reason and notify stakeholders.",
+        "initiatingParty": "buyer"
+      }
+    },
+    "tool": "oracle_fusion.purchase_orders.cancel"
+  },
+  {
+    "arguments": {
+      "channel": "C-PROCUREMENT",
+      "text": "CASE-033: Unsafe supply canceled. Oracle reference REF-0033; control workbook updated.",
+      "thread_ts": "1768000033.000100"
+    },
+    "tool": "slack.chat_postMessage"
+  },
+  {
+    "arguments": {
+      "approvalId": "approval-033",
+      "fileId": "drive-approval-033",
+      "requestBody": {
+        "message": "Approved for CASE-033 only."
+      }
+    },
+    "tool": "google_drive.approvals.approve"
+  },
+  {
+    "arguments": {
+      "committed_value": 3325.51,
+      "purchase_document": "PO-0033",
+      "supplier_decision": "Unsafe supply canceled"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

@@ -1,84 +1,80 @@
 {
   "allowed_write_tables": [
-    "purchase_orders",
-    "purchase_order_lines",
-    "receipts",
-    "receipt_lines",
-    "quality_inspections",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "inspection_id": {
-        "type": "string"
-      },
-      "lot_number": {
-        "type": "string"
-      },
-      "receipt_id": {
-        "type": "string"
-      },
-      "released_quantity": {
+      "accepted_quantity": {
         "type": "integer"
+      },
+      "inspection_disposition": {
+        "type": "string"
+      },
+      "receipt_reference": {
+        "type": "string"
       }
     },
     "required": [
-      "inspection_id",
-      "lot_number",
-      "receipt_id",
-      "released_quantity"
+      "accepted_quantity",
+      "inspection_disposition",
+      "receipt_reference"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "inspection_id": "INSP-R-006",
-      "lot_number": "LOT-R-0006",
-      "receipt_id": "RCV-0006",
-      "released_quantity": 30
+      "accepted_quantity": 44,
+      "inspection_disposition": "Receipt request created",
+      "receipt_reference": "RCV-0036"
     },
     "assertions": [
       {
-        "description": "The approved PO quantity is received into a traceable lot.",
-        "id": "receipt_complete",
-        "table": "receipts",
+        "description": "oracle_fusion.receiving_receipt_requests.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "purchase_order_id": "PO-R-006",
-          "status": "Inspected"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"EmployeeId\":7136,\"OrganizationCode\":\"SEA\",\"ReceiptSourceCode\":\"VENDOR\",\"VendorName\":\"Cascade Industrial\",\"lines\":[{\"ItemNumber\":\"NS-COMP-036\",\"LotNumber\":\"LOT-0036\",\"POHeaderId\":2000036,\"POLineId\":2100036,\"Quantity\":44,\"SourceDocumentCode\":\"PO\",\"UnitOfMeasure\":\"EA\"}]}},\"case\":\"CASE-036\",\"outcome\":\"Match packing slip, PO, certificate, and dock count before creating the receipt request with the supplier lot.\",\"tool\":\"oracle_fusion.receiving_receipt_requests.create\"}",
+          "resource_type": "oracle_fusion.receiving_receipt_requests",
+          "revision": 1,
+          "status": "Receipt request created",
+          "system": "oracle_fusion"
         },
         "where": {
-          "receipt_id": "RCV-0006"
+          "resource_id": "factorybench-036-mutation-01",
+          "task_id": "factorybench-036"
         }
       },
       {
-        "description": "The full receipt has a passing inspection.",
-        "id": "inspection_passed",
-        "table": "quality_inspections",
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "accepted_qty": 30,
-          "rejected_qty": 0,
-          "result": "Pass"
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "inspection_id": "INSP-R-006"
+          "resource_id": "factorybench-036-mutation-02",
+          "task_id": "factorybench-036"
         }
       },
       {
-        "description": "Accepted stock is released to stores.",
-        "id": "accepted_stock_released",
-        "table": "inventory_on_hand",
+        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "quantity": 30,
-          "status": "Unrestricted"
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "lot_number": "LOT-R-0006",
-          "plant_id": "SEA",
-          "subinventory": "STORES"
+          "resource_id": "factorybench-036-mutation-03",
+          "task_id": "factorybench-036"
         }
       }
     ]
@@ -86,30 +82,74 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "inbound_receipt"
+        "file": "F-000036"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "slack.files_info"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-R-006"
+        "format": "full",
+        "id": "msg-036",
+        "userId": "me"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.get"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-036",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-036",
+        "mimeType": "text/plain"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-036'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.receiving_receipt_requests.list"
+    },
+    {
+      "arguments": {
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0036"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.purchase_orders.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order"
+    "factorybench.context.get",
+    "slack.files_info",
+    "gmail.messages.get",
+    "google_sheets.spreadsheets.values.get",
+    "google_drive.files.export",
+    "oracle_fusion.receiving_receipt_requests.list",
+    "oracle_fusion.purchase_orders.get"
   ],
   "task_id": "factorybench-036",
   "write_tools": [
-    "receive_purchase_order",
-    "record_inspection",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.messages.send",
+    "google_sheets.spreadsheets.values.update",
+    "oracle_fusion.receiving_receipt_requests.create"
   ]
 }

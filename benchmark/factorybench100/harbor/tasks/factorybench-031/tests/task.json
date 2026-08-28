@@ -1,84 +1,81 @@
 {
   "allowed_write_tables": [
-    "purchase_orders",
-    "purchase_order_lines",
-    "receipts",
-    "receipt_lines",
-    "quality_inspections",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "inspection_id": {
+      "committed_value": {
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "purchase_document": {
         "type": "string"
       },
-      "lot_number": {
+      "supplier_decision": {
         "type": "string"
-      },
-      "receipt_id": {
-        "type": "string"
-      },
-      "released_quantity": {
-        "type": "integer"
       }
     },
     "required": [
-      "inspection_id",
-      "lot_number",
-      "receipt_id",
-      "released_quantity"
+      "committed_value",
+      "purchase_document",
+      "supplier_decision"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "inspection_id": "INSP-R-001",
-      "lot_number": "LOT-R-0001",
-      "receipt_id": "RCV-0001",
-      "released_quantity": 25
+      "committed_value": 3072.03,
+      "purchase_document": "PO-0031",
+      "supplier_decision": "Draft purchase order created"
     },
     "assertions": [
       {
-        "description": "The approved PO quantity is received into a traceable lot.",
-        "id": "receipt_complete",
-        "table": "receipts",
+        "description": "oracle_fusion.draft_purchase_orders.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "purchase_order_id": "PO-R-001",
-          "status": "Inspected"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"BuyerId\":9131,\"CurrencyCode\":\"USD\",\"Description\":\"Award the enclosure tooling package\",\"DocumentStyleId\":1,\"ProcurementBUId\":204,\"RequiredAcknowledgment\":\"Document and Schedule\",\"RequisitioningBUId\":204,\"SupplierId\":600031,\"SupplierSiteId\":610031,\"lines\":[{\"Item\":\"NS-COMP-031\",\"ItemDescription\":\"Award the enclosure tooling package\",\"LineNumber\":1,\"LineType\":\"Goods\",\"Price\":78.77,\"Quantity\":39,\"UOM\":\"EA\"}]}},\"case\":\"CASE-031\",\"outcome\":\"Compare the technical bid, commercial workbook, supplier status, and approval thread before creating the draft purchase order.\",\"tool\":\"oracle_fusion.draft_purchase_orders.create\"}",
+          "resource_type": "oracle_fusion.draft_purchase_orders",
+          "revision": 1,
+          "status": "Draft purchase order created",
+          "system": "oracle_fusion"
         },
         "where": {
-          "receipt_id": "RCV-0001"
+          "resource_id": "factorybench-031-mutation-01",
+          "task_id": "factorybench-031"
         }
       },
       {
-        "description": "The full receipt has a passing inspection.",
-        "id": "inspection_passed",
-        "table": "quality_inspections",
+        "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "accepted_qty": 25,
-          "rejected_qty": 0,
-          "result": "Pass"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "inspection_id": "INSP-R-001"
+          "resource_id": "factorybench-031-mutation-02",
+          "task_id": "factorybench-031"
         }
       },
       {
-        "description": "Accepted stock is released to stores.",
-        "id": "accepted_stock_released",
-        "table": "inventory_on_hand",
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "quantity": 25,
-          "status": "Unrestricted"
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "lot_number": "LOT-R-0001",
-          "plant_id": "SEA",
-          "subinventory": "STORES"
+          "resource_id": "factorybench-031-mutation-03",
+          "task_id": "factorybench-031"
         }
       }
     ]
@@ -86,30 +83,80 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "inbound_receipt"
+        "id": "att-031",
+        "messageId": "msg-031",
+        "userId": "me"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-R-001"
+        "channel": "C-FINANCE",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-031",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-031' and trashed = false"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-031'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.suppliers.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-031'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.draft_purchase_orders.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order"
+    "factorybench.context.get",
+    "gmail.messages.attachments.get",
+    "slack.conversations_history",
+    "google_sheets.spreadsheets.values.get",
+    "google_drive.files.list",
+    "oracle_fusion.suppliers.list",
+    "oracle_fusion.draft_purchase_orders.list"
   ],
   "task_id": "factorybench-031",
   "write_tools": [
-    "receive_purchase_order",
-    "record_inspection",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "oracle_fusion.draft_purchase_orders.create",
+    "slack.reactions_add"
   ]
 }

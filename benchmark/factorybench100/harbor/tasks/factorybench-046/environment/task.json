@@ -1,428 +1,755 @@
 {
   "allowed_write_tables": [
-    "ap_invoices",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "decision": {
+      "case_reference": {
         "type": "string"
       },
-      "invoice_id": {
+      "governance_action": {
         "type": "string"
       },
-      "variance_percent": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "supplier": {
+        "type": "string"
       }
     },
     "required": [
-      "decision",
-      "invoice_id",
-      "variance_percent"
+      "case_reference",
+      "governance_action",
+      "supplier"
     ],
     "type": "object"
   },
   "as_of": "2026-01-12",
   "expected": {
     "answer": {
-      "decision": "Hold",
-      "invoice_id": "INV-0006",
-      "variance_percent": 3.5
+      "case_reference": "CASE-0046",
+      "governance_action": "Conditional source enabled",
+      "supplier": "SUP-0046"
     },
     "assertions": [
       {
-        "description": "The invoice receives the policy-correct three-way-match decision.",
-        "id": "invoice_decision",
-        "table": "ap_invoices",
+        "description": "oracle_fusion.supply_requests.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "hold_reason": "AMOUNT_VARIANCE",
-          "status": "Hold"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0046\",\"SupplyRequestDate\":\"2026-01-21\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-046\",\"NeedByDate\":\"2026-01-25\",\"Quantity\":17,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}},\"case\":\"CASE-046\",\"outcome\":\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\",\"tool\":\"oracle_fusion.supply_requests.create\"}",
+          "resource_type": "oracle_fusion.supply_requests",
+          "revision": 1,
+          "status": "Conditional source enabled",
+          "system": "oracle_fusion"
         },
         "where": {
-          "invoice_id": "INV-0006"
+          "resource_id": "factorybench-046-mutation-01",
+          "task_id": "factorybench-046"
+        }
+      },
+      {
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
+        "where": {
+          "resource_id": "factorybench-046-mutation-02",
+          "task_id": "factorybench-046"
+        }
+      },
+      {
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
+        },
+        "where": {
+          "resource_id": "factorybench-046-mutation-03",
+          "task_id": "factorybench-046"
         }
       }
     ]
   },
-  "family": "invoice_match",
-  "instruction": "Perform three-way match for invoice INV-0006 against PO PO-I-006 and receipt RCV-I-006. The invoice is $1937.52; apply the variance policy, update the invoice, and return the decision and variance percentage.",
-  "level": "L2",
+  "family": "supplier_governance",
+  "instruction": "You are the supplier quality manager for Northstar Controls. Resolve FACTORYBENCH-046 (Approve a conditional alternate for molded parts). Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply. The case is an isolated snapshot as of 2026-01-12; correlate immutable IDs and effective revisions rather than matching names alone. Evidence is distributed across Oracle Fusion, Gmail, Drive, Sheets, and Slack, with inspectable files including `operating-policy.md`, `contract-or-service-control.md`, `supplier-quotation.pdf`, `supplier-lead-time-and-capacity.xlsx`, `approval-decision-log.csv`, `source-email-thread.eml`, `operations-slack-thread.json`, `drive-approval-record.json`. After the documented Oracle operation, send the scoped completion email; then add the Oracle result as a Drive comment. Return exactly: supplier, governance_action, case_reference.",
+  "level": "L3",
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "invoice_match"
+        "fileId": "drive-046"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-I-006"
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000046.000100"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "receipt_id": "RCV-I-006"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
+        ],
+        "spreadsheetId": "sheet-046"
       },
-      "tool": "get_receipt"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
-        "invoice_id": "INV-0006"
+        "maxResults": 20,
+        "q": "\"CASE-046\"",
+        "userId": "me"
       },
-      "tool": "get_invoice_match"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-046'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.suppliers.list"
+    },
+    {
+      "arguments": {
+        "SupplierId": 600046
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.suppliers.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order",
-    "get_receipt",
-    "get_invoice_match"
+    "factorybench.context.get",
+    "google_drive.files.download",
+    "slack.conversations_replies",
+    "google_sheets.spreadsheets.get",
+    "gmail.messages.list",
+    "oracle_fusion.suppliers.list",
+    "oracle_fusion.suppliers.get"
   ],
-  "role": "accounts_payable_specialist",
+  "role": "supplier_quality_manager",
   "seed_tables": {
-    "ap_invoices": [
+    "api_fixtures": [
       {
-        "hold_reason": null,
-        "invoice_amount": 1937.52,
-        "invoice_id": "INV-0006",
-        "purchase_order_id": "PO-I-006",
-        "receipt_id": "RCV-I-006",
-        "status": "Pending",
-        "supplier_id": "SUP-A",
-        "task_id": "factorybench-046"
+        "arguments_json": "{\"fileId\":\"drive-046\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-call-01",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-046 | APPROVED | Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply. | Oracle operation oracle_fusion.supply_requests.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"case\\\":\\\"CASE-046\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H8\\\",\\\"decision\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.supply_requests.create\\\",\\\"returnFields\\\":{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}}\",\"description\":\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\",\"id\":\"drive-046\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "google_drive.files.download"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000046.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-call-02",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"CASE-046: evidence checked.\",\"ts\":\"1768000046.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"CASE-046 | APPROVED | Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply. | Oracle operation oracle_fusion.supply_requests.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"case\\\":\\\"CASE-046\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H8\\\",\\\"decision\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.supply_requests.create\\\",\\\"returnFields\\\":{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}}\",\"ts\":\"1768000046.000200\",\"user\":\"U-APPROVER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-046",
+        "tool_name": "slack.conversations_replies"
+      },
+      {
+        "arguments_json": "{\"includeGridData\":false,\"ranges\":[\"Control!A1:H50\"],\"spreadsheetId\":\"sheet-046\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-call-03",
+        "read_only": 1,
+        "response_json": "{\"developerMetadata\":[{\"metadataKey\":\"case\",\"metadataValue\":\"CASE-046\"},{\"metadataKey\":\"approvalStatus\",\"metadataValue\":\"APPROVED\"},{\"metadataKey\":\"approvedControlPacket\",\"metadataValue\":\"{\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"case\\\":\\\"CASE-046\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H8\\\",\\\"decision\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.supply_requests.create\\\",\\\"returnFields\\\":{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}}\"}],\"namedRanges\":[{\"name\":\"ApprovedDecision\",\"namedRangeId\":\"decision-046\"}],\"properties\":{\"title\":\"CASE-046 control workbook\"},\"sheets\":[{\"properties\":{\"sheetId\":0,\"title\":\"Control\"}}],\"spreadsheetId\":\"sheet-046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "google_sheets.spreadsheets.get"
+      },
+      {
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-046\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-call-04",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-046\",\"threadId\":\"thread-046\"}],\"resultSizeEstimate\":1}",
+        "task_id": "factorybench-046",
+        "tool_name": "gmail.messages.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-call-05",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.suppliers.list"
+      },
+      {
+        "arguments_json": "{\"SupplierId\":600046}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-call-06",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.suppliers.get"
+      },
+      {
+        "arguments_json": "{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0046\",\"SupplyRequestDate\":\"2026-01-21\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-046\",\"NeedByDate\":\"2026-01-25\",\"Quantity\":17,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}}",
+        "effect_json": "{\"effective_at\":\"2026-01-21\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"case\\\":\\\"CASE-046\\\",\\\"outcome\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"tool\\\":\\\"oracle_fusion.supply_requests.create\\\"}\",\"resource_id\":\"factorybench-046-mutation-01\",\"resource_type\":\"oracle_fusion.supply_requests\",\"revision\":1,\"status\":\"Conditional source enabled\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-046\"}",
+        "fixture_id": "factorybench-046-call-07",
+        "read_only": 0,
+        "response_json": "{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"Operation\":\"oracle_fusion.supply_requests.create\",\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"CONDITIONAL_SOURCE_ENABLED\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"links\":[],\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.supply_requests.create"
+      },
+      {
+        "arguments_json": "{\"raw\":\"RnJvbTogc3VwcGxpZXIucXVhbGl0eS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogb3BlcmF0aW9ucy1jb250cm9sQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA0NiDigJQgQ29tcGxldGVkIGVudGVycHJpc2Ugd29ya2Zsb3cNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpDb25kaXRpb25hbCBzb3VyY2UgZW5hYmxlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDQ2Lg0K\",\"threadId\":\"thread-046\",\"userId\":\"me\"}",
+        "effect_json": "{\"effective_at\":\"2026-01-21\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogc3VwcGxpZXIucXVhbGl0eS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogb3BlcmF0aW9ucy1jb250cm9sQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA0NiDigJQgQ29tcGxldGVkIGVudGVycHJpc2Ugd29ya2Zsb3cNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpDb25kaXRpb25hbCBzb3VyY2UgZW5hYmxlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDQ2Lg0K\\\",\\\"threadId\\\":\\\"thread-046\\\",\\\"userId\\\":\\\"me\\\"},\\\"case\\\":\\\"CASE-046\\\",\\\"outcome\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-046-mutation-02\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-046\"}",
+        "fixture_id": "factorybench-046-call-08",
+        "read_only": 0,
+        "response_json": "{\"id\":\"sent-046\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "gmail.messages.send"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-046\",\"requestBody\":{\"content\":\"CASE-046: Conditional source enabled; Oracle reference recorded.\"}}",
+        "effect_json": "{\"effective_at\":\"2026-01-21\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-046\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-046: Conditional source enabled; Oracle reference recorded.\\\"}},\\\"case\\\":\\\"CASE-046\\\",\\\"outcome\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-046-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-046\"}",
+        "fixture_id": "factorybench-046-call-09",
+        "read_only": 0,
+        "response_json": "{\"content\":\"CASE-046: Conditional source enabled; Oracle reference recorded.\",\"id\":\"comment-046\",\"resolved\":false}",
+        "task_id": "factorybench-046",
+        "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"id\":\"att-046\",\"messageId\":\"msg-046\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-01",
+        "read_only": 1,
+        "response_json": "{\"data\":\"U3VwcGxpZXIgcXVvdGF0aW9uIGF0dGFjaG1lbnQgZm9yIENBU0UtMDQ2OiBxdWFudGl0eSAxNy4gQ0FTRS0wNDYgfCBBUFBST1ZFRCB8IFJlY29uY2lsZSBhdWRpdCByZXN1bHRzLCBpbnN1cmFuY2UgY2VydGlmaWNhdGUsIHRyaWFsLWxvdCBxdWFsaXR5LCBhbmQgc291cmNpbmcgYXBwcm92YWwgYmVmb3JlIGRvY3VtZW50aW5nIGNvbmRpdGlvbmFsIHVzZSBhbmQgY3JlYXRpbmcgc3VwcGx5LiB8IE9yYWNsZSBvcGVyYXRpb24gb3JhY2xlX2Z1c2lvbi5zdXBwbHlfcmVxdWVzdHMuY3JlYXRlIHwgYXBwcm92ZWQgY29udHJvbCBwYWNrZXQgeyJhcHByb3ZhbFN0YXR1cyI6IkFQUFJPVkVEIiwiYXBwcm92ZWRBcmd1bWVudHMiOnsicmVxdWVzdEJvZHkiOnsiU3VwcGx5T3JkZXJSZWZlcmVuY2VOdW1iZXIiOiJTVVBQTFktMDA0NiIsIlN1cHBseVJlcXVlc3REYXRlIjoiMjAyNi0wMS0yMSIsIlN1cHBseVJlcXVlc3RTeXN0ZW0iOiJFWFQiLCJzdXBwbHlSZXF1ZXN0TGluZXMiOlt7IkRlc3RpbmF0aW9uT3JnYW5pemF0aW9uQ29kZSI6IlNFQSIsIkl0ZW1OdW1iZXIiOiJOUy1DT01QLTA0NiIsIk5lZWRCeURhdGUiOiIyMDI2LTAxLTI1IiwiUXVhbnRpdHkiOjE3LCJTdXBwbHlPcmRlclNvdXJjZSI6IkVYVCIsIlN1cHBseVR5cGUiOiJCVVkifV19fSwiY2FzZSI6IkNBU0UtMDQ2IiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDgiLCJkZWNpc2lvbiI6IlJlY29uY2lsZSBhdWRpdCByZXN1bHRzLCBpbnN1cmFuY2UgY2VydGlmaWNhdGUsIHRyaWFsLWxvdCBxdWFsaXR5LCBhbmQgc291cmNpbmcgYXBwcm92YWwgYmVmb3JlIGRvY3VtZW50aW5nIGNvbmRpdGlvbmFsIHVzZSBhbmQgY3JlYXRpbmcgc3VwcGx5LiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24uc3VwcGx5X3JlcXVlc3RzLmNyZWF0ZSIsInJldHVybkZpZWxkcyI6eyJjYXNlX3JlZmVyZW5jZSI6IkNBU0UtMDA0NiIsImdvdmVybmFuY2VfYWN0aW9uIjoiQ29uZGl0aW9uYWwgc291cmNlIGVuYWJsZWQiLCJzdXBwbGllciI6IlNVUC0wMDQ2In19\",\"size\":1083}",
+        "task_id": "factorybench-046",
+        "tool_name": "gmail.messages.attachments.get"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-046\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-02",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-046\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"Q0FTRS0wNDYgfCBBUFBST1ZFRCB8IFJlY29uY2lsZSBhdWRpdCByZXN1bHRzLCBpbnN1cmFuY2UgY2VydGlmaWNhdGUsIHRyaWFsLWxvdCBxdWFsaXR5LCBhbmQgc291cmNpbmcgYXBwcm92YWwgYmVmb3JlIGRvY3VtZW50aW5nIGNvbmRpdGlvbmFsIHVzZSBhbmQgY3JlYXRpbmcgc3VwcGx5LiB8IE9yYWNsZSBvcGVyYXRpb24gb3JhY2xlX2Z1c2lvbi5zdXBwbHlfcmVxdWVzdHMuY3JlYXRlIHwgYXBwcm92ZWQgY29udHJvbCBwYWNrZXQgeyJhcHByb3ZhbFN0YXR1cyI6IkFQUFJPVkVEIiwiYXBwcm92ZWRBcmd1bWVudHMiOnsicmVxdWVzdEJvZHkiOnsiU3VwcGx5T3JkZXJSZWZlcmVuY2VOdW1iZXIiOiJTVVBQTFktMDA0NiIsIlN1cHBseVJlcXVlc3REYXRlIjoiMjAyNi0wMS0yMSIsIlN1cHBseVJlcXVlc3RTeXN0ZW0iOiJFWFQiLCJzdXBwbHlSZXF1ZXN0TGluZXMiOlt7IkRlc3RpbmF0aW9uT3JnYW5pemF0aW9uQ29kZSI6IlNFQSIsIkl0ZW1OdW1iZXIiOiJOUy1DT01QLTA0NiIsIk5lZWRCeURhdGUiOiIyMDI2LTAxLTI1IiwiUXVhbnRpdHkiOjE3LCJTdXBwbHlPcmRlclNvdXJjZSI6IkVYVCIsIlN1cHBseVR5cGUiOiJCVVkifV19fSwiY2FzZSI6IkNBU0UtMDQ2IiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDgiLCJkZWNpc2lvbiI6IlJlY29uY2lsZSBhdWRpdCByZXN1bHRzLCBpbnN1cmFuY2UgY2VydGlmaWNhdGUsIHRyaWFsLWxvdCBxdWFsaXR5LCBhbmQgc291cmNpbmcgYXBwcm92YWwgYmVmb3JlIGRvY3VtZW50aW5nIGNvbmRpdGlvbmFsIHVzZSBhbmQgY3JlYXRpbmcgc3VwcGx5LiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24uc3VwcGx5X3JlcXVlc3RzLmNyZWF0ZSIsInJldHVybkZpZWxkcyI6eyJjYXNlX3JlZmVyZW5jZSI6IkNBU0UtMDA0NiIsImdvdmVybmFuY2VfYWN0aW9uIjoiQ29uZGl0aW9uYWwgc291cmNlIGVuYWJsZWQiLCJzdXBwbGllciI6IlNVUC0wMDQ2In19\",\"size\":1026},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-046 \\u2014 evidence and requested action\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-046\",\"size\":1024},\"filename\":\"supplier-quotation.pdf\"}]},\"snippet\":\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\",\"threadId\":\"thread-046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "gmail.messages.get"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"thread-046\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-04",
+        "read_only": 1,
+        "response_json": "{\"historyId\":\"900046\",\"id\":\"thread-046\",\"messages\":[{\"id\":\"msg-046\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"Q0FTRS0wNDYgfCBBUFBST1ZFRCB8IFJlY29uY2lsZSBhdWRpdCByZXN1bHRzLCBpbnN1cmFuY2UgY2VydGlmaWNhdGUsIHRyaWFsLWxvdCBxdWFsaXR5LCBhbmQgc291cmNpbmcgYXBwcm92YWwgYmVmb3JlIGRvY3VtZW50aW5nIGNvbmRpdGlvbmFsIHVzZSBhbmQgY3JlYXRpbmcgc3VwcGx5LiB8IE9yYWNsZSBvcGVyYXRpb24gb3JhY2xlX2Z1c2lvbi5zdXBwbHlfcmVxdWVzdHMuY3JlYXRlIHwgYXBwcm92ZWQgY29udHJvbCBwYWNrZXQgeyJhcHByb3ZhbFN0YXR1cyI6IkFQUFJPVkVEIiwiYXBwcm92ZWRBcmd1bWVudHMiOnsicmVxdWVzdEJvZHkiOnsiU3VwcGx5T3JkZXJSZWZlcmVuY2VOdW1iZXIiOiJTVVBQTFktMDA0NiIsIlN1cHBseVJlcXVlc3REYXRlIjoiMjAyNi0wMS0yMSIsIlN1cHBseVJlcXVlc3RTeXN0ZW0iOiJFWFQiLCJzdXBwbHlSZXF1ZXN0TGluZXMiOlt7IkRlc3RpbmF0aW9uT3JnYW5pemF0aW9uQ29kZSI6IlNFQSIsIkl0ZW1OdW1iZXIiOiJOUy1DT01QLTA0NiIsIk5lZWRCeURhdGUiOiIyMDI2LTAxLTI1IiwiUXVhbnRpdHkiOjE3LCJTdXBwbHlPcmRlclNvdXJjZSI6IkVYVCIsIlN1cHBseVR5cGUiOiJCVVkifV19fSwiY2FzZSI6IkNBU0UtMDQ2IiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDgiLCJkZWNpc2lvbiI6IlJlY29uY2lsZSBhdWRpdCByZXN1bHRzLCBpbnN1cmFuY2UgY2VydGlmaWNhdGUsIHRyaWFsLWxvdCBxdWFsaXR5LCBhbmQgc291cmNpbmcgYXBwcm92YWwgYmVmb3JlIGRvY3VtZW50aW5nIGNvbmRpdGlvbmFsIHVzZSBhbmQgY3JlYXRpbmcgc3VwcGx5LiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24uc3VwcGx5X3JlcXVlc3RzLmNyZWF0ZSIsInJldHVybkZpZWxkcyI6eyJjYXNlX3JlZmVyZW5jZSI6IkNBU0UtMDA0NiIsImdvdmVybmFuY2VfYWN0aW9uIjoiQ29uZGl0aW9uYWwgc291cmNlIGVuYWJsZWQiLCJzdXBwbGllciI6IlNVUC0wMDQ2In19\",\"size\":1026},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-046 \\u2014 approved enterprise action\"}]},\"snippet\":\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\",\"threadId\":\"thread-046\"}]}",
+        "task_id": "factorybench-046",
+        "tool_name": "gmail.threads.get"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-approval-046\",\"pageSize\":20}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-05",
+        "read_only": 1,
+        "response_json": "{\"approvals\":[{\"fileId\":\"drive-approval-046\",\"id\":\"approval-046\",\"reviewerResponses\":[{\"comment\":\"CASE-046 | APPROVED | Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply. | Oracle operation oracle_fusion.supply_requests.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"case\\\":\\\"CASE-046\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H8\\\",\\\"decision\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.supply_requests.create\\\",\\\"returnFields\\\":{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}}\",\"response\":\"APPROVED\",\"reviewer\":\"U-APPROVER\"}],\"status\":\"IN_PROGRESS\"}]}",
+        "task_id": "factorybench-046",
+        "tool_name": "google_drive.approvals.list"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-046\",\"mimeType\":\"text/plain\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-07",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-046 | APPROVED | Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply. | Oracle operation oracle_fusion.supply_requests.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"case\\\":\\\"CASE-046\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H8\\\",\\\"decision\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.supply_requests.create\\\",\\\"returnFields\\\":{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}}\",\"description\":\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\",\"id\":\"drive-046\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "google_drive.files.export"
+      },
+      {
+        "arguments_json": "{\"fields\":\"id,name,mimeType,modifiedTime,md5Checksum,description\",\"fileId\":\"drive-046\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-08",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-046 | APPROVED | Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply. | Oracle operation oracle_fusion.supply_requests.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"case\\\":\\\"CASE-046\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H8\\\",\\\"decision\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.supply_requests.create\\\",\\\"returnFields\\\":{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}}\",\"description\":\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\",\"id\":\"drive-046\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "google_drive.files.get"
+      },
+      {
+        "arguments_json": "{\"fields\":\"files(id,name,mimeType,modifiedTime,md5Checksum)\",\"pageSize\":50,\"q\":\"name contains 'CASE-046' and trashed = false\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-09",
+        "read_only": 1,
+        "response_json": "{\"files\":[{\"description\":\"CASE-046: Operating policy\",\"id\":\"drive-046-01\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"operating-policy.md\"},{\"description\":\"CASE-046: Contract / service control\",\"id\":\"drive-046\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"},{\"description\":\"CASE-046: Supplier quotation\",\"id\":\"drive-046-03\",\"mimeType\":\"application/pdf\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"supplier-quotation.pdf\"},{\"description\":\"CASE-046: Supplier lead-time and capacity workbook\",\"id\":\"drive-046-04\",\"mimeType\":\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"supplier-lead-time-and-capacity.xlsx\"},{\"description\":\"CASE-046: Approval decision log\",\"id\":\"drive-046-05\",\"mimeType\":\"text/csv\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"approval-decision-log.csv\"},{\"description\":\"CASE-046: Source email thread\",\"id\":\"drive-046-06\",\"mimeType\":\"message/rfc822\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"source-email-thread.eml\"},{\"description\":\"CASE-046: Operations Slack thread\",\"id\":\"drive-046-07\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"operations-slack-thread.json\"},{\"description\":\"CASE-046: Drive approval record\",\"id\":\"drive-approval-046\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"drive-approval-record.json\"},{\"description\":\"CASE-046: Oracle starting-record export\",\"id\":\"drive-046-09\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"oracle-starting-record.json\"},{\"description\":\"CASE-046: Inspection measurements\",\"id\":\"drive-046-10\",\"mimeType\":\"text/csv\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"inspection-measurements.csv\"},{\"description\":\"CASE-046: Workflow risk register\",\"id\":\"drive-046-11\",\"mimeType\":\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"workflow-risk-register.xlsx\"},{\"description\":\"CASE-046: Technical specification\",\"id\":\"drive-046-12\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"technical-specification.md\"}],\"kind\":\"drive#fileList\",\"nextPageToken\":null}",
+        "task_id": "factorybench-046",
+        "tool_name": "google_drive.files.list"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"ranges\":[\"Control!A1:H50\",\"Approvals!A1:G20\"],\"spreadsheetId\":\"sheet-046\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-11",
+        "read_only": 1,
+        "response_json": "{\"spreadsheetId\":\"sheet-046\",\"valueRanges\":[{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:E2\",\"values\":[[\"case\",\"record\",\"quantity\",\"approval\",\"approved_operation\",\"approved_arguments_json\",\"return_fields_json\"],[\"CASE-046\",\"NS-000046\",17,\"APPROVED\",\"oracle_fusion.supply_requests.create\",\"{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}}\",\"{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}\"]]}]}",
+        "task_id": "factorybench-046",
+        "tool_name": "google_sheets.spreadsheets.values.batchGet"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:H50\",\"spreadsheetId\":\"sheet-046\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-12",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:E2\",\"values\":[[\"case\",\"record\",\"quantity\",\"approval\",\"approved_operation\",\"approved_arguments_json\",\"return_fields_json\"],[\"CASE-046\",\"NS-000046\",17,\"APPROVED\",\"oracle_fusion.supply_requests.create\",\"{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}}\",\"{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}\"]]}",
+        "task_id": "factorybench-046",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-13",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.draft_purchase_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-14",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.inspection_plans.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-15",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.inventory_onhand_balances.list"
+      },
+      {
+        "arguments_json": "{\"invoicesUniqID\":\"invoicesUniqID-0046\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-16",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.invoices.get"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100046,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-17",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.maintenance_documents.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100046,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-18",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.maintenance_operations.list"
+      },
+      {
+        "arguments_json": "{\"MaintenanceProgramId\":500046}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-19",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.maintenance_programs.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-20",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.maintenance_programs.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100046}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-21",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.maintenance_work_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-22",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.maintenance_work_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-23",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.purchase_order_lines.list"
+      },
+      {
+        "arguments_json": "{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-24",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.purchase_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-25",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.purchase_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-26",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.quality_inspection_results.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-27",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.receiving_receipt_requests.list"
+      },
+      {
+        "arguments_json": "{\"HeaderInterfaceId\":700046,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-28",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.receiving_receipt_transactions.list"
+      },
+      {
+        "arguments_json": "{\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-29",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.sales_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-30",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.sales_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-33",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.supply_requests.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100046,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-34",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.work_order_materials.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100046,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-35",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.work_order_operations.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100046,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-36",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.work_order_resources.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100046}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-37",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.work_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-046'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-38",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700046,\"HoldId\":1000046,\"InspectionId\":1100046,\"InterfaceTransactionId\":800046,\"InvoiceId\":900046,\"ItemNumber\":\"NS-COMP-046\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500046,\"OrderNumber\":\"ORD-0046\",\"OrganizationCode\":\"SEA\",\"Quantity\":17,\"RecordId\":10000046,\"ReferenceNumber\":\"CASE-046\",\"StatusCode\":\"OPEN\",\"SupplierId\":600046,\"WoOperationId\":200046,\"WoOperationMaterialId\":300046,\"WoOperationResourceId\":400046,\"WorkOrderId\":100046,\"WorkOrderNumber\":\"WO-0046\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0046\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0046\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-046",
+        "tool_name": "oracle_fusion.work_orders.list"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-QUALITY\",\"inclusive\":true,\"limit\":100,\"oldest\":\"1768000000.000000\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-39",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"CASE-046: evidence checked.\",\"ts\":\"1768000046.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"CASE-046 | APPROVED | Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply. | Oracle operation oracle_fusion.supply_requests.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"case\\\":\\\"CASE-046\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H8\\\",\\\"decision\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.supply_requests.create\\\",\\\"returnFields\\\":{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}}\",\"ts\":\"1768000046.000200\",\"user\":\"U-APPROVER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-046",
+        "tool_name": "slack.conversations_history"
+      },
+      {
+        "arguments_json": "{\"file\":\"F-000046\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-41",
+        "read_only": 1,
+        "response_json": "{\"file\":{\"id\":\"F-000046\",\"mimetype\":\"application/pdf\",\"name\":\"inspection-evidence.pdf\",\"preview\":\"CASE-046 | APPROVED | Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply. | Oracle operation oracle_fusion.supply_requests.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"case\\\":\\\"CASE-046\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H8\\\",\\\"decision\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.supply_requests.create\\\",\\\"returnFields\\\":{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}}\",\"title\":\"CASE-046 inspection evidence\"},\"ok\":true}",
+        "task_id": "factorybench-046",
+        "tool_name": "slack.files_info"
+      },
+      {
+        "arguments_json": "{\"count\":50,\"query\":\"\\\"CASE-046\\\"\",\"sort\":\"timestamp\",\"sort_dir\":\"asc\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-discovery-42",
+        "read_only": 1,
+        "response_json": "{\"messages\":{\"matches\":[{\"channel\":{\"id\":\"C-QUALITY\"},\"text\":\"CASE-046 | APPROVED | Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply. | Oracle operation oracle_fusion.supply_requests.create | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0046\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-21\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-046\\\",\\\"NeedByDate\\\":\\\"2026-01-25\\\",\\\"Quantity\\\":17,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"case\\\":\\\"CASE-046\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H8\\\",\\\"decision\\\":\\\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.supply_requests.create\\\",\\\"returnFields\\\":{\\\"case_reference\\\":\\\"CASE-0046\\\",\\\"governance_action\\\":\\\"Conditional source enabled\\\",\\\"supplier\\\":\\\"SUP-0046\\\"}}\",\"ts\":\"1768000046.000100\",\"user\":\"U-APPROVER\"}],\"total\":1},\"ok\":true,\"query\":\"\\\"CASE-046\\\"\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "slack.search_messages"
       }
     ],
-    "bom_components": [
+    "evidence_files": [
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-HOUSING",
-        "operation_sequence": 10,
-        "quantity_per": 1,
-        "yield_factor": 1
-      },
-      {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-RELAY",
-        "operation_sequence": 20,
-        "quantity_per": 2,
-        "yield_factor": 1
-      },
-      {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-COPPER",
-        "operation_sequence": 20,
-        "quantity_per": 1,
-        "yield_factor": 1
-      }
-    ],
-    "bom_headers": [
-      {
-        "assembly_item_id": "FG-PANEL",
-        "bom_id": "BOM-PANEL-C",
-        "effective_on": "2025-10-01",
-        "revision": "C",
-        "status": "Active"
-      }
-    ],
-    "documents": [
-      {
-        "body": "Release only when the customer is not on credit hold, an effective BOM exists, and every component has enough available stock. Reserve the exact BOM quantity.",
-        "category": "order_release",
-        "doc_id": "POL-01",
-        "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
+        "asset_id": "factorybench-046-policy",
+        "extracted_text": "# Approve a conditional alternate for molded parts \u2014 operating control\n\nScope: Combine supplier master, performance, approval, and collaboration evidence into controlled ERP follow-up.\n\nThe operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.\n",
+        "kind": "policy",
+        "media_type": "text/markdown",
+        "path": "operating-policy.md",
+        "sha256": "7c602337ae6aa9417839200875fb3ff7ab7dec4a7f19b1136f801ecca467964a",
+        "source": "google_drive",
         "task_id": "factorybench-046",
-        "title": "Order release control"
+        "title": "Operating policy"
       },
       {
-        "body": "Net requirements against unreserved on-hand. Use an approved supplier quote that is valid through the need-by date. Requisitions over the requester's limit require the plant manager's approval.",
-        "category": "material_shortage",
-        "doc_id": "POL-02",
-        "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
+        "asset_id": "factorybench-046-contract",
+        "extracted_text": "# Commercial or service control for CASE-046\n\nThe approved operational objective is: Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\n\nEffective date: 2026-01-21\nReference record: NS-000046\nAny deviation affecting price, completion, inspected quantity, compliance, or customer commit requires explicit approval preserved in the case packet.\n",
+        "kind": "contract",
+        "media_type": "text/markdown",
+        "path": "contract-or-service-control.md",
+        "sha256": "f7b6b8de759da8fb922e64ab384412963f121afc82f4aa731e5779bdef6ad658",
+        "source": "google_drive",
         "task_id": "factorybench-046",
-        "title": "Shortage requisition control"
+        "title": "Contract / service control"
       },
       {
-        "body": "Choose an approved supplier. Minimize landed price while meeting the need-by date; break ties by higher quality score, then higher on-time rate. Purchase orders above the buyer's limit require plant-manager approval.",
-        "category": "supplier_selection",
-        "doc_id": "POL-03",
-        "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
+        "asset_id": "factorybench-046-quote",
+        "extracted_text": "VENDOR QUOTATION CASE-046\nSupplier: Rainier Components\nItem: NS-COMP-046\nQuantity: 17 EA\nUnit price: USD 96.32\nExtended: USD 1637.44\nLead time: 5 calendar days\nValid through: 2026-02-20\nFreight: included\nQuality certificate: required with shipment\n",
+        "kind": "vendor_pdf",
+        "media_type": "application/pdf",
+        "path": "supplier-quotation.pdf",
+        "sha256": "5770ad31610836797db83185be08d40941b0b8a949169fec63a0be04ee12ef43",
+        "source": "gmail_attachment",
         "task_id": "factorybench-046",
-        "title": "Supplier award policy"
+        "title": "Supplier quotation"
       },
       {
-        "body": "Receive only against an approved purchase order. Put the lot in inspection status, record accepted and rejected quantities, and release only accepted quantity to stores.",
-        "category": "inbound_receipt",
-        "doc_id": "POL-04",
-        "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
+        "asset_id": "factorybench-046-leadtime",
+        "extracted_text": "[[\"supplier\", \"item\", \"quoted_days\", \"historical_p50\", \"historical_p90\", \"capacity_confirmed\", \"valid_through\"], [\"Rainier Components\", \"NS-COMP-046\", 5, 7, 10, \"YES\", \"2026-02-20\"], [\"Alternate Dynamics\", \"NS-COMP-046\", 13, 8, 15, \"NO\", \"2026-02-10\"]]",
+        "kind": "spreadsheet",
+        "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "path": "supplier-lead-time-and-capacity.xlsx",
+        "sha256": "c0d3ec92fddadb48a49e9b7e11e8415237297c00217e31804b1bc54d3299d0b2",
+        "source": "google_drive",
         "task_id": "factorybench-046",
-        "title": "Receiving and inspection policy"
+        "title": "Supplier lead-time and capacity workbook"
       },
       {
-        "body": "Compare invoice, approved PO, and accepted receipt. Approve when quantity is covered and the amount variance is at most 2 percent; otherwise place a variance hold.",
-        "category": "invoice_match",
-        "doc_id": "POL-05",
-        "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
+        "asset_id": "factorybench-046-decision",
+        "extracted_text": "timestamp,case,actor,decision,scope,source\n2026-01-12T09:10:00-08:00,CASE-046,U-OPS-LEAD,evidence_verified,NS-000046,slack\n2026-01-12T10:05:00-08:00,CASE-046,U-APPROVER,approved,2026-01-21,drive_approval\n",
+        "kind": "spreadsheet_export",
+        "media_type": "text/csv",
+        "path": "approval-decision-log.csv",
+        "sha256": "3d6515bbbf95a77d6e2e2641dfec91f5ee0be374d70d534da8d470d37d0ee571",
+        "source": "google_sheets",
         "task_id": "factorybench-046",
-        "title": "Three-way match policy"
+        "title": "Approval decision log"
       },
       {
-        "body": "Issue only reserved, unrestricted stock. Use FEFO across eligible lots and start the operation only after the full required quantity has been issued.",
-        "category": "production_issue",
-        "doc_id": "POL-06",
-        "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
+        "asset_id": "factorybench-046-email",
+        "extracted_text": "From: operations-46@northstar.example\nTo: supplier.quality.manager@northstar.example\nDate: 2026-01-12\nMessage-ID: <msg-046@northstar.example>\nSubject: CASE-046 \u2014 evidence and requested action\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\n\nPlease complete: Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\nUse record NS-000046; approved effective date is 2026-01-21. The supporting quotation and spreadsheet are attached. Reply with the Oracle reference.\n",
+        "kind": "email",
+        "media_type": "message/rfc822",
+        "path": "source-email-thread.eml",
+        "sha256": "9655075a0aa59e22674401fc28ec1ce8ac40e573db654839ab7d6aced5535965",
+        "source": "gmail",
         "task_id": "factorybench-046",
-        "title": "Material issue policy"
+        "title": "Source email thread"
       },
       {
-        "body": "A failed inspection requires an immediate lot hold and an open nonconformance. Use REWORK when the defect is recoverable and assign it to the quality engineer.",
-        "category": "quality_exception",
-        "doc_id": "POL-07",
-        "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
+        "asset_id": "factorybench-046-slack",
+        "extracted_text": "{\n  \"channel\": \"C-QUALITY\",\n  \"messages\": [\n    {\n      \"text\": \"CASE-046: physical/operational evidence checked for NS-000046.\",\n      \"ts\": \"1768000046.000100\",\n      \"user\": \"U-OPS-LEAD\"\n    },\n    {\n      \"text\": \"Approved exactly as documented; effective 2026-01-21. No broader change authorized.\",\n      \"ts\": \"1768000046.000200\",\n      \"user\": \"U-APPROVER\"\n    },\n    {\n      \"text\": \"Post the resulting Oracle reference back to this thread and the control workbook.\",\n      \"ts\": \"1768000046.000300\",\n      \"user\": \"U-CONTROLLER\"\n    }\n  ],\n  \"thread_ts\": \"1768000046.000100\"\n}\n",
+        "kind": "chat_thread",
+        "media_type": "application/json",
+        "path": "operations-slack-thread.json",
+        "sha256": "d6e3f1d2882eb4b665ee1820b48d1f7c9b29a6d78f904a641961a53eb3ccd09f",
+        "source": "slack",
         "task_id": "factorybench-046",
-        "title": "Nonconformance policy"
+        "title": "Operations Slack thread"
       },
       {
-        "body": "Complete all operations before closing the work order. Record finished quantity and scrap, then post material, labor, and overhead variance for finance review.",
-        "category": "completion_costing",
-        "doc_id": "POL-08",
-        "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
+        "asset_id": "factorybench-046-approval",
+        "extracted_text": "{\n  \"approvalId\": \"approval-046\",\n  \"approvedScope\": \"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\",\n  \"case\": \"CASE-046\",\n  \"effectiveDate\": \"2026-01-21\",\n  \"fileId\": \"drive-approval-046\",\n  \"requiredReviewers\": [\n    \"U-APPROVER\"\n  ],\n  \"reviewerResponses\": [\n    {\n      \"response\": \"APPROVED\",\n      \"reviewer\": \"U-APPROVER\"\n    }\n  ],\n  \"status\": \"IN_PROGRESS\"\n}\n",
+        "kind": "approval",
+        "media_type": "application/json",
+        "path": "drive-approval-record.json",
+        "sha256": "e0871eb05438cd2ef126c4634b7a8bd904333607213714e87f8c337e683c9904",
+        "source": "google_drive",
         "task_id": "factorybench-046",
-        "title": "Work-order close policy"
+        "title": "Drive approval record"
       },
       {
-        "body": "Use unrestricted surplus from the donor plant, complete the interplant transfer, and reschedule the receiving work order no earlier than the transfer arrival date.",
-        "category": "transfer_reschedule",
-        "doc_id": "POL-09",
-        "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
+        "asset_id": "factorybench-046-erp",
+        "extracted_text": "{\n  \"case\": \"CASE-046\",\n  \"itemNumber\": \"NS-COMP-046\",\n  \"lastUpdateDate\": \"2026-01-12T08:00:00-08:00\",\n  \"organizationCode\": \"SEA\",\n  \"quantity\": 17,\n  \"recordId\": \"NS-000046\",\n  \"source\": \"Oracle Fusion Cloud 26a-shaped synthetic export\",\n  \"status\": \"Open\",\n  \"supplier\": \"Rainier Components\"\n}\n",
+        "kind": "erp_export",
+        "media_type": "application/json",
+        "path": "oracle-starting-record.json",
+        "sha256": "1eb115827dc54a3806a45666989dcd6f1724fc55a4ca6a3a7aa9c31fbf9e5c68",
+        "source": "oracle_fusion",
         "task_id": "factorybench-046",
-        "title": "Interplant recovery policy"
+        "title": "Oracle starting-record export"
       },
       {
-        "body": "Open a high-priority maintenance work order for the failed workcenter. Reroute production only to a qualified active alternate and reschedule within that center's capacity.",
-        "category": "maintenance_recovery",
-        "doc_id": "POL-10",
-        "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
+        "asset_id": "factorybench-046-measurements",
+        "extracted_text": "sample,characteristic,value,unit,lower,upper,result\nS-046-1,dimension_a,24.97,mm,24.9,25.1,PASS\nS-046-2,dimension_a,25.01,mm,24.9,25.1,PASS\nS-046-3,dielectric,1516,V,1500,,PASS\n",
+        "kind": "quality_data",
+        "media_type": "text/csv",
+        "path": "inspection-measurements.csv",
+        "sha256": "bb992bc42c65f610f3e193048345b3c18d2c9f31398ba3247f267b11f51a7686",
+        "source": "laboratory_drive",
         "task_id": "factorybench-046",
-        "title": "Unplanned downtime policy"
-      }
-    ],
-    "items": [
-      {
-        "description": "Industrial control panel",
-        "item_id": "FG-PANEL",
-        "item_type": "finished_good",
-        "make_buy": "MAKE",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 910,
-        "uom": "EA"
+        "title": "Inspection measurements"
       },
       {
-        "description": "Powder-coated enclosure",
-        "item_id": "RM-HOUSING",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 210,
-        "uom": "EA"
+        "asset_id": "factorybench-046-risk",
+        "extracted_text": "[[\"risk_id\", \"case\", \"risk\", \"likelihood\", \"impact\", \"owner\", \"mitigation\", \"status\"], [\"R-046-A\", \"CASE-046\", \"incorrect record selection\", \"low\", \"high\", \"supplier_quality_manager\", \"cross-check immutable identifiers\", \"OPEN\"], [\"R-046-B\", \"CASE-046\", \"unapproved scope expansion\", \"medium\", \"high\", \"U-APPROVER\", \"limit write to approved fields\", \"MITIGATED\"]]",
+        "kind": "spreadsheet",
+        "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "path": "workflow-risk-register.xlsx",
+        "sha256": "12b26f9f76f0986f941ca0e8653bdc9f8f366cda2120321aa6a9b05fe839f9a5",
+        "source": "google_drive",
+        "task_id": "factorybench-046",
+        "title": "Workflow risk register"
       },
       {
-        "description": "Safety relay",
-        "item_id": "RM-RELAY",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 48,
-        "uom": "EA"
-      },
-      {
-        "description": "Copper busbar set",
-        "item_id": "RM-COPPER",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 72,
-        "uom": "EA"
+        "asset_id": "factorybench-046-spec",
+        "extracted_text": "# Technical specification NS-000046\n\nRevision: R5\nEffective: 2026-01-21\nItem: NS-COMP-046\nRequired control: Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\n",
+        "kind": "specification",
+        "media_type": "text/markdown",
+        "path": "technical-specification.md",
+        "sha256": "9ee4b3be0bdb0a78a2306d60df6da13761207c51cfccb9cf33489f10d928e02e",
+        "source": "google_drive",
+        "task_id": "factorybench-046",
+        "title": "Technical specification"
       }
     ],
     "organizations": [
       {
         "ledger_currency": "USD",
         "name": "Northstar Controls Manufacturing",
-        "organization_id": "M1"
+        "organization_id": "NSC"
       }
     ],
-    "plants": [
+    "resource_state": [
       {
-        "name": "Seattle Assembly",
-        "organization_id": "M1",
-        "plant_id": "SEA",
-        "timezone": "America/Los_Angeles"
-      },
-      {
-        "name": "Portland Components",
-        "organization_id": "M1",
-        "plant_id": "PDX",
-        "timezone": "America/Los_Angeles"
-      }
-    ],
-    "purchase_order_lines": [
-      {
-        "item_id": "RM-COPPER",
-        "line_no": 1,
-        "ordered_qty": 26,
-        "purchase_order_id": "PO-I-006",
-        "received_qty": 26,
-        "unit_price": 72
-      }
-    ],
-    "purchase_orders": [
-      {
-        "approved_by": "U-MANAGER",
-        "buyer_id": "U-BUYER",
-        "promised_date": "2026-01-12",
-        "purchase_order_id": "PO-I-006",
-        "requisition_id": null,
-        "status": "Approved",
-        "supplier_id": "SUP-A",
-        "task_id": "factorybench-046",
-        "total_amount": 1872
-      }
-    ],
-    "receipt_lines": [
-      {
-        "accepted_qty": 26,
-        "item_id": "RM-COPPER",
-        "line_no": 1,
-        "lot_number": "LOT-I-006",
-        "quantity": 26,
-        "receipt_id": "RCV-I-006",
-        "rejected_qty": 0
-      }
-    ],
-    "receipts": [
-      {
-        "purchase_order_id": "PO-I-006",
-        "receipt_id": "RCV-I-006",
-        "received_at": "2026-01-12",
-        "receiver_id": "U-PLANNER",
-        "status": "Inspected",
+        "effective_at": "2026-01-12",
+        "payload_json": "{\"case\":\"CASE-046\",\"identifiers\":{\"SupplierId\":600046},\"quantity\":17,\"record\":\"NS-000046\"}",
+        "resource_id": "600046",
+        "resource_type": "oracle_fusion.suppliers",
+        "revision": 0,
+        "status": "Open",
+        "system": "oracle_fusion",
         "task_id": "factorybench-046"
-      }
-    ],
-    "suppliers": [
-      {
-        "approved": 1,
-        "name": "Cascade Industrial",
-        "on_time_rate": 0.94,
-        "payment_terms": "NET30",
-        "quality_score": 97.2,
-        "supplier_id": "SUP-A"
-      },
-      {
-        "approved": 1,
-        "name": "Rainier Components",
-        "on_time_rate": 0.98,
-        "payment_terms": "NET45",
-        "quality_score": 95.8,
-        "supplier_id": "SUP-B"
-      },
-      {
-        "approved": 0,
-        "name": "Frontier Supply",
-        "on_time_rate": 0.99,
-        "payment_terms": "NET30",
-        "quality_score": 99.1,
-        "supplier_id": "SUP-C"
       }
     ],
     "users": [
       {
         "approval_limit": 0,
-        "display_name": "Maya Chen",
-        "plant_id": "SEA",
-        "role": "production_planner",
-        "user_id": "U-PLANNER"
-      },
-      {
-        "approval_limit": 1000,
-        "display_name": "Diego Ruiz",
-        "plant_id": "SEA",
-        "role": "buyer",
-        "user_id": "U-BUYER"
+        "display_name": "Jordan Lee",
+        "role": "supplier_quality_manager",
+        "user_id": "U-AGENT"
       },
       {
         "approval_limit": 250000,
         "display_name": "Avery Morgan",
-        "plant_id": "SEA",
-        "role": "plant_manager",
-        "user_id": "U-MANAGER"
+        "role": "authorized_approver",
+        "user_id": "U-APPROVER"
       },
       {
-        "approval_limit": 0,
-        "display_name": "Priya Shah",
-        "plant_id": "SEA",
-        "role": "quality_inspector",
-        "user_id": "U-INSPECTOR"
-      },
-      {
-        "approval_limit": 0,
-        "display_name": "Noah Williams",
-        "plant_id": "SEA",
-        "role": "quality_engineer",
-        "user_id": "U-QUALITY"
-      }
-    ],
-    "workcenters": [
-      {
-        "capacity_hours": 80,
-        "name": "Assembly Cell 1",
-        "plant_id": "SEA",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-ASM-1"
-      },
-      {
-        "capacity_hours": 64,
-        "name": "Assembly Cell 2",
-        "plant_id": "SEA",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-ASM-2"
-      },
-      {
-        "capacity_hours": 72,
-        "name": "Portland Fabrication",
-        "plant_id": "PDX",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-PDX-1"
+        "approval_limit": 25000,
+        "display_name": "Maya Chen",
+        "role": "operations_lead",
+        "user_id": "U-OPS-LEAD"
       }
     ]
   },
   "task_id": "factorybench-046",
-  "title": "Resolve three-way match for INV-0006",
+  "title": "Approve a conditional alternate for molded parts",
   "world": {
     "database": "SQLite",
-    "name": "Northstar Controls Oracle-shaped ERP",
-    "organization_id": "M1",
+    "id": "northstar-enterprise-fusion-v2",
+    "name": "Northstar Controls enterprise operations sandbox",
+    "organization_id": "NSC",
     "primary_plant": "SEA",
-    "servers": [
-      "oracle_erp",
-      "plant_docs",
-      "factory_harness"
+    "synthetic": true,
+    "systems": [
+      "factorybench",
+      "gmail",
+      "google_drive",
+      "google_sheets",
+      "oracle_fusion",
+      "slack"
     ]
   }
 }

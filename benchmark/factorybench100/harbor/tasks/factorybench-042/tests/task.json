@@ -1,47 +1,80 @@
 {
   "allowed_write_tables": [
-    "ap_invoices",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "decision": {
+      "hold_or_reference": {
         "type": "string"
       },
-      "invoice_id": {
+      "invoice_number": {
         "type": "string"
       },
-      "variance_percent": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "validation_outcome": {
+        "type": "string"
       }
     },
     "required": [
-      "decision",
-      "invoice_id",
-      "variance_percent"
+      "hold_or_reference",
+      "invoice_number",
+      "validation_outcome"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "decision": "Hold",
-      "invoice_id": "INV-0002",
-      "variance_percent": 3.5
+      "hold_or_reference": "REF-0042",
+      "invoice_number": "INV-0042",
+      "validation_outcome": "Freight hold placed"
     },
     "assertions": [
       {
-        "description": "The invoice receives the policy-correct three-way-match decision.",
-        "id": "invoice_decision",
-        "table": "ap_invoices",
+        "description": "oracle_fusion.invoice_holds.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "hold_reason": "AMOUNT_VARIANCE",
-          "status": "Hold"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"HoldName\":\"CONTROL REVIEW\",\"HoldReason\":\"Confirm freight is excluded from the PO and exceeds tolerance, then create the documented Payables hold with the approved reason.\",\"InvoiceId\":900042}},\"case\":\"CASE-042\",\"outcome\":\"Confirm freight is excluded from the PO and exceeds tolerance, then create the documented Payables hold with the approved reason.\",\"tool\":\"oracle_fusion.invoice_holds.create\"}",
+          "resource_type": "oracle_fusion.invoice_holds",
+          "revision": 1,
+          "status": "Freight hold placed",
+          "system": "oracle_fusion"
         },
         "where": {
-          "invoice_id": "INV-0002"
+          "resource_id": "factorybench-042-mutation-01",
+          "task_id": "factorybench-042"
+        }
+      },
+      {
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
+        "where": {
+          "resource_id": "factorybench-042-mutation-02",
+          "task_id": "factorybench-042"
+        }
+      },
+      {
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
+        },
+        "where": {
+          "resource_id": "factorybench-042-mutation-03",
+          "task_id": "factorybench-042"
         }
       }
     ]
@@ -49,43 +82,76 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "invoice_match"
+        "format": "full",
+        "id": "thread-042",
+        "userId": "me"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "gmail.threads.get"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-I-002"
+        "channel": "C-QUALITY",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
     },
     {
       "arguments": {
-        "receipt_id": "RCV-I-002"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
+        ],
+        "spreadsheetId": "sheet-042"
       },
-      "tool": "get_receipt"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
-        "invoice_id": "INV-0002"
+        "fileId": "drive-approval-042",
+        "pageSize": 20
       },
-      "tool": "get_invoice_match"
+      "match": "successful_tool_call",
+      "tool": "google_drive.approvals.list"
+    },
+    {
+      "arguments": {
+        "invoicesUniqID": "invoicesUniqID-0042"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.invoices.get"
+    },
+    {
+      "arguments": {
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0042"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.purchase_orders.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order",
-    "get_receipt",
-    "get_invoice_match"
+    "factorybench.context.get",
+    "gmail.threads.get",
+    "slack.conversations_history",
+    "google_sheets.spreadsheets.get",
+    "google_drive.approvals.list",
+    "oracle_fusion.invoices.get",
+    "oracle_fusion.purchase_orders.get"
   ],
   "task_id": "factorybench-042",
   "write_tools": [
-    "hold_invoice",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "google_drive.comments.create",
+    "oracle_fusion.invoice_holds.create"
   ]
 }

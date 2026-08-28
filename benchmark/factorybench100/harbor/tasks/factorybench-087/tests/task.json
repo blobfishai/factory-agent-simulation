@@ -1,80 +1,80 @@
 {
   "allowed_write_tables": [
-    "inventory_transfers",
-    "inventory_on_hand",
-    "work_orders",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "new_completion": {
+      "compliance_case": {
         "type": "string"
       },
-      "new_start": {
+      "contained_record": {
         "type": "string"
       },
-      "transfer_id": {
-        "type": "string"
-      },
-      "work_order_id": {
+      "evidence_reference": {
         "type": "string"
       }
     },
     "required": [
-      "new_completion",
-      "new_start",
-      "transfer_id",
-      "work_order_id"
+      "compliance_case",
+      "contained_record",
+      "evidence_reference"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "new_completion": "2026-01-17",
-      "new_start": "2026-01-14",
-      "transfer_id": "TRF-0007",
-      "work_order_id": "WO-T-007"
+      "compliance_case": "CASE-0087",
+      "contained_record": "NS-0087",
+      "evidence_reference": "REF-0087"
     },
     "assertions": [
       {
-        "description": "The donor-plant transfer is completed for the shortage quantity.",
-        "id": "transfer_completed",
-        "table": "inventory_transfers",
+        "description": "oracle_fusion.maintenance_documents.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "quantity": 14,
-          "status": "Completed"
+          "payload_json": "{\"arguments\":{\"WorkOrderId\":100087,\"requestBody\":{\"Description\":\"Verify certificate issuer, lot, and asset applicability before creating the maintenance document reference.\",\"DocumentName\":\"CASE-087-technical-evidence\",\"DocumentNumber\":\"DOC-0087\",\"DocumentType\":\"URL\"}},\"case\":\"CASE-087\",\"outcome\":\"Verify certificate issuer, lot, and asset applicability before creating the maintenance document reference.\",\"tool\":\"oracle_fusion.maintenance_documents.create\"}",
+          "resource_type": "oracle_fusion.maintenance_documents",
+          "revision": 1,
+          "status": "Certificate attached",
+          "system": "oracle_fusion"
         },
         "where": {
-          "transfer_id": "TRF-0007"
+          "resource_id": "factorybench-087-mutation-01",
+          "task_id": "factorybench-087"
         }
       },
       {
-        "description": "Transferred stock is available at the receiving plant.",
-        "id": "receiving_inventory_created",
-        "table": "inventory_on_hand",
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "quantity": 14,
-          "status": "Unrestricted"
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "item_id": "RM-COPPER",
-          "lot_number": "PDX-C-007",
-          "plant_id": "SEA",
-          "subinventory": "STORES"
+          "resource_id": "factorybench-087-mutation-02",
+          "task_id": "factorybench-087"
         }
       },
       {
-        "description": "The work order starts on arrival and has a feasible completion date.",
-        "id": "work_order_rescheduled",
-        "table": "work_orders",
+        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "scheduled_completion": "2026-01-17",
-          "scheduled_start": "2026-01-14"
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
         },
         "where": {
-          "work_order_id": "WO-T-007"
+          "resource_id": "factorybench-087-mutation-03",
+          "task_id": "factorybench-087"
         }
       }
     ]
@@ -82,49 +82,75 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "transfer_reschedule"
+        "format": "full",
+        "id": "msg-087",
+        "userId": "me"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
-        "work_order_id": "WO-T-007"
+        "id": "att-087",
+        "messageId": "msg-087",
+        "userId": "me"
       },
-      "tool": "get_work_order"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
-        "item_ids": [
-          "RM-COPPER"
-        ],
-        "plant_id": "PDX"
+        "fileId": "drive-approval-087",
+        "pageSize": 20
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_drive.approvals.list"
     },
     {
       "arguments": {
-        "plant_id": "SEA",
-        "work_order_id": "WO-T-007"
+        "maxResults": 20,
+        "q": "\"CASE-087\"",
+        "userId": "me"
       },
-      "tool": "get_schedule"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-087'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.quality_inspection_results.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100087
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.maintenance_work_orders.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order",
-    "get_inventory",
-    "get_schedule"
+    "factorybench.context.get",
+    "gmail.messages.get",
+    "gmail.messages.attachments.get",
+    "google_drive.approvals.list",
+    "gmail.messages.list",
+    "oracle_fusion.quality_inspection_results.list",
+    "oracle_fusion.maintenance_work_orders.get"
   ],
   "task_id": "factorybench-087",
   "write_tools": [
-    "complete_transfer",
-    "create_transfer",
-    "reschedule_work_order",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "google_sheets.spreadsheets.values.update",
+    "oracle_fusion.maintenance_documents.create"
   ]
 }

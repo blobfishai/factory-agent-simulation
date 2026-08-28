@@ -3,78 +3,23 @@
 from __future__ import annotations
 
 import argparse
-import inspect
 import json
 import sys
 from pathlib import Path
-from typing import Any, get_args, get_origin, get_type_hints
+from typing import Any
 
 from .catalog import BENCHMARK_VERSION, get_task
+from .contracts import public_tool_definitions
 from .world import (
     FactoryWorld,
     READ_TOOLS,
-    TOOL_CONTRACTS,
-    TOOL_DESCRIPTIONS,
     WRITE_TOOLS,
     seed_database,
 )
 
 
-def _json_type(annotation: Any) -> dict[str, Any]:
-    origin = get_origin(annotation)
-    if annotation is str:
-        return {"type": "string"}
-    if annotation is int:
-        return {"type": "integer"}
-    if annotation is float:
-        return {"type": "number"}
-    if origin is list:
-        args = get_args(annotation)
-        return {"type": "array", "items": _json_type(args[0]) if args else {}}
-    return {}
-
-
 def tool_definitions(task: dict[str, Any] | None = None) -> list[dict[str, Any]]:
-    definitions: list[dict[str, Any]] = []
-    for name in sorted(READ_TOOLS | WRITE_TOOLS):
-        handler = getattr(FactoryWorld, f"_tool_{name}")
-        signature = inspect.signature(handler)
-        hints = get_type_hints(handler)
-        properties: dict[str, Any] = {}
-        required: list[str] = []
-        for parameter_name, parameter in signature.parameters.items():
-            if parameter_name == "self" or parameter.kind is inspect.Parameter.VAR_KEYWORD:
-                continue
-            properties[parameter_name] = _json_type(hints.get(parameter_name, Any))
-            if parameter.default is inspect.Parameter.empty:
-                required.append(parameter_name)
-        server = next(server_name for server_name, contract in TOOL_CONTRACTS.items() if name in contract["tools"])
-        input_schema: dict[str, Any] = {
-            "type": "object",
-            "properties": properties,
-            "required": required,
-            "additionalProperties": name == "submit_answer",
-        }
-        if name == "submit_answer" and task is not None:
-            input_schema = task["answer_schema"]
-        definitions.append(
-            {
-                "name": name,
-                "description": TOOL_DESCRIPTIONS.get(
-                    name,
-                    f"{server}: execute {name.replace('_', ' ')} in the task world.",
-                ),
-                "inputSchema": input_schema,
-                "annotations": {
-                    "title": name,
-                    "readOnlyHint": name in READ_TOOLS,
-                    "destructiveHint": name in WRITE_TOOLS - {"submit_answer"},
-                    "idempotentHint": name in READ_TOOLS,
-                    "openWorldHint": False,
-                },
-            }
-        )
-    return definitions
+    return public_tool_definitions(task["answer_schema"] if task is not None else None)
 
 
 def _response(request_id: Any, result: Any = None, error: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -185,8 +130,8 @@ def handle_request(world: FactoryWorld, request: dict[str, Any]) -> dict[str, An
                         "content": {
                             "type": "text",
                             "text": (
-                                f"{world.task['instruction']} Start with get_environment_context, "
-                                "respect every read-before-write control, and finish with submit_answer."
+                                f"{world.task['instruction']} Start with factorybench.context.get, "
+                                "respect every read-before-write control, and finish with factorybench.submit_answer."
                             ),
                         },
                     }

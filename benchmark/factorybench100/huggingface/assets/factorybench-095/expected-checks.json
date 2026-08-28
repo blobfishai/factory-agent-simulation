@@ -1,47 +1,54 @@
 {
   "answer": {
-    "alternate_workcenter": "WC-ASM-2",
-    "maintenance_id": "MWO-0005",
-    "new_completion": "2026-01-15",
-    "work_order_id": "WO-M-005"
+    "accounting_period": "2026-01",
+    "close_exception": "FB-095",
+    "resolution_action": "Maintenance labor posted"
   },
   "assertions": [
     {
-      "description": "High-priority maintenance is opened for the failed center.",
-      "id": "maintenance_opened",
-      "table": "maintenance_work_orders",
+      "description": "oracle_fusion.resource_transactions.create produced the task-scoped, source-audited state transition.",
+      "id": "mutation_01",
+      "table": "resource_state",
       "values": {
-        "priority": "High",
-        "status": "Open",
-        "workcenter_id": "WC-ASM-1"
+        "payload_json": "{\"arguments\":{\"requestBody\":{\"ResourceTransactionDetail\":[{\"OrganizationCode\":\"SEA\",\"ResourceCode\":\"RES-095\",\"TransactionQuantity\":21.75,\"TransactionUnitOfMeasure\":\"HR\",\"WoOperationSequenceNumber\":10,\"WorkOrderNumber\":\"WO-0095\"}],\"SourceSystemCode\":\"FUSION_MOBILE\"}},\"case\":\"CASE-095\",\"outcome\":\"Match the approved technician time and maintenance order before posting the resource transaction for close.\",\"tool\":\"oracle_fusion.resource_transactions.create\"}",
+        "resource_type": "oracle_fusion.resource_transactions",
+        "revision": 1,
+        "status": "Maintenance labor posted",
+        "system": "oracle_fusion"
       },
       "where": {
-        "maintenance_id": "MWO-0005"
+        "resource_id": "factorybench-095-mutation-01",
+        "task_id": "factorybench-095"
       }
     },
     {
-      "description": "The operation moves to an active qualified alternate.",
-      "id": "operation_rerouted",
-      "table": "work_order_operations",
+      "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+      "id": "mutation_02",
+      "table": "resource_state",
       "values": {
-        "workcenter_id": "WC-ASM-2"
+        "resource_type": "slack",
+        "revision": 1,
+        "status": "Recorded",
+        "system": "slack"
       },
       "where": {
-        "sequence": 10,
-        "work_order_id": "WO-M-005"
+        "resource_id": "factorybench-095-mutation-02",
+        "task_id": "factorybench-095"
       }
     },
     {
-      "description": "The work-order dates and primary center reflect the recovery plan.",
-      "id": "schedule_recovered",
-      "table": "work_orders",
+      "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+      "id": "mutation_03",
+      "table": "resource_state",
       "values": {
-        "scheduled_completion": "2026-01-15",
-        "scheduled_start": "2026-01-13",
-        "workcenter_id": "WC-ASM-2"
+        "resource_type": "google_drive.approvals",
+        "revision": 1,
+        "status": "Recorded",
+        "system": "google_drive"
       },
       "where": {
-        "work_order_id": "WO-M-005"
+        "resource_id": "factorybench-095-mutation-03",
+        "task_id": "factorybench-095"
       }
     }
   ]

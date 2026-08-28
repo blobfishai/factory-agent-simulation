@@ -1,54 +1,104 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "inbound_receipt"
+      "fileId": "drive-034"
     },
-    "tool": "search_documents"
+    "tool": "google_drive.files.download"
   },
   {
     "arguments": {
-      "purchase_order_id": "PO-R-004"
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
+      ],
+      "spreadsheetId": "sheet-034",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_purchase_order"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "lot_number": "LOT-R-0004",
-      "purchase_order_id": "PO-R-004",
-      "quantity": 28,
-      "receipt_id": "RCV-0004",
-      "received_at": "2026-01-12",
-      "receiver_id": "U-PLANNER"
+      "channel": "C-QUALITY",
+      "inclusive": true,
+      "limit": 100,
+      "oldest": "1768000000.000000"
     },
-    "tool": "receive_purchase_order"
+    "tool": "slack.conversations_history"
   },
   {
     "arguments": {
-      "accepted_qty": 28,
-      "inspected_qty": 28,
-      "inspection_id": "INSP-R-004",
-      "inspector_id": "U-INSPECTOR",
-      "item_id": "RM-RELAY",
-      "lot_number": "LOT-R-0004",
-      "rejected_qty": 0,
-      "result": "Pass",
-      "source_id": "RCV-0004",
-      "source_type": "receipt"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-034' and trashed = false"
     },
-    "tool": "record_inspection"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "inspection_id": "INSP-R-004",
-      "lot_number": "LOT-R-0004",
-      "receipt_id": "RCV-0004",
-      "released_quantity": 28
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-034'"
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.suppliers.list"
+  },
+  {
+    "arguments": {
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0034"
+    },
+    "tool": "oracle_fusion.purchase_orders.get"
+  },
+  {
+    "arguments": {
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0034",
+      "requestBody": {
+        "closeAction": "finallyClose",
+        "closeReason": "Reconcile accepted service entry, invoice status, and buyer approval before closing the PO for receiving and invoicing."
+      }
+    },
+    "tool": "oracle_fusion.purchase_orders.close"
+  },
+  {
+    "arguments": {
+      "channel": "C-QUALITY",
+      "name": "white_check_mark",
+      "timestamp": "1768000034.000100"
+    },
+    "tool": "slack.reactions_add"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-034",
+            "buyer",
+            "Purchase order closed",
+            "REF-0034",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-034",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "committed_value": 3455.76,
+      "purchase_document": "PO-0034",
+      "supplier_decision": "Purchase order closed"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

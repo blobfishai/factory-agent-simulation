@@ -1,82 +1,80 @@
 {
   "allowed_write_tables": [
-    "quality_holds",
-    "nonconformances",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "disposition": {
+      "affected_work_order": {
         "type": "string"
       },
-      "hold_id": {
+      "change_order": {
         "type": "string"
       },
-      "inspection_id": {
-        "type": "string"
-      },
-      "nonconformance_id": {
+      "implementation_result": {
         "type": "string"
       }
     },
     "required": [
-      "disposition",
-      "hold_id",
-      "inspection_id",
-      "nonconformance_id"
+      "affected_work_order",
+      "change_order",
+      "implementation_result"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "disposition": "REWORK",
-      "hold_id": "HOLD-0009",
-      "inspection_id": "INSP-Q-009",
-      "nonconformance_id": "NC-0009"
+      "affected_work_order": "ORD-0069",
+      "change_order": "ORD-0069",
+      "implementation_result": "Bulletin attached"
     },
     "assertions": [
       {
-        "description": "The failed lot is on an active quality hold.",
-        "id": "lot_held",
-        "table": "quality_holds",
+        "description": "oracle_fusion.maintenance_documents.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "lot_number": "FG-LOT-009",
-          "reason_code": "FUNCTIONAL_TEST_FAIL",
-          "status": "Active"
+          "payload_json": "{\"arguments\":{\"WorkOrderId\":100069,\"requestBody\":{\"Description\":\"Confirm document revision and asset applicability before creating the maintenance document reference.\",\"DocumentName\":\"CASE-069-technical-evidence\",\"DocumentNumber\":\"DOC-0069\",\"DocumentType\":\"URL\"}},\"case\":\"CASE-069\",\"outcome\":\"Confirm document revision and asset applicability before creating the maintenance document reference.\",\"tool\":\"oracle_fusion.maintenance_documents.create\"}",
+          "resource_type": "oracle_fusion.maintenance_documents",
+          "revision": 1,
+          "status": "Bulletin attached",
+          "system": "oracle_fusion"
         },
         "where": {
-          "hold_id": "HOLD-0009"
+          "resource_id": "factorybench-069-mutation-01",
+          "task_id": "factorybench-069"
         }
       },
       {
-        "description": "A recoverable nonconformance is assigned for rework.",
-        "id": "nonconformance_opened",
-        "table": "nonconformances",
+        "description": "google_sheets.spreadsheets.values.append produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "disposition": "REWORK",
-          "inspection_id": "INSP-Q-009",
-          "owner_id": "U-QUALITY",
-          "status": "Open"
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
         },
         "where": {
-          "nonconformance_id": "NC-0009"
+          "resource_id": "factorybench-069-mutation-02",
+          "task_id": "factorybench-069"
         }
       },
       {
-        "description": "The affected inventory remains quarantined.",
-        "id": "inventory_quarantined",
-        "table": "inventory_on_hand",
+        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "status": "Quality Hold"
+          "resource_type": "google_drive.approvals",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "item_id": "FG-PANEL",
-          "lot_number": "FG-LOT-009",
-          "plant_id": "SEA",
-          "subinventory": "FG"
+          "resource_id": "factorybench-069-mutation-03",
+          "task_id": "factorybench-069"
         }
       }
     ]
@@ -84,30 +82,80 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "quality_exception"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
+        ],
+        "spreadsheetId": "sheet-069"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
-        "inspection_id": "INSP-Q-009"
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-069' and trashed = false"
       },
-      "tool": "get_quality_context"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "count": 50,
+        "query": "\"CASE-069\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.search_messages"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "thread-069",
+        "userId": "me"
+      },
+      "match": "successful_tool_call",
+      "tool": "gmail.threads.get"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100069
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_orders.get"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100069,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-069'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.maintenance_documents.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_quality_context"
+    "factorybench.context.get",
+    "google_sheets.spreadsheets.get",
+    "google_drive.files.list",
+    "slack.search_messages",
+    "gmail.threads.get",
+    "oracle_fusion.work_orders.get",
+    "oracle_fusion.maintenance_documents.list"
   ],
   "task_id": "factorybench-069",
   "write_tools": [
-    "create_nonconformance",
-    "place_quality_hold",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_drive.approvals.approve",
+    "google_sheets.spreadsheets.values.append",
+    "oracle_fusion.maintenance_documents.create"
   ]
 }

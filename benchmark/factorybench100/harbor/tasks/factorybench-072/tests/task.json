@@ -1,79 +1,81 @@
 {
   "allowed_write_tables": [
-    "work_order_operations",
-    "work_orders",
-    "wip_variances",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "completed_quantity": {
-        "type": "integer"
-      },
-      "scrap_quantity": {
-        "type": "integer"
-      },
-      "variance_id": {
+      "cost_reference": {
         "type": "string"
       },
-      "work_order_id": {
+      "posting_action": {
         "type": "string"
+      },
+      "reconciled_amount": {
+        "multipleOf": 0.01,
+        "type": "number"
       }
     },
     "required": [
-      "completed_quantity",
-      "scrap_quantity",
-      "variance_id",
-      "work_order_id"
+      "cost_reference",
+      "posting_action",
+      "reconciled_amount"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "completed_quantity": 12,
-      "scrap_quantity": 2,
-      "variance_id": "VAR-0002",
-      "work_order_id": "WO-C-002"
+      "cost_reference": "REF-0072",
+      "posting_action": "Duplicate issue reversed",
+      "reconciled_amount": 5449.82
     },
     "assertions": [
       {
-        "count": 2,
-        "description": "All work-order operations are complete.",
-        "id": "operation_completed",
-        "table": "work_order_operations",
+        "description": "oracle_fusion.material_transactions.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
+        "values": {
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"MaterialTransactionDetail\":[{\"InventoryItemNumber\":\"NS-COMP-072\",\"LotNumber\":\"LOT-0072\",\"OrganizationCode\":\"SEA\",\"SubinventoryCode\":\"STORES\",\"TransactionQuantity\":43,\"TransactionTypeCode\":\"MATERIAL_ISSUE\",\"TransactionUnitOfMeasure\":\"EA\",\"WorkOrderNumber\":\"WO-0072\"}],\"SourceSystemCode\":\"FUSION_MOBILE\",\"SourceSystemType\":\"EXTERNAL\"}},\"case\":\"CASE-072\",\"outcome\":\"Prove the duplicate scan and remaining physical stock before posting the material return that corrects WIP cost.\",\"tool\":\"oracle_fusion.material_transactions.create\"}",
+          "resource_type": "oracle_fusion.material_transactions",
+          "revision": 1,
+          "status": "Duplicate issue reversed",
+          "system": "oracle_fusion"
+        },
         "where": {
-          "status": "Complete",
-          "work_order_id": "WO-C-002"
+          "resource_id": "factorybench-072-mutation-01",
+          "task_id": "factorybench-072"
         }
       },
       {
-        "description": "Finished and scrap quantities reconcile to the order quantity.",
-        "id": "work_order_completed",
-        "table": "work_orders",
+        "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "completed_qty": 12,
-          "scrap_qty": 2,
-          "status": "Completed"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "work_order_id": "WO-C-002"
+          "resource_id": "factorybench-072-mutation-02",
+          "task_id": "factorybench-072"
         }
       },
       {
-        "description": "WIP variance is posted for finance review.",
-        "id": "variance_posted",
-        "table": "wip_variances",
+        "description": "google_sheets.spreadsheets.values.append produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "labor_variance": 0.0,
-          "material_variance": -37.5,
-          "overhead_variance": 7.5,
-          "status": "Posted"
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
         },
         "where": {
-          "variance_id": "VAR-0002"
+          "resource_id": "factorybench-072-mutation-03",
+          "task_id": "factorybench-072"
         }
       }
     ]
@@ -81,31 +83,80 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "completion_costing"
+        "fileId": "drive-072"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "work_order_id": "WO-C-002"
+        "majorDimension": "ROWS",
+        "ranges": [
+          "Control!A1:H50",
+          "Approvals!A1:G20"
+        ],
+        "spreadsheetId": "sheet-072",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_work_order"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.batchGet"
+    },
+    {
+      "arguments": {
+        "channel": "C-PRODUCTION",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-072' and trashed = false"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100072
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_orders.get"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100072,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-072'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_materials.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order"
+    "factorybench.context.get",
+    "google_drive.files.download",
+    "google_sheets.spreadsheets.values.batchGet",
+    "slack.conversations_history",
+    "google_drive.files.list",
+    "oracle_fusion.work_orders.get",
+    "oracle_fusion.work_order_materials.list"
   ],
   "task_id": "factorybench-072",
   "write_tools": [
-    "complete_operation",
-    "complete_work_order",
-    "record_wip_variance",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_sheets.spreadsheets.values.append",
+    "oracle_fusion.material_transactions.create",
+    "slack.reactions_add"
   ]
 }

@@ -1,66 +1,80 @@
 {
   "allowed_write_tables": [
-    "purchase_orders",
-    "purchase_order_lines",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "purchase_order_id": {
+      "forecast_horizon": {
         "type": "string"
       },
-      "supplier_id": {
+      "generation_action": {
         "type": "string"
       },
-      "total_amount": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "program_code": {
+        "type": "string"
       }
     },
     "required": [
-      "purchase_order_id",
-      "supplier_id",
-      "total_amount"
+      "forecast_horizon",
+      "generation_action",
+      "program_code"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "purchase_order_id": "PO-0010",
-      "supplier_id": "SUP-B",
-      "total_amount": 2450.0
+      "forecast_horizon": "2026-01-24",
+      "generation_action": "Procedure linked",
+      "program_code": "PM-0030"
     },
     "assertions": [
       {
-        "description": "The purchase order is awarded to the best eligible supplier, meets the need-by date, and is approved.",
-        "id": "po_approved",
-        "table": "purchase_orders",
+        "description": "oracle_fusion.maintenance_documents.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "approved_by": "U-MANAGER",
-          "promised_date": "2026-01-16",
-          "requisition_id": "REQ-A-010",
-          "status": "Approved",
-          "supplier_id": "SUP-B",
-          "total_amount": 2450.0
+          "payload_json": "{\"arguments\":{\"WorkOrderId\":100030,\"requestBody\":{\"Description\":\"Confirm the revision is approved and attach its document reference to the correct generated maintenance order.\",\"DocumentName\":\"CASE-030-technical-evidence\",\"DocumentNumber\":\"DOC-0030\",\"DocumentType\":\"URL\"}},\"case\":\"CASE-030\",\"outcome\":\"Confirm the revision is approved and attach its document reference to the correct generated maintenance order.\",\"tool\":\"oracle_fusion.maintenance_documents.create\"}",
+          "resource_type": "oracle_fusion.maintenance_documents",
+          "revision": 1,
+          "status": "Procedure linked",
+          "system": "oracle_fusion"
         },
         "where": {
-          "purchase_order_id": "PO-0010"
+          "resource_id": "factorybench-030-mutation-01",
+          "task_id": "factorybench-030"
         }
       },
       {
-        "description": "The PO line preserves the approved requisition quantity.",
-        "id": "po_line_exact",
-        "table": "purchase_order_lines",
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "item_id": "RM-RELAY",
-          "ordered_qty": 50,
-          "unit_price": 49.0
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "line_no": 1,
-          "purchase_order_id": "PO-0010"
+          "resource_id": "factorybench-030-mutation-02",
+          "task_id": "factorybench-030"
+        }
+      },
+      {
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
+        },
+        "where": {
+          "resource_id": "factorybench-030-mutation-03",
+          "task_id": "factorybench-030"
         }
       }
     ]
@@ -68,39 +82,80 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "supplier_selection"
+        "majorDimension": "ROWS",
+        "ranges": [
+          "Control!A1:H50",
+          "Approvals!A1:G20"
+        ],
+        "spreadsheetId": "sheet-030",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.batchGet"
     },
     {
       "arguments": {
-        "requisition_id": "REQ-A-010"
+        "channel": "C-QUALITY",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
       },
-      "tool": "get_requisition"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
     },
     {
       "arguments": {
-        "item_id": "RM-RELAY",
-        "need_by": "2026-02-05",
-        "task_id": "factorybench-030"
+        "maxResults": 20,
+        "q": "\"CASE-030\"",
+        "userId": "me"
       },
-      "tool": "get_supplier_quotes"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-030"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-030'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.maintenance_programs.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100030
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.maintenance_work_orders.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_requisition",
-    "get_supplier_quotes"
+    "factorybench.context.get",
+    "google_sheets.spreadsheets.values.batchGet",
+    "slack.conversations_history",
+    "gmail.messages.list",
+    "google_drive.files.get",
+    "oracle_fusion.maintenance_programs.list",
+    "oracle_fusion.maintenance_work_orders.get"
   ],
   "task_id": "factorybench-030",
   "write_tools": [
-    "approve_purchase_order",
-    "create_purchase_order",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "oracle_fusion.maintenance_documents.create",
+    "slack.chat_postMessage"
   ]
 }

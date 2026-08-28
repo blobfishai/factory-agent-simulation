@@ -46,8 +46,7 @@ def test_sandbox_bridge_persists_a_real_isolated_episode(tmp_path: Path) -> None
     assert set(evidence["state_diff"]) >= {
         "answers",
         "audit_log",
-        "material_reservations",
-        "work_orders",
+        "resource_state",
     }
 
 
@@ -57,7 +56,7 @@ def test_sandbox_bridge_returns_tool_errors_inside_the_episode(tmp_path: Path) -
     session = tmp_path / "session"
     _run(bundle, session, {"action": "reset"})
 
-    write = next(step for step in task["oracle_steps"] if step["tool"] == "create_work_order")
+    write = next(step for step in task["oracle_steps"] if not step.get("control"))
     result = _run(
         bundle,
         session,

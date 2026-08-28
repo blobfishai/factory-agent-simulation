@@ -1,81 +1,80 @@
 {
   "allowed_write_tables": [
-    "inventory_on_hand",
-    "material_reservations",
-    "material_requirements",
-    "material_transactions",
-    "work_order_operations",
-    "work_orders",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "issued_lot": {
-        "type": "string"
-      },
-      "issued_quantity": {
+      "controlled_quantity": {
         "type": "integer"
       },
-      "operation_status": {
+      "from_to_location": {
         "type": "string"
       },
-      "work_order_id": {
+      "inventory_transaction": {
         "type": "string"
       }
     },
     "required": [
-      "issued_lot",
-      "issued_quantity",
-      "operation_status",
-      "work_order_id"
+      "controlled_quantity",
+      "from_to_location",
+      "inventory_transaction"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "issued_lot": "R-EARLY-007",
-      "issued_quantity": 34,
-      "operation_status": "In Process",
-      "work_order_id": "WO-I-007"
+      "controlled_quantity": 28,
+      "from_to_location": "SEA-2",
+      "inventory_transaction": "Cycle count adjusted"
     },
     "assertions": [
       {
-        "description": "The full requirement is issued from the reserved earliest-expiry lot.",
-        "id": "fefo_issue",
-        "table": "material_transactions",
+        "description": "oracle_fusion.inventory_transactions.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "lot_number": "R-EARLY-007",
-          "quantity": 34,
-          "transaction_type": "WIP_ISSUE"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"SourceSystemCode\":\"EXTERNAL\",\"TransactionLines\":[{\"Item\":\"NS-COMP-057\",\"LotNumber\":\"LOT-0057\",\"OrganizationCode\":\"SEA\",\"Subinventory\":\"STORES\",\"TransactionQuantity\":28,\"TransactionType\":\"Subinventory Transfer\",\"TransactionUnitOfMeasure\":\"EA\",\"TransferSubinventory\":\"CONTROLLED\"}],\"TransactionMode\":\"ONLINE\"}},\"case\":\"CASE-057\",\"outcome\":\"Reconcile independent count sheets and recount approval before posting the bounded quantity correction.\",\"tool\":\"oracle_fusion.inventory_transactions.create\"}",
+          "resource_type": "oracle_fusion.inventory_transactions",
+          "revision": 1,
+          "status": "Cycle count adjusted",
+          "system": "oracle_fusion"
         },
         "where": {
-          "transaction_id": "TX-ISSUE-007"
+          "resource_id": "factorybench-057-mutation-01",
+          "task_id": "factorybench-057"
         }
       },
       {
-        "description": "The material requirement reflects the full issue.",
-        "id": "requirement_issued",
-        "table": "material_requirements",
+        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "issued_qty": 34
+          "resource_type": "google_drive.approvals",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "work_order_id": "WO-I-007"
+          "resource_id": "factorybench-057-mutation-02",
+          "task_id": "factorybench-057"
         }
       },
       {
-        "description": "The first operation starts after material issue.",
-        "id": "operation_started",
-        "table": "work_order_operations",
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "status": "In Process"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "sequence": 10,
-          "work_order_id": "WO-I-007"
+          "resource_id": "factorybench-057-mutation-03",
+          "task_id": "factorybench-057"
         }
       }
     ]
@@ -83,40 +82,69 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "production_issue"
+        "count": 50,
+        "query": "\"CASE-057\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "slack.search_messages"
     },
     {
       "arguments": {
-        "work_order_id": "WO-I-007"
+        "channel": "C-PROCUREMENT",
+        "limit": 100,
+        "ts": "1768000057.000100"
       },
-      "tool": "get_work_order"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "item_ids": [
-          "RM-RELAY"
-        ],
-        "plant_id": "SEA"
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-057"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-057",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-057'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order",
-    "get_inventory"
+    "factorybench.context.get",
+    "slack.search_messages",
+    "slack.conversations_replies",
+    "google_drive.files.get",
+    "google_sheets.spreadsheets.values.get",
+    "oracle_fusion.inventory_onhand_balances.list"
   ],
   "task_id": "factorybench-057",
   "write_tools": [
-    "issue_material",
-    "start_operation",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_drive.approvals.approve",
+    "oracle_fusion.inventory_transactions.create",
+    "slack.chat_postMessage"
   ]
 }

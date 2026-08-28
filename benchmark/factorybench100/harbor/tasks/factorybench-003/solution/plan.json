@@ -1,92 +1,105 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "order_release"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-003' and trashed = false"
     },
-    "tool": "search_documents"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "sales_order_id": "SO-0003"
+      "fileId": "drive-003"
     },
-    "tool": "get_sales_order"
+    "tool": "google_drive.files.download"
   },
   {
     "arguments": {
-      "as_of": "2026-01-12",
-      "item_id": "FG-PANEL"
-    },
-    "tool": "get_bom"
-  },
-  {
-    "arguments": {
-      "item_ids": [
-        "RM-HOUSING",
-        "RM-RELAY",
-        "RM-COPPER"
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
       ],
-      "plant_id": "SEA"
+      "spreadsheetId": "sheet-003",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_inventory"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "item_id": "FG-PANEL",
-      "quantity": 7,
-      "sales_order_id": "SO-0003",
-      "scheduled_completion": "2026-01-18",
-      "scheduled_start": "2026-01-15",
-      "work_order_id": "WO-0003",
-      "workcenter_id": "WC-ASM-1"
+      "channel": "C-FINANCE",
+      "inclusive": true,
+      "limit": 100,
+      "oldest": "1768000000.000000"
     },
-    "tool": "create_work_order"
+    "tool": "slack.conversations_history"
   },
   {
     "arguments": {
-      "item_id": "RM-HOUSING",
-      "lot_number": "H-003",
-      "plant_id": "SEA",
-      "quantity": 7,
-      "reservation_id": "RES-H-003",
-      "subinventory": "STORES",
-      "work_order_id": "WO-0003"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-003'"
     },
-    "tool": "reserve_material"
+    "tool": "oracle_fusion.sales_orders.list"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "lot_number": "R-003",
-      "plant_id": "SEA",
-      "quantity": 14,
-      "reservation_id": "RES-R-003",
-      "subinventory": "STORES",
-      "work_order_id": "WO-0003"
+      "WorkOrderId": 100003
     },
-    "tool": "reserve_material"
+    "tool": "oracle_fusion.work_orders.get"
   },
   {
     "arguments": {
-      "item_id": "RM-COPPER",
-      "lot_number": "C-003",
-      "plant_id": "SEA",
-      "quantity": 7,
-      "reservation_id": "RES-C-003",
-      "subinventory": "STORES",
-      "work_order_id": "WO-0003"
+      "WorkOrderId": 100003,
+      "requestBody": {
+        "PlannedCompletionDate": "2026-01-22",
+        "PlannedStartDate": "2026-01-16",
+        "WorkOrderStatusCode": "Released"
+      }
     },
-    "tool": "reserve_material"
+    "tool": "oracle_fusion.work_orders.update"
   },
   {
     "arguments": {
-      "completion_date": "2026-01-18",
-      "released_quantity": 7,
-      "work_order_id": "WO-0003"
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-003",
+            "order_fulfillment_manager",
+            "Customer commit recovered",
+            "REF-0003",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-003",
+      "valueInputOption": "RAW"
     },
-    "tool": "submit_answer"
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "channel": "C-FINANCE",
+      "name": "white_check_mark",
+      "timestamp": "1768000003.000100"
+    },
+    "tool": "slack.reactions_add"
+  },
+  {
+    "arguments": {
+      "order_number": "ORD-0003",
+      "revised_commit_date": "2026-01-16",
+      "supply_action": "Customer commit recovered"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

@@ -1,82 +1,80 @@
 {
   "allowed_write_tables": [
-    "quality_holds",
-    "nonconformances",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "disposition": {
+      "need_by_date": {
         "type": "string"
       },
-      "hold_id": {
+      "planning_action": {
         "type": "string"
       },
-      "inspection_id": {
-        "type": "string"
-      },
-      "nonconformance_id": {
+      "supply_reference": {
         "type": "string"
       }
     },
     "required": [
-      "disposition",
-      "hold_id",
-      "inspection_id",
-      "nonconformance_id"
+      "need_by_date",
+      "planning_action",
+      "supply_reference"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "disposition": "REWORK",
-      "hold_id": "HOLD-0004",
-      "inspection_id": "INSP-Q-004",
-      "nonconformance_id": "NC-0004"
+      "need_by_date": "2026-01-20",
+      "planning_action": "Planning substitute applied",
+      "supply_reference": "SUPPLY-0064"
     },
     "assertions": [
       {
-        "description": "The failed lot is on an active quality hold.",
-        "id": "lot_held",
-        "table": "quality_holds",
+        "description": "oracle_fusion.work_order_materials.replace_with_substitute produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "lot_number": "FG-LOT-004",
-          "reason_code": "FUNCTIONAL_TEST_FAIL",
-          "status": "Active"
+          "payload_json": "{\"arguments\":{\"WoOperationId\":200064,\"WoOperationMaterialId\":300064,\"WorkOrderId\":100064,\"requestBody\":{\"SubstituteItemNumber\":\"NS-SUB-064\",\"SubstituteQuantity\":35}},\"case\":\"CASE-064\",\"outcome\":\"Use the approved substitute matrix and available stock to update the planned material line.\",\"tool\":\"oracle_fusion.work_order_materials.replace_with_substitute\"}",
+          "resource_type": "oracle_fusion.work_order_materials",
+          "revision": 1,
+          "status": "Planning substitute applied",
+          "system": "oracle_fusion"
         },
         "where": {
-          "hold_id": "HOLD-0004"
+          "resource_id": "factorybench-064-mutation-01",
+          "task_id": "factorybench-064"
         }
       },
       {
-        "description": "A recoverable nonconformance is assigned for rework.",
-        "id": "nonconformance_opened",
-        "table": "nonconformances",
+        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "disposition": "REWORK",
-          "inspection_id": "INSP-Q-004",
-          "owner_id": "U-QUALITY",
-          "status": "Open"
+          "resource_type": "google_drive.approvals",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "nonconformance_id": "NC-0004"
+          "resource_id": "factorybench-064-mutation-02",
+          "task_id": "factorybench-064"
         }
       },
       {
-        "description": "The affected inventory remains quarantined.",
-        "id": "inventory_quarantined",
-        "table": "inventory_on_hand",
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "status": "Quality Hold"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "item_id": "FG-PANEL",
-          "lot_number": "FG-LOT-004",
-          "plant_id": "SEA",
-          "subinventory": "FG"
+          "resource_id": "factorybench-064-mutation-03",
+          "task_id": "factorybench-064"
         }
       }
     ]
@@ -84,30 +82,80 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "quality_exception"
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-064"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
-        "inspection_id": "INSP-Q-004"
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-064",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_quality_context"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "count": 50,
+        "query": "\"CASE-064\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.search_messages"
+    },
+    {
+      "arguments": {
+        "channel": "C-PRODUCTION",
+        "limit": 100,
+        "ts": "1768000064.000100"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-064'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100064,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-064'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_materials.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_quality_context"
+    "factorybench.context.get",
+    "google_drive.files.get",
+    "google_sheets.spreadsheets.values.get",
+    "slack.search_messages",
+    "slack.conversations_replies",
+    "oracle_fusion.supply_requests.list",
+    "oracle_fusion.work_order_materials.list"
   ],
   "task_id": "factorybench-064",
   "write_tools": [
-    "create_nonconformance",
-    "place_quality_hold",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_drive.approvals.approve",
+    "oracle_fusion.work_order_materials.replace_with_substitute",
+    "slack.chat_postMessage"
   ]
 }

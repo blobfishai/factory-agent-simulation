@@ -1,7 +1,7 @@
 {
   "checks": [
     {
-      "description": "Required policy and ERP reads completed before the first write.",
+      "description": "Required cross-system evidence reads completed before the first write.",
       "evidence": {
         "missing": []
       },
@@ -9,46 +9,44 @@
       "passed": true
     },
     {
-      "description": "The failed lot is on an active quality hold.",
+      "description": "oracle_fusion.work_orders.create produced the task-scoped, source-audited state transition.",
       "evidence": {
         "matching_rows": 1,
         "mismatches": {}
       },
-      "id": "lot_held",
+      "id": "mutation_01",
       "passed": true
     },
     {
-      "description": "A recoverable nonconformance is assigned for rework.",
+      "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
       "evidence": {
         "matching_rows": 1,
         "mismatches": {}
       },
-      "id": "nonconformance_opened",
+      "id": "mutation_02",
       "passed": true
     },
     {
-      "description": "The affected inventory remains quarantined.",
+      "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
       "evidence": {
         "matching_rows": 1,
         "mismatches": {}
       },
-      "id": "inventory_quarantined",
+      "id": "mutation_03",
       "passed": true
     },
     {
       "description": "Submitted answer fields exactly match the ground truth.",
       "evidence": {
         "expected": {
-          "disposition": "REWORK",
-          "hold_id": "HOLD-0010",
-          "inspection_id": "INSP-Q-010",
-          "nonconformance_id": "NC-0010"
+          "affected_work_order": "ORD-0070",
+          "change_order": "ORD-0070",
+          "implementation_result": "Pilot order created"
         },
         "submitted": {
-          "disposition": "REWORK",
-          "hold_id": "HOLD-0010",
-          "inspection_id": "INSP-Q-010",
-          "nonconformance_id": "NC-0010"
+          "affected_work_order": "ORD-0070",
+          "change_order": "ORD-0070",
+          "implementation_result": "Pilot order created"
         }
       },
       "id": "exact_answer",
@@ -60,9 +58,7 @@
         "disallowed": [],
         "written_tables": [
           "answers",
-          "inventory_on_hand",
-          "nonconformances",
-          "quality_holds"
+          "resource_state"
         ]
       },
       "id": "write_scope",
@@ -85,158 +81,125 @@
     "answers": {
       "after": [
         {
-          "field": "disposition",
+          "field": "affected_work_order",
           "task_id": "factorybench-070",
-          "value": "REWORK"
+          "value": "ORD-0070"
         },
         {
-          "field": "hold_id",
+          "field": "change_order",
           "task_id": "factorybench-070",
-          "value": "HOLD-0010"
+          "value": "ORD-0070"
         },
         {
-          "field": "inspection_id",
+          "field": "implementation_result",
           "task_id": "factorybench-070",
-          "value": "INSP-Q-010"
-        },
-        {
-          "field": "nonconformance_id",
-          "task_id": "factorybench-070",
-          "value": "NC-0010"
+          "value": "Pilot order created"
         }
       ],
-      "after_count": 4,
+      "after_count": 3,
       "before": [],
       "before_count": 0
     },
     "audit_log": {
       "after": [
         {
-          "action": "insert",
+          "action": "upsert",
           "audit_id": 1,
-          "payload": "{\"hold_id\": \"HOLD-0010\", \"item_id\": \"FG-PANEL\", \"lot_number\": \"FG-LOT-010\", \"reason_code\": \"FUNCTIONAL_TEST_FAIL\", \"source_id\": \"INSP-Q-010\", \"status\": \"Active\", \"task_id\": \"factorybench-070\"}",
-          "record_id": "HOLD-0010",
-          "table_name": "quality_holds",
+          "payload": "{\"effective_at\": \"2026-01-26\", \"payload_json\": \"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"ItemNumber\\\":\\\"NS-COMP-070\\\",\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"PlannedCompletionDate\\\":\\\"2026-01-29\\\",\\\"PlannedStartDate\\\":\\\"2026-01-26\\\",\\\"WorkOrderNumber\\\":\\\"WO-0070\\\",\\\"WorkOrderQuantity\\\":41,\\\"WorkOrderStatusCode\\\":\\\"Released\\\"}},\\\"case\\\":\\\"CASE-070\\\",\\\"outcome\\\":\\\"Use the approved prototype quantity, revision, and start window to create an isolated pilot order.\\\",\\\"tool\\\":\\\"oracle_fusion.work_orders.create\\\"}\", \"resource_id\": \"factorybench-070-mutation-01\", \"resource_type\": \"oracle_fusion.work_orders\", \"revision\": 1, \"status\": \"Pilot order created\", \"system\": \"oracle_fusion\", \"task_id\": \"factorybench-070\"}",
+          "record_id": "factorybench-070-mutation-01",
+          "table_name": "resource_state",
           "task_id": "factorybench-070",
-          "tool": "place_quality_hold"
+          "tool": "oracle_fusion.work_orders.create"
         },
         {
-          "action": "update",
+          "action": "upsert",
           "audit_id": 2,
-          "payload": "{\"status\": \"Quality Hold\"}",
-          "record_id": "FG-PANEL:FG-LOT-010",
-          "table_name": "inventory_on_hand",
+          "payload": "{\"effective_at\": \"2026-01-26\", \"payload_json\": \"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogbWFudWZhY3R1cmluZy5lbmdpbmVlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG9wZXJhdGlvbnMtY29udHJvbEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wNzAg4oCUIENvbXBsZXRlZCBlbnRlcnByaXNlIHdvcmtmbG93DQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KUGlsb3Qgb3JkZXIgY3JlYXRlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDcwLg0K\\\",\\\"threadId\\\":\\\"thread-070\\\",\\\"userId\\\":\\\"me\\\"},\\\"case\\\":\\\"CASE-070\\\",\\\"outcome\\\":\\\"Use the approved prototype quantity, revision, and start window to create an isolated pilot order.\\\",\\\"tool\\\":\\\"gmail.messages.send\\\"}\", \"resource_id\": \"factorybench-070-mutation-02\", \"resource_type\": \"gmail.messages\", \"revision\": 1, \"status\": \"Recorded\", \"system\": \"gmail\", \"task_id\": \"factorybench-070\"}",
+          "record_id": "factorybench-070-mutation-02",
+          "table_name": "resource_state",
           "task_id": "factorybench-070",
-          "tool": "place_quality_hold"
+          "tool": "gmail.messages.send"
         },
         {
-          "action": "insert",
+          "action": "upsert",
           "audit_id": 3,
-          "payload": "{\"disposition\": \"REWORK\", \"inspection_id\": \"INSP-Q-010\", \"nonconformance_id\": \"NC-0010\", \"owner_id\": \"U-QUALITY\", \"status\": \"Open\", \"task_id\": \"factorybench-070\"}",
-          "record_id": "NC-0010",
-          "table_name": "nonconformances",
+          "payload": "{\"effective_at\": \"2026-01-26\", \"payload_json\": \"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-070\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-070: Pilot order created; Oracle reference recorded.\\\"}},\\\"case\\\":\\\"CASE-070\\\",\\\"outcome\\\":\\\"Use the approved prototype quantity, revision, and start window to create an isolated pilot order.\\\",\\\"tool\\\":\\\"google_drive.comments.create\\\"}\", \"resource_id\": \"factorybench-070-mutation-03\", \"resource_type\": \"google_drive.comments\", \"revision\": 1, \"status\": \"Recorded\", \"system\": \"google_drive\", \"task_id\": \"factorybench-070\"}",
+          "record_id": "factorybench-070-mutation-03",
+          "table_name": "resource_state",
           "task_id": "factorybench-070",
-          "tool": "create_nonconformance"
+          "tool": "google_drive.comments.create"
         },
         {
-          "action": "upsert",
+          "action": "submit",
           "audit_id": 4,
-          "payload": "{\"value\": \"INSP-Q-010\"}",
-          "record_id": "factorybench-070:inspection_id",
+          "payload": "{\"affected_work_order\": \"ORD-0070\", \"change_order\": \"ORD-0070\", \"implementation_result\": \"Pilot order created\"}",
+          "record_id": "factorybench-070",
           "table_name": "answers",
           "task_id": "factorybench-070",
-          "tool": "submit_answer"
-        },
-        {
-          "action": "upsert",
-          "audit_id": 5,
-          "payload": "{\"value\": \"HOLD-0010\"}",
-          "record_id": "factorybench-070:hold_id",
-          "table_name": "answers",
-          "task_id": "factorybench-070",
-          "tool": "submit_answer"
-        },
-        {
-          "action": "upsert",
-          "audit_id": 6,
-          "payload": "{\"value\": \"NC-0010\"}",
-          "record_id": "factorybench-070:nonconformance_id",
-          "table_name": "answers",
-          "task_id": "factorybench-070",
-          "tool": "submit_answer"
-        },
-        {
-          "action": "upsert",
-          "audit_id": 7,
-          "payload": "{\"value\": \"REWORK\"}",
-          "record_id": "factorybench-070:disposition",
-          "table_name": "answers",
-          "task_id": "factorybench-070",
-          "tool": "submit_answer"
+          "tool": "factorybench.submit_answer"
         }
       ],
-      "after_count": 7,
+      "after_count": 4,
       "before": [],
       "before_count": 0
     },
-    "inventory_on_hand": {
+    "resource_state": {
       "after": [
         {
-          "expiration_date": null,
-          "item_id": "FG-PANEL",
-          "lot_number": "FG-LOT-010",
-          "plant_id": "SEA",
-          "quantity": 18.0,
-          "reserved_qty": 0.0,
-          "status": "Quality Hold",
-          "subinventory": "FG"
+          "effective_at": "2026-01-26",
+          "payload_json": "{\"arguments\":{\"raw\":\"RnJvbTogbWFudWZhY3R1cmluZy5lbmdpbmVlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG9wZXJhdGlvbnMtY29udHJvbEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wNzAg4oCUIENvbXBsZXRlZCBlbnRlcnByaXNlIHdvcmtmbG93DQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KUGlsb3Qgb3JkZXIgY3JlYXRlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDcwLg0K\",\"threadId\":\"thread-070\",\"userId\":\"me\"},\"case\":\"CASE-070\",\"outcome\":\"Use the approved prototype quantity, revision, and start window to create an isolated pilot order.\",\"tool\":\"gmail.messages.send\"}",
+          "resource_id": "factorybench-070-mutation-02",
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail",
+          "task_id": "factorybench-070"
+        },
+        {
+          "effective_at": "2026-01-26",
+          "payload_json": "{\"arguments\":{\"fileId\":\"drive-070\",\"requestBody\":{\"content\":\"CASE-070: Pilot order created; Oracle reference recorded.\"}},\"case\":\"CASE-070\",\"outcome\":\"Use the approved prototype quantity, revision, and start window to create an isolated pilot order.\",\"tool\":\"google_drive.comments.create\"}",
+          "resource_id": "factorybench-070-mutation-03",
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive",
+          "task_id": "factorybench-070"
+        },
+        {
+          "effective_at": "2026-01-12",
+          "payload_json": "{\"case\":\"CASE-070\",\"identifiers\":{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-070'\"},\"quantity\":41,\"record\":\"NS-000070\"}",
+          "resource_id": "NS-000070",
+          "resource_type": "oracle_fusion.inventory_onhand_balances",
+          "revision": 0,
+          "status": "Open",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-070"
+        },
+        {
+          "effective_at": "2026-01-26",
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"ItemNumber\":\"NS-COMP-070\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-29\",\"PlannedStartDate\":\"2026-01-26\",\"WorkOrderNumber\":\"WO-0070\",\"WorkOrderQuantity\":41,\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-070\",\"outcome\":\"Use the approved prototype quantity, revision, and start window to create an isolated pilot order.\",\"tool\":\"oracle_fusion.work_orders.create\"}",
+          "resource_id": "factorybench-070-mutation-01",
+          "resource_type": "oracle_fusion.work_orders",
+          "revision": 1,
+          "status": "Pilot order created",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-070"
         }
       ],
-      "after_count": 1,
+      "after_count": 4,
       "before": [
         {
-          "expiration_date": null,
-          "item_id": "FG-PANEL",
-          "lot_number": "FG-LOT-010",
-          "plant_id": "SEA",
-          "quantity": 18.0,
-          "reserved_qty": 0.0,
-          "status": "Inspection",
-          "subinventory": "FG"
+          "effective_at": "2026-01-12",
+          "payload_json": "{\"case\":\"CASE-070\",\"identifiers\":{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-070'\"},\"quantity\":41,\"record\":\"NS-000070\"}",
+          "resource_id": "NS-000070",
+          "resource_type": "oracle_fusion.inventory_onhand_balances",
+          "revision": 0,
+          "status": "Open",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-070"
         }
       ],
       "before_count": 1
-    },
-    "nonconformances": {
-      "after": [
-        {
-          "disposition": "REWORK",
-          "inspection_id": "INSP-Q-010",
-          "nonconformance_id": "NC-0010",
-          "owner_id": "U-QUALITY",
-          "status": "Open",
-          "task_id": "factorybench-070"
-        }
-      ],
-      "after_count": 1,
-      "before": [],
-      "before_count": 0
-    },
-    "quality_holds": {
-      "after": [
-        {
-          "hold_id": "HOLD-0010",
-          "item_id": "FG-PANEL",
-          "lot_number": "FG-LOT-010",
-          "reason_code": "FUNCTIONAL_TEST_FAIL",
-          "source_id": "INSP-Q-010",
-          "status": "Active",
-          "task_id": "factorybench-070"
-        }
-      ],
-      "after_count": 1,
-      "before": [],
-      "before_count": 0
     }
   },
   "strict_pass": true,
@@ -247,388 +210,608 @@
       "arguments": {},
       "index": 0,
       "result": {
-        "available_documents": [
+        "evidence_index": [
           {
-            "category": "order_release",
-            "doc_id": "POL-01",
-            "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
-            "title": "Order release control"
+            "asset_id": "factorybench-070-decision",
+            "kind": "spreadsheet_export",
+            "media_type": "text/csv",
+            "path": "approval-decision-log.csv",
+            "sha256": "e3bc78fb447ee94dd3084c9b5bdc51d04e228a93900ac1840bc413d7fc1d8156",
+            "source": "google_sheets",
+            "title": "Approval decision log"
           },
           {
-            "category": "material_shortage",
-            "doc_id": "POL-02",
-            "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
-            "title": "Shortage requisition control"
+            "asset_id": "factorybench-070-contract",
+            "kind": "contract",
+            "media_type": "text/markdown",
+            "path": "contract-or-service-control.md",
+            "sha256": "f76396ad21c16dce1b66b82e2c3d1adafd586debbf40d026b227b4bd96175333",
+            "source": "google_drive",
+            "title": "Contract / service control"
           },
           {
-            "category": "supplier_selection",
-            "doc_id": "POL-03",
-            "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
-            "title": "Supplier award policy"
+            "asset_id": "factorybench-070-approval",
+            "kind": "approval",
+            "media_type": "application/json",
+            "path": "drive-approval-record.json",
+            "sha256": "7e66119a92d8215a5f66dbbf600e6fb0507825f80d3bf054c1c5248bf5c52c45",
+            "source": "google_drive",
+            "title": "Drive approval record"
           },
           {
-            "category": "inbound_receipt",
-            "doc_id": "POL-04",
-            "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
-            "title": "Receiving and inspection policy"
+            "asset_id": "factorybench-070-measurements",
+            "kind": "quality_data",
+            "media_type": "text/csv",
+            "path": "inspection-measurements.csv",
+            "sha256": "a685743b6ca474513ce4e79832fccf55f74a27485061b061fbb7d7514fb82322",
+            "source": "laboratory_drive",
+            "title": "Inspection measurements"
           },
           {
-            "category": "invoice_match",
-            "doc_id": "POL-05",
-            "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
-            "title": "Three-way match policy"
+            "asset_id": "factorybench-070-policy",
+            "kind": "policy",
+            "media_type": "text/markdown",
+            "path": "operating-policy.md",
+            "sha256": "0c6060dd25407922456b5962e0a621d35f75f4473595806f2acc2d0382af2c20",
+            "source": "google_drive",
+            "title": "Operating policy"
           },
           {
-            "category": "production_issue",
-            "doc_id": "POL-06",
-            "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
-            "title": "Material issue policy"
+            "asset_id": "factorybench-070-slack",
+            "kind": "chat_thread",
+            "media_type": "application/json",
+            "path": "operations-slack-thread.json",
+            "sha256": "4f8db2264a54088b5011bad4ef842b54c3cdaba6b5ae6791e1b03a8d72f98be1",
+            "source": "slack",
+            "title": "Operations Slack thread"
           },
           {
-            "category": "quality_exception",
-            "doc_id": "POL-07",
-            "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
-            "title": "Nonconformance policy"
+            "asset_id": "factorybench-070-erp",
+            "kind": "erp_export",
+            "media_type": "application/json",
+            "path": "oracle-starting-record.json",
+            "sha256": "9f2707660db1273e5a3a668135f9ae014467decd7efa66716d93a8710c3b38c3",
+            "source": "oracle_fusion",
+            "title": "Oracle starting-record export"
           },
           {
-            "category": "completion_costing",
-            "doc_id": "POL-08",
-            "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
-            "title": "Work-order close policy"
+            "asset_id": "factorybench-070-email",
+            "kind": "email",
+            "media_type": "message/rfc822",
+            "path": "source-email-thread.eml",
+            "sha256": "1f3b1b740dd8fc9119987e88df1d51605abd2b3b8472e3a5ebe7f7bb260d8fe1",
+            "source": "gmail",
+            "title": "Source email thread"
           },
           {
-            "category": "transfer_reschedule",
-            "doc_id": "POL-09",
-            "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
-            "title": "Interplant recovery policy"
+            "asset_id": "factorybench-070-leadtime",
+            "kind": "spreadsheet",
+            "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "path": "supplier-lead-time-and-capacity.xlsx",
+            "sha256": "9007ff0116adac0e3aec652ab7bcb6d0e1b588567927ad4a24383262b9c2930d",
+            "source": "google_drive",
+            "title": "Supplier lead-time and capacity workbook"
           },
           {
-            "category": "maintenance_recovery",
-            "doc_id": "POL-10",
-            "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
-            "title": "Unplanned downtime policy"
+            "asset_id": "factorybench-070-quote",
+            "kind": "vendor_pdf",
+            "media_type": "application/pdf",
+            "path": "supplier-quotation.pdf",
+            "sha256": "b2a38193d52637810cda86d228b41eef0461bdf3bfe90e471667851b6fb3e104",
+            "source": "gmail_attachment",
+            "title": "Supplier quotation"
+          },
+          {
+            "asset_id": "factorybench-070-spec",
+            "kind": "specification",
+            "media_type": "text/markdown",
+            "path": "technical-specification.md",
+            "sha256": "da82d3373f883ef7d57fa94b357f8f1c4b705a9857c5798458782da8682ce3a1",
+            "source": "google_drive",
+            "title": "Technical specification"
+          },
+          {
+            "asset_id": "factorybench-070-risk",
+            "kind": "spreadsheet",
+            "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "path": "workflow-risk-register.xlsx",
+            "sha256": "4a02164633ffddbd5f4e9ad1fe833ac1329364853383c68cc782e1156e8bb6f0",
+            "source": "google_drive",
+            "title": "Workflow risk register"
+          }
+        ],
+        "identity": [
+          {
+            "approval_limit": 0.0,
+            "display_name": "Jordan Lee",
+            "role": "manufacturing_engineer",
+            "user_id": "U-AGENT"
+          },
+          {
+            "approval_limit": 250000.0,
+            "display_name": "Avery Morgan",
+            "role": "authorized_approver",
+            "user_id": "U-APPROVER"
+          },
+          {
+            "approval_limit": 25000.0,
+            "display_name": "Maya Chen",
+            "role": "operations_lead",
+            "user_id": "U-OPS-LEAD"
           }
         ],
         "organization": {
-          "organization_id": "M1",
+          "organization_id": "NSC",
           "primary_plant": "SEA",
-          "world": "Northstar Controls Oracle-shaped ERP"
+          "world": "Northstar Controls enterprise operations sandbox",
+          "world_id": "northstar-enterprise-fusion-v2"
         },
-        "reference_data": {
-          "items": [
-            {
-              "description": "Industrial control panel",
-              "item_id": "FG-PANEL",
-              "item_type": "finished_good",
-              "make_buy": "MAKE",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Copper busbar set",
-              "item_id": "RM-COPPER",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Powder-coated enclosure",
-              "item_id": "RM-HOUSING",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Safety relay",
-              "item_id": "RM-RELAY",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
+        "reference_records": {
+          "case_reference": "CASE-070",
+          "gmail": {
+            "search_query": "\"CASE-070\"",
+            "userId": "me"
+          },
+          "google_drive": {
+            "approval_file_id": "drive-approval-070",
+            "primary_file_id": "drive-070",
+            "search_query": "name contains 'CASE-070' and trashed = false"
+          },
+          "google_sheets": {
+            "audit_append_range": "Audit!A:F",
+            "decision_range": "Control!A1:H50",
+            "outcome_write_range": "Control!H32",
+            "spreadsheet_id": "sheet-070"
+          },
+          "oracle_fusion": {
+            "filter": "ReferenceNumber='CASE-070'",
+            "only_data": true,
+            "record_handles": {
+              "HeaderInterfaceId": 700070,
+              "MaintenanceProgramId": 500070,
+              "SupplierId": 600070,
+              "WorkOrderId": 100070,
+              "invoicesUniqID": "invoicesUniqID-0070",
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0070",
+              "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0070"
             }
-          ],
-          "plants": [
-            {
-              "name": "Portland Components",
-              "organization_id": "M1",
-              "plant_id": "PDX",
-              "timezone": "America/Los_Angeles"
-            },
-            {
-              "name": "Seattle Assembly",
-              "organization_id": "M1",
-              "plant_id": "SEA",
-              "timezone": "America/Los_Angeles"
-            }
-          ],
-          "suppliers": [
-            {
-              "approved": 1,
-              "name": "Cascade Industrial",
-              "on_time_rate": 0.94,
-              "payment_terms": "NET30",
-              "quality_score": 97.2,
-              "supplier_id": "SUP-A"
-            },
-            {
-              "approved": 1,
-              "name": "Rainier Components",
-              "on_time_rate": 0.98,
-              "payment_terms": "NET45",
-              "quality_score": 95.8,
-              "supplier_id": "SUP-B"
-            },
-            {
-              "approved": 0,
-              "name": "Frontier Supply",
-              "on_time_rate": 0.99,
-              "payment_terms": "NET30",
-              "quality_score": 99.1,
-              "supplier_id": "SUP-C"
-            }
-          ],
-          "users": [
-            {
-              "approval_limit": 1000.0,
-              "display_name": "Diego Ruiz",
-              "plant_id": "SEA",
-              "role": "buyer",
-              "user_id": "U-BUYER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Priya Shah",
-              "plant_id": "SEA",
-              "role": "quality_inspector",
-              "user_id": "U-INSPECTOR"
-            },
-            {
-              "approval_limit": 250000.0,
-              "display_name": "Avery Morgan",
-              "plant_id": "SEA",
-              "role": "plant_manager",
-              "user_id": "U-MANAGER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Maya Chen",
-              "plant_id": "SEA",
-              "role": "production_planner",
-              "user_id": "U-PLANNER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Noah Williams",
-              "plant_id": "SEA",
-              "role": "quality_engineer",
-              "user_id": "U-QUALITY"
-            }
-          ],
-          "workcenters": [
-            {
-              "capacity_hours": 80.0,
-              "name": "Assembly Cell 1",
-              "plant_id": "SEA",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-ASM-1"
-            },
-            {
-              "capacity_hours": 64.0,
-              "name": "Assembly Cell 2",
-              "plant_id": "SEA",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-ASM-2"
-            },
-            {
-              "capacity_hours": 72.0,
-              "name": "Portland Fabrication",
-              "plant_id": "PDX",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-PDX-1"
-            }
-          ]
+          },
+          "slack": {
+            "channel": "C-QUALITY",
+            "search_query": "\"CASE-070\"",
+            "thread_ts": "1768000070.000100"
+          }
         },
+        "starting_records": [
+          {
+            "effective_at": "2026-01-12",
+            "resource_id": "NS-000070",
+            "resource_type": "oracle_fusion.inventory_onhand_balances",
+            "revision": 0,
+            "status": "Open",
+            "system": "oracle_fusion"
+          }
+        ],
         "state": {
+          "network": "closed",
           "persistence": "episode-local SQLite",
           "scope": "isolated task snapshot"
         },
         "task": {
           "as_of": "2026-01-12",
-          "family": "quality_exception",
-          "role": "quality_engineer",
+          "family": "engineering_change",
+          "role": "manufacturing_engineer",
           "task_id": "factorybench-070"
         },
         "tool_servers": [
           {
-            "description": "Query and mutate the synthetic manufacturing ERP.",
-            "name": "oracle_erp",
+            "description": "Benchmark-only discovery and answer submission controls.",
+            "name": "factorybench",
             "tools": [
-              "approve_invoice",
-              "approve_purchase_order",
-              "approve_requisition",
-              "complete_operation",
-              "complete_transfer",
-              "complete_work_order",
-              "create_maintenance_work_order",
-              "create_nonconformance",
-              "create_purchase_order",
-              "create_requisition",
-              "create_transfer",
-              "create_work_order",
-              "get_bom",
-              "get_environment_context",
-              "get_inventory",
-              "get_invoice_match",
-              "get_maintenance_context",
-              "get_purchase_order",
-              "get_quality_context",
-              "get_receipt",
-              "get_requisition",
-              "get_sales_order",
-              "get_schedule",
-              "get_supplier_quotes",
-              "get_work_order",
-              "hold_invoice",
-              "issue_material",
-              "place_quality_hold",
-              "receive_purchase_order",
-              "record_inspection",
-              "record_wip_variance",
-              "reroute_operation",
-              "reschedule_work_order",
-              "reserve_material",
-              "start_operation"
+              "factorybench.context.get",
+              "factorybench.submit_answer"
             ]
           },
           {
-            "description": "Search versioned operating policies and task assets.",
-            "name": "plant_docs",
+            "description": "Documented Gmail API operations over task-scoped messages and attachments.",
+            "name": "gmail",
             "tools": [
-              "search_documents"
+              "gmail.drafts.create",
+              "gmail.messages.attachments.get",
+              "gmail.messages.get",
+              "gmail.messages.list",
+              "gmail.messages.send",
+              "gmail.threads.get"
             ]
           },
           {
-            "description": "Submit exact answer fields for deterministic verification.",
-            "name": "factory_harness",
+            "description": "Documented Google Drive API operations over task-scoped files and approvals.",
+            "name": "google_drive",
             "tools": [
-              "submit_answer"
+              "google_drive.approvals.approve",
+              "google_drive.approvals.list",
+              "google_drive.comments.create",
+              "google_drive.files.download",
+              "google_drive.files.export",
+              "google_drive.files.get",
+              "google_drive.files.list"
+            ]
+          },
+          {
+            "description": "Documented Google Sheets API operations over task-scoped workbooks.",
+            "name": "google_sheets",
+            "tools": [
+              "google_sheets.spreadsheets.get",
+              "google_sheets.spreadsheets.values.append",
+              "google_sheets.spreadsheets.values.batchGet",
+              "google_sheets.spreadsheets.values.get",
+              "google_sheets.spreadsheets.values.update"
+            ]
+          },
+          {
+            "description": "Documented Oracle Fusion Cloud ERP/SCM REST operations over synthetic task state.",
+            "name": "oracle_fusion",
+            "tools": [
+              "oracle_fusion.draft_purchase_orders.create",
+              "oracle_fusion.draft_purchase_orders.list",
+              "oracle_fusion.inspection_plans.list",
+              "oracle_fusion.inventory_onhand_balances.list",
+              "oracle_fusion.inventory_transactions.create",
+              "oracle_fusion.invoice_holds.create",
+              "oracle_fusion.invoice_holds.update",
+              "oracle_fusion.invoices.create",
+              "oracle_fusion.invoices.get",
+              "oracle_fusion.invoices.update",
+              "oracle_fusion.invoices.validate",
+              "oracle_fusion.maintenance_documents.create",
+              "oracle_fusion.maintenance_documents.list",
+              "oracle_fusion.maintenance_operations.list",
+              "oracle_fusion.maintenance_operations.update",
+              "oracle_fusion.maintenance_programs.create",
+              "oracle_fusion.maintenance_programs.generate_forecasts",
+              "oracle_fusion.maintenance_programs.generate_work_orders",
+              "oracle_fusion.maintenance_programs.get",
+              "oracle_fusion.maintenance_programs.list",
+              "oracle_fusion.maintenance_programs.update",
+              "oracle_fusion.maintenance_work_orders.create",
+              "oracle_fusion.maintenance_work_orders.get",
+              "oracle_fusion.maintenance_work_orders.list",
+              "oracle_fusion.maintenance_work_orders.update",
+              "oracle_fusion.material_transactions.create",
+              "oracle_fusion.operation_transactions.create",
+              "oracle_fusion.purchase_order_lines.list",
+              "oracle_fusion.purchase_orders.acknowledge",
+              "oracle_fusion.purchase_orders.cancel",
+              "oracle_fusion.purchase_orders.close",
+              "oracle_fusion.purchase_orders.get",
+              "oracle_fusion.purchase_orders.list",
+              "oracle_fusion.quality_inspection_results.create",
+              "oracle_fusion.quality_inspection_results.list",
+              "oracle_fusion.quality_inspection_results.update",
+              "oracle_fusion.receiving_receipt_requests.create",
+              "oracle_fusion.receiving_receipt_requests.list",
+              "oracle_fusion.receiving_receipt_transactions.create",
+              "oracle_fusion.receiving_receipt_transactions.list",
+              "oracle_fusion.receiving_receipt_transactions.update",
+              "oracle_fusion.resource_transactions.create",
+              "oracle_fusion.sales_orders.get",
+              "oracle_fusion.sales_orders.list",
+              "oracle_fusion.suppliers.get",
+              "oracle_fusion.suppliers.list",
+              "oracle_fusion.supply_requests.create",
+              "oracle_fusion.supply_requests.list",
+              "oracle_fusion.work_order_materials.list",
+              "oracle_fusion.work_order_materials.replace_with_substitute",
+              "oracle_fusion.work_order_materials.update",
+              "oracle_fusion.work_order_operations.create",
+              "oracle_fusion.work_order_operations.list",
+              "oracle_fusion.work_order_operations.update",
+              "oracle_fusion.work_order_resources.create",
+              "oracle_fusion.work_order_resources.list",
+              "oracle_fusion.work_order_resources.update",
+              "oracle_fusion.work_orders.create",
+              "oracle_fusion.work_orders.get",
+              "oracle_fusion.work_orders.list",
+              "oracle_fusion.work_orders.update"
+            ]
+          },
+          {
+            "description": "Documented Slack Web API operations over task-scoped conversations and files.",
+            "name": "slack",
+            "tools": [
+              "slack.chat_postMessage",
+              "slack.conversations_history",
+              "slack.conversations_replies",
+              "slack.files_info",
+              "slack.reactions_add",
+              "slack.search_messages"
             ]
           }
         ]
       },
       "success": true,
-      "tool": "get_environment_context"
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "quality_exception"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
+        ],
+        "spreadsheetId": "sheet-070"
       },
       "index": 1,
       "result": {
-        "documents": [
+        "developerMetadata": [
           {
-            "body": "A failed inspection requires an immediate lot hold and an open nonconformance. Use REWORK when the defect is recoverable and assign it to the quality engineer.",
-            "category": "quality_exception",
-            "doc_id": "POL-07",
-            "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
-            "title": "Nonconformance policy"
+            "metadataKey": "case",
+            "metadataValue": "CASE-070"
+          },
+          {
+            "metadataKey": "approvalStatus",
+            "metadataValue": "APPROVED"
+          },
+          {
+            "metadataKey": "approvedControlPacket",
+            "metadataValue": "{\"approvalStatus\":\"APPROVED\",\"approvedArguments\":{\"requestBody\":{\"ItemNumber\":\"NS-COMP-070\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-29\",\"PlannedStartDate\":\"2026-01-26\",\"WorkOrderNumber\":\"WO-0070\",\"WorkOrderQuantity\":41,\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-070\",\"controlWorkbookAuditRange\":\"Audit!A:F\",\"controlWorkbookOutcomeRange\":\"Control!H32\",\"decision\":\"Use the approved prototype quantity, revision, and start window to create an isolated pilot order.\",\"oracleOperation\":\"oracle_fusion.work_orders.create\",\"returnFields\":{\"affected_work_order\":\"ORD-0070\",\"change_order\":\"ORD-0070\",\"implementation_result\":\"Pilot order created\"}}"
           }
-        ]
+        ],
+        "namedRanges": [
+          {
+            "name": "ApprovedDecision",
+            "namedRangeId": "decision-070"
+          }
+        ],
+        "properties": {
+          "title": "CASE-070 control workbook"
+        },
+        "sheets": [
+          {
+            "properties": {
+              "sheetId": 0,
+              "title": "Control"
+            }
+          }
+        ],
+        "spreadsheetId": "sheet-070"
       },
       "success": true,
-      "tool": "search_documents"
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
-        "inspection_id": "INSP-Q-010"
+        "maxResults": 20,
+        "q": "\"CASE-070\"",
+        "userId": "me"
       },
       "index": 2,
       "result": {
-        "inspection": {
-          "accepted_qty": 16.0,
-          "inspected_qty": 18.0,
-          "inspection_id": "INSP-Q-010",
-          "inspector_id": "U-INSPECTOR",
-          "item_id": "FG-PANEL",
-          "lot_number": "FG-LOT-010",
-          "rejected_qty": 2.0,
-          "result": "Fail",
-          "source_id": "WO-Q-010",
-          "source_type": "work_order",
-          "task_id": "factorybench-070"
-        },
-        "inventory": [
+        "messages": [
           {
-            "expiration_date": null,
-            "item_id": "FG-PANEL",
-            "lot_number": "FG-LOT-010",
-            "plant_id": "SEA",
-            "quantity": 18.0,
-            "reserved_qty": 0.0,
-            "status": "Inspection",
-            "subinventory": "FG"
+            "id": "msg-070",
+            "threadId": "thread-070"
           }
-        ]
+        ],
+        "resultSizeEstimate": 1
       },
       "success": true,
-      "tool": "get_quality_context"
+      "tool": "gmail.messages.list"
     },
     {
       "arguments": {
-        "hold_id": "HOLD-0010",
-        "inspection_id": "INSP-Q-010",
-        "item_id": "FG-PANEL",
-        "lot_number": "FG-LOT-010",
-        "reason_code": "FUNCTIONAL_TEST_FAIL"
+        "fileId": "drive-070"
       },
       "index": 3,
       "result": {
-        "hold_id": "HOLD-0010",
-        "status": "Active"
+        "content": "# Commercial or service control for CASE-070\n\nThe approved operational objective is: Use the approved prototype quantity, revision, and start window to create an isolated pilot order.\n\nEffective date: 2026-01-26\nReference record: NS-000070\nAny deviation affecting price, completion, inspected quantity, compliance, or customer commit requires explicit approval preserved in the case packet.\n",
+        "description": "Contract / service control",
+        "id": "drive-070",
+        "kind": "drive#file",
+        "md5Checksum": "f76396ad21c16dce1b66b82e2c3d1adafd586debbf40d026b227b4bd96175333",
+        "mimeType": "text/markdown",
+        "modifiedTime": "2026-01-12T09:00:00Z",
+        "name": "contract-or-service-control.md"
       },
       "success": true,
-      "tool": "place_quality_hold"
+      "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "disposition": "REWORK",
-        "inspection_id": "INSP-Q-010",
-        "nonconformance_id": "NC-0010",
-        "owner_id": "U-QUALITY"
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000070.000100"
       },
       "index": 4,
       "result": {
-        "disposition": "REWORK",
-        "nonconformance_id": "NC-0010",
-        "status": "Open"
+        "has_more": false,
+        "messages": [
+          {
+            "text": "CASE-070: evidence checked.",
+            "ts": "1768000070.000100",
+            "user": "U-OPS-LEAD"
+          },
+          {
+            "text": "CASE-070 | APPROVED | Use the approved prototype quantity, revision, and start window to create an isolated pilot order. | Oracle operation oracle_fusion.work_orders.create | approved control packet {\"approvalStatus\":\"APPROVED\",\"approvedArguments\":{\"requestBody\":{\"ItemNumber\":\"NS-COMP-070\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-29\",\"PlannedStartDate\":\"2026-01-26\",\"WorkOrderNumber\":\"WO-0070\",\"WorkOrderQuantity\":41,\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-070\",\"controlWorkbookAuditRange\":\"Audit!A:F\",\"controlWorkbookOutcomeRange\":\"Control!H32\",\"decision\":\"Use the approved prototype quantity, revision, and start window to create an isolated pilot order.\",\"oracleOperation\":\"oracle_fusion.work_orders.create\",\"returnFields\":{\"affected_work_order\":\"ORD-0070\",\"change_order\":\"ORD-0070\",\"implementation_result\":\"Pilot order created\"}}",
+            "ts": "1768000070.000200",
+            "user": "U-APPROVER"
+          }
+        ],
+        "ok": true,
+        "response_metadata": {
+          "next_cursor": ""
+        }
       },
       "success": true,
-      "tool": "create_nonconformance"
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "disposition": "REWORK",
-        "hold_id": "HOLD-0010",
-        "inspection_id": "INSP-Q-010",
-        "nonconformance_id": "NC-0010"
+        "WorkOrderId": 100070
       },
       "index": 5,
       "result": {
-        "submitted": {
-          "disposition": "REWORK",
-          "hold_id": "HOLD-0010",
-          "inspection_id": "INSP-Q-010",
-          "nonconformance_id": "NC-0010"
+        "HeaderInterfaceId": 700070,
+        "HoldId": 1000070,
+        "InspectionId": 1100070,
+        "InterfaceTransactionId": 800070,
+        "InvoiceId": 900070,
+        "ItemNumber": "NS-COMP-070",
+        "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+        "MaintenanceProgramId": 500070,
+        "OrderNumber": "ORD-0070",
+        "OrganizationCode": "SEA",
+        "Quantity": 41,
+        "RecordId": 10000070,
+        "ReferenceNumber": "CASE-070",
+        "StatusCode": "OPEN",
+        "SupplierId": 600070,
+        "WoOperationId": 200070,
+        "WoOperationMaterialId": 300070,
+        "WoOperationResourceId": 400070,
+        "WorkOrderId": 100070,
+        "WorkOrderNumber": "WO-0070",
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0070",
+        "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0070"
+      },
+      "success": true,
+      "tool": "oracle_fusion.work_orders.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-070'"
+      },
+      "index": 6,
+      "result": {
+        "count": 1,
+        "hasMore": false,
+        "items": [
+          {
+            "HeaderInterfaceId": 700070,
+            "HoldId": 1000070,
+            "InspectionId": 1100070,
+            "InterfaceTransactionId": 800070,
+            "InvoiceId": 900070,
+            "ItemNumber": "NS-COMP-070",
+            "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+            "MaintenanceProgramId": 500070,
+            "OrderNumber": "ORD-0070",
+            "OrganizationCode": "SEA",
+            "Quantity": 41,
+            "RecordId": 10000070,
+            "ReferenceNumber": "CASE-070",
+            "StatusCode": "OPEN",
+            "SupplierId": 600070,
+            "WoOperationId": 200070,
+            "WoOperationMaterialId": 300070,
+            "WoOperationResourceId": 400070,
+            "WorkOrderId": 100070,
+            "WorkOrderNumber": "WO-0070",
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0070",
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0070"
+          }
+        ],
+        "limit": 50,
+        "links": [],
+        "offset": 0
+      },
+      "success": true,
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "requestBody": {
+          "ItemNumber": "NS-COMP-070",
+          "OrganizationCode": "SEA",
+          "PlannedCompletionDate": "2026-01-29",
+          "PlannedStartDate": "2026-01-26",
+          "WorkOrderNumber": "WO-0070",
+          "WorkOrderQuantity": 41,
+          "WorkOrderStatusCode": "Released"
+        }
+      },
+      "index": 7,
+      "result": {
+        "HeaderInterfaceId": 700070,
+        "HoldId": 1000070,
+        "InspectionId": 1100070,
+        "InterfaceTransactionId": 800070,
+        "InvoiceId": 900070,
+        "ItemNumber": "NS-COMP-070",
+        "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+        "MaintenanceProgramId": 500070,
+        "Operation": "oracle_fusion.work_orders.create",
+        "OrderNumber": "ORD-0070",
+        "OrganizationCode": "SEA",
+        "Quantity": 41,
+        "RecordId": 10000070,
+        "ReferenceNumber": "CASE-070",
+        "StatusCode": "PILOT_ORDER_CREATED",
+        "SupplierId": 600070,
+        "WoOperationId": 200070,
+        "WoOperationMaterialId": 300070,
+        "WoOperationResourceId": 400070,
+        "WorkOrderId": 100070,
+        "WorkOrderNumber": "WO-0070",
+        "links": [],
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0070",
+        "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0070"
+      },
+      "success": true,
+      "tool": "oracle_fusion.work_orders.create"
+    },
+    {
+      "arguments": {
+        "raw": "RnJvbTogbWFudWZhY3R1cmluZy5lbmdpbmVlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG9wZXJhdGlvbnMtY29udHJvbEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wNzAg4oCUIENvbXBsZXRlZCBlbnRlcnByaXNlIHdvcmtmbG93DQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KUGlsb3Qgb3JkZXIgY3JlYXRlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDcwLg0K",
+        "threadId": "thread-070",
+        "userId": "me"
+      },
+      "index": 8,
+      "result": {
+        "id": "sent-070",
+        "labelIds": [
+          "SENT"
+        ],
+        "threadId": "thread-070"
+      },
+      "success": true,
+      "tool": "gmail.messages.send"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-070",
+        "requestBody": {
+          "content": "CASE-070: Pilot order created; Oracle reference recorded."
+        }
+      },
+      "index": 9,
+      "result": {
+        "content": "CASE-070: Pilot order created; Oracle reference recorded.",
+        "id": "comment-070",
+        "resolved": false
+      },
+      "success": true,
+      "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "affected_work_order": "ORD-0070",
+        "change_order": "ORD-0070",
+        "implementation_result": "Pilot order created"
+      },
+      "index": 10,
+      "result": {
+        "accepted": true,
+        "fields": {
+          "affected_work_order": "ORD-0070",
+          "change_order": "ORD-0070",
+          "implementation_result": "Pilot order created"
         },
         "task_id": "factorybench-070"
       },
       "success": true,
-      "tool": "submit_answer"
+      "tool": "factorybench.submit_answer"
     }
   ]
 }

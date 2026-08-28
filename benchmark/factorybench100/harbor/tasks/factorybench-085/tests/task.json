@@ -1,80 +1,80 @@
 {
   "allowed_write_tables": [
-    "inventory_transfers",
-    "inventory_on_hand",
-    "work_orders",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "new_completion": {
+      "field_destination": {
         "type": "string"
       },
-      "new_start": {
+      "service_request": {
         "type": "string"
       },
-      "transfer_id": {
-        "type": "string"
-      },
-      "work_order_id": {
+      "stock_action": {
         "type": "string"
       }
     },
     "required": [
-      "new_completion",
-      "new_start",
-      "transfer_id",
-      "work_order_id"
+      "field_destination",
+      "service_request",
+      "stock_action"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "new_completion": "2026-01-17",
-      "new_start": "2026-01-14",
-      "transfer_id": "TRF-0005",
-      "work_order_id": "WO-T-005"
+      "field_destination": "SEA-2",
+      "service_request": "FB-085",
+      "stock_action": "Replacement return received"
     },
     "assertions": [
       {
-        "description": "The donor-plant transfer is completed for the shortage quantity.",
-        "id": "transfer_completed",
-        "table": "inventory_transfers",
+        "description": "oracle_fusion.receiving_receipt_requests.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "quantity": 12,
-          "status": "Completed"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"EmployeeId\":7185,\"OrganizationCode\":\"SEA\",\"ReceiptSourceCode\":\"VENDOR\",\"VendorName\":\"Cascade Industrial\",\"lines\":[{\"ItemNumber\":\"NS-COMP-085\",\"LotNumber\":\"LOT-0085\",\"POHeaderId\":2000085,\"POLineId\":2100085,\"Quantity\":19,\"SourceDocumentCode\":\"PO\",\"UnitOfMeasure\":\"EA\"}]}},\"case\":\"CASE-085\",\"outcome\":\"Match shipment, RMA, and serial evidence before creating the receipt request for the returned asset.\",\"tool\":\"oracle_fusion.receiving_receipt_requests.create\"}",
+          "resource_type": "oracle_fusion.receiving_receipt_requests",
+          "revision": 1,
+          "status": "Replacement return received",
+          "system": "oracle_fusion"
         },
         "where": {
-          "transfer_id": "TRF-0005"
+          "resource_id": "factorybench-085-mutation-01",
+          "task_id": "factorybench-085"
         }
       },
       {
-        "description": "Transferred stock is available at the receiving plant.",
-        "id": "receiving_inventory_created",
-        "table": "inventory_on_hand",
+        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "quantity": 12,
-          "status": "Unrestricted"
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
         },
         "where": {
-          "item_id": "RM-COPPER",
-          "lot_number": "PDX-C-005",
-          "plant_id": "SEA",
-          "subinventory": "STORES"
+          "resource_id": "factorybench-085-mutation-02",
+          "task_id": "factorybench-085"
         }
       },
       {
-        "description": "The work order starts on arrival and has a feasible completion date.",
-        "id": "work_order_rescheduled",
-        "table": "work_orders",
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "scheduled_completion": "2026-01-17",
-          "scheduled_start": "2026-01-14"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "work_order_id": "WO-T-005"
+          "resource_id": "factorybench-085-mutation-03",
+          "task_id": "factorybench-085"
         }
       }
     ]
@@ -82,49 +82,77 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "transfer_reschedule"
-      },
-      "tool": "search_documents"
-    },
-    {
-      "arguments": {
-        "work_order_id": "WO-T-005"
-      },
-      "tool": "get_work_order"
-    },
-    {
-      "arguments": {
-        "item_ids": [
-          "RM-COPPER"
+        "majorDimension": "ROWS",
+        "ranges": [
+          "Control!A1:H50",
+          "Approvals!A1:G20"
         ],
-        "plant_id": "PDX"
+        "spreadsheetId": "sheet-085",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.batchGet"
     },
     {
       "arguments": {
-        "plant_id": "SEA",
-        "work_order_id": "WO-T-005"
+        "format": "full",
+        "id": "msg-085",
+        "userId": "me"
       },
-      "tool": "get_schedule"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.get"
+    },
+    {
+      "arguments": {
+        "file": "F-000085"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.files_info"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-approval-085",
+        "pageSize": 20
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.approvals.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-085'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0085"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.sales_orders.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order",
-    "get_inventory",
-    "get_schedule"
+    "factorybench.context.get",
+    "google_sheets.spreadsheets.values.batchGet",
+    "gmail.messages.get",
+    "slack.files_info",
+    "google_drive.approvals.list",
+    "oracle_fusion.inventory_onhand_balances.list",
+    "oracle_fusion.sales_orders.get"
   ],
   "task_id": "factorybench-085",
   "write_tools": [
-    "complete_transfer",
-    "create_transfer",
-    "reschedule_work_order",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_sheets.spreadsheets.values.update",
+    "oracle_fusion.receiving_receipt_requests.create",
+    "slack.chat_postMessage"
   ]
 }

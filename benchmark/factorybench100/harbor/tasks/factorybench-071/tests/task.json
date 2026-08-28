@@ -1,79 +1,81 @@
 {
   "allowed_write_tables": [
-    "work_order_operations",
-    "work_orders",
-    "wip_variances",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "completed_quantity": {
-        "type": "integer"
-      },
-      "scrap_quantity": {
-        "type": "integer"
-      },
-      "variance_id": {
+      "cost_reference": {
         "type": "string"
       },
-      "work_order_id": {
+      "posting_action": {
         "type": "string"
+      },
+      "reconciled_amount": {
+        "multipleOf": 0.01,
+        "type": "number"
       }
     },
     "required": [
-      "completed_quantity",
-      "scrap_quantity",
-      "variance_id",
-      "work_order_id"
+      "cost_reference",
+      "posting_action",
+      "reconciled_amount"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "completed_quantity": 12,
-      "scrap_quantity": 1,
-      "variance_id": "VAR-0001",
-      "work_order_id": "WO-C-001"
+      "cost_reference": "REF-0071",
+      "posting_action": "Labor cost posted",
+      "reconciled_amount": 5273.94
     },
     "assertions": [
       {
-        "count": 2,
-        "description": "All work-order operations are complete.",
-        "id": "operation_completed",
-        "table": "work_order_operations",
+        "description": "oracle_fusion.resource_transactions.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
+        "values": {
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"ResourceTransactionDetail\":[{\"OrganizationCode\":\"SEA\",\"ResourceCode\":\"RES-071\",\"TransactionQuantity\":31.5,\"TransactionUnitOfMeasure\":\"HR\",\"WoOperationSequenceNumber\":10,\"WorkOrderNumber\":\"WO-0071\"}],\"SourceSystemCode\":\"FUSION_MOBILE\"}},\"case\":\"CASE-071\",\"outcome\":\"Match employee time, resource rate, and operation status before posting the omitted resource transaction.\",\"tool\":\"oracle_fusion.resource_transactions.create\"}",
+          "resource_type": "oracle_fusion.resource_transactions",
+          "revision": 1,
+          "status": "Labor cost posted",
+          "system": "oracle_fusion"
+        },
         "where": {
-          "status": "Complete",
-          "work_order_id": "WO-C-001"
+          "resource_id": "factorybench-071-mutation-01",
+          "task_id": "factorybench-071"
         }
       },
       {
-        "description": "Finished and scrap quantities reconcile to the order quantity.",
-        "id": "work_order_completed",
-        "table": "work_orders",
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "completed_qty": 12,
-          "scrap_qty": 1,
-          "status": "Completed"
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
         },
         "where": {
-          "work_order_id": "WO-C-001"
+          "resource_id": "factorybench-071-mutation-02",
+          "task_id": "factorybench-071"
         }
       },
       {
-        "description": "WIP variance is posted for finance review.",
-        "id": "variance_posted",
-        "table": "wip_variances",
+        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "labor_variance": -18.0,
-          "material_variance": -50.0,
-          "overhead_variance": 0.0,
-          "status": "Posted"
+          "resource_type": "google_drive.approvals",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "variance_id": "VAR-0001"
+          "resource_id": "factorybench-071-mutation-03",
+          "task_id": "factorybench-071"
         }
       }
     ]
@@ -81,31 +83,78 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "completion_costing"
+        "channel": "C-FINANCE",
+        "limit": 100,
+        "ts": "1768000071.000100"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "work_order_id": "WO-C-001"
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-071"
       },
-      "tool": "get_work_order"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-071",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "count": 50,
+        "query": "\"CASE-071\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.search_messages"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100071
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_orders.get"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100071,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-071'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_resources.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order"
+    "factorybench.context.get",
+    "slack.conversations_replies",
+    "google_drive.files.get",
+    "google_sheets.spreadsheets.values.get",
+    "slack.search_messages",
+    "oracle_fusion.work_orders.get",
+    "oracle_fusion.work_order_resources.list"
   ],
   "task_id": "factorybench-071",
   "write_tools": [
-    "complete_operation",
-    "complete_work_order",
-    "record_wip_variance",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_drive.approvals.approve",
+    "oracle_fusion.resource_transactions.create",
+    "slack.chat_postMessage"
   ]
 }

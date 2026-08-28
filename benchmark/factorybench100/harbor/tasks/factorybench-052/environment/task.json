@@ -1,473 +1,760 @@
 {
   "allowed_write_tables": [
-    "inventory_on_hand",
-    "material_reservations",
-    "material_requirements",
-    "material_transactions",
-    "work_order_operations",
-    "work_orders",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "issued_lot": {
-        "type": "string"
-      },
-      "issued_quantity": {
+      "controlled_quantity": {
         "type": "integer"
       },
-      "operation_status": {
+      "inspection_reference": {
         "type": "string"
       },
-      "work_order_id": {
+      "quality_result": {
         "type": "string"
       }
     },
     "required": [
-      "issued_lot",
-      "issued_quantity",
-      "operation_status",
-      "work_order_id"
+      "controlled_quantity",
+      "inspection_reference",
+      "quality_result"
     ],
     "type": "object"
   },
   "as_of": "2026-01-12",
   "expected": {
     "answer": {
-      "issued_lot": "R-EARLY-002",
-      "issued_quantity": 24,
-      "operation_status": "In Process",
-      "work_order_id": "WO-I-002"
+      "controlled_quantity": 23,
+      "inspection_reference": "INSP-0052",
+      "quality_result": "Failed result recorded"
     },
     "assertions": [
       {
-        "description": "The full requirement is issued from the reserved earliest-expiry lot.",
-        "id": "fefo_issue",
-        "table": "material_transactions",
+        "description": "oracle_fusion.quality_inspection_results.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "lot_number": "R-EARLY-002",
-          "quantity": 24,
-          "transaction_type": "WIP_ISSUE"
+          "payload_json": "{\"arguments\":{\"InspectionId\":1100052,\"requestBody\":{\"InspectionResult\":\"ACCEPT\",\"InspectionStatus\":\"COMPLETE\",\"QuantityAccepted\":23,\"QuantityRejected\":0,\"samples\":[{\"Result\":\"PASS\",\"SampleNumber\":1}]}},\"case\":\"CASE-052\",\"outcome\":\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\",\"tool\":\"oracle_fusion.quality_inspection_results.update\"}",
+          "resource_type": "oracle_fusion.quality_inspection_results",
+          "revision": 1,
+          "status": "Failed result recorded",
+          "system": "oracle_fusion"
         },
         "where": {
-          "transaction_id": "TX-ISSUE-002"
+          "resource_id": "factorybench-052-mutation-01",
+          "task_id": "factorybench-052"
         }
       },
       {
-        "description": "The material requirement reflects the full issue.",
-        "id": "requirement_issued",
-        "table": "material_requirements",
+        "description": "google_sheets.spreadsheets.values.append produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "issued_qty": 24
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
         },
         "where": {
-          "item_id": "RM-RELAY",
-          "work_order_id": "WO-I-002"
+          "resource_id": "factorybench-052-mutation-02",
+          "task_id": "factorybench-052"
         }
       },
       {
-        "description": "The first operation starts after material issue.",
-        "id": "operation_started",
-        "table": "work_order_operations",
+        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "status": "In Process"
+          "resource_type": "google_drive.approvals",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "sequence": 10,
-          "work_order_id": "WO-I-002"
+          "resource_id": "factorybench-052-mutation-03",
+          "task_id": "factorybench-052"
         }
       }
     ]
   },
-  "family": "production_issue",
-  "instruction": "Stage and issue 24 RM-RELAY units to work order WO-I-002, honoring reservation and FEFO controls, then start operation 10. Return the work order, lot, issued quantity, and operation status.",
+  "family": "quality_execution",
+  "instruction": "You are the quality engineer for Northstar Controls. Resolve FACTORYBENCH-052 (Record failed dielectric-test samples). Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values. The case is an isolated snapshot as of 2026-01-12; correlate immutable IDs and effective revisions rather than matching names alone. Evidence is distributed across Oracle Fusion, Gmail, Drive, Sheets, and Slack, with inspectable files including `operating-policy.md`, `contract-or-service-control.md`, `supplier-quotation.pdf`, `supplier-lead-time-and-capacity.xlsx`, `approval-decision-log.csv`, `source-email-thread.eml`, `operations-slack-thread.json`, `drive-approval-record.json`. After the documented Oracle operation, append an audit row to the control workbook; then record the current reviewer's Drive approval. Return exactly: inspection_reference, quality_result, controlled_quantity.",
   "level": "L3",
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "production_issue"
-      },
-      "tool": "search_documents"
-    },
-    {
-      "arguments": {
-        "work_order_id": "WO-I-002"
-      },
-      "tool": "get_work_order"
-    },
-    {
-      "arguments": {
-        "item_ids": [
-          "RM-RELAY"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
         ],
-        "plant_id": "SEA"
+        "spreadsheetId": "sheet-052"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-052' and trashed = false"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "count": 50,
+        "query": "\"CASE-052\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.search_messages"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "thread-052",
+        "userId": "me"
+      },
+      "match": "successful_tool_call",
+      "tool": "gmail.threads.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-052'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.inspection_plans.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-052'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.quality_inspection_results.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order",
-    "get_inventory"
+    "factorybench.context.get",
+    "google_sheets.spreadsheets.get",
+    "google_drive.files.list",
+    "slack.search_messages",
+    "gmail.threads.get",
+    "oracle_fusion.inspection_plans.list",
+    "oracle_fusion.quality_inspection_results.list"
   ],
-  "role": "shop_floor_controller",
+  "role": "quality_engineer",
   "seed_tables": {
-    "bom_components": [
+    "api_fixtures": [
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-HOUSING",
-        "operation_sequence": 10,
-        "quantity_per": 1,
-        "yield_factor": 1
+        "arguments_json": "{\"includeGridData\":false,\"ranges\":[\"Control!A1:H50\"],\"spreadsheetId\":\"sheet-052\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-call-01",
+        "read_only": 1,
+        "response_json": "{\"developerMetadata\":[{\"metadataKey\":\"case\",\"metadataValue\":\"CASE-052\"},{\"metadataKey\":\"approvalStatus\",\"metadataValue\":\"APPROVED\"},{\"metadataKey\":\"approvedControlPacket\",\"metadataValue\":\"{\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"case\\\":\\\"CASE-052\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H14\\\",\\\"decision\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.quality_inspection_results.update\\\",\\\"returnFields\\\":{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}}\"}],\"namedRanges\":[{\"name\":\"ApprovedDecision\",\"namedRangeId\":\"decision-052\"}],\"properties\":{\"title\":\"CASE-052 control workbook\"},\"sheets\":[{\"properties\":{\"sheetId\":0,\"title\":\"Control\"}}],\"spreadsheetId\":\"sheet-052\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "google_sheets.spreadsheets.get"
       },
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-RELAY",
-        "operation_sequence": 20,
-        "quantity_per": 2,
-        "yield_factor": 1
+        "arguments_json": "{\"fields\":\"files(id,name,mimeType,modifiedTime,md5Checksum)\",\"pageSize\":50,\"q\":\"name contains 'CASE-052' and trashed = false\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-call-02",
+        "read_only": 1,
+        "response_json": "{\"files\":[{\"description\":\"CASE-052: Operating policy\",\"id\":\"drive-052-01\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"operating-policy.md\"},{\"description\":\"CASE-052: Contract / service control\",\"id\":\"drive-052\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"},{\"description\":\"CASE-052: Supplier quotation\",\"id\":\"drive-052-03\",\"mimeType\":\"application/pdf\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"supplier-quotation.pdf\"},{\"description\":\"CASE-052: Supplier lead-time and capacity workbook\",\"id\":\"drive-052-04\",\"mimeType\":\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"supplier-lead-time-and-capacity.xlsx\"},{\"description\":\"CASE-052: Approval decision log\",\"id\":\"drive-052-05\",\"mimeType\":\"text/csv\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"approval-decision-log.csv\"},{\"description\":\"CASE-052: Source email thread\",\"id\":\"drive-052-06\",\"mimeType\":\"message/rfc822\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"source-email-thread.eml\"},{\"description\":\"CASE-052: Operations Slack thread\",\"id\":\"drive-052-07\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"operations-slack-thread.json\"},{\"description\":\"CASE-052: Drive approval record\",\"id\":\"drive-approval-052\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"drive-approval-record.json\"},{\"description\":\"CASE-052: Oracle starting-record export\",\"id\":\"drive-052-09\",\"mimeType\":\"application/json\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"oracle-starting-record.json\"},{\"description\":\"CASE-052: Inspection measurements\",\"id\":\"drive-052-10\",\"mimeType\":\"text/csv\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"inspection-measurements.csv\"},{\"description\":\"CASE-052: Workflow risk register\",\"id\":\"drive-052-11\",\"mimeType\":\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"workflow-risk-register.xlsx\"},{\"description\":\"CASE-052: Technical specification\",\"id\":\"drive-052-12\",\"mimeType\":\"text/markdown\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"technical-specification.md\"}],\"kind\":\"drive#fileList\",\"nextPageToken\":null}",
+        "task_id": "factorybench-052",
+        "tool_name": "google_drive.files.list"
       },
       {
-        "bom_id": "BOM-PANEL-C",
-        "component_item_id": "RM-COPPER",
-        "operation_sequence": 20,
-        "quantity_per": 1,
-        "yield_factor": 1
+        "arguments_json": "{\"count\":50,\"query\":\"\\\"CASE-052\\\"\",\"sort\":\"timestamp\",\"sort_dir\":\"asc\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-call-03",
+        "read_only": 1,
+        "response_json": "{\"messages\":{\"matches\":[{\"channel\":{\"id\":\"C-PRODUCTION\"},\"text\":\"CASE-052 | APPROVED | Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values. | Oracle operation oracle_fusion.quality_inspection_results.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"case\\\":\\\"CASE-052\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H14\\\",\\\"decision\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.quality_inspection_results.update\\\",\\\"returnFields\\\":{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}}\",\"ts\":\"1768000052.000100\",\"user\":\"U-APPROVER\"}],\"total\":1},\"ok\":true,\"query\":\"\\\"CASE-052\\\"\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "slack.search_messages"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"thread-052\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-call-04",
+        "read_only": 1,
+        "response_json": "{\"historyId\":\"900052\",\"id\":\"thread-052\",\"messages\":[{\"id\":\"msg-052\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"Q0FTRS0wNTIgfCBBUFBST1ZFRCB8IFRyYW5zY3JpYmUgdGhlIHNpZ25lZCBsYWIgd29ya3NoZWV0IGludG8gdGhlIGNvcnJlY3QgaW5zcGVjdGlvbiByZXN1bHQgYW5kIHByZXNlcnZlIHNhbXBsZS1sZXZlbCB2YWx1ZXMuIHwgT3JhY2xlIG9wZXJhdGlvbiBvcmFjbGVfZnVzaW9uLnF1YWxpdHlfaW5zcGVjdGlvbl9yZXN1bHRzLnVwZGF0ZSB8IGFwcHJvdmVkIGNvbnRyb2wgcGFja2V0IHsiYXBwcm92YWxTdGF0dXMiOiJBUFBST1ZFRCIsImFwcHJvdmVkQXJndW1lbnRzIjp7Ikluc3BlY3Rpb25JZCI6MTEwMDA1MiwicmVxdWVzdEJvZHkiOnsiSW5zcGVjdGlvblJlc3VsdCI6IkFDQ0VQVCIsIkluc3BlY3Rpb25TdGF0dXMiOiJDT01QTEVURSIsIlF1YW50aXR5QWNjZXB0ZWQiOjIzLCJRdWFudGl0eVJlamVjdGVkIjowLCJzYW1wbGVzIjpbeyJSZXN1bHQiOiJQQVNTIiwiU2FtcGxlTnVtYmVyIjoxfV19fSwiY2FzZSI6IkNBU0UtMDUyIiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDE0IiwiZGVjaXNpb24iOiJUcmFuc2NyaWJlIHRoZSBzaWduZWQgbGFiIHdvcmtzaGVldCBpbnRvIHRoZSBjb3JyZWN0IGluc3BlY3Rpb24gcmVzdWx0IGFuZCBwcmVzZXJ2ZSBzYW1wbGUtbGV2ZWwgdmFsdWVzLiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24ucXVhbGl0eV9pbnNwZWN0aW9uX3Jlc3VsdHMudXBkYXRlIiwicmV0dXJuRmllbGRzIjp7ImNvbnRyb2xsZWRfcXVhbnRpdHkiOjIzLCJpbnNwZWN0aW9uX3JlZmVyZW5jZSI6IklOU1AtMDA1MiIsInF1YWxpdHlfcmVzdWx0IjoiRmFpbGVkIHJlc3VsdCByZWNvcmRlZCJ9fQ\",\"size\":865},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-052 \\u2014 approved enterprise action\"}]},\"snippet\":\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\",\"threadId\":\"thread-052\"}]}",
+        "task_id": "factorybench-052",
+        "tool_name": "gmail.threads.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-call-05",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.inspection_plans.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-call-06",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.quality_inspection_results.list"
+      },
+      {
+        "arguments_json": "{\"InspectionId\":1100052,\"requestBody\":{\"InspectionResult\":\"ACCEPT\",\"InspectionStatus\":\"COMPLETE\",\"QuantityAccepted\":23,\"QuantityRejected\":0,\"samples\":[{\"Result\":\"PASS\",\"SampleNumber\":1}]}}",
+        "effect_json": "{\"effective_at\":\"2026-01-27\",\"payload_json\":\"{\\\"arguments\\\":{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"case\\\":\\\"CASE-052\\\",\\\"outcome\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"tool\\\":\\\"oracle_fusion.quality_inspection_results.update\\\"}\",\"resource_id\":\"factorybench-052-mutation-01\",\"resource_type\":\"oracle_fusion.quality_inspection_results\",\"revision\":1,\"status\":\"Failed result recorded\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-052\"}",
+        "fixture_id": "factorybench-052-call-07",
+        "read_only": 0,
+        "response_json": "{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"Operation\":\"oracle_fusion.quality_inspection_results.update\",\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"FAILED_RESULT_RECORDED\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"links\":[],\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.quality_inspection_results.update"
+      },
+      {
+        "arguments_json": "{\"insertDataOption\":\"INSERT_ROWS\",\"range\":\"Audit!A:F\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:F\",\"values\":[[\"2026-01-12\",\"CASE-052\",\"quality_engineer\",\"Failed result recorded\",\"REF-0052\",\"posted\"]]},\"spreadsheetId\":\"sheet-052\",\"valueInputOption\":\"RAW\"}",
+        "effect_json": "{\"effective_at\":\"2026-01-27\",\"payload_json\":\"{\\\"arguments\\\":{\\\"insertDataOption\\\":\\\"INSERT_ROWS\\\",\\\"range\\\":\\\"Audit!A:F\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"range\\\":\\\"Audit!A:F\\\",\\\"values\\\":[[\\\"2026-01-12\\\",\\\"CASE-052\\\",\\\"quality_engineer\\\",\\\"Failed result recorded\\\",\\\"REF-0052\\\",\\\"posted\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-052\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"case\\\":\\\"CASE-052\\\",\\\"outcome\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"tool\\\":\\\"google_sheets.spreadsheets.values.append\\\"}\",\"resource_id\":\"factorybench-052-mutation-02\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-052\"}",
+        "fixture_id": "factorybench-052-call-08",
+        "read_only": 0,
+        "response_json": "{\"spreadsheetId\":\"sheet-052\",\"tableRange\":\"Audit!A1:F20\",\"updates\":{\"updatedCells\":6,\"updatedRange\":\"Audit!A21:F21\",\"updatedRows\":1}}",
+        "task_id": "factorybench-052",
+        "tool_name": "google_sheets.spreadsheets.values.append"
+      },
+      {
+        "arguments_json": "{\"approvalId\":\"approval-052\",\"fileId\":\"drive-approval-052\",\"requestBody\":{\"message\":\"Approved for CASE-052 only.\"}}",
+        "effect_json": "{\"effective_at\":\"2026-01-27\",\"payload_json\":\"{\\\"arguments\\\":{\\\"approvalId\\\":\\\"approval-052\\\",\\\"fileId\\\":\\\"drive-approval-052\\\",\\\"requestBody\\\":{\\\"message\\\":\\\"Approved for CASE-052 only.\\\"}},\\\"case\\\":\\\"CASE-052\\\",\\\"outcome\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"tool\\\":\\\"google_drive.approvals.approve\\\"}\",\"resource_id\":\"factorybench-052-mutation-03\",\"resource_type\":\"google_drive.approvals\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-052\"}",
+        "fixture_id": "factorybench-052-call-09",
+        "read_only": 0,
+        "response_json": "{\"fileId\":\"drive-approval-052\",\"id\":\"approval-052\",\"status\":\"APPROVED\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "google_drive.approvals.approve"
+      },
+      {
+        "arguments_json": "{\"id\":\"att-052\",\"messageId\":\"msg-052\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-01",
+        "read_only": 1,
+        "response_json": "{\"data\":\"U3VwcGxpZXIgcXVvdGF0aW9uIGF0dGFjaG1lbnQgZm9yIENBU0UtMDUyOiBxdWFudGl0eSAyMy4gQ0FTRS0wNTIgfCBBUFBST1ZFRCB8IFRyYW5zY3JpYmUgdGhlIHNpZ25lZCBsYWIgd29ya3NoZWV0IGludG8gdGhlIGNvcnJlY3QgaW5zcGVjdGlvbiByZXN1bHQgYW5kIHByZXNlcnZlIHNhbXBsZS1sZXZlbCB2YWx1ZXMuIHwgT3JhY2xlIG9wZXJhdGlvbiBvcmFjbGVfZnVzaW9uLnF1YWxpdHlfaW5zcGVjdGlvbl9yZXN1bHRzLnVwZGF0ZSB8IGFwcHJvdmVkIGNvbnRyb2wgcGFja2V0IHsiYXBwcm92YWxTdGF0dXMiOiJBUFBST1ZFRCIsImFwcHJvdmVkQXJndW1lbnRzIjp7Ikluc3BlY3Rpb25JZCI6MTEwMDA1MiwicmVxdWVzdEJvZHkiOnsiSW5zcGVjdGlvblJlc3VsdCI6IkFDQ0VQVCIsIkluc3BlY3Rpb25TdGF0dXMiOiJDT01QTEVURSIsIlF1YW50aXR5QWNjZXB0ZWQiOjIzLCJRdWFudGl0eVJlamVjdGVkIjowLCJzYW1wbGVzIjpbeyJSZXN1bHQiOiJQQVNTIiwiU2FtcGxlTnVtYmVyIjoxfV19fSwiY2FzZSI6IkNBU0UtMDUyIiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDE0IiwiZGVjaXNpb24iOiJUcmFuc2NyaWJlIHRoZSBzaWduZWQgbGFiIHdvcmtzaGVldCBpbnRvIHRoZSBjb3JyZWN0IGluc3BlY3Rpb24gcmVzdWx0IGFuZCBwcmVzZXJ2ZSBzYW1wbGUtbGV2ZWwgdmFsdWVzLiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24ucXVhbGl0eV9pbnNwZWN0aW9uX3Jlc3VsdHMudXBkYXRlIiwicmV0dXJuRmllbGRzIjp7ImNvbnRyb2xsZWRfcXVhbnRpdHkiOjIzLCJpbnNwZWN0aW9uX3JlZmVyZW5jZSI6IklOU1AtMDA1MiIsInF1YWxpdHlfcmVzdWx0IjoiRmFpbGVkIHJlc3VsdCByZWNvcmRlZCJ9fQ\",\"size\":922}",
+        "task_id": "factorybench-052",
+        "tool_name": "gmail.messages.attachments.get"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-052\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-02",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-052\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"Q0FTRS0wNTIgfCBBUFBST1ZFRCB8IFRyYW5zY3JpYmUgdGhlIHNpZ25lZCBsYWIgd29ya3NoZWV0IGludG8gdGhlIGNvcnJlY3QgaW5zcGVjdGlvbiByZXN1bHQgYW5kIHByZXNlcnZlIHNhbXBsZS1sZXZlbCB2YWx1ZXMuIHwgT3JhY2xlIG9wZXJhdGlvbiBvcmFjbGVfZnVzaW9uLnF1YWxpdHlfaW5zcGVjdGlvbl9yZXN1bHRzLnVwZGF0ZSB8IGFwcHJvdmVkIGNvbnRyb2wgcGFja2V0IHsiYXBwcm92YWxTdGF0dXMiOiJBUFBST1ZFRCIsImFwcHJvdmVkQXJndW1lbnRzIjp7Ikluc3BlY3Rpb25JZCI6MTEwMDA1MiwicmVxdWVzdEJvZHkiOnsiSW5zcGVjdGlvblJlc3VsdCI6IkFDQ0VQVCIsIkluc3BlY3Rpb25TdGF0dXMiOiJDT01QTEVURSIsIlF1YW50aXR5QWNjZXB0ZWQiOjIzLCJRdWFudGl0eVJlamVjdGVkIjowLCJzYW1wbGVzIjpbeyJSZXN1bHQiOiJQQVNTIiwiU2FtcGxlTnVtYmVyIjoxfV19fSwiY2FzZSI6IkNBU0UtMDUyIiwiY29udHJvbFdvcmtib29rQXVkaXRSYW5nZSI6IkF1ZGl0IUE6RiIsImNvbnRyb2xXb3JrYm9va091dGNvbWVSYW5nZSI6IkNvbnRyb2whSDE0IiwiZGVjaXNpb24iOiJUcmFuc2NyaWJlIHRoZSBzaWduZWQgbGFiIHdvcmtzaGVldCBpbnRvIHRoZSBjb3JyZWN0IGluc3BlY3Rpb24gcmVzdWx0IGFuZCBwcmVzZXJ2ZSBzYW1wbGUtbGV2ZWwgdmFsdWVzLiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24ucXVhbGl0eV9pbnNwZWN0aW9uX3Jlc3VsdHMudXBkYXRlIiwicmV0dXJuRmllbGRzIjp7ImNvbnRyb2xsZWRfcXVhbnRpdHkiOjIzLCJpbnNwZWN0aW9uX3JlZmVyZW5jZSI6IklOU1AtMDA1MiIsInF1YWxpdHlfcmVzdWx0IjoiRmFpbGVkIHJlc3VsdCByZWNvcmRlZCJ9fQ\",\"size\":865},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-052 \\u2014 evidence and requested action\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-052\",\"size\":1024},\"filename\":\"supplier-quotation.pdf\"}]},\"snippet\":\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\",\"threadId\":\"thread-052\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "gmail.messages.get"
+      },
+      {
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-052\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-03",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-052\",\"threadId\":\"thread-052\"}],\"resultSizeEstimate\":1}",
+        "task_id": "factorybench-052",
+        "tool_name": "gmail.messages.list"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-approval-052\",\"pageSize\":20}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-05",
+        "read_only": 1,
+        "response_json": "{\"approvals\":[{\"fileId\":\"drive-approval-052\",\"id\":\"approval-052\",\"reviewerResponses\":[{\"comment\":\"CASE-052 | APPROVED | Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values. | Oracle operation oracle_fusion.quality_inspection_results.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"case\\\":\\\"CASE-052\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H14\\\",\\\"decision\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.quality_inspection_results.update\\\",\\\"returnFields\\\":{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}}\",\"response\":\"APPROVED\",\"reviewer\":\"U-APPROVER\"}],\"status\":\"IN_PROGRESS\"}]}",
+        "task_id": "factorybench-052",
+        "tool_name": "google_drive.approvals.list"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-052\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-06",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-052 | APPROVED | Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values. | Oracle operation oracle_fusion.quality_inspection_results.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"case\\\":\\\"CASE-052\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H14\\\",\\\"decision\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.quality_inspection_results.update\\\",\\\"returnFields\\\":{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}}\",\"description\":\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\",\"id\":\"drive-052\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "google_drive.files.download"
+      },
+      {
+        "arguments_json": "{\"fileId\":\"drive-052\",\"mimeType\":\"text/plain\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-07",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-052 | APPROVED | Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values. | Oracle operation oracle_fusion.quality_inspection_results.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"case\\\":\\\"CASE-052\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H14\\\",\\\"decision\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.quality_inspection_results.update\\\",\\\"returnFields\\\":{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}}\",\"description\":\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\",\"id\":\"drive-052\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "google_drive.files.export"
+      },
+      {
+        "arguments_json": "{\"fields\":\"id,name,mimeType,modifiedTime,md5Checksum,description\",\"fileId\":\"drive-052\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-08",
+        "read_only": 1,
+        "response_json": "{\"content\":\"CASE-052 | APPROVED | Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values. | Oracle operation oracle_fusion.quality_inspection_results.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"case\\\":\\\"CASE-052\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H14\\\",\\\"decision\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.quality_inspection_results.update\\\",\\\"returnFields\\\":{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}}\",\"description\":\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\",\"id\":\"drive-052\",\"kind\":\"drive#file\",\"mimeType\":\"text/plain\",\"modifiedTime\":\"2026-01-12T09:00:00Z\",\"name\":\"contract-or-service-control.md\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "google_drive.files.get"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"ranges\":[\"Control!A1:H50\",\"Approvals!A1:G20\"],\"spreadsheetId\":\"sheet-052\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-11",
+        "read_only": 1,
+        "response_json": "{\"spreadsheetId\":\"sheet-052\",\"valueRanges\":[{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:E2\",\"values\":[[\"case\",\"record\",\"quantity\",\"approval\",\"approved_operation\",\"approved_arguments_json\",\"return_fields_json\"],[\"CASE-052\",\"NS-000052\",23,\"APPROVED\",\"oracle_fusion.quality_inspection_results.update\",\"{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}}\",\"{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}\"]]}]}",
+        "task_id": "factorybench-052",
+        "tool_name": "google_sheets.spreadsheets.values.batchGet"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:H50\",\"spreadsheetId\":\"sheet-052\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-12",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:E2\",\"values\":[[\"case\",\"record\",\"quantity\",\"approval\",\"approved_operation\",\"approved_arguments_json\",\"return_fields_json\"],[\"CASE-052\",\"NS-000052\",23,\"APPROVED\",\"oracle_fusion.quality_inspection_results.update\",\"{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}}\",\"{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}\"]]}",
+        "task_id": "factorybench-052",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-13",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.draft_purchase_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-15",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.inventory_onhand_balances.list"
+      },
+      {
+        "arguments_json": "{\"invoicesUniqID\":\"invoicesUniqID-0052\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-16",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.invoices.get"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100052,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-17",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.maintenance_documents.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100052,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-18",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.maintenance_operations.list"
+      },
+      {
+        "arguments_json": "{\"MaintenanceProgramId\":500052}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-19",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.maintenance_programs.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-20",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.maintenance_programs.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100052}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-21",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.maintenance_work_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-22",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.maintenance_work_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-23",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.purchase_order_lines.list"
+      },
+      {
+        "arguments_json": "{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-24",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.purchase_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-25",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.purchase_orders.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-27",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.receiving_receipt_requests.list"
+      },
+      {
+        "arguments_json": "{\"HeaderInterfaceId\":700052,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-28",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.receiving_receipt_transactions.list"
+      },
+      {
+        "arguments_json": "{\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-29",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.sales_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-30",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.sales_orders.list"
+      },
+      {
+        "arguments_json": "{\"SupplierId\":600052}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-31",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.suppliers.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-32",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.suppliers.list"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-33",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.supply_requests.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100052,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-34",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.work_order_materials.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100052,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-35",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.work_order_operations.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100052,\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-36",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.work_order_resources.list"
+      },
+      {
+        "arguments_json": "{\"WorkOrderId\":100052}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-37",
+        "read_only": 1,
+        "response_json": "{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.work_orders.get"
+      },
+      {
+        "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-38",
+        "read_only": 1,
+        "response_json": "{\"count\":1,\"hasMore\":false,\"items\":[{\"HeaderInterfaceId\":700052,\"HoldId\":1000052,\"InspectionId\":1100052,\"InterfaceTransactionId\":800052,\"InvoiceId\":900052,\"ItemNumber\":\"NS-COMP-052\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"MaintenanceProgramId\":500052,\"OrderNumber\":\"ORD-0052\",\"OrganizationCode\":\"SEA\",\"Quantity\":23,\"RecordId\":10000052,\"ReferenceNumber\":\"CASE-052\",\"StatusCode\":\"OPEN\",\"SupplierId\":600052,\"WoOperationId\":200052,\"WoOperationMaterialId\":300052,\"WoOperationResourceId\":400052,\"WorkOrderId\":100052,\"WorkOrderNumber\":\"WO-0052\",\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0052\",\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0052\"}],\"limit\":50,\"links\":[],\"offset\":0}",
+        "task_id": "factorybench-052",
+        "tool_name": "oracle_fusion.work_orders.list"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-PRODUCTION\",\"inclusive\":true,\"limit\":100,\"oldest\":\"1768000000.000000\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-39",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"CASE-052: evidence checked.\",\"ts\":\"1768000052.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"CASE-052 | APPROVED | Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values. | Oracle operation oracle_fusion.quality_inspection_results.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"case\\\":\\\"CASE-052\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H14\\\",\\\"decision\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.quality_inspection_results.update\\\",\\\"returnFields\\\":{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}}\",\"ts\":\"1768000052.000200\",\"user\":\"U-APPROVER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-052",
+        "tool_name": "slack.conversations_history"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-PRODUCTION\",\"limit\":100,\"ts\":\"1768000052.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-40",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"CASE-052: evidence checked.\",\"ts\":\"1768000052.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"CASE-052 | APPROVED | Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values. | Oracle operation oracle_fusion.quality_inspection_results.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"case\\\":\\\"CASE-052\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H14\\\",\\\"decision\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.quality_inspection_results.update\\\",\\\"returnFields\\\":{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}}\",\"ts\":\"1768000052.000200\",\"user\":\"U-APPROVER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-052",
+        "tool_name": "slack.conversations_replies"
+      },
+      {
+        "arguments_json": "{\"file\":\"F-000052\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-052-discovery-41",
+        "read_only": 1,
+        "response_json": "{\"file\":{\"id\":\"F-000052\",\"mimetype\":\"application/pdf\",\"name\":\"inspection-evidence.pdf\",\"preview\":\"CASE-052 | APPROVED | Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values. | Oracle operation oracle_fusion.quality_inspection_results.update | approved control packet {\\\"approvalStatus\\\":\\\"APPROVED\\\",\\\"approvedArguments\\\":{\\\"InspectionId\\\":1100052,\\\"requestBody\\\":{\\\"InspectionResult\\\":\\\"ACCEPT\\\",\\\"InspectionStatus\\\":\\\"COMPLETE\\\",\\\"QuantityAccepted\\\":23,\\\"QuantityRejected\\\":0,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"case\\\":\\\"CASE-052\\\",\\\"controlWorkbookAuditRange\\\":\\\"Audit!A:F\\\",\\\"controlWorkbookOutcomeRange\\\":\\\"Control!H14\\\",\\\"decision\\\":\\\"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\\\",\\\"oracleOperation\\\":\\\"oracle_fusion.quality_inspection_results.update\\\",\\\"returnFields\\\":{\\\"controlled_quantity\\\":23,\\\"inspection_reference\\\":\\\"INSP-0052\\\",\\\"quality_result\\\":\\\"Failed result recorded\\\"}}\",\"title\":\"CASE-052 inspection evidence\"},\"ok\":true}",
+        "task_id": "factorybench-052",
+        "tool_name": "slack.files_info"
       }
     ],
-    "bom_headers": [
+    "evidence_files": [
       {
-        "assembly_item_id": "FG-PANEL",
-        "bom_id": "BOM-PANEL-C",
-        "effective_on": "2025-10-01",
-        "revision": "C",
-        "status": "Active"
-      }
-    ],
-    "documents": [
-      {
-        "body": "Release only when the customer is not on credit hold, an effective BOM exists, and every component has enough available stock. Reserve the exact BOM quantity.",
-        "category": "order_release",
-        "doc_id": "POL-01",
-        "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
+        "asset_id": "factorybench-052-policy",
+        "extracted_text": "# Record failed dielectric-test samples \u2014 operating control\n\nScope: Execute inspection plans and disposition evidence while preserving lot and result traceability.\n\nThe operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.\n",
+        "kind": "policy",
+        "media_type": "text/markdown",
+        "path": "operating-policy.md",
+        "sha256": "8dc34e7bb38db36c8476349a4ed6c325e351709062e3a35e4c12c5e07e547612",
+        "source": "google_drive",
         "task_id": "factorybench-052",
-        "title": "Order release control"
+        "title": "Operating policy"
       },
       {
-        "body": "Net requirements against unreserved on-hand. Use an approved supplier quote that is valid through the need-by date. Requisitions over the requester's limit require the plant manager's approval.",
-        "category": "material_shortage",
-        "doc_id": "POL-02",
-        "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
+        "asset_id": "factorybench-052-contract",
+        "extracted_text": "# Commercial or service control for CASE-052\n\nThe approved operational objective is: Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\n\nEffective date: 2026-01-27\nReference record: NS-000052\nAny deviation affecting price, completion, inspected quantity, compliance, or customer commit requires explicit approval preserved in the case packet.\n",
+        "kind": "contract",
+        "media_type": "text/markdown",
+        "path": "contract-or-service-control.md",
+        "sha256": "0456f06c971af46d71a243dab8bbb56aac38724130b34c90b420efcebfd2f388",
+        "source": "google_drive",
         "task_id": "factorybench-052",
-        "title": "Shortage requisition control"
+        "title": "Contract / service control"
       },
       {
-        "body": "Choose an approved supplier. Minimize landed price while meeting the need-by date; break ties by higher quality score, then higher on-time rate. Purchase orders above the buyer's limit require plant-manager approval.",
-        "category": "supplier_selection",
-        "doc_id": "POL-03",
-        "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
+        "asset_id": "factorybench-052-quote",
+        "extracted_text": "VENDOR QUOTATION CASE-052\nSupplier: Rainier Components\nItem: NS-COMP-052\nQuantity: 23 EA\nUnit price: USD 103.34\nExtended: USD 2376.82\nLead time: 11 calendar days\nValid through: 2026-02-26\nFreight: included\nQuality certificate: required with shipment\n",
+        "kind": "vendor_pdf",
+        "media_type": "application/pdf",
+        "path": "supplier-quotation.pdf",
+        "sha256": "a713ee4e6105d5d6d2cc99644b6768079b1bf859a4f7116863024350677bb744",
+        "source": "gmail_attachment",
         "task_id": "factorybench-052",
-        "title": "Supplier award policy"
+        "title": "Supplier quotation"
       },
       {
-        "body": "Receive only against an approved purchase order. Put the lot in inspection status, record accepted and rejected quantities, and release only accepted quantity to stores.",
-        "category": "inbound_receipt",
-        "doc_id": "POL-04",
-        "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
+        "asset_id": "factorybench-052-leadtime",
+        "extracted_text": "[[\"supplier\", \"item\", \"quoted_days\", \"historical_p50\", \"historical_p90\", \"capacity_confirmed\", \"valid_through\"], [\"Rainier Components\", \"NS-COMP-052\", 11, 5, 11, \"YES\", \"2026-02-26\"], [\"Alternate Dynamics\", \"NS-COMP-052\", 11, 8, 15, \"NO\", \"2026-02-16\"]]",
+        "kind": "spreadsheet",
+        "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "path": "supplier-lead-time-and-capacity.xlsx",
+        "sha256": "75201fc3e57a648d3e49866435d03cd1b4dc67c366b9ec5f48fce5843ff5c7d3",
+        "source": "google_drive",
         "task_id": "factorybench-052",
-        "title": "Receiving and inspection policy"
+        "title": "Supplier lead-time and capacity workbook"
       },
       {
-        "body": "Compare invoice, approved PO, and accepted receipt. Approve when quantity is covered and the amount variance is at most 2 percent; otherwise place a variance hold.",
-        "category": "invoice_match",
-        "doc_id": "POL-05",
-        "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
+        "asset_id": "factorybench-052-decision",
+        "extracted_text": "timestamp,case,actor,decision,scope,source\n2026-01-12T09:10:00-08:00,CASE-052,U-OPS-LEAD,evidence_verified,NS-000052,slack\n2026-01-12T10:05:00-08:00,CASE-052,U-APPROVER,approved,2026-01-27,drive_approval\n",
+        "kind": "spreadsheet_export",
+        "media_type": "text/csv",
+        "path": "approval-decision-log.csv",
+        "sha256": "e661bbc920ff8e399b1b25382a9e6cc82efd011e5549010ce59eefea6a04dd35",
+        "source": "google_sheets",
         "task_id": "factorybench-052",
-        "title": "Three-way match policy"
+        "title": "Approval decision log"
       },
       {
-        "body": "Issue only reserved, unrestricted stock. Use FEFO across eligible lots and start the operation only after the full required quantity has been issued.",
-        "category": "production_issue",
-        "doc_id": "POL-06",
-        "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
+        "asset_id": "factorybench-052-email",
+        "extracted_text": "From: operations-52@northstar.example\nTo: quality.engineer@northstar.example\nDate: 2026-01-12\nMessage-ID: <msg-052@northstar.example>\nSubject: CASE-052 \u2014 evidence and requested action\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\n\nPlease complete: Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\nUse record NS-000052; approved effective date is 2026-01-27. The supporting quotation and spreadsheet are attached. Reply with the Oracle reference.\n",
+        "kind": "email",
+        "media_type": "message/rfc822",
+        "path": "source-email-thread.eml",
+        "sha256": "7eb15b5485bb541ac3510272792ab3896843053295e347af2d2cbf22f60d42f0",
+        "source": "gmail",
         "task_id": "factorybench-052",
-        "title": "Material issue policy"
+        "title": "Source email thread"
       },
       {
-        "body": "A failed inspection requires an immediate lot hold and an open nonconformance. Use REWORK when the defect is recoverable and assign it to the quality engineer.",
-        "category": "quality_exception",
-        "doc_id": "POL-07",
-        "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
+        "asset_id": "factorybench-052-slack",
+        "extracted_text": "{\n  \"channel\": \"C-PRODUCTION\",\n  \"messages\": [\n    {\n      \"text\": \"CASE-052: physical/operational evidence checked for NS-000052.\",\n      \"ts\": \"1768000052.000100\",\n      \"user\": \"U-OPS-LEAD\"\n    },\n    {\n      \"text\": \"Approved exactly as documented; effective 2026-01-27. No broader change authorized.\",\n      \"ts\": \"1768000052.000200\",\n      \"user\": \"U-APPROVER\"\n    },\n    {\n      \"text\": \"Post the resulting Oracle reference back to this thread and the control workbook.\",\n      \"ts\": \"1768000052.000300\",\n      \"user\": \"U-CONTROLLER\"\n    }\n  ],\n  \"thread_ts\": \"1768000052.000100\"\n}\n",
+        "kind": "chat_thread",
+        "media_type": "application/json",
+        "path": "operations-slack-thread.json",
+        "sha256": "9e09333fc53f1d0b9c72b5273b5ba55856adf5cb77dcb2794446e40c356154bf",
+        "source": "slack",
         "task_id": "factorybench-052",
-        "title": "Nonconformance policy"
+        "title": "Operations Slack thread"
       },
       {
-        "body": "Complete all operations before closing the work order. Record finished quantity and scrap, then post material, labor, and overhead variance for finance review.",
-        "category": "completion_costing",
-        "doc_id": "POL-08",
-        "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
+        "asset_id": "factorybench-052-approval",
+        "extracted_text": "{\n  \"approvalId\": \"approval-052\",\n  \"approvedScope\": \"Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\",\n  \"case\": \"CASE-052\",\n  \"effectiveDate\": \"2026-01-27\",\n  \"fileId\": \"drive-approval-052\",\n  \"requiredReviewers\": [\n    \"U-APPROVER\"\n  ],\n  \"reviewerResponses\": [\n    {\n      \"response\": \"APPROVED\",\n      \"reviewer\": \"U-APPROVER\"\n    }\n  ],\n  \"status\": \"IN_PROGRESS\"\n}\n",
+        "kind": "approval",
+        "media_type": "application/json",
+        "path": "drive-approval-record.json",
+        "sha256": "9e7c89cf3d8a4d9645266a394a966db8f0ddb3822c18f03977452974c1cd7cbd",
+        "source": "google_drive",
         "task_id": "factorybench-052",
-        "title": "Work-order close policy"
+        "title": "Drive approval record"
       },
       {
-        "body": "Use unrestricted surplus from the donor plant, complete the interplant transfer, and reschedule the receiving work order no earlier than the transfer arrival date.",
-        "category": "transfer_reschedule",
-        "doc_id": "POL-09",
-        "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
+        "asset_id": "factorybench-052-erp",
+        "extracted_text": "{\n  \"case\": \"CASE-052\",\n  \"itemNumber\": \"NS-COMP-052\",\n  \"lastUpdateDate\": \"2026-01-12T08:00:00-08:00\",\n  \"organizationCode\": \"SEA\",\n  \"quantity\": 23,\n  \"recordId\": \"NS-000052\",\n  \"source\": \"Oracle Fusion Cloud 26a-shaped synthetic export\",\n  \"status\": \"Open\",\n  \"supplier\": \"Rainier Components\"\n}\n",
+        "kind": "erp_export",
+        "media_type": "application/json",
+        "path": "oracle-starting-record.json",
+        "sha256": "869ca09a8997180db481986defbb9544f3e22d5092b7f45dfb4db50a87eef5d5",
+        "source": "oracle_fusion",
         "task_id": "factorybench-052",
-        "title": "Interplant recovery policy"
+        "title": "Oracle starting-record export"
       },
       {
-        "body": "Open a high-priority maintenance work order for the failed workcenter. Reroute production only to a qualified active alternate and reschedule within that center's capacity.",
-        "category": "maintenance_recovery",
-        "doc_id": "POL-10",
-        "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
+        "asset_id": "factorybench-052-measurements",
+        "extracted_text": "sample,characteristic,value,unit,lower,upper,result\nS-052-1,dimension_a,24.97,mm,24.9,25.1,PASS\nS-052-2,dimension_a,25.01,mm,24.9,25.1,PASS\nS-052-3,dielectric,1522,V,1500,,PASS\n",
+        "kind": "quality_data",
+        "media_type": "text/csv",
+        "path": "inspection-measurements.csv",
+        "sha256": "df960067a40b69e1a5b6a97b858b96b8ef37a2255485072aff323bf7cf90379d",
+        "source": "laboratory_drive",
         "task_id": "factorybench-052",
-        "title": "Unplanned downtime policy"
-      }
-    ],
-    "inventory_on_hand": [
-      {
-        "expiration_date": "2026-06-30",
-        "item_id": "RM-RELAY",
-        "lot_number": "R-EARLY-002",
-        "plant_id": "SEA",
-        "quantity": 24,
-        "reserved_qty": 24,
-        "status": "Unrestricted",
-        "subinventory": "STORES"
+        "title": "Inspection measurements"
       },
       {
-        "expiration_date": "2027-06-30",
-        "item_id": "RM-RELAY",
-        "lot_number": "R-LATE-002",
-        "plant_id": "SEA",
-        "quantity": 34,
-        "reserved_qty": 0,
-        "status": "Unrestricted",
-        "subinventory": "STORES"
-      }
-    ],
-    "items": [
-      {
-        "description": "Industrial control panel",
-        "item_id": "FG-PANEL",
-        "item_type": "finished_good",
-        "make_buy": "MAKE",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 910,
-        "uom": "EA"
-      },
-      {
-        "description": "Powder-coated enclosure",
-        "item_id": "RM-HOUSING",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 210,
-        "uom": "EA"
-      },
-      {
-        "description": "Safety relay",
-        "item_id": "RM-RELAY",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 48,
-        "uom": "EA"
-      },
-      {
-        "description": "Copper busbar set",
-        "item_id": "RM-COPPER",
-        "item_type": "component",
-        "make_buy": "BUY",
-        "organization_id": "M1",
-        "status": "Active",
-        "unit_cost": 72,
-        "uom": "EA"
-      }
-    ],
-    "material_requirements": [
-      {
-        "issued_qty": 0,
-        "item_id": "RM-RELAY",
-        "need_by": "2026-01-12",
-        "required_qty": 24,
-        "reserved_qty": 24,
-        "work_order_id": "WO-I-002"
-      }
-    ],
-    "material_reservations": [
-      {
-        "item_id": "RM-RELAY",
-        "lot_number": "R-EARLY-002",
-        "plant_id": "SEA",
-        "quantity": 24,
-        "reservation_id": "RES-I-002",
-        "status": "Active",
-        "subinventory": "STORES",
+        "asset_id": "factorybench-052-risk",
+        "extracted_text": "[[\"risk_id\", \"case\", \"risk\", \"likelihood\", \"impact\", \"owner\", \"mitigation\", \"status\"], [\"R-052-A\", \"CASE-052\", \"incorrect record selection\", \"low\", \"high\", \"quality_engineer\", \"cross-check immutable identifiers\", \"OPEN\"], [\"R-052-B\", \"CASE-052\", \"unapproved scope expansion\", \"medium\", \"high\", \"U-APPROVER\", \"limit write to approved fields\", \"MITIGATED\"]]",
+        "kind": "spreadsheet",
+        "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "path": "workflow-risk-register.xlsx",
+        "sha256": "bca06fd928c0a186804150a60e5f3b7fac917787699018858e6859674bb92eae",
+        "source": "google_drive",
         "task_id": "factorybench-052",
-        "work_order_id": "WO-I-002"
+        "title": "Workflow risk register"
+      },
+      {
+        "asset_id": "factorybench-052-spec",
+        "extracted_text": "# Technical specification NS-000052\n\nRevision: R4\nEffective: 2026-01-27\nItem: NS-COMP-052\nRequired control: Transcribe the signed lab worksheet into the correct inspection result and preserve sample-level values.\n",
+        "kind": "specification",
+        "media_type": "text/markdown",
+        "path": "technical-specification.md",
+        "sha256": "38102e688c3da7fb2e1d39bcd1160b26e01e5f12a6e94c25e3ec028e531df2c1",
+        "source": "google_drive",
+        "task_id": "factorybench-052",
+        "title": "Technical specification"
       }
     ],
     "organizations": [
       {
         "ledger_currency": "USD",
         "name": "Northstar Controls Manufacturing",
-        "organization_id": "M1"
+        "organization_id": "NSC"
       }
     ],
-    "plants": [
+    "resource_state": [
       {
-        "name": "Seattle Assembly",
-        "organization_id": "M1",
-        "plant_id": "SEA",
-        "timezone": "America/Los_Angeles"
-      },
-      {
-        "name": "Portland Components",
-        "organization_id": "M1",
-        "plant_id": "PDX",
-        "timezone": "America/Los_Angeles"
-      }
-    ],
-    "suppliers": [
-      {
-        "approved": 1,
-        "name": "Cascade Industrial",
-        "on_time_rate": 0.94,
-        "payment_terms": "NET30",
-        "quality_score": 97.2,
-        "supplier_id": "SUP-A"
-      },
-      {
-        "approved": 1,
-        "name": "Rainier Components",
-        "on_time_rate": 0.98,
-        "payment_terms": "NET45",
-        "quality_score": 95.8,
-        "supplier_id": "SUP-B"
-      },
-      {
-        "approved": 0,
-        "name": "Frontier Supply",
-        "on_time_rate": 0.99,
-        "payment_terms": "NET30",
-        "quality_score": 99.1,
-        "supplier_id": "SUP-C"
+        "effective_at": "2026-01-12",
+        "payload_json": "{\"case\":\"CASE-052\",\"identifiers\":{\"limit\":50,\"onlyData\":true,\"q\":\"ReferenceNumber='CASE-052'\"},\"quantity\":23,\"record\":\"NS-000052\"}",
+        "resource_id": "NS-000052",
+        "resource_type": "oracle_fusion.quality_inspection_results",
+        "revision": 0,
+        "status": "Open",
+        "system": "oracle_fusion",
+        "task_id": "factorybench-052"
       }
     ],
     "users": [
       {
         "approval_limit": 0,
-        "display_name": "Maya Chen",
-        "plant_id": "SEA",
-        "role": "production_planner",
-        "user_id": "U-PLANNER"
-      },
-      {
-        "approval_limit": 1000,
-        "display_name": "Diego Ruiz",
-        "plant_id": "SEA",
-        "role": "buyer",
-        "user_id": "U-BUYER"
+        "display_name": "Jordan Lee",
+        "role": "quality_engineer",
+        "user_id": "U-AGENT"
       },
       {
         "approval_limit": 250000,
         "display_name": "Avery Morgan",
-        "plant_id": "SEA",
-        "role": "plant_manager",
-        "user_id": "U-MANAGER"
+        "role": "authorized_approver",
+        "user_id": "U-APPROVER"
       },
       {
-        "approval_limit": 0,
-        "display_name": "Priya Shah",
-        "plant_id": "SEA",
-        "role": "quality_inspector",
-        "user_id": "U-INSPECTOR"
-      },
-      {
-        "approval_limit": 0,
-        "display_name": "Noah Williams",
-        "plant_id": "SEA",
-        "role": "quality_engineer",
-        "user_id": "U-QUALITY"
-      }
-    ],
-    "work_order_operations": [
-      {
-        "actual_hours": 0,
-        "planned_hours": 6.0,
-        "sequence": 10,
-        "status": "Ready",
-        "work_order_id": "WO-I-002",
-        "workcenter_id": "WC-ASM-1"
-      }
-    ],
-    "work_orders": [
-      {
-        "completed_qty": 0,
-        "item_id": "FG-PANEL",
-        "parent_work_order_id": null,
-        "quantity": 12,
-        "sales_order_id": null,
-        "scheduled_completion": "2026-01-14",
-        "scheduled_start": "2026-01-12",
-        "scrap_qty": 0,
-        "status": "Released",
-        "task_id": "factorybench-052",
-        "work_order_id": "WO-I-002",
-        "workcenter_id": "WC-ASM-1"
-      }
-    ],
-    "workcenters": [
-      {
-        "capacity_hours": 80,
-        "name": "Assembly Cell 1",
-        "plant_id": "SEA",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-ASM-1"
-      },
-      {
-        "capacity_hours": 64,
-        "name": "Assembly Cell 2",
-        "plant_id": "SEA",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-ASM-2"
-      },
-      {
-        "capacity_hours": 72,
-        "name": "Portland Fabrication",
-        "plant_id": "PDX",
-        "qualified_item_class": "control_panel",
-        "status": "Active",
-        "workcenter_id": "WC-PDX-1"
+        "approval_limit": 25000,
+        "display_name": "Maya Chen",
+        "role": "operations_lead",
+        "user_id": "U-OPS-LEAD"
       }
     ]
   },
   "task_id": "factorybench-052",
-  "title": "Issue FEFO material to WO-I-002",
+  "title": "Record failed dielectric-test samples",
   "world": {
     "database": "SQLite",
-    "name": "Northstar Controls Oracle-shaped ERP",
-    "organization_id": "M1",
+    "id": "northstar-enterprise-fusion-v2",
+    "name": "Northstar Controls enterprise operations sandbox",
+    "organization_id": "NSC",
     "primary_plant": "SEA",
-    "servers": [
-      "oracle_erp",
-      "plant_docs",
-      "factory_harness"
+    "synthetic": true,
+    "systems": [
+      "factorybench",
+      "gmail",
+      "google_drive",
+      "google_sheets",
+      "oracle_fusion",
+      "slack"
     ]
   }
 }

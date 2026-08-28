@@ -1,54 +1,112 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "inbound_receipt"
+      "format": "full",
+      "id": "thread-038",
+      "userId": "me"
     },
-    "tool": "search_documents"
+    "tool": "gmail.threads.get"
   },
   {
     "arguments": {
-      "purchase_order_id": "PO-R-008"
+      "includeGridData": false,
+      "ranges": [
+        "Control!A1:H50"
+      ],
+      "spreadsheetId": "sheet-038"
     },
-    "tool": "get_purchase_order"
+    "tool": "google_sheets.spreadsheets.get"
   },
   {
     "arguments": {
-      "item_id": "RM-RELAY",
-      "lot_number": "LOT-R-0008",
-      "purchase_order_id": "PO-R-008",
-      "quantity": 32,
-      "receipt_id": "RCV-0008",
-      "received_at": "2026-01-12",
-      "receiver_id": "U-PLANNER"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-038' and trashed = false"
     },
-    "tool": "receive_purchase_order"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "accepted_qty": 32,
-      "inspected_qty": 32,
-      "inspection_id": "INSP-R-008",
-      "inspector_id": "U-INSPECTOR",
-      "item_id": "RM-RELAY",
-      "lot_number": "LOT-R-0008",
-      "rejected_qty": 0,
-      "result": "Pass",
-      "source_id": "RCV-0008",
-      "source_type": "receipt"
+      "count": 50,
+      "query": "\"CASE-038\"",
+      "sort": "timestamp",
+      "sort_dir": "asc"
     },
-    "tool": "record_inspection"
+    "tool": "slack.search_messages"
   },
   {
     "arguments": {
-      "inspection_id": "INSP-R-008",
-      "lot_number": "LOT-R-0008",
-      "receipt_id": "RCV-0008",
-      "released_quantity": 32
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-038'"
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.receiving_receipt_requests.list"
+  },
+  {
+    "arguments": {
+      "HeaderInterfaceId": 700038,
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-038'"
+    },
+    "tool": "oracle_fusion.receiving_receipt_transactions.list"
+  },
+  {
+    "arguments": {
+      "HeaderInterfaceId": 700038,
+      "InterfaceTransactionId": 800038,
+      "requestBody": {
+        "Comments": "CASE-038",
+        "InspectionQualityCode": "ACCEPT",
+        "Quantity": 9,
+        "TransactionType": "CORRECT"
+      }
+    },
+    "tool": "oracle_fusion.receiving_receipt_transactions.update"
+  },
+  {
+    "arguments": {
+      "approvalId": "approval-038",
+      "fileId": "drive-approval-038",
+      "requestBody": {
+        "message": "Approved for CASE-038 only."
+      }
+    },
+    "tool": "google_drive.approvals.approve"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-038",
+            "receiving_specialist",
+            "Receipt quantity corrected",
+            "REF-0038",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-038",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "accepted_quantity": 9,
+      "inspection_disposition": "Receipt quantity corrected",
+      "receipt_reference": "RCV-0038"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

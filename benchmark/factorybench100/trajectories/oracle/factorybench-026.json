@@ -1,7 +1,7 @@
 {
   "checks": [
     {
-      "description": "Required policy and ERP reads completed before the first write.",
+      "description": "Required cross-system evidence reads completed before the first write.",
       "evidence": {
         "missing": []
       },
@@ -9,35 +9,44 @@
       "passed": true
     },
     {
-      "description": "The purchase order is awarded to the best eligible supplier, meets the need-by date, and is approved.",
+      "description": "oracle_fusion.maintenance_programs.update produced the task-scoped, source-audited state transition.",
       "evidence": {
         "matching_rows": 1,
         "mismatches": {}
       },
-      "id": "po_approved",
+      "id": "mutation_01",
       "passed": true
     },
     {
-      "description": "The PO line preserves the approved requisition quantity.",
+      "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
       "evidence": {
         "matching_rows": 1,
         "mismatches": {}
       },
-      "id": "po_line_exact",
+      "id": "mutation_02",
+      "passed": true
+    },
+    {
+      "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "mutation_03",
       "passed": true
     },
     {
       "description": "Submitted answer fields exactly match the ground truth.",
       "evidence": {
         "expected": {
-          "purchase_order_id": "PO-0006",
-          "supplier_id": "SUP-B",
-          "total_amount": "2041.20"
+          "forecast_horizon": "2026-01-20",
+          "generation_action": "Forecast window advanced",
+          "program_code": "PM-0026"
         },
         "submitted": {
-          "purchase_order_id": "PO-0006",
-          "supplier_id": "SUP-B",
-          "total_amount": "2041.20"
+          "forecast_horizon": "2026-01-20",
+          "generation_action": "Forecast window advanced",
+          "program_code": "PM-0026"
         }
       },
       "id": "exact_answer",
@@ -49,8 +58,7 @@
         "disallowed": [],
         "written_tables": [
           "answers",
-          "purchase_order_lines",
-          "purchase_orders"
+          "resource_state"
         ]
       },
       "id": "write_scope",
@@ -66,26 +74,26 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_checks": 6,
+  "passed_checks": 7,
   "policy": "oracle",
   "score": 100.0,
   "state_diff": {
     "answers": {
       "after": [
         {
-          "field": "purchase_order_id",
+          "field": "forecast_horizon",
           "task_id": "factorybench-026",
-          "value": "PO-0006"
+          "value": "2026-01-20"
         },
         {
-          "field": "supplier_id",
+          "field": "generation_action",
           "task_id": "factorybench-026",
-          "value": "SUP-B"
+          "value": "Forecast window advanced"
         },
         {
-          "field": "total_amount",
+          "field": "program_code",
           "task_id": "factorybench-026",
-          "value": "2041.20"
+          "value": "PM-0026"
         }
       ],
       "after_count": 3,
@@ -95,538 +103,702 @@
     "audit_log": {
       "after": [
         {
-          "action": "insert",
+          "action": "upsert",
           "audit_id": 1,
-          "payload": "{\"approved_by\": null, \"buyer_id\": \"U-BUYER\", \"promised_date\": \"2026-01-16\", \"purchase_order_id\": \"PO-0006\", \"requisition_id\": \"REQ-A-006\", \"status\": \"Pending Approval\", \"supplier_id\": \"SUP-B\", \"task_id\": \"factorybench-026\", \"total_amount\": 2041.2}",
-          "record_id": "PO-0006",
-          "table_name": "purchase_orders",
+          "payload": "{\"effective_at\": \"2026-01-20\", \"payload_json\": \"{\\\"arguments\\\":{\\\"MaintenanceProgramId\\\":500026,\\\"requestBody\\\":{\\\"ForecastEndDate\\\":\\\"2026-04-20\\\",\\\"ForecastStartDate\\\":\\\"2026-01-20\\\",\\\"StatusCode\\\":\\\"ACTIVE\\\"}},\\\"case\\\":\\\"CASE-026\\\",\\\"outcome\\\":\\\"Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.\\\",\\\"tool\\\":\\\"oracle_fusion.maintenance_programs.update\\\"}\", \"resource_id\": \"factorybench-026-mutation-01\", \"resource_type\": \"oracle_fusion.maintenance_programs\", \"revision\": 1, \"status\": \"Forecast window advanced\", \"system\": \"oracle_fusion\", \"task_id\": \"factorybench-026\"}",
+          "record_id": "factorybench-026-mutation-01",
+          "table_name": "resource_state",
           "task_id": "factorybench-026",
-          "tool": "create_purchase_order"
+          "tool": "oracle_fusion.maintenance_programs.update"
         },
         {
-          "action": "insert",
+          "action": "upsert",
           "audit_id": 2,
-          "payload": "{\"item_id\": \"RM-RELAY\", \"line_no\": 1, \"ordered_qty\": 42, \"purchase_order_id\": \"PO-0006\", \"received_qty\": 0, \"unit_price\": 48.6}",
-          "record_id": "PO-0006:1",
-          "table_name": "purchase_order_lines",
+          "payload": "{\"effective_at\": \"2026-01-20\", \"payload_json\": \"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-QUALITY\\\",\\\"text\\\":\\\"CASE-026: Forecast window advanced. Oracle reference REF-0026; control workbook updated.\\\",\\\"thread_ts\\\":\\\"1768000026.000100\\\"},\\\"case\\\":\\\"CASE-026\\\",\\\"outcome\\\":\\\"Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.\\\",\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\", \"resource_id\": \"factorybench-026-mutation-02\", \"resource_type\": \"slack\", \"revision\": 1, \"status\": \"Recorded\", \"system\": \"slack\", \"task_id\": \"factorybench-026\"}",
+          "record_id": "factorybench-026-mutation-02",
+          "table_name": "resource_state",
           "task_id": "factorybench-026",
-          "tool": "create_purchase_order"
+          "tool": "slack.chat_postMessage"
         },
         {
-          "action": "update",
+          "action": "upsert",
           "audit_id": 3,
-          "payload": "{\"approved_by\": \"U-MANAGER\", \"status\": \"Approved\"}",
-          "record_id": "PO-0006",
-          "table_name": "purchase_orders",
+          "payload": "{\"effective_at\": \"2026-01-20\", \"payload_json\": \"{\\\"arguments\\\":{\\\"approvalId\\\":\\\"approval-026\\\",\\\"fileId\\\":\\\"drive-approval-026\\\",\\\"requestBody\\\":{\\\"message\\\":\\\"Approved for CASE-026 only.\\\"}},\\\"case\\\":\\\"CASE-026\\\",\\\"outcome\\\":\\\"Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.\\\",\\\"tool\\\":\\\"google_drive.approvals.approve\\\"}\", \"resource_id\": \"factorybench-026-mutation-03\", \"resource_type\": \"google_drive.approvals\", \"revision\": 1, \"status\": \"Recorded\", \"system\": \"google_drive\", \"task_id\": \"factorybench-026\"}",
+          "record_id": "factorybench-026-mutation-03",
+          "table_name": "resource_state",
           "task_id": "factorybench-026",
-          "tool": "approve_purchase_order"
+          "tool": "google_drive.approvals.approve"
         },
         {
-          "action": "upsert",
+          "action": "submit",
           "audit_id": 4,
-          "payload": "{\"value\": \"PO-0006\"}",
-          "record_id": "factorybench-026:purchase_order_id",
+          "payload": "{\"forecast_horizon\": \"2026-01-20\", \"generation_action\": \"Forecast window advanced\", \"program_code\": \"PM-0026\"}",
+          "record_id": "factorybench-026",
           "table_name": "answers",
           "task_id": "factorybench-026",
-          "tool": "submit_answer"
-        },
-        {
-          "action": "upsert",
-          "audit_id": 5,
-          "payload": "{\"value\": \"SUP-B\"}",
-          "record_id": "factorybench-026:supplier_id",
-          "table_name": "answers",
-          "task_id": "factorybench-026",
-          "tool": "submit_answer"
-        },
-        {
-          "action": "upsert",
-          "audit_id": 6,
-          "payload": "{\"value\": \"2041.20\"}",
-          "record_id": "factorybench-026:total_amount",
-          "table_name": "answers",
-          "task_id": "factorybench-026",
-          "tool": "submit_answer"
+          "tool": "factorybench.submit_answer"
         }
       ],
-      "after_count": 6,
+      "after_count": 4,
       "before": [],
       "before_count": 0
     },
-    "purchase_order_lines": {
+    "resource_state": {
       "after": [
         {
-          "item_id": "RM-RELAY",
-          "line_no": 1,
-          "ordered_qty": 42.0,
-          "purchase_order_id": "PO-0006",
-          "received_qty": 0.0,
-          "unit_price": 48.6
-        }
-      ],
-      "after_count": 1,
-      "before": [],
-      "before_count": 0
-    },
-    "purchase_orders": {
-      "after": [
+          "effective_at": "2026-01-20",
+          "payload_json": "{\"arguments\":{\"approvalId\":\"approval-026\",\"fileId\":\"drive-approval-026\",\"requestBody\":{\"message\":\"Approved for CASE-026 only.\"}},\"case\":\"CASE-026\",\"outcome\":\"Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.\",\"tool\":\"google_drive.approvals.approve\"}",
+          "resource_id": "factorybench-026-mutation-03",
+          "resource_type": "google_drive.approvals",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive",
+          "task_id": "factorybench-026"
+        },
         {
-          "approved_by": "U-MANAGER",
-          "buyer_id": "U-BUYER",
-          "promised_date": "2026-01-16",
-          "purchase_order_id": "PO-0006",
-          "requisition_id": "REQ-A-006",
-          "status": "Approved",
-          "supplier_id": "SUP-B",
-          "task_id": "factorybench-026",
-          "total_amount": 2041.2
+          "effective_at": "2026-01-12",
+          "payload_json": "{\"case\":\"CASE-026\",\"identifiers\":{\"MaintenanceProgramId\":500026},\"quantity\":34,\"record\":\"NS-000026\"}",
+          "resource_id": "500026",
+          "resource_type": "oracle_fusion.maintenance_programs",
+          "revision": 0,
+          "status": "Open",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-026"
+        },
+        {
+          "effective_at": "2026-01-20",
+          "payload_json": "{\"arguments\":{\"MaintenanceProgramId\":500026,\"requestBody\":{\"ForecastEndDate\":\"2026-04-20\",\"ForecastStartDate\":\"2026-01-20\",\"StatusCode\":\"ACTIVE\"}},\"case\":\"CASE-026\",\"outcome\":\"Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.\",\"tool\":\"oracle_fusion.maintenance_programs.update\"}",
+          "resource_id": "factorybench-026-mutation-01",
+          "resource_type": "oracle_fusion.maintenance_programs",
+          "revision": 1,
+          "status": "Forecast window advanced",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-026"
+        },
+        {
+          "effective_at": "2026-01-20",
+          "payload_json": "{\"arguments\":{\"channel\":\"C-QUALITY\",\"text\":\"CASE-026: Forecast window advanced. Oracle reference REF-0026; control workbook updated.\",\"thread_ts\":\"1768000026.000100\"},\"case\":\"CASE-026\",\"outcome\":\"Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.\",\"tool\":\"slack.chat_postMessage\"}",
+          "resource_id": "factorybench-026-mutation-02",
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack",
+          "task_id": "factorybench-026"
         }
       ],
-      "after_count": 1,
-      "before": [],
-      "before_count": 0
+      "after_count": 4,
+      "before": [
+        {
+          "effective_at": "2026-01-12",
+          "payload_json": "{\"case\":\"CASE-026\",\"identifiers\":{\"MaintenanceProgramId\":500026},\"quantity\":34,\"record\":\"NS-000026\"}",
+          "resource_id": "500026",
+          "resource_type": "oracle_fusion.maintenance_programs",
+          "revision": 0,
+          "status": "Open",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-026"
+        }
+      ],
+      "before_count": 1
     }
   },
   "strict_pass": true,
   "task_id": "factorybench-026",
-  "total_checks": 6,
+  "total_checks": 7,
   "trace": [
     {
       "arguments": {},
       "index": 0,
       "result": {
-        "available_documents": [
+        "evidence_index": [
           {
-            "category": "order_release",
-            "doc_id": "POL-01",
-            "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
-            "title": "Order release control"
+            "asset_id": "factorybench-026-decision",
+            "kind": "spreadsheet_export",
+            "media_type": "text/csv",
+            "path": "approval-decision-log.csv",
+            "sha256": "3d608c45111646bccc8e13545df2053a779d42179ad1a519f73f615a77524735",
+            "source": "google_sheets",
+            "title": "Approval decision log"
           },
           {
-            "category": "material_shortage",
-            "doc_id": "POL-02",
-            "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
-            "title": "Shortage requisition control"
+            "asset_id": "factorybench-026-contract",
+            "kind": "contract",
+            "media_type": "text/markdown",
+            "path": "contract-or-service-control.md",
+            "sha256": "48bc67e2ebc2c0849e48b21f6b5d59edd805779e8067b45c0fd0c2e3f9c69fdd",
+            "source": "google_drive",
+            "title": "Contract / service control"
           },
           {
-            "category": "supplier_selection",
-            "doc_id": "POL-03",
-            "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
-            "title": "Supplier award policy"
+            "asset_id": "factorybench-026-approval",
+            "kind": "approval",
+            "media_type": "application/json",
+            "path": "drive-approval-record.json",
+            "sha256": "0fd9f3789c9ae786955ded6a57767a7b1c1e5513876e1326153db3981c69eb9c",
+            "source": "google_drive",
+            "title": "Drive approval record"
           },
           {
-            "category": "inbound_receipt",
-            "doc_id": "POL-04",
-            "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
-            "title": "Receiving and inspection policy"
+            "asset_id": "factorybench-026-measurements",
+            "kind": "quality_data",
+            "media_type": "text/csv",
+            "path": "inspection-measurements.csv",
+            "sha256": "543f32f623a6cf5c46de55314b4a9e47d36d3c4a84f6ce87a7d5c42a4e68a553",
+            "source": "laboratory_drive",
+            "title": "Inspection measurements"
           },
           {
-            "category": "invoice_match",
-            "doc_id": "POL-05",
-            "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
-            "title": "Three-way match policy"
+            "asset_id": "factorybench-026-policy",
+            "kind": "policy",
+            "media_type": "text/markdown",
+            "path": "operating-policy.md",
+            "sha256": "a3bd04295231f6ee45ddf7409c0f00b8ad414b69c0703491b78a746d9266adf5",
+            "source": "google_drive",
+            "title": "Operating policy"
           },
           {
-            "category": "production_issue",
-            "doc_id": "POL-06",
-            "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
-            "title": "Material issue policy"
+            "asset_id": "factorybench-026-slack",
+            "kind": "chat_thread",
+            "media_type": "application/json",
+            "path": "operations-slack-thread.json",
+            "sha256": "bac2405344803d6088147914ef6ff2426979138be51dc36a3911786d387a688b",
+            "source": "slack",
+            "title": "Operations Slack thread"
           },
           {
-            "category": "quality_exception",
-            "doc_id": "POL-07",
-            "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
-            "title": "Nonconformance policy"
+            "asset_id": "factorybench-026-erp",
+            "kind": "erp_export",
+            "media_type": "application/json",
+            "path": "oracle-starting-record.json",
+            "sha256": "b627ea32c1ec59c058fdfac2efebbcf2f6bc348498deb71a50ff702309e76c65",
+            "source": "oracle_fusion",
+            "title": "Oracle starting-record export"
           },
           {
-            "category": "completion_costing",
-            "doc_id": "POL-08",
-            "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
-            "title": "Work-order close policy"
+            "asset_id": "factorybench-026-email",
+            "kind": "email",
+            "media_type": "message/rfc822",
+            "path": "source-email-thread.eml",
+            "sha256": "4c0079d3ec9dd1ba350b9b7d713164261884404297e7e5f675b3d2c6543d6562",
+            "source": "gmail",
+            "title": "Source email thread"
           },
           {
-            "category": "transfer_reschedule",
-            "doc_id": "POL-09",
-            "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
-            "title": "Interplant recovery policy"
+            "asset_id": "factorybench-026-leadtime",
+            "kind": "spreadsheet",
+            "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "path": "supplier-lead-time-and-capacity.xlsx",
+            "sha256": "088833ee4ba11f71ecb0755afb5f3c1e4fb61ae46c5ac8b20308d64f0fdd70c9",
+            "source": "google_drive",
+            "title": "Supplier lead-time and capacity workbook"
           },
           {
-            "category": "maintenance_recovery",
-            "doc_id": "POL-10",
-            "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
-            "title": "Unplanned downtime policy"
+            "asset_id": "factorybench-026-quote",
+            "kind": "vendor_pdf",
+            "media_type": "application/pdf",
+            "path": "supplier-quotation.pdf",
+            "sha256": "7e3661d8cfde06b3e3104fa62fc737483b278ffecc7713ae09756a638a7f879e",
+            "source": "gmail_attachment",
+            "title": "Supplier quotation"
+          },
+          {
+            "asset_id": "factorybench-026-spec",
+            "kind": "specification",
+            "media_type": "text/markdown",
+            "path": "technical-specification.md",
+            "sha256": "58c1ea135d250a21348f34c32772c18fab118afeeaf51b67056db13009a00b97",
+            "source": "google_drive",
+            "title": "Technical specification"
+          },
+          {
+            "asset_id": "factorybench-026-risk",
+            "kind": "spreadsheet",
+            "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "path": "workflow-risk-register.xlsx",
+            "sha256": "a1d57e5f5a185a55d95d6ee65ccfc5c5ce69eb5e121843636da2b9d50cadac47",
+            "source": "google_drive",
+            "title": "Workflow risk register"
+          }
+        ],
+        "identity": [
+          {
+            "approval_limit": 0.0,
+            "display_name": "Jordan Lee",
+            "role": "reliability_engineer",
+            "user_id": "U-AGENT"
+          },
+          {
+            "approval_limit": 250000.0,
+            "display_name": "Avery Morgan",
+            "role": "authorized_approver",
+            "user_id": "U-APPROVER"
+          },
+          {
+            "approval_limit": 25000.0,
+            "display_name": "Maya Chen",
+            "role": "operations_lead",
+            "user_id": "U-OPS-LEAD"
           }
         ],
         "organization": {
-          "organization_id": "M1",
+          "organization_id": "NSC",
           "primary_plant": "SEA",
-          "world": "Northstar Controls Oracle-shaped ERP"
+          "world": "Northstar Controls enterprise operations sandbox",
+          "world_id": "northstar-enterprise-fusion-v2"
         },
-        "reference_data": {
-          "items": [
-            {
-              "description": "Industrial control panel",
-              "item_id": "FG-PANEL",
-              "item_type": "finished_good",
-              "make_buy": "MAKE",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Copper busbar set",
-              "item_id": "RM-COPPER",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Powder-coated enclosure",
-              "item_id": "RM-HOUSING",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Safety relay",
-              "item_id": "RM-RELAY",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
+        "reference_records": {
+          "case_reference": "CASE-026",
+          "gmail": {
+            "search_query": "\"CASE-026\"",
+            "userId": "me"
+          },
+          "google_drive": {
+            "approval_file_id": "drive-approval-026",
+            "primary_file_id": "drive-026",
+            "search_query": "name contains 'CASE-026' and trashed = false"
+          },
+          "google_sheets": {
+            "audit_append_range": "Audit!A:F",
+            "decision_range": "Control!A1:H50",
+            "outcome_write_range": "Control!H28",
+            "spreadsheet_id": "sheet-026"
+          },
+          "oracle_fusion": {
+            "filter": "ReferenceNumber='CASE-026'",
+            "only_data": true,
+            "record_handles": {
+              "HeaderInterfaceId": 700026,
+              "MaintenanceProgramId": 500026,
+              "SupplierId": 600026,
+              "WorkOrderId": 100026,
+              "invoicesUniqID": "invoicesUniqID-0026",
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0026",
+              "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0026"
             }
-          ],
-          "plants": [
-            {
-              "name": "Portland Components",
-              "organization_id": "M1",
-              "plant_id": "PDX",
-              "timezone": "America/Los_Angeles"
-            },
-            {
-              "name": "Seattle Assembly",
-              "organization_id": "M1",
-              "plant_id": "SEA",
-              "timezone": "America/Los_Angeles"
-            }
-          ],
-          "suppliers": [
-            {
-              "approved": 1,
-              "name": "Cascade Industrial",
-              "on_time_rate": 0.94,
-              "payment_terms": "NET30",
-              "quality_score": 97.2,
-              "supplier_id": "SUP-A"
-            },
-            {
-              "approved": 1,
-              "name": "Rainier Components",
-              "on_time_rate": 0.98,
-              "payment_terms": "NET45",
-              "quality_score": 95.8,
-              "supplier_id": "SUP-B"
-            },
-            {
-              "approved": 0,
-              "name": "Frontier Supply",
-              "on_time_rate": 0.99,
-              "payment_terms": "NET30",
-              "quality_score": 99.1,
-              "supplier_id": "SUP-C"
-            }
-          ],
-          "users": [
-            {
-              "approval_limit": 1000.0,
-              "display_name": "Diego Ruiz",
-              "plant_id": "SEA",
-              "role": "buyer",
-              "user_id": "U-BUYER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Priya Shah",
-              "plant_id": "SEA",
-              "role": "quality_inspector",
-              "user_id": "U-INSPECTOR"
-            },
-            {
-              "approval_limit": 250000.0,
-              "display_name": "Avery Morgan",
-              "plant_id": "SEA",
-              "role": "plant_manager",
-              "user_id": "U-MANAGER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Maya Chen",
-              "plant_id": "SEA",
-              "role": "production_planner",
-              "user_id": "U-PLANNER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Noah Williams",
-              "plant_id": "SEA",
-              "role": "quality_engineer",
-              "user_id": "U-QUALITY"
-            }
-          ],
-          "workcenters": [
-            {
-              "capacity_hours": 80.0,
-              "name": "Assembly Cell 1",
-              "plant_id": "SEA",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-ASM-1"
-            },
-            {
-              "capacity_hours": 64.0,
-              "name": "Assembly Cell 2",
-              "plant_id": "SEA",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-ASM-2"
-            },
-            {
-              "capacity_hours": 72.0,
-              "name": "Portland Fabrication",
-              "plant_id": "PDX",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-PDX-1"
-            }
-          ]
+          },
+          "slack": {
+            "channel": "C-QUALITY",
+            "search_query": "\"CASE-026\"",
+            "thread_ts": "1768000026.000100"
+          }
         },
+        "starting_records": [
+          {
+            "effective_at": "2026-01-12",
+            "resource_id": "500026",
+            "resource_type": "oracle_fusion.maintenance_programs",
+            "revision": 0,
+            "status": "Open",
+            "system": "oracle_fusion"
+          }
+        ],
         "state": {
+          "network": "closed",
           "persistence": "episode-local SQLite",
           "scope": "isolated task snapshot"
         },
         "task": {
           "as_of": "2026-01-12",
-          "family": "supplier_selection",
-          "role": "buyer",
+          "family": "preventive_maintenance",
+          "role": "reliability_engineer",
           "task_id": "factorybench-026"
         },
         "tool_servers": [
           {
-            "description": "Query and mutate the synthetic manufacturing ERP.",
-            "name": "oracle_erp",
+            "description": "Benchmark-only discovery and answer submission controls.",
+            "name": "factorybench",
             "tools": [
-              "approve_invoice",
-              "approve_purchase_order",
-              "approve_requisition",
-              "complete_operation",
-              "complete_transfer",
-              "complete_work_order",
-              "create_maintenance_work_order",
-              "create_nonconformance",
-              "create_purchase_order",
-              "create_requisition",
-              "create_transfer",
-              "create_work_order",
-              "get_bom",
-              "get_environment_context",
-              "get_inventory",
-              "get_invoice_match",
-              "get_maintenance_context",
-              "get_purchase_order",
-              "get_quality_context",
-              "get_receipt",
-              "get_requisition",
-              "get_sales_order",
-              "get_schedule",
-              "get_supplier_quotes",
-              "get_work_order",
-              "hold_invoice",
-              "issue_material",
-              "place_quality_hold",
-              "receive_purchase_order",
-              "record_inspection",
-              "record_wip_variance",
-              "reroute_operation",
-              "reschedule_work_order",
-              "reserve_material",
-              "start_operation"
+              "factorybench.context.get",
+              "factorybench.submit_answer"
             ]
           },
           {
-            "description": "Search versioned operating policies and task assets.",
-            "name": "plant_docs",
+            "description": "Documented Google Drive API operations over task-scoped files and approvals.",
+            "name": "google_drive",
             "tools": [
-              "search_documents"
+              "google_drive.approvals.approve",
+              "google_drive.approvals.list",
+              "google_drive.comments.create",
+              "google_drive.files.download",
+              "google_drive.files.export",
+              "google_drive.files.get",
+              "google_drive.files.list"
             ]
           },
           {
-            "description": "Submit exact answer fields for deterministic verification.",
-            "name": "factory_harness",
+            "description": "Documented Google Sheets API operations over task-scoped workbooks.",
+            "name": "google_sheets",
             "tools": [
-              "submit_answer"
+              "google_sheets.spreadsheets.get",
+              "google_sheets.spreadsheets.values.append",
+              "google_sheets.spreadsheets.values.batchGet",
+              "google_sheets.spreadsheets.values.get",
+              "google_sheets.spreadsheets.values.update"
+            ]
+          },
+          {
+            "description": "Documented Oracle Fusion Cloud ERP/SCM REST operations over synthetic task state.",
+            "name": "oracle_fusion",
+            "tools": [
+              "oracle_fusion.draft_purchase_orders.create",
+              "oracle_fusion.draft_purchase_orders.list",
+              "oracle_fusion.inspection_plans.list",
+              "oracle_fusion.inventory_onhand_balances.list",
+              "oracle_fusion.inventory_transactions.create",
+              "oracle_fusion.invoice_holds.create",
+              "oracle_fusion.invoice_holds.update",
+              "oracle_fusion.invoices.create",
+              "oracle_fusion.invoices.get",
+              "oracle_fusion.invoices.update",
+              "oracle_fusion.invoices.validate",
+              "oracle_fusion.maintenance_documents.create",
+              "oracle_fusion.maintenance_documents.list",
+              "oracle_fusion.maintenance_operations.list",
+              "oracle_fusion.maintenance_operations.update",
+              "oracle_fusion.maintenance_programs.create",
+              "oracle_fusion.maintenance_programs.generate_forecasts",
+              "oracle_fusion.maintenance_programs.generate_work_orders",
+              "oracle_fusion.maintenance_programs.get",
+              "oracle_fusion.maintenance_programs.list",
+              "oracle_fusion.maintenance_programs.update",
+              "oracle_fusion.maintenance_work_orders.create",
+              "oracle_fusion.maintenance_work_orders.get",
+              "oracle_fusion.maintenance_work_orders.list",
+              "oracle_fusion.maintenance_work_orders.update",
+              "oracle_fusion.material_transactions.create",
+              "oracle_fusion.operation_transactions.create",
+              "oracle_fusion.purchase_order_lines.list",
+              "oracle_fusion.purchase_orders.acknowledge",
+              "oracle_fusion.purchase_orders.cancel",
+              "oracle_fusion.purchase_orders.close",
+              "oracle_fusion.purchase_orders.get",
+              "oracle_fusion.purchase_orders.list",
+              "oracle_fusion.quality_inspection_results.create",
+              "oracle_fusion.quality_inspection_results.list",
+              "oracle_fusion.quality_inspection_results.update",
+              "oracle_fusion.receiving_receipt_requests.create",
+              "oracle_fusion.receiving_receipt_requests.list",
+              "oracle_fusion.receiving_receipt_transactions.create",
+              "oracle_fusion.receiving_receipt_transactions.list",
+              "oracle_fusion.receiving_receipt_transactions.update",
+              "oracle_fusion.resource_transactions.create",
+              "oracle_fusion.sales_orders.get",
+              "oracle_fusion.sales_orders.list",
+              "oracle_fusion.suppliers.get",
+              "oracle_fusion.suppliers.list",
+              "oracle_fusion.supply_requests.create",
+              "oracle_fusion.supply_requests.list",
+              "oracle_fusion.work_order_materials.list",
+              "oracle_fusion.work_order_materials.replace_with_substitute",
+              "oracle_fusion.work_order_materials.update",
+              "oracle_fusion.work_order_operations.create",
+              "oracle_fusion.work_order_operations.list",
+              "oracle_fusion.work_order_operations.update",
+              "oracle_fusion.work_order_resources.create",
+              "oracle_fusion.work_order_resources.list",
+              "oracle_fusion.work_order_resources.update",
+              "oracle_fusion.work_orders.create",
+              "oracle_fusion.work_orders.get",
+              "oracle_fusion.work_orders.list",
+              "oracle_fusion.work_orders.update"
+            ]
+          },
+          {
+            "description": "Documented Slack Web API operations over task-scoped conversations and files.",
+            "name": "slack",
+            "tools": [
+              "slack.chat_postMessage",
+              "slack.conversations_history",
+              "slack.conversations_replies",
+              "slack.files_info",
+              "slack.reactions_add",
+              "slack.search_messages"
             ]
           }
         ]
       },
       "success": true,
-      "tool": "get_environment_context"
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "supplier_selection"
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-026",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
       "index": 1,
       "result": {
-        "documents": [
-          {
-            "body": "Choose an approved supplier. Minimize landed price while meeting the need-by date; break ties by higher quality score, then higher on-time rate. Purchase orders above the buyer's limit require plant-manager approval.",
-            "category": "supplier_selection",
-            "doc_id": "POL-03",
-            "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
-            "title": "Supplier award policy"
-          }
+        "majorDimension": "ROWS",
+        "range": "Control!A1:E2",
+        "values": [
+          [
+            "case",
+            "record",
+            "quantity",
+            "approval",
+            "approved_operation",
+            "approved_arguments_json",
+            "return_fields_json"
+          ],
+          [
+            "CASE-026",
+            "NS-000026",
+            34,
+            "APPROVED",
+            "oracle_fusion.maintenance_programs.update",
+            "{\"MaintenanceProgramId\":500026,\"requestBody\":{\"ForecastEndDate\":\"2026-04-20\",\"ForecastStartDate\":\"2026-01-20\",\"StatusCode\":\"ACTIVE\"}}",
+            "{\"forecast_horizon\":\"2026-01-20\",\"generation_action\":\"Forecast window advanced\",\"program_code\":\"PM-0026\"}"
+          ]
         ]
       },
       "success": true,
-      "tool": "search_documents"
+      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
-        "requisition_id": "REQ-A-006"
+        "count": 50,
+        "query": "\"CASE-026\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
       },
       "index": 2,
       "result": {
-        "header": {
-          "approved_by": "U-MANAGER",
-          "need_by": "2026-02-01",
-          "requester_id": "U-PLANNER",
-          "requisition_id": "REQ-A-006",
-          "status": "Approved",
-          "supplier_id": null,
-          "task_id": "factorybench-026",
-          "total_amount": 0.0,
-          "work_order_id": null
+        "messages": {
+          "matches": [
+            {
+              "channel": {
+                "id": "C-QUALITY"
+              },
+              "text": "CASE-026 | APPROVED | Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets. | Oracle operation oracle_fusion.maintenance_programs.update | approved control packet {\"approvalStatus\":\"APPROVED\",\"approvedArguments\":{\"MaintenanceProgramId\":500026,\"requestBody\":{\"ForecastEndDate\":\"2026-04-20\",\"ForecastStartDate\":\"2026-01-20\",\"StatusCode\":\"ACTIVE\"}},\"case\":\"CASE-026\",\"controlWorkbookAuditRange\":\"Audit!A:F\",\"controlWorkbookOutcomeRange\":\"Control!H28\",\"decision\":\"Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.\",\"oracleOperation\":\"oracle_fusion.maintenance_programs.update\",\"returnFields\":{\"forecast_horizon\":\"2026-01-20\",\"generation_action\":\"Forecast window advanced\",\"program_code\":\"PM-0026\"}}",
+              "ts": "1768000026.000100",
+              "user": "U-APPROVER"
+            }
+          ],
+          "total": 1
         },
-        "lines": [
-          {
-            "item_id": "RM-RELAY",
-            "line_no": 1,
-            "quantity": 42.0,
-            "requisition_id": "REQ-A-006",
-            "unit_price": 0.0
-          }
-        ]
+        "ok": true,
+        "query": "\"CASE-026\""
       },
       "success": true,
-      "tool": "get_requisition"
+      "tool": "slack.search_messages"
     },
     {
       "arguments": {
-        "item_id": "RM-RELAY",
-        "need_by": "2026-02-01",
-        "task_id": "factorybench-026"
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000026.000100"
       },
       "index": 3,
       "result": {
-        "quotes": [
+        "has_more": false,
+        "messages": [
           {
-            "approved": 0,
-            "item_id": "RM-RELAY",
-            "lead_days": 2,
-            "minimum_qty": 10.0,
-            "name": "Frontier Supply",
-            "on_time_rate": 0.99,
-            "quality_score": 99.1,
-            "quote_id": "SQC-006",
-            "supplier_id": "SUP-C",
-            "task_id": "factorybench-026",
-            "unit_price": 44.6,
-            "valid_until": "2026-02-02"
+            "text": "CASE-026: evidence checked.",
+            "ts": "1768000026.000100",
+            "user": "U-OPS-LEAD"
           },
           {
-            "approved": 1,
-            "item_id": "RM-RELAY",
-            "lead_days": 4,
-            "minimum_qty": 10.0,
-            "name": "Rainier Components",
-            "on_time_rate": 0.98,
-            "quality_score": 95.8,
-            "quote_id": "SQB-006",
-            "supplier_id": "SUP-B",
-            "task_id": "factorybench-026",
-            "unit_price": 48.6,
-            "valid_until": "2026-02-02"
-          },
-          {
-            "approved": 1,
-            "item_id": "RM-RELAY",
-            "lead_days": 6,
-            "minimum_qty": 10.0,
-            "name": "Cascade Industrial",
-            "on_time_rate": 0.94,
-            "quality_score": 97.2,
-            "quote_id": "SQA-006",
-            "supplier_id": "SUP-A",
-            "task_id": "factorybench-026",
-            "unit_price": 50.1,
-            "valid_until": "2026-02-02"
+            "text": "CASE-026 | APPROVED | Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets. | Oracle operation oracle_fusion.maintenance_programs.update | approved control packet {\"approvalStatus\":\"APPROVED\",\"approvedArguments\":{\"MaintenanceProgramId\":500026,\"requestBody\":{\"ForecastEndDate\":\"2026-04-20\",\"ForecastStartDate\":\"2026-01-20\",\"StatusCode\":\"ACTIVE\"}},\"case\":\"CASE-026\",\"controlWorkbookAuditRange\":\"Audit!A:F\",\"controlWorkbookOutcomeRange\":\"Control!H28\",\"decision\":\"Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.\",\"oracleOperation\":\"oracle_fusion.maintenance_programs.update\",\"returnFields\":{\"forecast_horizon\":\"2026-01-20\",\"generation_action\":\"Forecast window advanced\",\"program_code\":\"PM-0026\"}}",
+            "ts": "1768000026.000200",
+            "user": "U-APPROVER"
           }
-        ]
+        ],
+        "ok": true,
+        "response_metadata": {
+          "next_cursor": ""
+        }
       },
       "success": true,
-      "tool": "get_supplier_quotes"
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "buyer_id": "U-BUYER",
-        "item_id": "RM-RELAY",
-        "promised_date": "2026-01-16",
-        "purchase_order_id": "PO-0006",
-        "quantity": 42,
-        "requisition_id": "REQ-A-006",
-        "supplier_id": "SUP-B",
-        "unit_price": 48.6
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-026"
       },
       "index": 4,
       "result": {
-        "purchase_order_id": "PO-0006",
-        "status": "Pending Approval",
-        "total_amount": 2041.2
+        "content": "# Commercial or service control for CASE-026\n\nThe approved operational objective is: Validate the meter export and reliability threshold, then revise the program forecast window without altering unrelated assets.\n\nEffective date: 2026-01-20\nReference record: NS-000026\nAny deviation affecting price, completion, inspected quantity, compliance, or customer commit requires explicit approval preserved in the case packet.\n",
+        "description": "Contract / service control",
+        "id": "drive-026",
+        "kind": "drive#file",
+        "md5Checksum": "48bc67e2ebc2c0849e48b21f6b5d59edd805779e8067b45c0fd0c2e3f9c69fdd",
+        "mimeType": "text/markdown",
+        "modifiedTime": "2026-01-12T09:00:00Z",
+        "name": "contract-or-service-control.md"
       },
       "success": true,
-      "tool": "create_purchase_order"
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
-        "approver_id": "U-MANAGER",
-        "purchase_order_id": "PO-0006"
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-026'"
       },
       "index": 5,
       "result": {
-        "purchase_order_id": "PO-0006",
-        "status": "Approved"
+        "count": 1,
+        "hasMore": false,
+        "items": [
+          {
+            "HeaderInterfaceId": 700026,
+            "HoldId": 1000026,
+            "InspectionId": 1100026,
+            "InterfaceTransactionId": 800026,
+            "InvoiceId": 900026,
+            "ItemNumber": "NS-COMP-026",
+            "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+            "MaintenanceProgramId": 500026,
+            "OrderNumber": "ORD-0026",
+            "OrganizationCode": "SEA",
+            "Quantity": 34,
+            "RecordId": 10000026,
+            "ReferenceNumber": "CASE-026",
+            "StatusCode": "OPEN",
+            "SupplierId": 600026,
+            "WoOperationId": 200026,
+            "WoOperationMaterialId": 300026,
+            "WoOperationResourceId": 400026,
+            "WorkOrderId": 100026,
+            "WorkOrderNumber": "WO-0026",
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0026",
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0026"
+          }
+        ],
+        "limit": 50,
+        "links": [],
+        "offset": 0
       },
       "success": true,
-      "tool": "approve_purchase_order"
+      "tool": "oracle_fusion.maintenance_programs.list"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-0006",
-        "supplier_id": "SUP-B",
-        "total_amount": 2041.2
+        "MaintenanceProgramId": 500026
       },
       "index": 6,
       "result": {
-        "submitted": {
-          "purchase_order_id": "PO-0006",
-          "supplier_id": "SUP-B",
-          "total_amount": "2041.20"
+        "HeaderInterfaceId": 700026,
+        "HoldId": 1000026,
+        "InspectionId": 1100026,
+        "InterfaceTransactionId": 800026,
+        "InvoiceId": 900026,
+        "ItemNumber": "NS-COMP-026",
+        "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+        "MaintenanceProgramId": 500026,
+        "OrderNumber": "ORD-0026",
+        "OrganizationCode": "SEA",
+        "Quantity": 34,
+        "RecordId": 10000026,
+        "ReferenceNumber": "CASE-026",
+        "StatusCode": "OPEN",
+        "SupplierId": 600026,
+        "WoOperationId": 200026,
+        "WoOperationMaterialId": 300026,
+        "WoOperationResourceId": 400026,
+        "WorkOrderId": 100026,
+        "WorkOrderNumber": "WO-0026",
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0026",
+        "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0026"
+      },
+      "success": true,
+      "tool": "oracle_fusion.maintenance_programs.get"
+    },
+    {
+      "arguments": {
+        "MaintenanceProgramId": 500026,
+        "requestBody": {
+          "ForecastEndDate": "2026-04-20",
+          "ForecastStartDate": "2026-01-20",
+          "StatusCode": "ACTIVE"
+        }
+      },
+      "index": 7,
+      "result": {
+        "HeaderInterfaceId": 700026,
+        "HoldId": 1000026,
+        "InspectionId": 1100026,
+        "InterfaceTransactionId": 800026,
+        "InvoiceId": 900026,
+        "ItemNumber": "NS-COMP-026",
+        "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+        "MaintenanceProgramId": 500026,
+        "Operation": "oracle_fusion.maintenance_programs.update",
+        "OrderNumber": "ORD-0026",
+        "OrganizationCode": "SEA",
+        "Quantity": 34,
+        "RecordId": 10000026,
+        "ReferenceNumber": "CASE-026",
+        "StatusCode": "FORECAST_WINDOW_ADVANCED",
+        "SupplierId": 600026,
+        "WoOperationId": 200026,
+        "WoOperationMaterialId": 300026,
+        "WoOperationResourceId": 400026,
+        "WorkOrderId": 100026,
+        "WorkOrderNumber": "WO-0026",
+        "links": [],
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0026",
+        "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0026"
+      },
+      "success": true,
+      "tool": "oracle_fusion.maintenance_programs.update"
+    },
+    {
+      "arguments": {
+        "channel": "C-QUALITY",
+        "text": "CASE-026: Forecast window advanced. Oracle reference REF-0026; control workbook updated.",
+        "thread_ts": "1768000026.000100"
+      },
+      "index": 8,
+      "result": {
+        "channel": "C-QUALITY",
+        "message": {
+          "text": "CASE-026: Forecast window advanced. Oracle reference REF-0026; control workbook updated.",
+          "thread_ts": "1768000026.000100"
+        },
+        "ok": true,
+        "ts": "1768000026.000900"
+      },
+      "success": true,
+      "tool": "slack.chat_postMessage"
+    },
+    {
+      "arguments": {
+        "approvalId": "approval-026",
+        "fileId": "drive-approval-026",
+        "requestBody": {
+          "message": "Approved for CASE-026 only."
+        }
+      },
+      "index": 9,
+      "result": {
+        "fileId": "drive-approval-026",
+        "id": "approval-026",
+        "status": "APPROVED"
+      },
+      "success": true,
+      "tool": "google_drive.approvals.approve"
+    },
+    {
+      "arguments": {
+        "forecast_horizon": "2026-01-20",
+        "generation_action": "Forecast window advanced",
+        "program_code": "PM-0026"
+      },
+      "index": 10,
+      "result": {
+        "accepted": true,
+        "fields": {
+          "forecast_horizon": "2026-01-20",
+          "generation_action": "Forecast window advanced",
+          "program_code": "PM-0026"
         },
         "task_id": "factorybench-026"
       },
       "success": true,
-      "tool": "submit_answer"
+      "tool": "factorybench.submit_answer"
     }
   ]
 }

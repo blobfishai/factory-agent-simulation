@@ -28,6 +28,15 @@ def _write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _exact_factory_score(verdict: dict[str, Any]) -> float:
+    """Recover the unrounded per-task percentage from deterministic checks."""
+
+    checks = verdict.get("checks")
+    if isinstance(checks, list) and checks and all(isinstance(check, dict) for check in checks):
+        return sum(bool(check.get("passed")) for check in checks) / len(checks) * 100
+    return float(verdict["factory_score"])
+
+
 def _trial_dirs(job_dir: Path) -> list[Path]:
     return sorted(
         path
@@ -45,6 +54,7 @@ def import_harbor_job(
     reasoning_effort: str,
     harbor_version: str,
     run_url: str | None = None,
+    runtime_overlay_path: Path | None = None,
 ) -> dict[str, Any]:
     if not RUN_SLUG.fullmatch(run_slug):
         raise ValueError("run slug must use lowercase letters, numbers, dots, and hyphens")
@@ -72,7 +82,7 @@ def import_harbor_job(
         trial_record = {
             "task_id": task_id,
             "family": tasks[task_id]["family"],
-            "score": float(verdict["factory_score"]),
+            "score": _exact_factory_score(verdict),
             "strict_pass": bool(verdict["strict_pass"]),
             "tool_calls": len(trace),
             "successful_tool_calls": sum(1 for entry in trace if entry.get("success")),
@@ -131,6 +141,13 @@ def import_harbor_job(
     }
     model_name = str(next(iter(model_names)))
     agent_version = str(next(iter(agent_versions)))
+    runtime_overlay = None
+    if runtime_overlay_path is not None:
+        runtime_overlay_artifact = f"{run_slug}/runtime-overlay.json"
+        runtime_overlay = _read_json(runtime_overlay_path) | {
+            "artifact": runtime_overlay_artifact
+        }
+        _write_json(output / runtime_overlay_artifact, runtime_overlay)
     manifest = {
         "schema_version": "factorybench.model-run.v1",
         "benchmark": BENCHMARK_NAME,
@@ -158,11 +175,14 @@ def import_harbor_job(
             ),
             "average_tool_calls": round(statistics.mean(calls), 2),
             "average_cost_usd": round(statistics.mean(costs), 6) if costs else None,
+            "total_cost_usd": round(sum(costs), 6) if costs else None,
             "family_scores": family_scores,
         },
         "featured_task_id": trials[0]["task_id"],
         "trials": trials,
     }
+    if runtime_overlay is not None:
+        manifest["runtime_overlay"] = runtime_overlay
     _write_json(output / f"{run_slug}.json", manifest)
     return manifest
 
@@ -176,6 +196,7 @@ def main() -> None:
     parser.add_argument("--reasoning-effort", required=True)
     parser.add_argument("--harbor-version", default="0.21.0")
     parser.add_argument("--run-url")
+    parser.add_argument("--runtime-overlay", type=Path)
     args = parser.parse_args()
     manifest = import_harbor_job(
         args.job_dir,
@@ -185,6 +206,7 @@ def main() -> None:
         reasoning_effort=args.reasoning_effort,
         harbor_version=args.harbor_version,
         run_url=args.run_url,
+        runtime_overlay_path=args.runtime_overlay,
     )
     print(json.dumps(manifest, indent=2, sort_keys=True))
 

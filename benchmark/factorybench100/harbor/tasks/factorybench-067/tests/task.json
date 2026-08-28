@@ -1,82 +1,80 @@
 {
   "allowed_write_tables": [
-    "quality_holds",
-    "nonconformances",
-    "inventory_on_hand",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "disposition": {
+      "affected_work_order": {
         "type": "string"
       },
-      "hold_id": {
+      "change_order": {
         "type": "string"
       },
-      "inspection_id": {
-        "type": "string"
-      },
-      "nonconformance_id": {
+      "implementation_result": {
         "type": "string"
       }
     },
     "required": [
-      "disposition",
-      "hold_id",
-      "inspection_id",
-      "nonconformance_id"
+      "affected_work_order",
+      "change_order",
+      "implementation_result"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "disposition": "REWORK",
-      "hold_id": "HOLD-0007",
-      "inspection_id": "INSP-Q-007",
-      "nonconformance_id": "NC-0007"
+      "affected_work_order": "ORD-0067",
+      "change_order": "ORD-0067",
+      "implementation_result": "Routing change implemented"
     },
     "assertions": [
       {
-        "description": "The failed lot is on an active quality hold.",
-        "id": "lot_held",
-        "table": "quality_holds",
+        "description": "oracle_fusion.work_order_operations.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "lot_number": "FG-LOT-007",
-          "reason_code": "FUNCTIONAL_TEST_FAIL",
-          "status": "Active"
+          "payload_json": "{\"arguments\":{\"WoOperationId\":200067,\"WorkOrderId\":100067,\"requestBody\":{\"OperationName\":\"Controlled operation CASE-067\",\"PlannedCompletionDate\":\"2026-01-28\",\"PlannedStartDate\":\"2026-01-23\",\"WorkCenterCode\":\"WC-ALT-2\"}},\"case\":\"CASE-067\",\"outcome\":\"Match the released routing redline to the open operation and update its work center and timing.\",\"tool\":\"oracle_fusion.work_order_operations.update\"}",
+          "resource_type": "oracle_fusion.work_order_operations",
+          "revision": 1,
+          "status": "Routing change implemented",
+          "system": "oracle_fusion"
         },
         "where": {
-          "hold_id": "HOLD-0007"
+          "resource_id": "factorybench-067-mutation-01",
+          "task_id": "factorybench-067"
         }
       },
       {
-        "description": "A recoverable nonconformance is assigned for rework.",
-        "id": "nonconformance_opened",
-        "table": "nonconformances",
+        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "disposition": "REWORK",
-          "inspection_id": "INSP-Q-007",
-          "owner_id": "U-QUALITY",
-          "status": "Open"
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
         },
         "where": {
-          "nonconformance_id": "NC-0007"
+          "resource_id": "factorybench-067-mutation-02",
+          "task_id": "factorybench-067"
         }
       },
       {
-        "description": "The affected inventory remains quarantined.",
-        "id": "inventory_quarantined",
-        "table": "inventory_on_hand",
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "status": "Quality Hold"
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "item_id": "FG-PANEL",
-          "lot_number": "FG-LOT-007",
-          "plant_id": "SEA",
-          "subinventory": "FG"
+          "resource_id": "factorybench-067-mutation-03",
+          "task_id": "factorybench-067"
         }
       }
     ]
@@ -84,30 +82,75 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "quality_exception"
+        "format": "full",
+        "id": "msg-067",
+        "userId": "me"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
-        "inspection_id": "INSP-Q-007"
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-067",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_quality_context"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-067",
+        "mimeType": "text/plain"
+      },
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "file": "F-000067"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.files_info"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100067
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_orders.get"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100067,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-067'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_operations.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_quality_context"
+    "factorybench.context.get",
+    "gmail.messages.get",
+    "google_sheets.spreadsheets.values.get",
+    "google_drive.files.export",
+    "slack.files_info",
+    "oracle_fusion.work_orders.get",
+    "oracle_fusion.work_order_operations.list"
   ],
   "task_id": "factorybench-067",
   "write_tools": [
-    "create_nonconformance",
-    "place_quality_hold",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.messages.send",
+    "google_sheets.spreadsheets.values.update",
+    "oracle_fusion.work_order_operations.update"
   ]
 }

@@ -1,63 +1,97 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "material_shortage"
-    },
-    "tool": "search_documents"
-  },
-  {
-    "arguments": {
-      "work_order_id": "WO-S-003"
-    },
-    "tool": "get_work_order"
-  },
-  {
-    "arguments": {
-      "item_ids": [
-        "RM-COPPER"
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
       ],
-      "plant_id": "SEA"
+      "spreadsheetId": "sheet-013",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_inventory"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "item_id": "RM-COPPER",
-      "need_by": "2026-02-02",
-      "task_id": "factorybench-013"
+      "channel": "C-PROCUREMENT",
+      "inclusive": true,
+      "limit": 100,
+      "oldest": "1768000000.000000"
     },
-    "tool": "get_supplier_quotes"
+    "tool": "slack.conversations_history"
   },
   {
     "arguments": {
-      "item_id": "RM-COPPER",
-      "need_by": "2026-02-02",
-      "quantity": 18,
-      "requester_id": "U-BUYER",
-      "requisition_id": "REQ-0003",
-      "supplier_id": "SUP-A",
-      "unit_price": 70.3,
-      "work_order_id": "WO-S-003"
+      "maxResults": 20,
+      "q": "\"CASE-013\"",
+      "userId": "me"
     },
-    "tool": "create_requisition"
+    "tool": "gmail.messages.list"
   },
   {
     "arguments": {
-      "approver_id": "U-MANAGER",
-      "requisition_id": "REQ-0003"
+      "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+      "fileId": "drive-013"
     },
-    "tool": "approve_requisition"
+    "tool": "google_drive.files.get"
   },
   {
     "arguments": {
-      "net_shortage": 18,
-      "requisition_id": "REQ-0003",
-      "supplier_id": "SUP-A"
+      "limit": 50,
+      "onlyData": true,
+      "q": "ReferenceNumber='CASE-013'"
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.inventory_onhand_balances.list"
+  },
+  {
+    "arguments": {
+      "requestBody": {
+        "SourceSystemCode": "EXTERNAL",
+        "TransactionLines": [
+          {
+            "Item": "NS-COMP-013",
+            "LotNumber": "LOT-0013",
+            "OrganizationCode": "SEA",
+            "Subinventory": "STORES",
+            "TransactionQuantity": 21,
+            "TransactionType": "Subinventory Transfer",
+            "TransactionUnitOfMeasure": "EA",
+            "TransferSubinventory": "CONTROLLED"
+          }
+        ],
+        "TransactionMode": "ONLINE"
+      }
+    },
+    "tool": "oracle_fusion.inventory_transactions.create"
+  },
+  {
+    "arguments": {
+      "message": {
+        "raw": "RnJvbTogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogb3BlcmF0aW9ucy1jb250cm9sQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAxMyDigJQgRHJhZnQgZW50ZXJwcmlzZSB3b3JrZmxvdw0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkxvdCBjb3JyZWN0aW9uIHBvc3RlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDEzLg0K",
+        "threadId": "thread-013"
+      },
+      "userId": "me"
+    },
+    "tool": "gmail.drafts.create"
+  },
+  {
+    "arguments": {
+      "channel": "C-PROCUREMENT",
+      "text": "CASE-013: Lot correction posted. Oracle reference REF-0013; control workbook updated.",
+      "thread_ts": "1768000013.000100"
+    },
+    "tool": "slack.chat_postMessage"
+  },
+  {
+    "arguments": {
+      "item_lot": "FB-013",
+      "posted_quantity": 21,
+      "transaction_reference": "Lot correction posted"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

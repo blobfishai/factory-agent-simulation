@@ -1,47 +1,80 @@
 {
   "allowed_write_tables": [
-    "ap_invoices",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "decision": {
+      "case_reference": {
         "type": "string"
       },
-      "invoice_id": {
+      "governance_action": {
         "type": "string"
       },
-      "variance_percent": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "supplier": {
+        "type": "string"
       }
     },
     "required": [
-      "decision",
-      "invoice_id",
-      "variance_percent"
+      "case_reference",
+      "governance_action",
+      "supplier"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "decision": "Approved",
-      "invoice_id": "INV-0009",
-      "variance_percent": 1.0
+      "case_reference": "CASE-0049",
+      "governance_action": "Remediation PO closed",
+      "supplier": "SUP-0049"
     },
     "assertions": [
       {
-        "description": "The invoice receives the policy-correct three-way-match decision.",
-        "id": "invoice_decision",
-        "table": "ap_invoices",
+        "description": "oracle_fusion.purchase_orders.close produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "hold_reason": null,
-          "status": "Approved"
+          "payload_json": "{\"arguments\":{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0049\",\"requestBody\":{\"closeAction\":\"finallyClose\",\"closeReason\":\"Confirm every corrective-action deliverable was accepted and invoiced before finally closing the remediation PO.\"}},\"case\":\"CASE-049\",\"outcome\":\"Confirm every corrective-action deliverable was accepted and invoiced before finally closing the remediation PO.\",\"tool\":\"oracle_fusion.purchase_orders.close\"}",
+          "resource_type": "oracle_fusion.purchase_orders",
+          "revision": 1,
+          "status": "Remediation PO closed",
+          "system": "oracle_fusion"
         },
         "where": {
-          "invoice_id": "INV-0009"
+          "resource_id": "factorybench-049-mutation-01",
+          "task_id": "factorybench-049"
+        }
+      },
+      {
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
+        "where": {
+          "resource_id": "factorybench-049-mutation-02",
+          "task_id": "factorybench-049"
+        }
+      },
+      {
+        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets"
+        },
+        "where": {
+          "resource_id": "factorybench-049-mutation-03",
+          "task_id": "factorybench-049"
         }
       }
     ]
@@ -49,43 +82,78 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "invoice_match"
+        "format": "full",
+        "id": "msg-049",
+        "userId": "me"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-I-009"
+        "id": "att-049",
+        "messageId": "msg-049",
+        "userId": "me"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
-        "receipt_id": "RCV-I-009"
+        "fileId": "drive-approval-049",
+        "pageSize": 20
       },
-      "tool": "get_receipt"
+      "match": "successful_tool_call",
+      "tool": "google_drive.approvals.list"
     },
     {
       "arguments": {
-        "invoice_id": "INV-0009"
+        "maxResults": 20,
+        "q": "\"CASE-049\"",
+        "userId": "me"
       },
-      "tool": "get_invoice_match"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-049'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.suppliers.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0049",
+        "q": "ReferenceNumber='CASE-049'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.purchase_order_lines.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order",
-    "get_receipt",
-    "get_invoice_match"
+    "factorybench.context.get",
+    "gmail.messages.get",
+    "gmail.messages.attachments.get",
+    "google_drive.approvals.list",
+    "gmail.messages.list",
+    "oracle_fusion.suppliers.list",
+    "oracle_fusion.purchase_order_lines.list"
   ],
   "task_id": "factorybench-049",
   "write_tools": [
-    "approve_invoice",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "google_sheets.spreadsheets.values.update",
+    "oracle_fusion.purchase_orders.close"
   ]
 }

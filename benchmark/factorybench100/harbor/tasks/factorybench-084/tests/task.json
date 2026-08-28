@@ -1,80 +1,80 @@
 {
   "allowed_write_tables": [
-    "inventory_transfers",
-    "inventory_on_hand",
-    "work_orders",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "new_completion": {
+      "field_destination": {
         "type": "string"
       },
-      "new_start": {
+      "service_request": {
         "type": "string"
       },
-      "transfer_id": {
-        "type": "string"
-      },
-      "work_order_id": {
+      "stock_action": {
         "type": "string"
       }
     },
     "required": [
-      "new_completion",
-      "new_start",
-      "transfer_id",
-      "work_order_id"
+      "field_destination",
+      "service_request",
+      "stock_action"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "new_completion": "2026-01-17",
-      "new_start": "2026-01-14",
-      "transfer_id": "TRF-0004",
-      "work_order_id": "WO-T-004"
+      "field_destination": "SEA-1",
+      "service_request": "FB-084",
+      "stock_action": "Repair spare issued"
     },
     "assertions": [
       {
-        "description": "The donor-plant transfer is completed for the shortage quantity.",
-        "id": "transfer_completed",
-        "table": "inventory_transfers",
+        "description": "oracle_fusion.material_transactions.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "quantity": 11,
-          "status": "Completed"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"MaterialTransactionDetail\":[{\"InventoryItemNumber\":\"NS-COMP-084\",\"LotNumber\":\"LOT-0084\",\"OrganizationCode\":\"SEA\",\"SubinventoryCode\":\"STORES\",\"TransactionQuantity\":18,\"TransactionTypeCode\":\"MATERIAL_ISSUE\",\"TransactionUnitOfMeasure\":\"EA\",\"WorkOrderNumber\":\"WO-0084\"}],\"SourceSystemCode\":\"FUSION_MOBILE\",\"SourceSystemType\":\"EXTERNAL\"}},\"case\":\"CASE-084\",\"outcome\":\"Verify reservation, lot, and technician assignment before posting the material issue to the repair order.\",\"tool\":\"oracle_fusion.material_transactions.create\"}",
+          "resource_type": "oracle_fusion.material_transactions",
+          "revision": 1,
+          "status": "Repair spare issued",
+          "system": "oracle_fusion"
         },
         "where": {
-          "transfer_id": "TRF-0004"
+          "resource_id": "factorybench-084-mutation-01",
+          "task_id": "factorybench-084"
         }
       },
       {
-        "description": "Transferred stock is available at the receiving plant.",
-        "id": "receiving_inventory_created",
-        "table": "inventory_on_hand",
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "quantity": 11,
-          "status": "Unrestricted"
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "item_id": "RM-COPPER",
-          "lot_number": "PDX-C-004",
-          "plant_id": "SEA",
-          "subinventory": "STORES"
+          "resource_id": "factorybench-084-mutation-02",
+          "task_id": "factorybench-084"
         }
       },
       {
-        "description": "The work order starts on arrival and has a feasible completion date.",
-        "id": "work_order_rescheduled",
-        "table": "work_orders",
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
         "values": {
-          "scheduled_completion": "2026-01-17",
-          "scheduled_start": "2026-01-14"
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
         },
         "where": {
-          "work_order_id": "WO-T-004"
+          "resource_id": "factorybench-084-mutation-03",
+          "task_id": "factorybench-084"
         }
       }
     ]
@@ -82,49 +82,79 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "transfer_reschedule"
+        "maxResults": 20,
+        "q": "\"CASE-084\"",
+        "userId": "me"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
     },
     {
       "arguments": {
-        "work_order_id": "WO-T-004"
+        "fileId": "drive-084"
       },
-      "tool": "get_work_order"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "item_ids": [
-          "RM-COPPER"
+        "channel": "C-PRODUCTION",
+        "limit": 100,
+        "ts": "1768000084.000100"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
         ],
-        "plant_id": "PDX"
+        "spreadsheetId": "sheet-084"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
-        "plant_id": "SEA",
-        "work_order_id": "WO-T-004"
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-084'"
       },
-      "tool": "get_schedule"
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100084,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-084'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_materials.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order",
-    "get_inventory",
-    "get_schedule"
+    "factorybench.context.get",
+    "gmail.messages.list",
+    "google_drive.files.download",
+    "slack.conversations_replies",
+    "google_sheets.spreadsheets.get",
+    "oracle_fusion.inventory_onhand_balances.list",
+    "oracle_fusion.work_order_materials.list"
   ],
   "task_id": "factorybench-084",
   "write_tools": [
-    "complete_transfer",
-    "create_transfer",
-    "reschedule_work_order",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.messages.send",
+    "google_drive.comments.create",
+    "oracle_fusion.material_transactions.create"
   ]
 }

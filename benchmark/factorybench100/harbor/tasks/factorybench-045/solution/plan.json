@@ -1,44 +1,109 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "invoice_match"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-045' and trashed = false"
     },
-    "tool": "search_documents"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "purchase_order_id": "PO-I-005"
+      "count": 50,
+      "query": "\"CASE-045\"",
+      "sort": "timestamp",
+      "sort_dir": "asc"
     },
-    "tool": "get_purchase_order"
+    "tool": "slack.search_messages"
   },
   {
     "arguments": {
-      "receipt_id": "RCV-I-005"
+      "format": "full",
+      "id": "thread-045",
+      "userId": "me"
     },
-    "tool": "get_receipt"
+    "tool": "gmail.threads.get"
   },
   {
     "arguments": {
-      "invoice_id": "INV-0005"
+      "includeGridData": false,
+      "ranges": [
+        "Control!A1:H50"
+      ],
+      "spreadsheetId": "sheet-045"
     },
-    "tool": "get_invoice_match"
+    "tool": "google_sheets.spreadsheets.get"
   },
   {
     "arguments": {
-      "invoice_id": "INV-0005"
+      "invoicesUniqID": "invoicesUniqID-0045"
     },
-    "tool": "approve_invoice"
+    "tool": "oracle_fusion.invoices.get"
   },
   {
     "arguments": {
-      "decision": "Approved",
-      "invoice_id": "INV-0005",
-      "variance_percent": 1.0
+      "SupplierId": 600045
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.suppliers.get"
+  },
+  {
+    "arguments": {
+      "requestBody": {
+        "BusinessUnit": "Northstar Manufacturing BU",
+        "InvoiceAmount": 1522.4,
+        "InvoiceCurrency": "USD",
+        "InvoiceDate": "2026-01-20",
+        "InvoiceNumber": "INV-0045",
+        "PaymentTerms": "Net 30",
+        "Supplier": "Cascade Industrial",
+        "SupplierSite": "SEA"
+      }
+    },
+    "tool": "oracle_fusion.invoices.create"
+  },
+  {
+    "arguments": {
+      "approvalId": "approval-045",
+      "fileId": "drive-approval-045",
+      "requestBody": {
+        "message": "Approved for CASE-045 only."
+      }
+    },
+    "tool": "google_drive.approvals.approve"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-045",
+            "accounts_payable_specialist",
+            "Invoice entered",
+            "REF-0045",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-045",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "hold_or_reference": "REF-0045",
+      "invoice_number": "INV-0045",
+      "validation_outcome": "Invoice entered"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

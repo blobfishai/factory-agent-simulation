@@ -1,7 +1,7 @@
 {
   "checks": [
     {
-      "description": "Required policy and ERP reads completed before the first write.",
+      "description": "Required cross-system evidence reads completed before the first write.",
       "evidence": {
         "missing": []
       },
@@ -9,35 +9,44 @@
       "passed": true
     },
     {
-      "description": "The shortage is covered by an approved requisition.",
+      "description": "oracle_fusion.work_order_resources.update produced the task-scoped, source-audited state transition.",
       "evidence": {
         "matching_rows": 1,
         "mismatches": {}
       },
-      "id": "requisition_approved",
+      "id": "mutation_01",
       "passed": true
     },
     {
-      "description": "The requisition line equals net requirement after available stock.",
+      "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
       "evidence": {
         "matching_rows": 1,
         "mismatches": {}
       },
-      "id": "net_quantity_ordered",
+      "id": "mutation_02",
+      "passed": true
+    },
+    {
+      "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+      "evidence": {
+        "matching_rows": 1,
+        "mismatches": {}
+      },
+      "id": "mutation_03",
       "passed": true
     },
     {
       "description": "Submitted answer fields exactly match the ground truth.",
       "evidence": {
         "expected": {
-          "net_shortage": "31",
-          "requisition_id": "REQ-0008",
-          "supplier_id": "SUP-A"
+          "affected_order": "ORD-0018",
+          "recovery_route": "SEA-3",
+          "revised_completion": "2026-01-31"
         },
         "submitted": {
-          "net_shortage": "31",
-          "requisition_id": "REQ-0008",
-          "supplier_id": "SUP-A"
+          "affected_order": "ORD-0018",
+          "recovery_route": "SEA-3",
+          "revised_completion": "2026-01-31"
         }
       },
       "id": "exact_answer",
@@ -49,8 +58,7 @@
         "disallowed": [],
         "written_tables": [
           "answers",
-          "purchase_requisitions",
-          "requisition_lines"
+          "resource_state"
         ]
       },
       "id": "write_scope",
@@ -66,26 +74,26 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_checks": 6,
+  "passed_checks": 7,
   "policy": "oracle",
   "score": 100.0,
   "state_diff": {
     "answers": {
       "after": [
         {
-          "field": "net_shortage",
+          "field": "affected_order",
           "task_id": "factorybench-018",
-          "value": "31"
+          "value": "ORD-0018"
         },
         {
-          "field": "requisition_id",
+          "field": "recovery_route",
           "task_id": "factorybench-018",
-          "value": "REQ-0008"
+          "value": "SEA-3"
         },
         {
-          "field": "supplier_id",
+          "field": "revised_completion",
           "task_id": "factorybench-018",
-          "value": "SUP-A"
+          "value": "2026-01-31"
         }
       ],
       "after_count": 3,
@@ -95,555 +103,716 @@
     "audit_log": {
       "after": [
         {
-          "action": "insert",
+          "action": "upsert",
           "audit_id": 1,
-          "payload": "{\"approved_by\": null, \"need_by\": \"2026-02-07\", \"requester_id\": \"U-BUYER\", \"requisition_id\": \"REQ-0008\", \"status\": \"Pending Approval\", \"supplier_id\": \"SUP-A\", \"task_id\": \"factorybench-018\", \"total_amount\": 2194.8, \"work_order_id\": \"WO-S-008\"}",
-          "record_id": "REQ-0008",
-          "table_name": "purchase_requisitions",
+          "payload": "{\"effective_at\": \"2026-01-31\", \"payload_json\": \"{\\\"arguments\\\":{\\\"WoOperationResourceId\\\":400018,\\\"WorkOrderId\\\":100018,\\\"requestBody\\\":{\\\"AssignedUnits\\\":1,\\\"ResourceCode\\\":\\\"RES-ALT-018\\\",\\\"UsageRate\\\":1.0}},\\\"case\\\":\\\"CASE-018\\\",\\\"outcome\\\":\\\"Reconcile the supplier notice, open PO line, and qualified alternate before revising the outside-processing resource.\\\",\\\"tool\\\":\\\"oracle_fusion.work_order_resources.update\\\"}\", \"resource_id\": \"factorybench-018-mutation-01\", \"resource_type\": \"oracle_fusion.work_order_resources\", \"revision\": 1, \"status\": \"Supplier operation rerouted\", \"system\": \"oracle_fusion\", \"task_id\": \"factorybench-018\"}",
+          "record_id": "factorybench-018-mutation-01",
+          "table_name": "resource_state",
           "task_id": "factorybench-018",
-          "tool": "create_requisition"
+          "tool": "oracle_fusion.work_order_resources.update"
         },
         {
-          "action": "insert",
+          "action": "upsert",
           "audit_id": 2,
-          "payload": "{\"item_id\": \"RM-COPPER\", \"line_no\": 1, \"quantity\": 31, \"requisition_id\": \"REQ-0008\", \"unit_price\": 70.8}",
-          "record_id": "REQ-0008:1",
-          "table_name": "requisition_lines",
+          "payload": "{\"effective_at\": \"2026-01-31\", \"payload_json\": \"{\\\"arguments\\\":{\\\"includeValuesInResponse\\\":true,\\\"range\\\":\\\"Control!H20\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"range\\\":\\\"Control!H20\\\",\\\"values\\\":[[\\\"Supplier operation rerouted\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-018\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"case\\\":\\\"CASE-018\\\",\\\"outcome\\\":\\\"Reconcile the supplier notice, open PO line, and qualified alternate before revising the outside-processing resource.\\\",\\\"tool\\\":\\\"google_sheets.spreadsheets.values.update\\\"}\", \"resource_id\": \"factorybench-018-mutation-02\", \"resource_type\": \"google_sheets.spreadsheets.values\", \"revision\": 1, \"status\": \"Recorded\", \"system\": \"google_sheets\", \"task_id\": \"factorybench-018\"}",
+          "record_id": "factorybench-018-mutation-02",
+          "table_name": "resource_state",
           "task_id": "factorybench-018",
-          "tool": "create_requisition"
+          "tool": "google_sheets.spreadsheets.values.update"
         },
         {
-          "action": "update",
+          "action": "upsert",
           "audit_id": 3,
-          "payload": "{\"approved_by\": \"U-MANAGER\", \"status\": \"Approved\"}",
-          "record_id": "REQ-0008",
-          "table_name": "purchase_requisitions",
+          "payload": "{\"effective_at\": \"2026-01-31\", \"payload_json\": \"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogbWFudWZhY3R1cmluZy5zY2hlZHVsZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBvcGVyYXRpb25zLWNvbnRyb2xAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDE4IOKAlCBEcmFmdCBlbnRlcnByaXNlIHdvcmtmbG93DQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KU3VwcGxpZXIgb3BlcmF0aW9uIHJlcm91dGVkLiBPcmFjbGUgYW5kIGNvbGxhYm9yYXRpb24gcmVmZXJlbmNlcyBhcmUgcmVjb3JkZWQgdW5kZXIgQ0FTRS0wMTguDQo\\\",\\\"threadId\\\":\\\"thread-018\\\"},\\\"userId\\\":\\\"me\\\"},\\\"case\\\":\\\"CASE-018\\\",\\\"outcome\\\":\\\"Reconcile the supplier notice, open PO line, and qualified alternate before revising the outside-processing resource.\\\",\\\"tool\\\":\\\"gmail.drafts.create\\\"}\", \"resource_id\": \"factorybench-018-mutation-03\", \"resource_type\": \"gmail.drafts\", \"revision\": 1, \"status\": \"Recorded\", \"system\": \"gmail\", \"task_id\": \"factorybench-018\"}",
+          "record_id": "factorybench-018-mutation-03",
+          "table_name": "resource_state",
           "task_id": "factorybench-018",
-          "tool": "approve_requisition"
+          "tool": "gmail.drafts.create"
         },
         {
-          "action": "upsert",
+          "action": "submit",
           "audit_id": 4,
-          "payload": "{\"value\": \"REQ-0008\"}",
-          "record_id": "factorybench-018:requisition_id",
+          "payload": "{\"affected_order\": \"ORD-0018\", \"recovery_route\": \"SEA-3\", \"revised_completion\": \"2026-01-31\"}",
+          "record_id": "factorybench-018",
           "table_name": "answers",
           "task_id": "factorybench-018",
-          "tool": "submit_answer"
-        },
-        {
-          "action": "upsert",
-          "audit_id": 5,
-          "payload": "{\"value\": \"31\"}",
-          "record_id": "factorybench-018:net_shortage",
-          "table_name": "answers",
-          "task_id": "factorybench-018",
-          "tool": "submit_answer"
-        },
-        {
-          "action": "upsert",
-          "audit_id": 6,
-          "payload": "{\"value\": \"SUP-A\"}",
-          "record_id": "factorybench-018:supplier_id",
-          "table_name": "answers",
-          "task_id": "factorybench-018",
-          "tool": "submit_answer"
+          "tool": "factorybench.submit_answer"
         }
       ],
-      "after_count": 6,
+      "after_count": 4,
       "before": [],
       "before_count": 0
     },
-    "purchase_requisitions": {
+    "resource_state": {
       "after": [
         {
-          "approved_by": "U-MANAGER",
-          "need_by": "2026-02-07",
-          "requester_id": "U-BUYER",
-          "requisition_id": "REQ-0008",
-          "status": "Approved",
-          "supplier_id": "SUP-A",
-          "task_id": "factorybench-018",
-          "total_amount": 2194.8,
-          "work_order_id": "WO-S-008"
-        }
-      ],
-      "after_count": 1,
-      "before": [],
-      "before_count": 0
-    },
-    "requisition_lines": {
-      "after": [
+          "effective_at": "2026-01-31",
+          "payload_json": "{\"arguments\":{\"message\":{\"raw\":\"RnJvbTogbWFudWZhY3R1cmluZy5zY2hlZHVsZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBvcGVyYXRpb25zLWNvbnRyb2xAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDE4IOKAlCBEcmFmdCBlbnRlcnByaXNlIHdvcmtmbG93DQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KU3VwcGxpZXIgb3BlcmF0aW9uIHJlcm91dGVkLiBPcmFjbGUgYW5kIGNvbGxhYm9yYXRpb24gcmVmZXJlbmNlcyBhcmUgcmVjb3JkZWQgdW5kZXIgQ0FTRS0wMTguDQo\",\"threadId\":\"thread-018\"},\"userId\":\"me\"},\"case\":\"CASE-018\",\"outcome\":\"Reconcile the supplier notice, open PO line, and qualified alternate before revising the outside-processing resource.\",\"tool\":\"gmail.drafts.create\"}",
+          "resource_id": "factorybench-018-mutation-03",
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail",
+          "task_id": "factorybench-018"
+        },
         {
-          "item_id": "RM-COPPER",
-          "line_no": 1,
-          "quantity": 31.0,
-          "requisition_id": "REQ-0008",
-          "unit_price": 70.8
+          "effective_at": "2026-01-31",
+          "payload_json": "{\"arguments\":{\"includeValuesInResponse\":true,\"range\":\"Control!H20\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"range\":\"Control!H20\",\"values\":[[\"Supplier operation rerouted\"]]},\"spreadsheetId\":\"sheet-018\",\"valueInputOption\":\"RAW\"},\"case\":\"CASE-018\",\"outcome\":\"Reconcile the supplier notice, open PO line, and qualified alternate before revising the outside-processing resource.\",\"tool\":\"google_sheets.spreadsheets.values.update\"}",
+          "resource_id": "factorybench-018-mutation-02",
+          "resource_type": "google_sheets.spreadsheets.values",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_sheets",
+          "task_id": "factorybench-018"
+        },
+        {
+          "effective_at": "2026-01-12",
+          "payload_json": "{\"case\":\"CASE-018\",\"identifiers\":{\"limit\":50,\"onlyData\":true,\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0018\",\"q\":\"ReferenceNumber='CASE-018'\"},\"quantity\":26,\"record\":\"NS-000018\"}",
+          "resource_id": "purchaseOrdersUniqID-0018",
+          "resource_type": "oracle_fusion.purchase_order_lines",
+          "revision": 0,
+          "status": "Open",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-018"
+        },
+        {
+          "effective_at": "2026-01-31",
+          "payload_json": "{\"arguments\":{\"WoOperationResourceId\":400018,\"WorkOrderId\":100018,\"requestBody\":{\"AssignedUnits\":1,\"ResourceCode\":\"RES-ALT-018\",\"UsageRate\":1.0}},\"case\":\"CASE-018\",\"outcome\":\"Reconcile the supplier notice, open PO line, and qualified alternate before revising the outside-processing resource.\",\"tool\":\"oracle_fusion.work_order_resources.update\"}",
+          "resource_id": "factorybench-018-mutation-01",
+          "resource_type": "oracle_fusion.work_order_resources",
+          "revision": 1,
+          "status": "Supplier operation rerouted",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-018"
         }
       ],
-      "after_count": 1,
-      "before": [],
-      "before_count": 0
+      "after_count": 4,
+      "before": [
+        {
+          "effective_at": "2026-01-12",
+          "payload_json": "{\"case\":\"CASE-018\",\"identifiers\":{\"limit\":50,\"onlyData\":true,\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0018\",\"q\":\"ReferenceNumber='CASE-018'\"},\"quantity\":26,\"record\":\"NS-000018\"}",
+          "resource_id": "purchaseOrdersUniqID-0018",
+          "resource_type": "oracle_fusion.purchase_order_lines",
+          "revision": 0,
+          "status": "Open",
+          "system": "oracle_fusion",
+          "task_id": "factorybench-018"
+        }
+      ],
+      "before_count": 1
     }
   },
   "strict_pass": true,
   "task_id": "factorybench-018",
-  "total_checks": 6,
+  "total_checks": 7,
   "trace": [
     {
       "arguments": {},
       "index": 0,
       "result": {
-        "available_documents": [
+        "evidence_index": [
           {
-            "category": "order_release",
-            "doc_id": "POL-01",
-            "sha256": "f02d22e29d62e78093fa85720ae5d9dcd6620f34621e0b615bdc04230e020876",
-            "title": "Order release control"
+            "asset_id": "factorybench-018-decision",
+            "kind": "spreadsheet_export",
+            "media_type": "text/csv",
+            "path": "approval-decision-log.csv",
+            "sha256": "ddc4f0d2e5abe06fd52277393c847f836850541b06553021f122898f1fbb2e8e",
+            "source": "google_sheets",
+            "title": "Approval decision log"
           },
           {
-            "category": "material_shortage",
-            "doc_id": "POL-02",
-            "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
-            "title": "Shortage requisition control"
+            "asset_id": "factorybench-018-contract",
+            "kind": "contract",
+            "media_type": "text/markdown",
+            "path": "contract-or-service-control.md",
+            "sha256": "722b9a6aac49d50a3208bc9a92d060c642791f4d979ffb7f6e0b9143f8885f0a",
+            "source": "google_drive",
+            "title": "Contract / service control"
           },
           {
-            "category": "supplier_selection",
-            "doc_id": "POL-03",
-            "sha256": "4383668b1dfa18fa8bfa36ce6c004af8a8fd59f2da1fe844771a869010911762",
-            "title": "Supplier award policy"
+            "asset_id": "factorybench-018-approval",
+            "kind": "approval",
+            "media_type": "application/json",
+            "path": "drive-approval-record.json",
+            "sha256": "1cfe9b9c2f446d112fdafb73d84e53ce5f1132dcadcb48b6a3155ffc6f36eca9",
+            "source": "google_drive",
+            "title": "Drive approval record"
           },
           {
-            "category": "inbound_receipt",
-            "doc_id": "POL-04",
-            "sha256": "a02e4ace7f6602616e7cdbc8303203697b17ba2a2ec9b3f476cca58765203005",
-            "title": "Receiving and inspection policy"
+            "asset_id": "factorybench-018-measurements",
+            "kind": "quality_data",
+            "media_type": "text/csv",
+            "path": "inspection-measurements.csv",
+            "sha256": "3a8e5acba19f8ce944885daa830a7efbe984bc7fbd58075cd513ac64d127d436",
+            "source": "laboratory_drive",
+            "title": "Inspection measurements"
           },
           {
-            "category": "invoice_match",
-            "doc_id": "POL-05",
-            "sha256": "ca8d069caaf86fddb05e407c30d7cd1435621a563d853b50cb2e1121abfbe01a",
-            "title": "Three-way match policy"
+            "asset_id": "factorybench-018-policy",
+            "kind": "policy",
+            "media_type": "text/markdown",
+            "path": "operating-policy.md",
+            "sha256": "f24bcbdbdeb62bea25e3ff4cef6a1b61f358efbac9a9506fe34231405e2001df",
+            "source": "google_drive",
+            "title": "Operating policy"
           },
           {
-            "category": "production_issue",
-            "doc_id": "POL-06",
-            "sha256": "31177fc47fcf83d19a85befd57b59ceef1c00974dbf1912741e885574cdddd4f",
-            "title": "Material issue policy"
+            "asset_id": "factorybench-018-slack",
+            "kind": "chat_thread",
+            "media_type": "application/json",
+            "path": "operations-slack-thread.json",
+            "sha256": "6b6eea777178c86067337466afa5320af785e059578ebf701b6f867ef7d6cd5e",
+            "source": "slack",
+            "title": "Operations Slack thread"
           },
           {
-            "category": "quality_exception",
-            "doc_id": "POL-07",
-            "sha256": "063e197d41367f8724a719a7b571f5d3100141a898172abb9720b1ceb339d6db",
-            "title": "Nonconformance policy"
+            "asset_id": "factorybench-018-erp",
+            "kind": "erp_export",
+            "media_type": "application/json",
+            "path": "oracle-starting-record.json",
+            "sha256": "364aa1acc889dfa31cb69f14b4da980af234605d8f580292c79cd5297505b04b",
+            "source": "oracle_fusion",
+            "title": "Oracle starting-record export"
           },
           {
-            "category": "completion_costing",
-            "doc_id": "POL-08",
-            "sha256": "4192bcbaa10ab85e3bfaf934c0b8d3e3e2faa6bd9646a9fe04c8d991874f0a06",
-            "title": "Work-order close policy"
+            "asset_id": "factorybench-018-email",
+            "kind": "email",
+            "media_type": "message/rfc822",
+            "path": "source-email-thread.eml",
+            "sha256": "1a8791514412f49928865bf1d9a2588922f62586f9c23d9db749e950508c07fa",
+            "source": "gmail",
+            "title": "Source email thread"
           },
           {
-            "category": "transfer_reschedule",
-            "doc_id": "POL-09",
-            "sha256": "2ed97b9f92ffc24650f0e8eeda40cc626fe471e885fb35c8a0a254a778d74f96",
-            "title": "Interplant recovery policy"
+            "asset_id": "factorybench-018-leadtime",
+            "kind": "spreadsheet",
+            "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "path": "supplier-lead-time-and-capacity.xlsx",
+            "sha256": "24d1e0d68405cb86297bc6b66cebdb4785388e15ecdd1c075444a09856dd6cde",
+            "source": "google_drive",
+            "title": "Supplier lead-time and capacity workbook"
           },
           {
-            "category": "maintenance_recovery",
-            "doc_id": "POL-10",
-            "sha256": "cf4a6a211491b642667667989c361634f145a2641f70c134a6fa641607de4a2c",
-            "title": "Unplanned downtime policy"
+            "asset_id": "factorybench-018-quote",
+            "kind": "vendor_pdf",
+            "media_type": "application/pdf",
+            "path": "supplier-quotation.pdf",
+            "sha256": "883636c92f94f6138555c0a22dba8399df81da3222c1ee8c08b2afac3e665510",
+            "source": "gmail_attachment",
+            "title": "Supplier quotation"
+          },
+          {
+            "asset_id": "factorybench-018-spec",
+            "kind": "specification",
+            "media_type": "text/markdown",
+            "path": "technical-specification.md",
+            "sha256": "bce96bc7d1c971de65e9012b25fe32f2619f5383fc496c28785fdac46fc6e522",
+            "source": "google_drive",
+            "title": "Technical specification"
+          },
+          {
+            "asset_id": "factorybench-018-risk",
+            "kind": "spreadsheet",
+            "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "path": "workflow-risk-register.xlsx",
+            "sha256": "cff32509930d301b9810ad65ea73411b270ebfdde92ebe9c12a74394f4bf2291",
+            "source": "google_drive",
+            "title": "Workflow risk register"
+          }
+        ],
+        "identity": [
+          {
+            "approval_limit": 0.0,
+            "display_name": "Jordan Lee",
+            "role": "manufacturing_scheduler",
+            "user_id": "U-AGENT"
+          },
+          {
+            "approval_limit": 250000.0,
+            "display_name": "Avery Morgan",
+            "role": "authorized_approver",
+            "user_id": "U-APPROVER"
+          },
+          {
+            "approval_limit": 25000.0,
+            "display_name": "Maya Chen",
+            "role": "operations_lead",
+            "user_id": "U-OPS-LEAD"
           }
         ],
         "organization": {
-          "organization_id": "M1",
+          "organization_id": "NSC",
           "primary_plant": "SEA",
-          "world": "Northstar Controls Oracle-shaped ERP"
+          "world": "Northstar Controls enterprise operations sandbox",
+          "world_id": "northstar-enterprise-fusion-v2"
         },
-        "reference_data": {
-          "items": [
-            {
-              "description": "Industrial control panel",
-              "item_id": "FG-PANEL",
-              "item_type": "finished_good",
-              "make_buy": "MAKE",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Copper busbar set",
-              "item_id": "RM-COPPER",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Powder-coated enclosure",
-              "item_id": "RM-HOUSING",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
-            },
-            {
-              "description": "Safety relay",
-              "item_id": "RM-RELAY",
-              "item_type": "component",
-              "make_buy": "BUY",
-              "status": "Active",
-              "uom": "EA"
+        "reference_records": {
+          "case_reference": "CASE-018",
+          "gmail": {
+            "search_query": "\"CASE-018\"",
+            "userId": "me"
+          },
+          "google_drive": {
+            "approval_file_id": "drive-approval-018",
+            "primary_file_id": "drive-018",
+            "search_query": "name contains 'CASE-018' and trashed = false"
+          },
+          "google_sheets": {
+            "audit_append_range": "Audit!A:F",
+            "decision_range": "Control!A1:H50",
+            "outcome_write_range": "Control!H20",
+            "spreadsheet_id": "sheet-018"
+          },
+          "oracle_fusion": {
+            "filter": "ReferenceNumber='CASE-018'",
+            "only_data": true,
+            "record_handles": {
+              "HeaderInterfaceId": 700018,
+              "MaintenanceProgramId": 500018,
+              "SupplierId": 600018,
+              "WoOperationResourceId": 400018,
+              "WorkOrderId": 100018,
+              "invoicesUniqID": "invoicesUniqID-0018",
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0018",
+              "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0018"
             }
-          ],
-          "plants": [
-            {
-              "name": "Portland Components",
-              "organization_id": "M1",
-              "plant_id": "PDX",
-              "timezone": "America/Los_Angeles"
-            },
-            {
-              "name": "Seattle Assembly",
-              "organization_id": "M1",
-              "plant_id": "SEA",
-              "timezone": "America/Los_Angeles"
-            }
-          ],
-          "suppliers": [
-            {
-              "approved": 1,
-              "name": "Cascade Industrial",
-              "on_time_rate": 0.94,
-              "payment_terms": "NET30",
-              "quality_score": 97.2,
-              "supplier_id": "SUP-A"
-            },
-            {
-              "approved": 1,
-              "name": "Rainier Components",
-              "on_time_rate": 0.98,
-              "payment_terms": "NET45",
-              "quality_score": 95.8,
-              "supplier_id": "SUP-B"
-            },
-            {
-              "approved": 0,
-              "name": "Frontier Supply",
-              "on_time_rate": 0.99,
-              "payment_terms": "NET30",
-              "quality_score": 99.1,
-              "supplier_id": "SUP-C"
-            }
-          ],
-          "users": [
-            {
-              "approval_limit": 1000.0,
-              "display_name": "Diego Ruiz",
-              "plant_id": "SEA",
-              "role": "buyer",
-              "user_id": "U-BUYER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Priya Shah",
-              "plant_id": "SEA",
-              "role": "quality_inspector",
-              "user_id": "U-INSPECTOR"
-            },
-            {
-              "approval_limit": 250000.0,
-              "display_name": "Avery Morgan",
-              "plant_id": "SEA",
-              "role": "plant_manager",
-              "user_id": "U-MANAGER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Maya Chen",
-              "plant_id": "SEA",
-              "role": "production_planner",
-              "user_id": "U-PLANNER"
-            },
-            {
-              "approval_limit": 0.0,
-              "display_name": "Noah Williams",
-              "plant_id": "SEA",
-              "role": "quality_engineer",
-              "user_id": "U-QUALITY"
-            }
-          ],
-          "workcenters": [
-            {
-              "capacity_hours": 80.0,
-              "name": "Assembly Cell 1",
-              "plant_id": "SEA",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-ASM-1"
-            },
-            {
-              "capacity_hours": 64.0,
-              "name": "Assembly Cell 2",
-              "plant_id": "SEA",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-ASM-2"
-            },
-            {
-              "capacity_hours": 72.0,
-              "name": "Portland Fabrication",
-              "plant_id": "PDX",
-              "qualified_item_class": "control_panel",
-              "status": "Active",
-              "workcenter_id": "WC-PDX-1"
-            }
-          ]
+          },
+          "slack": {
+            "channel": "C-QUALITY",
+            "search_query": "\"CASE-018\"",
+            "thread_ts": "1768000018.000100"
+          }
         },
+        "starting_records": [
+          {
+            "effective_at": "2026-01-12",
+            "resource_id": "purchaseOrdersUniqID-0018",
+            "resource_type": "oracle_fusion.purchase_order_lines",
+            "revision": 0,
+            "status": "Open",
+            "system": "oracle_fusion"
+          }
+        ],
         "state": {
+          "network": "closed",
           "persistence": "episode-local SQLite",
           "scope": "isolated task snapshot"
         },
         "task": {
           "as_of": "2026-01-12",
-          "family": "material_shortage",
-          "role": "material_planner",
+          "family": "capacity_recovery",
+          "role": "manufacturing_scheduler",
           "task_id": "factorybench-018"
         },
         "tool_servers": [
           {
-            "description": "Query and mutate the synthetic manufacturing ERP.",
-            "name": "oracle_erp",
+            "description": "Benchmark-only discovery and answer submission controls.",
+            "name": "factorybench",
             "tools": [
-              "approve_invoice",
-              "approve_purchase_order",
-              "approve_requisition",
-              "complete_operation",
-              "complete_transfer",
-              "complete_work_order",
-              "create_maintenance_work_order",
-              "create_nonconformance",
-              "create_purchase_order",
-              "create_requisition",
-              "create_transfer",
-              "create_work_order",
-              "get_bom",
-              "get_environment_context",
-              "get_inventory",
-              "get_invoice_match",
-              "get_maintenance_context",
-              "get_purchase_order",
-              "get_quality_context",
-              "get_receipt",
-              "get_requisition",
-              "get_sales_order",
-              "get_schedule",
-              "get_supplier_quotes",
-              "get_work_order",
-              "hold_invoice",
-              "issue_material",
-              "place_quality_hold",
-              "receive_purchase_order",
-              "record_inspection",
-              "record_wip_variance",
-              "reroute_operation",
-              "reschedule_work_order",
-              "reserve_material",
-              "start_operation"
+              "factorybench.context.get",
+              "factorybench.submit_answer"
             ]
           },
           {
-            "description": "Search versioned operating policies and task assets.",
-            "name": "plant_docs",
+            "description": "Documented Gmail API operations over task-scoped messages and attachments.",
+            "name": "gmail",
             "tools": [
-              "search_documents"
+              "gmail.drafts.create",
+              "gmail.messages.attachments.get",
+              "gmail.messages.get",
+              "gmail.messages.list",
+              "gmail.messages.send",
+              "gmail.threads.get"
             ]
           },
           {
-            "description": "Submit exact answer fields for deterministic verification.",
-            "name": "factory_harness",
+            "description": "Documented Google Drive API operations over task-scoped files and approvals.",
+            "name": "google_drive",
             "tools": [
-              "submit_answer"
+              "google_drive.approvals.approve",
+              "google_drive.approvals.list",
+              "google_drive.comments.create",
+              "google_drive.files.download",
+              "google_drive.files.export",
+              "google_drive.files.get",
+              "google_drive.files.list"
+            ]
+          },
+          {
+            "description": "Documented Google Sheets API operations over task-scoped workbooks.",
+            "name": "google_sheets",
+            "tools": [
+              "google_sheets.spreadsheets.get",
+              "google_sheets.spreadsheets.values.append",
+              "google_sheets.spreadsheets.values.batchGet",
+              "google_sheets.spreadsheets.values.get",
+              "google_sheets.spreadsheets.values.update"
+            ]
+          },
+          {
+            "description": "Documented Oracle Fusion Cloud ERP/SCM REST operations over synthetic task state.",
+            "name": "oracle_fusion",
+            "tools": [
+              "oracle_fusion.draft_purchase_orders.create",
+              "oracle_fusion.draft_purchase_orders.list",
+              "oracle_fusion.inspection_plans.list",
+              "oracle_fusion.inventory_onhand_balances.list",
+              "oracle_fusion.inventory_transactions.create",
+              "oracle_fusion.invoice_holds.create",
+              "oracle_fusion.invoice_holds.update",
+              "oracle_fusion.invoices.create",
+              "oracle_fusion.invoices.get",
+              "oracle_fusion.invoices.update",
+              "oracle_fusion.invoices.validate",
+              "oracle_fusion.maintenance_documents.create",
+              "oracle_fusion.maintenance_documents.list",
+              "oracle_fusion.maintenance_operations.list",
+              "oracle_fusion.maintenance_operations.update",
+              "oracle_fusion.maintenance_programs.create",
+              "oracle_fusion.maintenance_programs.generate_forecasts",
+              "oracle_fusion.maintenance_programs.generate_work_orders",
+              "oracle_fusion.maintenance_programs.get",
+              "oracle_fusion.maintenance_programs.list",
+              "oracle_fusion.maintenance_programs.update",
+              "oracle_fusion.maintenance_work_orders.create",
+              "oracle_fusion.maintenance_work_orders.get",
+              "oracle_fusion.maintenance_work_orders.list",
+              "oracle_fusion.maintenance_work_orders.update",
+              "oracle_fusion.material_transactions.create",
+              "oracle_fusion.operation_transactions.create",
+              "oracle_fusion.purchase_order_lines.list",
+              "oracle_fusion.purchase_orders.acknowledge",
+              "oracle_fusion.purchase_orders.cancel",
+              "oracle_fusion.purchase_orders.close",
+              "oracle_fusion.purchase_orders.get",
+              "oracle_fusion.purchase_orders.list",
+              "oracle_fusion.quality_inspection_results.create",
+              "oracle_fusion.quality_inspection_results.list",
+              "oracle_fusion.quality_inspection_results.update",
+              "oracle_fusion.receiving_receipt_requests.create",
+              "oracle_fusion.receiving_receipt_requests.list",
+              "oracle_fusion.receiving_receipt_transactions.create",
+              "oracle_fusion.receiving_receipt_transactions.list",
+              "oracle_fusion.receiving_receipt_transactions.update",
+              "oracle_fusion.resource_transactions.create",
+              "oracle_fusion.sales_orders.get",
+              "oracle_fusion.sales_orders.list",
+              "oracle_fusion.suppliers.get",
+              "oracle_fusion.suppliers.list",
+              "oracle_fusion.supply_requests.create",
+              "oracle_fusion.supply_requests.list",
+              "oracle_fusion.work_order_materials.list",
+              "oracle_fusion.work_order_materials.replace_with_substitute",
+              "oracle_fusion.work_order_materials.update",
+              "oracle_fusion.work_order_operations.create",
+              "oracle_fusion.work_order_operations.list",
+              "oracle_fusion.work_order_operations.update",
+              "oracle_fusion.work_order_resources.create",
+              "oracle_fusion.work_order_resources.list",
+              "oracle_fusion.work_order_resources.update",
+              "oracle_fusion.work_orders.create",
+              "oracle_fusion.work_orders.get",
+              "oracle_fusion.work_orders.list",
+              "oracle_fusion.work_orders.update"
             ]
           }
         ]
       },
       "success": true,
-      "tool": "get_environment_context"
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "material_shortage"
+        "maxResults": 20,
+        "q": "\"CASE-018\"",
+        "userId": "me"
       },
       "index": 1,
       "result": {
-        "documents": [
+        "messages": [
           {
-            "body": "Net requirements against unreserved on-hand. Use an approved supplier quote that is valid through the need-by date. Requisitions over the requester's limit require the plant manager's approval.",
-            "category": "material_shortage",
-            "doc_id": "POL-02",
-            "sha256": "8287f3ed9c3e58dec451ad5cafecf9290d43914b8de9c73295991b3b1b30f6e1",
-            "title": "Shortage requisition control"
+            "id": "msg-018",
+            "threadId": "thread-018"
           }
-        ]
+        ],
+        "resultSizeEstimate": 1
       },
       "success": true,
-      "tool": "search_documents"
+      "tool": "gmail.messages.list"
     },
     {
       "arguments": {
-        "work_order_id": "WO-S-008"
+        "format": "full",
+        "id": "msg-018",
+        "userId": "me"
       },
       "index": 2,
       "result": {
-        "header": {
-          "completed_qty": 0.0,
-          "item_id": "FG-PANEL",
-          "parent_work_order_id": null,
-          "quantity": 34.0,
-          "sales_order_id": null,
-          "scheduled_completion": "2026-02-07",
-          "scheduled_start": "2026-02-05",
-          "scrap_qty": 0.0,
-          "status": "Released",
-          "task_id": "factorybench-018",
-          "work_order_id": "WO-S-008",
-          "workcenter_id": "WC-ASM-1"
-        },
-        "operations": [],
-        "requirements": [
-          {
-            "issued_qty": 0.0,
-            "item_id": "RM-COPPER",
-            "need_by": "2026-02-04",
-            "required_qty": 34.0,
-            "reserved_qty": 0.0,
-            "work_order_id": "WO-S-008"
-          }
+        "id": "msg-018",
+        "labelIds": [
+          "INBOX"
         ],
-        "reservations": []
+        "payload": {
+          "body": {
+            "data": "Q0FTRS0wMTggfCBBUFBST1ZFRCB8IFJlY29uY2lsZSB0aGUgc3VwcGxpZXIgbm90aWNlLCBvcGVuIFBPIGxpbmUsIGFuZCBxdWFsaWZpZWQgYWx0ZXJuYXRlIGJlZm9yZSByZXZpc2luZyB0aGUgb3V0c2lkZS1wcm9jZXNzaW5nIHJlc291cmNlLiB8IE9yYWNsZSBvcGVyYXRpb24gb3JhY2xlX2Z1c2lvbi53b3JrX29yZGVyX3Jlc291cmNlcy51cGRhdGUgfCBhcHByb3ZlZCBjb250cm9sIHBhY2tldCB7ImFwcHJvdmFsU3RhdHVzIjoiQVBQUk9WRUQiLCJhcHByb3ZlZEFyZ3VtZW50cyI6eyJXb09wZXJhdGlvblJlc291cmNlSWQiOjQwMDAxOCwiV29ya09yZGVySWQiOjEwMDAxOCwicmVxdWVzdEJvZHkiOnsiQXNzaWduZWRVbml0cyI6MSwiUmVzb3VyY2VDb2RlIjoiUkVTLUFMVC0wMTgiLCJVc2FnZVJhdGUiOjEuMH19LCJjYXNlIjoiQ0FTRS0wMTgiLCJjb250cm9sV29ya2Jvb2tBdWRpdFJhbmdlIjoiQXVkaXQhQTpGIiwiY29udHJvbFdvcmtib29rT3V0Y29tZVJhbmdlIjoiQ29udHJvbCFIMjAiLCJkZWNpc2lvbiI6IlJlY29uY2lsZSB0aGUgc3VwcGxpZXIgbm90aWNlLCBvcGVuIFBPIGxpbmUsIGFuZCBxdWFsaWZpZWQgYWx0ZXJuYXRlIGJlZm9yZSByZXZpc2luZyB0aGUgb3V0c2lkZS1wcm9jZXNzaW5nIHJlc291cmNlLiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24ud29ya19vcmRlcl9yZXNvdXJjZXMudXBkYXRlIiwicmV0dXJuRmllbGRzIjp7ImFmZmVjdGVkX29yZGVyIjoiT1JELTAwMTgiLCJyZWNvdmVyeV9yb3V0ZSI6IlNFQS0zIiwicmV2aXNlZF9jb21wbGV0aW9uIjoiMjAyNi0wMS0zMSJ9fQ",
+            "size": 808
+          },
+          "headers": [
+            {
+              "name": "Subject",
+              "value": "CASE-018 \u2014 evidence and requested action"
+            }
+          ],
+          "parts": [
+            {
+              "body": {
+                "attachmentId": "att-018",
+                "size": 1024
+              },
+              "filename": "supplier-quotation.pdf"
+            }
+          ]
+        },
+        "snippet": "Reconcile the supplier notice, open PO line, and qualified alternate before revising the outside-processing resource.",
+        "threadId": "thread-018"
       },
       "success": true,
-      "tool": "get_work_order"
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
-        "item_ids": [
-          "RM-COPPER"
-        ],
-        "plant_id": "SEA"
+        "id": "att-018",
+        "messageId": "msg-018",
+        "userId": "me"
       },
       "index": 3,
       "result": {
-        "lots": [
-          {
-            "available_qty": 3.0,
-            "expiration_date": null,
-            "item_id": "RM-COPPER",
-            "lot_number": "CS-008",
-            "plant_id": "SEA",
-            "quantity": 3.0,
-            "reserved_qty": 0.0,
-            "status": "Unrestricted",
-            "subinventory": "STORES"
-          }
-        ]
+        "data": "U3VwcGxpZXIgcXVvdGF0aW9uIGF0dGFjaG1lbnQgZm9yIENBU0UtMDE4OiBxdWFudGl0eSAyNi4gQ0FTRS0wMTggfCBBUFBST1ZFRCB8IFJlY29uY2lsZSB0aGUgc3VwcGxpZXIgbm90aWNlLCBvcGVuIFBPIGxpbmUsIGFuZCBxdWFsaWZpZWQgYWx0ZXJuYXRlIGJlZm9yZSByZXZpc2luZyB0aGUgb3V0c2lkZS1wcm9jZXNzaW5nIHJlc291cmNlLiB8IE9yYWNsZSBvcGVyYXRpb24gb3JhY2xlX2Z1c2lvbi53b3JrX29yZGVyX3Jlc291cmNlcy51cGRhdGUgfCBhcHByb3ZlZCBjb250cm9sIHBhY2tldCB7ImFwcHJvdmFsU3RhdHVzIjoiQVBQUk9WRUQiLCJhcHByb3ZlZEFyZ3VtZW50cyI6eyJXb09wZXJhdGlvblJlc291cmNlSWQiOjQwMDAxOCwiV29ya09yZGVySWQiOjEwMDAxOCwicmVxdWVzdEJvZHkiOnsiQXNzaWduZWRVbml0cyI6MSwiUmVzb3VyY2VDb2RlIjoiUkVTLUFMVC0wMTgiLCJVc2FnZVJhdGUiOjEuMH19LCJjYXNlIjoiQ0FTRS0wMTgiLCJjb250cm9sV29ya2Jvb2tBdWRpdFJhbmdlIjoiQXVkaXQhQTpGIiwiY29udHJvbFdvcmtib29rT3V0Y29tZVJhbmdlIjoiQ29udHJvbCFIMjAiLCJkZWNpc2lvbiI6IlJlY29uY2lsZSB0aGUgc3VwcGxpZXIgbm90aWNlLCBvcGVuIFBPIGxpbmUsIGFuZCBxdWFsaWZpZWQgYWx0ZXJuYXRlIGJlZm9yZSByZXZpc2luZyB0aGUgb3V0c2lkZS1wcm9jZXNzaW5nIHJlc291cmNlLiIsIm9yYWNsZU9wZXJhdGlvbiI6Im9yYWNsZV9mdXNpb24ud29ya19vcmRlcl9yZXNvdXJjZXMudXBkYXRlIiwicmV0dXJuRmllbGRzIjp7ImFmZmVjdGVkX29yZGVyIjoiT1JELTAwMTgiLCJyZWNvdmVyeV9yb3V0ZSI6IlNFQS0zIiwicmV2aXNlZF9jb21wbGV0aW9uIjoiMjAyNi0wMS0zMSJ9fQ",
+        "size": 865
       },
       "success": true,
-      "tool": "get_inventory"
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
-        "item_id": "RM-COPPER",
-        "need_by": "2026-02-07",
-        "task_id": "factorybench-018"
+        "fileId": "drive-approval-018",
+        "pageSize": 20
       },
       "index": 4,
       "result": {
-        "quotes": [
+        "approvals": [
           {
-            "approved": 1,
-            "item_id": "RM-COPPER",
-            "lead_days": 5,
-            "minimum_qty": 5.0,
-            "name": "Cascade Industrial",
-            "on_time_rate": 0.94,
-            "quality_score": 97.2,
-            "quote_id": "QA-008",
-            "supplier_id": "SUP-A",
-            "task_id": "factorybench-018",
-            "unit_price": 70.8,
-            "valid_until": "2026-02-12"
-          },
-          {
-            "approved": 1,
-            "item_id": "RM-COPPER",
-            "lead_days": 3,
-            "minimum_qty": 5.0,
-            "name": "Rainier Components",
-            "on_time_rate": 0.98,
-            "quality_score": 95.8,
-            "quote_id": "QB-008",
-            "supplier_id": "SUP-B",
-            "task_id": "factorybench-018",
-            "unit_price": 72.8,
-            "valid_until": "2026-02-12"
+            "fileId": "drive-approval-018",
+            "id": "approval-018",
+            "reviewerResponses": [
+              {
+                "comment": "CASE-018 | APPROVED | Reconcile the supplier notice, open PO line, and qualified alternate before revising the outside-processing resource. | Oracle operation oracle_fusion.work_order_resources.update | approved control packet {\"approvalStatus\":\"APPROVED\",\"approvedArguments\":{\"WoOperationResourceId\":400018,\"WorkOrderId\":100018,\"requestBody\":{\"AssignedUnits\":1,\"ResourceCode\":\"RES-ALT-018\",\"UsageRate\":1.0}},\"case\":\"CASE-018\",\"controlWorkbookAuditRange\":\"Audit!A:F\",\"controlWorkbookOutcomeRange\":\"Control!H20\",\"decision\":\"Reconcile the supplier notice, open PO line, and qualified alternate before revising the outside-processing resource.\",\"oracleOperation\":\"oracle_fusion.work_order_resources.update\",\"returnFields\":{\"affected_order\":\"ORD-0018\",\"recovery_route\":\"SEA-3\",\"revised_completion\":\"2026-01-31\"}}",
+                "response": "APPROVED",
+                "reviewer": "U-APPROVER"
+              }
+            ],
+            "status": "IN_PROGRESS"
           }
         ]
       },
       "success": true,
-      "tool": "get_supplier_quotes"
+      "tool": "google_drive.approvals.list"
     },
     {
       "arguments": {
-        "item_id": "RM-COPPER",
-        "need_by": "2026-02-07",
-        "quantity": 31,
-        "requester_id": "U-BUYER",
-        "requisition_id": "REQ-0008",
-        "supplier_id": "SUP-A",
-        "unit_price": 70.8,
-        "work_order_id": "WO-S-008"
+        "WorkOrderId": 100018,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-018'"
       },
       "index": 5,
       "result": {
-        "requisition_id": "REQ-0008",
-        "status": "Pending Approval",
-        "total_amount": 2194.8
+        "count": 1,
+        "hasMore": false,
+        "items": [
+          {
+            "HeaderInterfaceId": 700018,
+            "HoldId": 1000018,
+            "InspectionId": 1100018,
+            "InterfaceTransactionId": 800018,
+            "InvoiceId": 900018,
+            "ItemNumber": "NS-COMP-018",
+            "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+            "MaintenanceProgramId": 500018,
+            "OrderNumber": "ORD-0018",
+            "OrganizationCode": "SEA",
+            "Quantity": 26,
+            "RecordId": 10000018,
+            "ReferenceNumber": "CASE-018",
+            "StatusCode": "OPEN",
+            "SupplierId": 600018,
+            "WoOperationId": 200018,
+            "WoOperationMaterialId": 300018,
+            "WoOperationResourceId": 400018,
+            "WorkOrderId": 100018,
+            "WorkOrderNumber": "WO-0018",
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0018",
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0018"
+          }
+        ],
+        "limit": 50,
+        "links": [],
+        "offset": 0
       },
       "success": true,
-      "tool": "create_requisition"
+      "tool": "oracle_fusion.work_order_operations.list"
     },
     {
       "arguments": {
-        "approver_id": "U-MANAGER",
-        "requisition_id": "REQ-0008"
+        "limit": 50,
+        "onlyData": true,
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0018",
+        "q": "ReferenceNumber='CASE-018'"
       },
       "index": 6,
       "result": {
-        "requisition_id": "REQ-0008",
-        "status": "Approved"
+        "count": 1,
+        "hasMore": false,
+        "items": [
+          {
+            "HeaderInterfaceId": 700018,
+            "HoldId": 1000018,
+            "InspectionId": 1100018,
+            "InterfaceTransactionId": 800018,
+            "InvoiceId": 900018,
+            "ItemNumber": "NS-COMP-018",
+            "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+            "MaintenanceProgramId": 500018,
+            "OrderNumber": "ORD-0018",
+            "OrganizationCode": "SEA",
+            "Quantity": 26,
+            "RecordId": 10000018,
+            "ReferenceNumber": "CASE-018",
+            "StatusCode": "OPEN",
+            "SupplierId": 600018,
+            "WoOperationId": 200018,
+            "WoOperationMaterialId": 300018,
+            "WoOperationResourceId": 400018,
+            "WorkOrderId": 100018,
+            "WorkOrderNumber": "WO-0018",
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0018",
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0018"
+          }
+        ],
+        "limit": 50,
+        "links": [],
+        "offset": 0
       },
       "success": true,
-      "tool": "approve_requisition"
+      "tool": "oracle_fusion.purchase_order_lines.list"
     },
     {
       "arguments": {
-        "net_shortage": 31,
-        "requisition_id": "REQ-0008",
-        "supplier_id": "SUP-A"
+        "WoOperationResourceId": 400018,
+        "WorkOrderId": 100018,
+        "requestBody": {
+          "AssignedUnits": 1,
+          "ResourceCode": "RES-ALT-018",
+          "UsageRate": 1.0
+        }
       },
       "index": 7,
       "result": {
-        "submitted": {
-          "net_shortage": "31",
-          "requisition_id": "REQ-0008",
-          "supplier_id": "SUP-A"
+        "HeaderInterfaceId": 700018,
+        "HoldId": 1000018,
+        "InspectionId": 1100018,
+        "InterfaceTransactionId": 800018,
+        "InvoiceId": 900018,
+        "ItemNumber": "NS-COMP-018",
+        "LastUpdateDate": "2026-01-12T08:00:00-08:00",
+        "MaintenanceProgramId": 500018,
+        "Operation": "oracle_fusion.work_order_resources.update",
+        "OrderNumber": "ORD-0018",
+        "OrganizationCode": "SEA",
+        "Quantity": 26,
+        "RecordId": 10000018,
+        "ReferenceNumber": "CASE-018",
+        "StatusCode": "SUPPLIER_OPERATION_REROUTED",
+        "SupplierId": 600018,
+        "WoOperationId": 200018,
+        "WoOperationMaterialId": 300018,
+        "WoOperationResourceId": 400018,
+        "WorkOrderId": 100018,
+        "WorkOrderNumber": "WO-0018",
+        "links": [],
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0018",
+        "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0018"
+      },
+      "success": true,
+      "tool": "oracle_fusion.work_order_resources.update"
+    },
+    {
+      "arguments": {
+        "includeValuesInResponse": true,
+        "range": "Control!H20",
+        "requestBody": {
+          "majorDimension": "ROWS",
+          "range": "Control!H20",
+          "values": [
+            [
+              "Supplier operation rerouted"
+            ]
+          ]
+        },
+        "spreadsheetId": "sheet-018",
+        "valueInputOption": "RAW"
+      },
+      "index": 8,
+      "result": {
+        "spreadsheetId": "sheet-018",
+        "updatedCells": 1,
+        "updatedColumns": 1,
+        "updatedRange": "Control!H20",
+        "updatedRows": 1
+      },
+      "success": true,
+      "tool": "google_sheets.spreadsheets.values.update"
+    },
+    {
+      "arguments": {
+        "message": {
+          "raw": "RnJvbTogbWFudWZhY3R1cmluZy5zY2hlZHVsZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBvcGVyYXRpb25zLWNvbnRyb2xAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDE4IOKAlCBEcmFmdCBlbnRlcnByaXNlIHdvcmtmbG93DQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KU3VwcGxpZXIgb3BlcmF0aW9uIHJlcm91dGVkLiBPcmFjbGUgYW5kIGNvbGxhYm9yYXRpb24gcmVmZXJlbmNlcyBhcmUgcmVjb3JkZWQgdW5kZXIgQ0FTRS0wMTguDQo",
+          "threadId": "thread-018"
+        },
+        "userId": "me"
+      },
+      "index": 9,
+      "result": {
+        "id": "draft-018",
+        "message": {
+          "id": "draft-msg-018",
+          "labelIds": [
+            "DRAFT"
+          ],
+          "threadId": "thread-018"
+        }
+      },
+      "success": true,
+      "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "affected_order": "ORD-0018",
+        "recovery_route": "SEA-3",
+        "revised_completion": "2026-01-31"
+      },
+      "index": 10,
+      "result": {
+        "accepted": true,
+        "fields": {
+          "affected_order": "ORD-0018",
+          "recovery_route": "SEA-3",
+          "revised_completion": "2026-01-31"
         },
         "task_id": "factorybench-018"
       },
       "success": true,
-      "tool": "submit_answer"
+      "tool": "factorybench.submit_answer"
     }
   ]
 }

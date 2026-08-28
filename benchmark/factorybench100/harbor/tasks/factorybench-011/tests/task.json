@@ -1,63 +1,80 @@
 {
   "allowed_write_tables": [
-    "purchase_requisitions",
-    "requisition_lines",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "net_shortage": {
-        "type": "integer"
-      },
-      "requisition_id": {
+      "item_lot": {
         "type": "string"
       },
-      "supplier_id": {
+      "posted_quantity": {
+        "type": "integer"
+      },
+      "transaction_reference": {
         "type": "string"
       }
     },
     "required": [
-      "net_shortage",
-      "requisition_id",
-      "supplier_id"
+      "item_lot",
+      "posted_quantity",
+      "transaction_reference"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "net_shortage": 16,
-      "requisition_id": "REQ-0001",
-      "supplier_id": "SUP-A"
+      "item_lot": "FB-011",
+      "posted_quantity": 19,
+      "transaction_reference": "Material issued"
     },
     "assertions": [
       {
-        "description": "The shortage is covered by an approved requisition.",
-        "id": "requisition_approved",
-        "table": "purchase_requisitions",
+        "description": "oracle_fusion.material_transactions.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "approved_by": "U-MANAGER",
-          "status": "Approved",
-          "supplier_id": "SUP-A",
-          "total_amount": 1121.6
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"MaterialTransactionDetail\":[{\"InventoryItemNumber\":\"NS-COMP-011\",\"LotNumber\":\"LOT-0011\",\"OrganizationCode\":\"SEA\",\"SubinventoryCode\":\"STORES\",\"TransactionQuantity\":19,\"TransactionTypeCode\":\"MATERIAL_ISSUE\",\"TransactionUnitOfMeasure\":\"EA\",\"WorkOrderNumber\":\"WO-0011\"}],\"SourceSystemCode\":\"FUSION_MOBILE\",\"SourceSystemType\":\"EXTERNAL\"}},\"case\":\"CASE-011\",\"outcome\":\"Reconcile the reservation, shelf-life waiver, and lot certificate before posting the exact work-order material issue.\",\"tool\":\"oracle_fusion.material_transactions.create\"}",
+          "resource_type": "oracle_fusion.material_transactions",
+          "revision": 1,
+          "status": "Material issued",
+          "system": "oracle_fusion"
         },
         "where": {
-          "requisition_id": "REQ-0001"
+          "resource_id": "factorybench-011-mutation-01",
+          "task_id": "factorybench-011"
         }
       },
       {
-        "description": "The requisition line equals net requirement after available stock.",
-        "id": "net_quantity_ordered",
-        "table": "requisition_lines",
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "item_id": "RM-COPPER",
-          "quantity": 16,
-          "unit_price": 70.1
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "line_no": 1,
-          "requisition_id": "REQ-0001"
+          "resource_id": "factorybench-011-mutation-02",
+          "task_id": "factorybench-011"
+        }
+      },
+      {
+        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.drafts",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
+        "where": {
+          "resource_id": "factorybench-011-mutation-03",
+          "task_id": "factorybench-011"
         }
       }
     ]
@@ -65,49 +82,81 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "material_shortage"
+        "fileId": "drive-approval-011",
+        "pageSize": 20
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_drive.approvals.list"
     },
     {
       "arguments": {
-        "work_order_id": "WO-S-001"
+        "format": "full",
+        "id": "thread-011",
+        "userId": "me"
       },
-      "tool": "get_work_order"
+      "match": "successful_tool_call",
+      "tool": "gmail.threads.get"
     },
     {
       "arguments": {
-        "item_ids": [
-          "RM-COPPER"
+        "channel": "C-FINANCE",
+        "inclusive": true,
+        "limit": 100,
+        "oldest": "1768000000.000000"
+      },
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_history"
+    },
+    {
+      "arguments": {
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
         ],
-        "plant_id": "SEA"
+        "spreadsheetId": "sheet-011"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
-        "item_id": "RM-COPPER",
-        "need_by": "2026-01-31",
-        "task_id": "factorybench-011"
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-011'"
       },
-      "tool": "get_supplier_quotes"
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100011,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-011'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_materials.list"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order",
-    "get_inventory",
-    "get_supplier_quotes"
+    "factorybench.context.get",
+    "google_drive.approvals.list",
+    "gmail.threads.get",
+    "slack.conversations_history",
+    "google_sheets.spreadsheets.get",
+    "oracle_fusion.inventory_onhand_balances.list",
+    "oracle_fusion.work_order_materials.list"
   ],
   "task_id": "factorybench-011",
   "write_tools": [
-    "approve_requisition",
-    "create_requisition",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.drafts.create",
+    "google_drive.comments.create",
+    "oracle_fusion.material_transactions.create"
   ]
 }

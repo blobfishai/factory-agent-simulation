@@ -1,47 +1,80 @@
 {
   "allowed_write_tables": [
-    "ap_invoices",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "decision": {
+      "case_reference": {
         "type": "string"
       },
-      "invoice_id": {
+      "governance_action": {
         "type": "string"
       },
-      "variance_percent": {
-        "multipleOf": 0.01,
-        "type": "number"
+      "supplier": {
+        "type": "string"
       }
     },
     "required": [
-      "decision",
-      "invoice_id",
-      "variance_percent"
+      "case_reference",
+      "governance_action",
+      "supplier"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "decision": "Hold",
-      "invoice_id": "INV-0006",
-      "variance_percent": 3.5
+      "case_reference": "CASE-0046",
+      "governance_action": "Conditional source enabled",
+      "supplier": "SUP-0046"
     },
     "assertions": [
       {
-        "description": "The invoice receives the policy-correct three-way-match decision.",
-        "id": "invoice_decision",
-        "table": "ap_invoices",
+        "description": "oracle_fusion.supply_requests.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "hold_reason": "AMOUNT_VARIANCE",
-          "status": "Hold"
+          "payload_json": "{\"arguments\":{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0046\",\"SupplyRequestDate\":\"2026-01-21\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-046\",\"NeedByDate\":\"2026-01-25\",\"Quantity\":17,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}},\"case\":\"CASE-046\",\"outcome\":\"Reconcile audit results, insurance certificate, trial-lot quality, and sourcing approval before documenting conditional use and creating supply.\",\"tool\":\"oracle_fusion.supply_requests.create\"}",
+          "resource_type": "oracle_fusion.supply_requests",
+          "revision": 1,
+          "status": "Conditional source enabled",
+          "system": "oracle_fusion"
         },
         "where": {
-          "invoice_id": "INV-0006"
+          "resource_id": "factorybench-046-mutation-01",
+          "task_id": "factorybench-046"
+        }
+      },
+      {
+        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "gmail.messages",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "gmail"
+        },
+        "where": {
+          "resource_id": "factorybench-046-mutation-02",
+          "task_id": "factorybench-046"
+        }
+      },
+      {
+        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "google_drive.comments",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
+        },
+        "where": {
+          "resource_id": "factorybench-046-mutation-03",
+          "task_id": "factorybench-046"
         }
       }
     ]
@@ -49,43 +82,76 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "invoice_match"
+        "fileId": "drive-046"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "purchase_order_id": "PO-I-006"
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000046.000100"
       },
-      "tool": "get_purchase_order"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "receipt_id": "RCV-I-006"
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:H50"
+        ],
+        "spreadsheetId": "sheet-046"
       },
-      "tool": "get_receipt"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
-        "invoice_id": "INV-0006"
+        "maxResults": 20,
+        "q": "\"CASE-046\"",
+        "userId": "me"
       },
-      "tool": "get_invoice_match"
+      "match": "successful_tool_call",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-046'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.suppliers.list"
+    },
+    {
+      "arguments": {
+        "SupplierId": 600046
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.suppliers.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_purchase_order",
-    "get_receipt",
-    "get_invoice_match"
+    "factorybench.context.get",
+    "google_drive.files.download",
+    "slack.conversations_replies",
+    "google_sheets.spreadsheets.get",
+    "gmail.messages.list",
+    "oracle_fusion.suppliers.list",
+    "oracle_fusion.suppliers.get"
   ],
   "task_id": "factorybench-046",
   "write_tools": [
-    "hold_invoice",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "gmail.messages.send",
+    "google_drive.comments.create",
+    "oracle_fusion.supply_requests.create"
   ]
 }

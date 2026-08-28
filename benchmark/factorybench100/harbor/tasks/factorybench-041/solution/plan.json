@@ -1,44 +1,106 @@
 [
   {
     "arguments": {},
-    "tool": "get_environment_context"
+    "tool": "factorybench.context.get"
   },
   {
     "arguments": {
-      "category": "invoice_match"
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-041' and trashed = false"
     },
-    "tool": "search_documents"
+    "tool": "google_drive.files.list"
   },
   {
     "arguments": {
-      "purchase_order_id": "PO-I-001"
+      "fileId": "drive-041"
     },
-    "tool": "get_purchase_order"
+    "tool": "google_drive.files.download"
   },
   {
     "arguments": {
-      "receipt_id": "RCV-I-001"
+      "majorDimension": "ROWS",
+      "ranges": [
+        "Control!A1:H50",
+        "Approvals!A1:G20"
+      ],
+      "spreadsheetId": "sheet-041",
+      "valueRenderOption": "UNFORMATTED_VALUE"
     },
-    "tool": "get_receipt"
+    "tool": "google_sheets.spreadsheets.values.batchGet"
   },
   {
     "arguments": {
-      "invoice_id": "INV-0001"
+      "channel": "C-PROCUREMENT",
+      "inclusive": true,
+      "limit": 100,
+      "oldest": "1768000000.000000"
     },
-    "tool": "get_invoice_match"
+    "tool": "slack.conversations_history"
   },
   {
     "arguments": {
-      "invoice_id": "INV-0001"
+      "invoicesUniqID": "invoicesUniqID-0041"
     },
-    "tool": "approve_invoice"
+    "tool": "oracle_fusion.invoices.get"
   },
   {
     "arguments": {
-      "decision": "Approved",
-      "invoice_id": "INV-0001",
-      "variance_percent": 1.0
+      "limit": 50,
+      "onlyData": true,
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0041",
+      "q": "ReferenceNumber='CASE-041'"
     },
-    "tool": "submit_answer"
+    "tool": "oracle_fusion.purchase_order_lines.list"
+  },
+  {
+    "arguments": {
+      "requestBody": {
+        "BusinessUnit": "Northstar Manufacturing BU",
+        "InvoiceNumber": "INV-0041",
+        "ProcessAction": "Validate",
+        "Supplier": "Cascade Industrial"
+      }
+    },
+    "tool": "oracle_fusion.invoices.validate"
+  },
+  {
+    "arguments": {
+      "insertDataOption": "INSERT_ROWS",
+      "range": "Audit!A:F",
+      "requestBody": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:F",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-041",
+            "accounts_payable_specialist",
+            "Validated",
+            "REF-0041",
+            "posted"
+          ]
+        ]
+      },
+      "spreadsheetId": "sheet-041",
+      "valueInputOption": "RAW"
+    },
+    "tool": "google_sheets.spreadsheets.values.append"
+  },
+  {
+    "arguments": {
+      "channel": "C-PROCUREMENT",
+      "name": "white_check_mark",
+      "timestamp": "1768000041.000100"
+    },
+    "tool": "slack.reactions_add"
+  },
+  {
+    "arguments": {
+      "hold_or_reference": "REF-0041",
+      "invoice_number": "INV-0041",
+      "validation_outcome": "Validated"
+    },
+    "tool": "factorybench.submit_answer"
   }
 ]

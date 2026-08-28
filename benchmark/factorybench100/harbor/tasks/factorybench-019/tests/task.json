@@ -1,63 +1,80 @@
 {
   "allowed_write_tables": [
-    "purchase_requisitions",
-    "requisition_lines",
+    "resource_state",
     "answers",
     "audit_log"
   ],
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "net_shortage": {
-        "type": "integer"
-      },
-      "requisition_id": {
+      "affected_order": {
         "type": "string"
       },
-      "supplier_id": {
+      "recovery_route": {
+        "type": "string"
+      },
+      "revised_completion": {
         "type": "string"
       }
     },
     "required": [
-      "net_shortage",
-      "requisition_id",
-      "supplier_id"
+      "affected_order",
+      "recovery_route",
+      "revised_completion"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "net_shortage": 32,
-      "requisition_id": "REQ-0009",
-      "supplier_id": "SUP-A"
+      "affected_order": "ORD-0019",
+      "recovery_route": "SEA-4",
+      "revised_completion": "2026-01-13"
     },
     "assertions": [
       {
-        "description": "The shortage is covered by an approved requisition.",
-        "id": "requisition_approved",
-        "table": "purchase_requisitions",
+        "description": "oracle_fusion.work_order_operations.update produced the task-scoped, source-audited state transition.",
+        "id": "mutation_01",
+        "table": "resource_state",
         "values": {
-          "approved_by": "U-MANAGER",
-          "status": "Approved",
-          "supplier_id": "SUP-A",
-          "total_amount": 2268.8
+          "payload_json": "{\"arguments\":{\"WoOperationId\":200019,\"WorkOrderId\":100019,\"requestBody\":{\"OperationName\":\"Controlled operation CASE-019\",\"PlannedCompletionDate\":\"2026-01-20\",\"PlannedStartDate\":\"2026-01-13\",\"WorkCenterCode\":\"WC-ALT-2\"}},\"case\":\"CASE-019\",\"outcome\":\"Verify the overtime authorization and finite-capacity workbook before moving operation dates and reporting the schedule change.\",\"tool\":\"oracle_fusion.work_order_operations.update\"}",
+          "resource_type": "oracle_fusion.work_order_operations",
+          "revision": 1,
+          "status": "Overtime plan applied",
+          "system": "oracle_fusion"
         },
         "where": {
-          "requisition_id": "REQ-0009"
+          "resource_id": "factorybench-019-mutation-01",
+          "task_id": "factorybench-019"
         }
       },
       {
-        "description": "The requisition line equals net requirement after available stock.",
-        "id": "net_quantity_ordered",
-        "table": "requisition_lines",
+        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "id": "mutation_02",
+        "table": "resource_state",
         "values": {
-          "item_id": "RM-COPPER",
-          "quantity": 32,
-          "unit_price": 70.9
+          "resource_type": "google_drive.approvals",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "google_drive"
         },
         "where": {
-          "line_no": 1,
-          "requisition_id": "REQ-0009"
+          "resource_id": "factorybench-019-mutation-02",
+          "task_id": "factorybench-019"
+        }
+      },
+      {
+        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "id": "mutation_03",
+        "table": "resource_state",
+        "values": {
+          "resource_type": "slack",
+          "revision": 1,
+          "status": "Recorded",
+          "system": "slack"
+        },
+        "where": {
+          "resource_id": "factorybench-019-mutation-03",
+          "task_id": "factorybench-019"
         }
       }
     ]
@@ -65,49 +82,78 @@
   "required_read_calls": [
     {
       "arguments": {},
-      "tool": "get_environment_context"
+      "match": "successful_tool_call",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "category": "material_shortage"
+        "count": 50,
+        "query": "\"CASE-019\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
       },
-      "tool": "search_documents"
+      "match": "successful_tool_call",
+      "tool": "slack.search_messages"
     },
     {
       "arguments": {
-        "work_order_id": "WO-S-009"
+        "channel": "C-FINANCE",
+        "limit": 100,
+        "ts": "1768000019.000100"
       },
-      "tool": "get_work_order"
+      "match": "successful_tool_call",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
-        "item_ids": [
-          "RM-COPPER"
-        ],
-        "plant_id": "SEA"
+        "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+        "fileId": "drive-019"
       },
-      "tool": "get_inventory"
+      "match": "successful_tool_call",
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
-        "item_id": "RM-COPPER",
-        "need_by": "2026-02-08",
-        "task_id": "factorybench-019"
+        "majorDimension": "ROWS",
+        "range": "Control!A1:H50",
+        "spreadsheetId": "sheet-019",
+        "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "tool": "get_supplier_quotes"
+      "match": "successful_tool_call",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100019,
+        "limit": 50,
+        "onlyData": true,
+        "q": "ReferenceNumber='CASE-019'"
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100019
+      },
+      "match": "successful_tool_call",
+      "tool": "oracle_fusion.work_orders.get"
     }
   ],
   "required_reads": [
-    "get_environment_context",
-    "search_documents",
-    "get_work_order",
-    "get_inventory",
-    "get_supplier_quotes"
+    "factorybench.context.get",
+    "slack.search_messages",
+    "slack.conversations_replies",
+    "google_drive.files.get",
+    "google_sheets.spreadsheets.values.get",
+    "oracle_fusion.work_order_operations.list",
+    "oracle_fusion.work_orders.get"
   ],
   "task_id": "factorybench-019",
   "write_tools": [
-    "approve_requisition",
-    "create_requisition",
-    "submit_answer"
+    "factorybench.submit_answer",
+    "google_drive.approvals.approve",
+    "oracle_fusion.work_order_operations.update",
+    "slack.chat_postMessage"
   ]
 }
