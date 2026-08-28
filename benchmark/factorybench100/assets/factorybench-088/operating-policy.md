@@ -1,5 +1,7 @@
-# Hold payment for a missing conflict-minerals report — operating control
+# Hold payment for a missing conflict-minerals report — operating policy
 
-Scope: Contain regulated material and assemble document, lot, serial, and approval evidence for audit.
+Decision scope: invoice missing conflict-minerals evidence.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: policy scope, supplier, item, reporting period, and invoice lines. Establish the immutable source record and effective revision, then reconcile invoice value for covered materials, value supported by current smelter and country-of-origin evidence, and covered value lacking the required report from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file.

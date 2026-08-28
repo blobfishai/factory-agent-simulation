@@ -1,29 +1,105 @@
 {
   "answer": {
-    "asset_or_resource": "FB-023",
-    "maintenance_order": "MWO-0023",
-    "planned_finish": "2026-01-17"
+    "affected_resource_or_operation": "NS-000023",
+    "base_completion": "2026-01-22",
+    "business_need_date": "2026-01-19",
+    "candidate_capacity": 28,
+    "capacity_gap": 27,
+    "capacity_unit": "HR",
+    "decision_timing_status": "ON_TIME",
+    "escalated_completion": "2026-01-18",
+    "escalation_approval_required": 1,
+    "net_usable_capacity": 19,
+    "outcome_vs_control_days": 0,
+    "qualified_alternative_completion": "2026-01-19",
+    "recommended_incremental_cost_usd": 741,
+    "recommended_option": "move_to_qualified_electrical_shop",
+    "recommended_outcome_date": "2026-01-19",
+    "required_capacity": 46,
+    "selected_resource_or_control": "MAINT-3",
+    "unavailable_or_protected_capacity": 9
   },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'move_to_qualified_electrical_shop', tied to NS-000023, revision R3, and the selected move_to_qualified_electrical_shop outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-19', tied to NS-000023, revision R3, and the selected move_to_qualified_electrical_shop outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported affected resource or operation as 'NS-000023', tied to NS-000023, revision R3, and the selected move_to_qualified_electrical_shop outcome.",
+      "field": "affected_resource_or_operation",
+      "id": "answer_affected_resource_or_operation",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported selected resource or control as 'MAINT-3', tied to NS-000023, revision R3, and the selected move_to_qualified_electrical_shop outcome.",
+      "field": "selected_resource_or_control",
+      "id": "answer_selected_resource_or_control",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000023, revision R3, and the selected move_to_qualified_electrical_shop outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "weight": 1.0
+    }
+  ],
   "assertions": [
     {
-      "description": "oracle_fusion.maintenance_operations.update produced the task-scoped, source-audited state transition.",
+      "description": "Required immutable record NS-000023 to reach business outcome 'Repair operation rerouted' through oracle_fusion.maintenance_operations.update with exact provider-critical values WorkOrderId=100023, WoOperationId=200023, requestBody.WorkCenterCode='MAINT-3', requestBody.PlannedStartDate='2026-01-17'. Human-authored names, descriptions, notes, and reasons are accepted when they preserve the task-scoped business meaning. The audited transition binds selected option move_to_qualified_electrical_shop, revision R3, approval AP-0023, and constraint shop qualification, active status, tooling, and capacity must all pass; mechanical-only shops and protected electrical work = 9 HR; uncovered or unsupported scope = 27.0 HR; no other provider record satisfies this state criterion.",
       "id": "mutation_01",
+      "payload_allowed_argument_paths": [
+        "WoOperationId",
+        "WorkOrderId",
+        "requestBody.OperationName",
+        "requestBody.PlannedStartDate",
+        "requestBody.WorkCenterCode"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "WoOperationId": 200023,
+          "WorkOrderId": 100023,
+          "requestBody": {
+            "PlannedStartDate": "2026-01-17",
+            "WorkCenterCode": "MAINT-3"
+          }
+        },
+        "tool": "oracle_fusion.maintenance_operations.update"
+      },
       "table": "resource_state",
       "values": {
-        "payload_json": "{\"arguments\":{\"WoOperationId\":200023,\"WorkOrderId\":100023,\"requestBody\":{\"OperationName\":\"Corrective action CASE-023\",\"PlannedStartDate\":\"2026-01-17\",\"WorkCenterCode\":\"MAINT-3\"}},\"case\":\"CASE-023\",\"outcome\":\"Check shop qualification and current load before changing the maintenance operation's work center.\",\"tool\":\"oracle_fusion.maintenance_operations.update\"}",
         "resource_type": "oracle_fusion.maintenance_operations",
         "revision": 1,
         "status": "Repair operation rerouted",
         "system": "oracle_fusion"
       },
+      "weight": 3.0,
       "where": {
         "resource_id": "factorybench-023-mutation-01",
         "task_id": "factorybench-023"
       }
     },
     {
-      "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+      "description": "Wrote move_to_qualified_electrical_shop, completion 2026-01-19, and the binding constraint into the existing task-scoped control cell without altering another row.",
       "id": "mutation_02",
+      "payload_contains": {
+        "arguments": {
+          "range": "Control!H25",
+          "spreadsheetId": "sheet-023"
+        },
+        "tool": "google_sheets.spreadsheets.values.update"
+      },
+      "payload_text_contains": [
+        "2026-01-19",
+        "move_to_qualified_electrical_shop"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "google_sheets.spreadsheets.values",
@@ -31,14 +107,33 @@
         "status": "Recorded",
         "system": "google_sheets"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-023-mutation-02",
         "task_id": "factorybench-023"
       }
     },
     {
-      "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+      "description": "Replied in the existing operations thread with move_to_qualified_electrical_shop, completion 2026-01-19, the constraint, alternatives, and Oracle result.",
       "id": "mutation_03",
+      "payload_contains": {
+        "arguments": {
+          "channel": "C-FINANCE",
+          "thread_ts": "1768000023.000100"
+        },
+        "tool": "slack.chat_postMessage"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-023",
+          "NS-000023",
+          "NS-COMP-023"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-19",
+        "move_to_qualified_electrical_shop"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "slack",
@@ -46,10 +141,645 @@
         "status": "Recorded",
         "system": "slack"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-023-mutation-03",
         "task_id": "factorybench-023"
       }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-19 as the documented date for maintenance operation requiring electrical qualification; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated 46 HR for repair-hours remaining.",
+      "field": "required_capacity",
+      "id": "calculate_required_capacity",
+      "weight": 2.0
+    },
+    {
+      "description": "Established 28 gross candidate HR associated with open hours in qualified electrical shops; did not call it usable before applying protected load.",
+      "field": "candidate_capacity",
+      "id": "establish_candidate_capacity",
+      "weight": 1.5
+    },
+    {
+      "description": "Excluded 9 HR for mechanical-only shops and protected electrical work.",
+      "field": "unavailable_or_protected_capacity",
+      "id": "remove_protected_capacity",
+      "weight": 1.5
+    },
+    {
+      "description": "Calculated 28 candidate \u2212 9 unavailable/protected = 19 net usable HR.",
+      "field": "net_usable_capacity",
+      "id": "calculate_net_usable_capacity",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 46 required \u2212 19 effective capacity = 27 HR uncovered.",
+      "field": "capacity_gap",
+      "id": "calculate_capacity_gap",
+      "weight": 2.0
+    },
+    {
+      "description": "Kept load and availability in HR.",
+      "field": "capacity_unit",
+      "id": "preserve_capacity_unit",
+      "weight": 0.5
+    },
+    {
+      "description": "Bound the recovery to provider identifier MAINT-3 only after confirming shop qualification, active status, tooling, and capacity must all pass.",
+      "field": "selected_resource_or_control",
+      "id": "identify_selected_resource_or_control",
+      "weight": 1.5
+    },
+    {
+      "description": "Calculated 2026-01-22 for wait_in_current_shop.",
+      "field": "base_completion",
+      "id": "compare_base_schedule",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated 2026-01-19 for move_to_qualified_electrical_shop using internal electrical-shop load.",
+      "field": "qualified_alternative_completion",
+      "id": "compare_qualified_schedule",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated 2026-01-18 for send_to_unqualified_fast_shop and retained its authority constraint.",
+      "field": "escalated_completion",
+      "id": "compare_escalated_schedule",
+      "weight": 1.0
+    },
+    {
+      "description": "Applied USD 741 as the documented incremental recovery cost for move_to_qualified_electrical_shop; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that send_to_unqualified_fast_shop remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of wait_in_current_shop, move_to_qualified_electrical_shop, and send_to_unqualified_fast_shop; selected move_to_qualified_electrical_shop because it alone gives the best currently authorized result under shop qualification, active status, tooling, and capacity must all pass.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-19 as the supported outcome date for move_to_qualified_electrical_shop.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-19 with the independent control date 2026-01-19 and calculated a signed variance of 0 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-023"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-023 scope, immutable handles, mounted systems, and evidence index before investigating NS-000023.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-023\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-023"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-023 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-023",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-023",
+            "threadId": "thread-023"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-023",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-023"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-16 readiness input for move_to_qualified_electrical_shop, then separately derived its 2026-01-19 operating outcome under shop qualification, active status, tooling, and capacity must all pass instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "file": "F-000023"
+          },
+          "expected_result_contains": {
+            "file": {
+              "id": "F-000023"
+            }
+          },
+          "match": "result_contains",
+          "tool": "slack.files_info"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Inspected the attachment linked from the scoped Slack discussion and correlated its case and source revision before using its control evidence.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-023' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-023"
+              },
+              {
+                "id": "drive-approval-023"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-023 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-023-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-023-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-023-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied internal electrical-shop load to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-023-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-023-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-023-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-16 readiness input for move_to_qualified_electrical_shop, then separately derived its 2026-01-19 operating outcome under shop qualification, active status, tooling, and capacity must all pass instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-023-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-023-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-023-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R3 and established 46 HR for repair-hours remaining, with control date 2026-01-19.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-023-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-023-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-023-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000023 at R3.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-023-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-023-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-023-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-023-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R3 and established 46 HR for repair-hours remaining, with control date 2026-01-19.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-023"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-023"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-023",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-023"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-023"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-023"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0023 only to move_to_qualified_electrical_shop, NS-000023, and the supported 19 HR; kept broader scope and send_to_unqualified_fast_shop outside current authority.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-023",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-023"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-023",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-023"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 28 observed less 9 excluded to 19 supported HR for open hours in qualified electrical shops. Applied internal electrical-shop load to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100023,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100023
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_resources.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance resources record: Applied internal electrical-shop load to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100023,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100023
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_documents.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance documents record: Located NS-000023 for maintenance operation requiring electrical qualification using immutable IDs and preserved effective revision R3.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100023
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100023
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='MWO-0023'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100023
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance work orders record: Located NS-000023 for maintenance operation requiring electrical qualification using immutable IDs and preserved effective revision R3.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100023,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100023
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance operations record: Applied internal electrical-shop load to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_16",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.maintenance_operations.update",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100023,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100023
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_operations.list"
+        }
+      ],
+      "description": "Read NS-000023 back through the documented Oracle maintenance operations.list operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'PlannedStartDate', 'WorkCenterCode'], including the effective update at 2026-01-19, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "LastUpdateDate": "2026-01-19T16:00:00-08:00",
+        "PlannedStartDate": "2026-01-17",
+        "WorkCenterCode": "MAINT-3"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "WorkOrderId": 100023
+      },
+      "weight": 2.0
     }
   ]
 }

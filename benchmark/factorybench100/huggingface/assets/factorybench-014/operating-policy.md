@@ -1,5 +1,7 @@
-# Report serial-controlled panel completion — operating control
+# Report serial-controlled panel completion — operating policy
 
-Scope: Post traceable material, inventory, operation, and resource transactions from controlled shop-floor evidence.
+Decision scope: serial-controlled panel completion.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: completed quantity must equal the distinct eligible serial set. Establish the immutable source record and effective revision, then reconcile serials assigned to the final operation, serials with every traveler signature and passed test, and missing-signature, duplicate, or failed-test serials from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file.

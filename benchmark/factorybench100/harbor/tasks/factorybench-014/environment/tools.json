@@ -52,20 +52,102 @@
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
-        "item_lot": {
+        "baseline_resolution_date": {
+          "description": "Resolution date for complete_eligible_serials.",
           "type": "string"
         },
-        "posted_quantity": {
+        "business_need_date": {
+          "description": "Documented business or control date that the decision must protect.",
+          "type": "string"
+        },
+        "controlled_item_or_record": {
+          "description": "Immutable item, lot, serial set, or transaction record in scope.",
+          "type": "string"
+        },
+        "controlled_resolution_date": {
+          "description": "Resolution date for complete_header_quantity.",
+          "type": "string"
+        },
+        "decision_timing_status": {
+          "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+          "enum": [
+            "ON_TIME",
+            "LATE"
+          ],
+          "type": "string"
+        },
+        "escalated_resolution_date": {
+          "description": "Resolution date for hold_all_serials.",
+          "type": "string"
+        },
+        "escalation_approval_required": {
+          "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
           "type": "integer"
         },
-        "transaction_reference": {
+        "excluded_quantity": {
+          "description": "missing-signature, duplicate, or failed-test serials",
+          "type": "integer"
+        },
+        "observed_quantity": {
+          "description": "Observed source quantity before applying the control for serial-controlled panel completion.",
+          "type": "integer"
+        },
+        "outcome_vs_control_days": {
+          "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+          "type": "integer"
+        },
+        "quantity_unit": {
+          "description": "Unit of measure for every controlled quantity: SERIALS.",
           "type": "string"
+        },
+        "recommended_incremental_cost_usd": {
+          "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+          "type": "integer"
+        },
+        "recommended_option": {
+          "description": "Best authorized option identifier after comparing complete_eligible_serials, complete_header_quantity, hold_all_serials.",
+          "enum": [
+            "complete_eligible_serials",
+            "complete_header_quantity",
+            "hold_all_serials"
+          ],
+          "type": "string"
+        },
+        "recommended_outcome_date": {
+          "description": "Date produced by the selected option after applying all source constraints.",
+          "type": "string"
+        },
+        "source_quantity": {
+          "description": "serials assigned to the final operation",
+          "type": "integer"
+        },
+        "supported_quantity": {
+          "description": "serials with every traveler signature and passed test",
+          "type": "integer"
+        },
+        "transaction_quantity": {
+          "description": "Exact quantity the Oracle mutation may persist.",
+          "type": "integer"
         }
       },
       "required": [
-        "item_lot",
-        "posted_quantity",
-        "transaction_reference"
+        "baseline_resolution_date",
+        "business_need_date",
+        "controlled_item_or_record",
+        "controlled_resolution_date",
+        "decision_timing_status",
+        "escalated_resolution_date",
+        "escalation_approval_required",
+        "excluded_quantity",
+        "observed_quantity",
+        "outcome_vs_control_days",
+        "quantity_unit",
+        "recommended_incremental_cost_usd",
+        "recommended_option",
+        "recommended_outcome_date",
+        "source_quantity",
+        "supported_quantity",
+        "transaction_quantity"
       ],
       "type": "object"
     },
@@ -115,11 +197,60 @@
         }
       },
       "required": [
+        "userId",
         "message"
       ],
       "type": "object"
     },
     "name": "gmail.drafts.create"
+  },
+  {
+    "_meta": {
+      "factorybench": {
+        "contractMode": "documented-operation",
+        "implementation": "closed deterministic sandbox",
+        "server": "gmail",
+        "upstream": {
+          "method": "GET",
+          "path": "/gmail/v1/users/{userId}/drafts/{id}",
+          "source": "https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.drafts/get"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "gmail.drafts.get"
+    },
+    "description": "Get one Gmail draft and its current message.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "enum": [
+            "minimal",
+            "full",
+            "raw",
+            "metadata"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "userId",
+        "id"
+      ],
+      "type": "object"
+    },
+    "name": "gmail.drafts.get"
   },
   {
     "_meta": {
@@ -156,6 +287,7 @@
         }
       },
       "required": [
+        "userId",
         "messageId",
         "id"
       ],
@@ -210,6 +342,7 @@
         }
       },
       "required": [
+        "userId",
         "id"
       ],
       "type": "object"
@@ -262,7 +395,9 @@
           "type": "string"
         }
       },
-      "required": [],
+      "required": [
+        "userId"
+      ],
       "type": "object"
     },
     "name": "gmail.messages.list"
@@ -302,6 +437,7 @@
         }
       },
       "required": [
+        "userId",
         "raw"
       ],
       "type": "object"
@@ -349,101 +485,12 @@
         }
       },
       "required": [
+        "userId",
         "id"
       ],
       "type": "object"
     },
     "name": "gmail.threads.get"
-  },
-  {
-    "_meta": {
-      "factorybench": {
-        "contractMode": "documented-operation",
-        "implementation": "closed deterministic sandbox",
-        "server": "google_drive",
-        "upstream": {
-          "method": "POST",
-          "path": "/drive/v3/files/{fileId}/approvals/{approvalId}:approve",
-          "source": "https://developers.google.com/workspace/drive/api/reference/rest/v3/files.approvals/approve"
-        }
-      }
-    },
-    "annotations": {
-      "destructiveHint": true,
-      "idempotentHint": false,
-      "openWorldHint": false,
-      "readOnlyHint": false,
-      "title": "google_drive.approvals.approve"
-    },
-    "description": "Approve a Drive approval as the current reviewer.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "approvalId": {
-          "type": "string"
-        },
-        "fileId": {
-          "type": "string"
-        },
-        "requestBody": {
-          "additionalProperties": false,
-          "properties": {
-            "message": {
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        }
-      },
-      "required": [
-        "fileId",
-        "approvalId"
-      ],
-      "type": "object"
-    },
-    "name": "google_drive.approvals.approve"
-  },
-  {
-    "_meta": {
-      "factorybench": {
-        "contractMode": "documented-operation",
-        "implementation": "closed deterministic sandbox",
-        "server": "google_drive",
-        "upstream": {
-          "method": "GET",
-          "path": "/drive/v3/files/{fileId}/approvals",
-          "source": "https://developers.google.com/workspace/drive/api/reference/rest/v3/files.approvals/list"
-        }
-      }
-    },
-    "annotations": {
-      "destructiveHint": false,
-      "idempotentHint": true,
-      "openWorldHint": false,
-      "readOnlyHint": true,
-      "title": "google_drive.approvals.list"
-    },
-    "description": "List approval processes on a Drive file.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "fileId": {
-          "type": "string"
-        },
-        "pageSize": {
-          "type": "integer"
-        },
-        "pageToken": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "fileId"
-      ],
-      "type": "object"
-    },
-    "name": "google_drive.approvals.list"
   },
   {
     "_meta": {
@@ -492,6 +539,98 @@
       "type": "object"
     },
     "name": "google_drive.comments.create"
+  },
+  {
+    "_meta": {
+      "factorybench": {
+        "contractMode": "documented-operation",
+        "implementation": "closed deterministic sandbox",
+        "server": "google_drive",
+        "upstream": {
+          "method": "GET",
+          "path": "/drive/v3/files/{fileId}/comments/{commentId}",
+          "source": "https://developers.google.com/workspace/drive/api/reference/rest/v3/comments/get"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "google_drive.comments.get"
+    },
+    "description": "Get one Drive comment.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "commentId": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "string"
+        },
+        "fileId": {
+          "type": "string"
+        },
+        "includeDeleted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "fileId",
+        "commentId"
+      ],
+      "type": "object"
+    },
+    "name": "google_drive.comments.get"
+  },
+  {
+    "_meta": {
+      "factorybench": {
+        "contractMode": "documented-operation",
+        "implementation": "closed deterministic sandbox",
+        "server": "google_drive",
+        "upstream": {
+          "method": "GET",
+          "path": "/drive/v3/files/{fileId}/comments",
+          "source": "https://developers.google.com/workspace/drive/api/reference/rest/v3/comments/list"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "google_drive.comments.list"
+    },
+    "description": "List comments on a Drive file.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "type": "string"
+        },
+        "fileId": {
+          "type": "string"
+        },
+        "includeDeleted": {
+          "type": "boolean"
+        },
+        "pageSize": {
+          "type": "integer"
+        },
+        "pageToken": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "fileId"
+      ],
+      "type": "object"
+    },
+    "name": "google_drive.comments.list"
   },
   {
     "_meta": {
@@ -937,6 +1076,191 @@
       "type": "object"
     },
     "name": "google_sheets.spreadsheets.values.update"
+  },
+  {
+    "_meta": {
+      "factorybench": {
+        "contractMode": "documented-operation",
+        "implementation": "closed deterministic sandbox",
+        "server": "oracle_fusion",
+        "upstream": {
+          "method": "GET",
+          "path": "/fscmRestApi/resources/11.13.18.05/cycleCountDefinitions",
+          "source": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-cyclecountdefinitions-get.html"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "oracle_fusion.cycle_count_definitions.list"
+    },
+    "description": "Get cycle-count definitions and approval tolerances.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "expand": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "string"
+        },
+        "finder": {
+          "type": "string"
+        },
+        "limit": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "onlyData": {
+          "type": "boolean"
+        },
+        "orderBy": {
+          "type": "string"
+        },
+        "q": {
+          "description": "Documented Oracle REST query expression.",
+          "type": "string"
+        },
+        "totalResults": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "oracle_fusion.cycle_count_definitions.list"
+  },
+  {
+    "_meta": {
+      "factorybench": {
+        "contractMode": "documented-operation",
+        "implementation": "closed deterministic sandbox",
+        "server": "oracle_fusion",
+        "upstream": {
+          "method": "GET",
+          "path": "/fscmRestApi/resources/11.13.18.05/cycleCountSequenceDetails/{cycleCountSequenceDetailsUniqID}/child/history",
+          "source": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/toc.htm"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "oracle_fusion.cycle_count_history.list"
+    },
+    "description": "Get the independently recorded count history for one cycle-count sequence.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "cycleCountSequenceDetailsUniqID": {
+          "type": "string"
+        },
+        "expand": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "string"
+        },
+        "finder": {
+          "type": "string"
+        },
+        "limit": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "onlyData": {
+          "type": "boolean"
+        },
+        "orderBy": {
+          "type": "string"
+        },
+        "q": {
+          "description": "Documented Oracle REST query expression.",
+          "type": "string"
+        },
+        "totalResults": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cycleCountSequenceDetailsUniqID"
+      ],
+      "type": "object"
+    },
+    "name": "oracle_fusion.cycle_count_history.list"
+  },
+  {
+    "_meta": {
+      "factorybench": {
+        "contractMode": "documented-operation",
+        "implementation": "closed deterministic sandbox",
+        "server": "oracle_fusion",
+        "upstream": {
+          "method": "GET",
+          "path": "/fscmRestApi/resources/11.13.18.05/cycleCountSequenceDetails",
+          "source": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-cyclecountsequencedetails-get.html"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "oracle_fusion.cycle_count_sequence_details.list"
+    },
+    "description": "Get cycle-count sequence quantities, recounts, and approval status.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "expand": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "string"
+        },
+        "finder": {
+          "type": "string"
+        },
+        "limit": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "onlyData": {
+          "type": "boolean"
+        },
+        "orderBy": {
+          "type": "string"
+        },
+        "q": {
+          "description": "Documented Oracle REST query expression.",
+          "type": "string"
+        },
+        "totalResults": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "oracle_fusion.cycle_count_sequence_details.list"
   },
   {
     "_meta": {
@@ -1472,6 +1796,66 @@
         "implementation": "closed deterministic sandbox",
         "server": "oracle_fusion",
         "upstream": {
+          "method": "GET",
+          "path": "/fscmRestApi/resources/11.13.18.05/invoices",
+          "source": "https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/op-invoices-get.html"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "oracle_fusion.invoices.list"
+    },
+    "description": "Get Payables invoices.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "expand": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "string"
+        },
+        "finder": {
+          "type": "string"
+        },
+        "limit": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "onlyData": {
+          "type": "boolean"
+        },
+        "orderBy": {
+          "type": "string"
+        },
+        "q": {
+          "description": "Documented Oracle REST query expression.",
+          "type": "string"
+        },
+        "totalResults": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "oracle_fusion.invoices.list"
+  },
+  {
+    "_meta": {
+      "factorybench": {
+        "contractMode": "documented-operation",
+        "implementation": "closed deterministic sandbox",
+        "server": "oracle_fusion",
+        "upstream": {
           "method": "PATCH",
           "path": "/fscmRestApi/resources/11.13.18.05/invoices/{invoicesUniqID}",
           "source": "https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/op-invoices-invoicesuniqid-patch.html"
@@ -1711,6 +2095,71 @@
       "type": "object"
     },
     "name": "oracle_fusion.maintenance_documents.list"
+  },
+  {
+    "_meta": {
+      "factorybench": {
+        "contractMode": "documented-operation",
+        "implementation": "closed deterministic sandbox",
+        "server": "oracle_fusion",
+        "upstream": {
+          "method": "GET",
+          "path": "/fscmRestApi/resources/11.13.18.05/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderMaterial",
+          "source": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/toc.htm"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "oracle_fusion.maintenance_materials.list"
+    },
+    "description": "Get material requirements for a maintenance work order.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "WorkOrderId": {
+          "type": "integer"
+        },
+        "expand": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "string"
+        },
+        "finder": {
+          "type": "string"
+        },
+        "limit": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "onlyData": {
+          "type": "boolean"
+        },
+        "orderBy": {
+          "type": "string"
+        },
+        "q": {
+          "description": "Documented Oracle REST query expression.",
+          "type": "string"
+        },
+        "totalResults": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "WorkOrderId"
+      ],
+      "type": "object"
+    },
+    "name": "oracle_fusion.maintenance_materials.list"
   },
   {
     "_meta": {
@@ -2158,6 +2607,71 @@
       "type": "object"
     },
     "name": "oracle_fusion.maintenance_programs.update"
+  },
+  {
+    "_meta": {
+      "factorybench": {
+        "contractMode": "documented-operation",
+        "implementation": "closed deterministic sandbox",
+        "server": "oracle_fusion",
+        "upstream": {
+          "method": "GET",
+          "path": "/fscmRestApi/resources/11.13.18.05/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderResource",
+          "source": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/toc.htm"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "oracle_fusion.maintenance_resources.list"
+    },
+    "description": "Get labor and equipment resources for a maintenance work order.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "WorkOrderId": {
+          "type": "integer"
+        },
+        "expand": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "string"
+        },
+        "finder": {
+          "type": "string"
+        },
+        "limit": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "onlyData": {
+          "type": "boolean"
+        },
+        "orderBy": {
+          "type": "string"
+        },
+        "q": {
+          "description": "Documented Oracle REST query expression.",
+          "type": "string"
+        },
+        "totalResults": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "WorkOrderId"
+      ],
+      "type": "object"
+    },
+    "name": "oracle_fusion.maintenance_resources.list"
   },
   {
     "_meta": {

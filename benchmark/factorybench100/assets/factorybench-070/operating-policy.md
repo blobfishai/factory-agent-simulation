@@ -1,5 +1,7 @@
-# Create a pilot work order for the revised design — operating control
+# Create a pilot work order for the revised design — operating policy
 
-Scope: Apply approved engineering changes to active work-order operations, materials, resources, and attachments.
+Decision scope: revised-design pilot build.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: ECO release, prototype scope, lot separation, and start approval. Establish the immutable source record and effective revision, then reconcile approved prototype quantity, material and fixture coverage at the released pilot revision, and production stock protected for customer orders from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: send the scoped completion reply in the existing email thread; and add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file.

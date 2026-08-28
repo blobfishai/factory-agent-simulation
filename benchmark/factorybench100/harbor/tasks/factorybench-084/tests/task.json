@@ -7,49 +7,227 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "field_destination": {
+      "baseline_resolution_date": {
+        "description": "Resolution date for issue_matching_reserved_spare.",
         "type": "string"
       },
-      "service_request": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
       },
-      "stock_action": {
+      "controlled_item_or_record": {
+        "description": "Immutable item, lot, serial set, or transaction record in scope.",
         "type": "string"
+      },
+      "controlled_resolution_date": {
+        "description": "Resolution date for take_other_customer_reservation.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_resolution_date": {
+        "description": "Resolution date for wait_for_standard_supply.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "excluded_quantity": {
+        "description": "stock reserved for higher-priority events or wrong ownership",
+        "type": "integer"
+      },
+      "observed_quantity": {
+        "description": "Observed source quantity before applying the control for reserved emergency spare.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "quantity_unit": {
+        "description": "Unit of measure for every controlled quantity: EA.",
+        "type": "string"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing issue_matching_reserved_spare, take_other_customer_reservation, wait_for_standard_supply.",
+        "enum": [
+          "issue_matching_reserved_spare",
+          "take_other_customer_reservation",
+          "wait_for_standard_supply"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "source_quantity": {
+        "description": "spare quantity required by the repair operation",
+        "type": "integer"
+      },
+      "supported_quantity": {
+        "description": "reservation tied to the same service request and asset",
+        "type": "integer"
+      },
+      "transaction_quantity": {
+        "description": "Exact quantity the Oracle mutation may persist.",
+        "type": "integer"
       }
     },
     "required": [
-      "field_destination",
-      "service_request",
-      "stock_action"
+      "baseline_resolution_date",
+      "business_need_date",
+      "controlled_item_or_record",
+      "controlled_resolution_date",
+      "decision_timing_status",
+      "escalated_resolution_date",
+      "escalation_approval_required",
+      "excluded_quantity",
+      "observed_quantity",
+      "outcome_vs_control_days",
+      "quantity_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "source_quantity",
+      "supported_quantity",
+      "transaction_quantity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "field_destination": "SEA-1",
-      "service_request": "FB-084",
-      "stock_action": "Repair spare issued"
+      "baseline_resolution_date": "2026-01-13",
+      "business_need_date": "2026-01-13",
+      "controlled_item_or_record": "NS-COMP-084",
+      "controlled_resolution_date": "2026-01-14",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-15",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 8,
+      "observed_quantity": 46,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "issue_matching_reserved_spare",
+      "recommended_outcome_date": "2026-01-13",
+      "source_quantity": 59,
+      "supported_quantity": 38,
+      "transaction_quantity": 38
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'issue_matching_reserved_spare', tied to NS-000084, revision R1, and the selected issue_matching_reserved_spare outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-13', tied to NS-000084, revision R1, and the selected issue_matching_reserved_spare outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported controlled item or record as 'NS-COMP-084', tied to NS-000084, revision R1, and the selected issue_matching_reserved_spare outcome.",
+        "field": "controlled_item_or_record",
+        "id": "answer_controlled_item_or_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported transaction quantity as 38, tied to NS-000084, revision R1, and the selected issue_matching_reserved_spare outcome.",
+        "field": "transaction_quantity",
+        "id": "answer_transaction_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000084, revision R1, and the selected issue_matching_reserved_spare outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.material_transactions.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000084 to reach business outcome 'Repair spare issued' through oracle_fusion.material_transactions.create with exact provider-critical values requestBody.SourceSystemCode='FUSION_MOBILE', requestBody.SourceSystemType='EXTERNAL', requestBody.MaterialTransactionDetail[0].OrganizationCode='SEA', requestBody.MaterialTransactionDetail[0].WorkOrderNumber='MWO-0084', requestBody.MaterialTransactionDetail[0].InventoryItemNumber='NS-COMP-084', requestBody.MaterialTransactionDetail[0].TransactionTypeCode='MATERIAL_ISSUE', requestBody.MaterialTransactionDetail[0].TransactionQuantity=38, requestBody.MaterialTransactionDetail[0].TransactionUnitOfMeasure='EA', requestBody.MaterialTransactionDetail[0].SubinventoryCode='SERVICE-STORES', requestBody.MaterialTransactionDetail[0].LotNumber='LOT-0084'. The audited transition binds selected option issue_matching_reserved_spare, revision R1, approval AP-0084, and constraint reservation, service priority, item, lot, and repair operation; stock reserved for higher-priority events or wrong ownership = 8 EA; uncovered or unsupported scope = 21.0 EA; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.MaterialTransactionDetail[0].InventoryItemNumber",
+          "requestBody.MaterialTransactionDetail[0].LotNumber",
+          "requestBody.MaterialTransactionDetail[0].OrganizationCode",
+          "requestBody.MaterialTransactionDetail[0].SubinventoryCode",
+          "requestBody.MaterialTransactionDetail[0].TransactionQuantity",
+          "requestBody.MaterialTransactionDetail[0].TransactionTypeCode",
+          "requestBody.MaterialTransactionDetail[0].TransactionUnitOfMeasure",
+          "requestBody.MaterialTransactionDetail[0].WorkOrderNumber",
+          "requestBody.SourceSystemCode",
+          "requestBody.SourceSystemType"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "MaterialTransactionDetail": [
+                {
+                  "InventoryItemNumber": "NS-COMP-084",
+                  "LotNumber": "LOT-0084",
+                  "OrganizationCode": "SEA",
+                  "SubinventoryCode": "SERVICE-STORES",
+                  "TransactionQuantity": 38,
+                  "TransactionTypeCode": "MATERIAL_ISSUE",
+                  "TransactionUnitOfMeasure": "EA",
+                  "WorkOrderNumber": "MWO-0084"
+                }
+              ],
+              "SourceSystemCode": "FUSION_MOBILE",
+              "SourceSystemType": "EXTERNAL"
+            }
+          },
+          "tool": "oracle_fusion.material_transactions.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"MaterialTransactionDetail\":[{\"InventoryItemNumber\":\"NS-COMP-084\",\"LotNumber\":\"LOT-0084\",\"OrganizationCode\":\"SEA\",\"SubinventoryCode\":\"STORES\",\"TransactionQuantity\":18,\"TransactionTypeCode\":\"MATERIAL_ISSUE\",\"TransactionUnitOfMeasure\":\"EA\",\"WorkOrderNumber\":\"WO-0084\"}],\"SourceSystemCode\":\"FUSION_MOBILE\",\"SourceSystemType\":\"EXTERNAL\"}},\"case\":\"CASE-084\",\"outcome\":\"Verify reservation, lot, and technician assignment before posting the material issue to the repair order.\",\"tool\":\"oracle_fusion.material_transactions.create\"}",
           "resource_type": "oracle_fusion.material_transactions",
           "revision": 1,
           "status": "Repair spare issued",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-084-mutation-01",
           "task_id": "factorybench-084"
         }
       },
       {
-        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "description": "Added the Oracle result to the existing case file as a comment containing issue_matching_reserved_spare, completion 2026-01-13, and the binding constraint.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "fileId": "drive-084"
+          },
+          "tool": "google_drive.comments.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-084",
+            "NS-000084",
+            "NS-COMP-084"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-13",
+          "issue_matching_reserved_spare"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_drive.comments",
@@ -57,14 +235,33 @@
           "status": "Recorded",
           "system": "google_drive"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-084-mutation-02",
           "task_id": "factorybench-084"
         }
       },
       {
-        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "description": "Sent service dispatch the scoped outcome for CASE-084, including completion 2026-01-13, the binding constraint, alternatives, and the Oracle business reference.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "threadId": "thread-084",
+            "userId": "me"
+          },
+          "tool": "gmail.messages.send"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-084",
+            "NS-000084",
+            "NS-COMP-084"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-13",
+          "issue_matching_reserved_spare"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "gmail.messages",
@@ -72,17 +269,1245 @@
           "status": "Recorded",
           "system": "gmail"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-084-mutation-03",
           "task_id": "factorybench-084"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-13 as the documented date for reserved emergency spare; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Established 59 EA for spare quantity required by the repair operation.",
+        "field": "source_quantity",
+        "id": "establish_source_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Correlated the independent source records to 46 observed EA.",
+        "field": "observed_quantity",
+        "id": "reconcile_observed_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Removed 8 EA for stock reserved for higher-priority events or wrong ownership.",
+        "field": "excluded_quantity",
+        "id": "identify_excluded_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 46 observed \u2212 8 excluded = 38 supported EA.",
+        "field": "supported_quantity",
+        "id": "calculate_supported_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Bound the Oracle transaction to exactly 38 EA, the measure required by the chosen disposition; did not substitute the header or another business quantity.",
+        "field": "transaction_quantity",
+        "id": "bound_transaction_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept the receipt, issue, transfer, inspection, or completion quantity in EA.",
+        "field": "quantity_unit",
+        "id": "preserve_transaction_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Derived 2026-01-13 for issue_matching_reserved_spare.",
+        "field": "baseline_resolution_date",
+        "id": "compare_quantity_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-14 for take_other_customer_reservation.",
+        "field": "controlled_resolution_date",
+        "id": "compare_quantity_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-15 for wait_for_standard_supply and recognized its control impact.",
+        "field": "escalated_resolution_date",
+        "id": "compare_quantity_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for issue_matching_reserved_spare; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that wait_for_standard_supply remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of issue_matching_reserved_spare, take_other_customer_reservation, and wait_for_standard_supply; selected issue_matching_reserved_spare because it alone gives the best currently authorized result under reservation, service priority, item, lot, and repair operation.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-13 as the supported outcome date for issue_matching_reserved_spare.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-13 with the independent control date 2026-01-13 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-084"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-084 scope, immutable handles, mounted systems, and evidence index before investigating NS-000084.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-084\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-084"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-084 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "id": "att-084",
+              "messageId": "msg-084-1",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "data": "Q0FTQ0FERSBJTkRVU1RSSUFMIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogc2VydmljZS1yZXNlcnZhdGlvbi1hbmQtc3BhcmUtaXNzdWUtbGVkZ2VyLTAwODQKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDg0Cklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IHNlcnZpY2UgcmVzZXJ2YXRpb24gYW5kIHNwYXJlLWlzc3VlIGxlZGdlcgpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDg0CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFIxCk1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMjEgRUEKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogdGFrZV9vdGhlcl9jdXN0b21lcl9yZXNlcnZhdGlvbgpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMQpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTIKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTQKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogcmVnaW9uYWwgcmVwbGFjZW1lbnQtc3RvY2sgYXJyaXZhbApDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBzdG9jayByZXNlcnZlZCBmb3IgaGlnaGVyLXByaW9yaXR5IGV2ZW50cyBvciB3cm9uZyBvd25lcnNoaXAKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogcmVzZXJ2YXRpb24sIHNlcnZpY2UgcHJpb3JpdHksIGl0ZW0sIGxvdCwgYW5kIHJlcGFpciBvcGVyYXRpb24KTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDg1IGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogQ2FzY2FkZSBJbmR1c3RyaWFsIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDg0ClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K",
+              "size": 1566
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.attachments.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-12 readiness input for take_other_customer_reservation, then separately derived its 2026-01-14 operating outcome under reservation, service priority, item, lot, and repair operation instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-084"
+            },
+            "expected_result_contains": {
+              "id": "drive-084"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-084",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-084"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-084"
+            },
+            "expected_result_contains": {
+              "id": "drive-084"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R1 and established 59 EA for spare quantity required by the repair operation, with control date 2026-01-13.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PRODUCTION",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000084.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-PRODUCTION",
+              "limit": 100,
+              "ts": "1768000084.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000084.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0084 only to issue_matching_reserved_spare, NS-000084, and the supported 38 EA; kept broader scope and wait_for_standard_supply outside current authority.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "includeGridData": false,
+              "ranges": [
+                "Control!A1:I50"
+              ],
+              "spreadsheetId": "sheet-084"
+            },
+            "expected_result_contains": {
+              "developerMetadata": [
+                {
+                  "metadataKey": "case",
+                  "metadataValue": "CASE-084"
+                }
+              ],
+              "spreadsheetId": "sheet-084"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-084' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-084"
+                },
+                {
+                  "id": "drive-approval-084"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-084 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-084-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-084-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-084-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-12 readiness input for take_other_customer_reservation, then separately derived its 2026-01-14 operating outcome under reservation, service priority, item, lot, and repair operation instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-084-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-084-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-084-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R1 and established 59 EA for spare quantity required by the repair operation, with control date 2026-01-13.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-084-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-084-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-084-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000084 at R1.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-084-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-084-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-084-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 46 observed less 8 excluded to 38 supported EA for reservation tied to the same service request and asset.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-084-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-084-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-084-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-084-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R1 and established 59 EA for spare quantity required by the repair operation, with control date 2026-01-13.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-084"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-084"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-084",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-084"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-084"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-084"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0084 only to issue_matching_reserved_spare, NS-000084, and the supported 38 EA; kept broader scope and wait_for_standard_supply outside current authority.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-084' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400084
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 46 observed less 8 excluded to 38 supported EA for reservation tied to the same service request and asset.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100084,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100084
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_materials.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle maintenance materials record: Applied revision R1 and established 59 EA for spare quantity required by the repair operation, with control date 2026-01-13.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100084
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100084
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='MWO-0084'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100084
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle maintenance work orders record: Located NS-000084 for reserved emergency spare using immutable IDs and preserved effective revision R1.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "SupplyOrderReferenceNumber='SUPPLY-0084'"
+            },
+            "expected_result_contains": {
+              "SupplyRequestId": 1500084
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.supply_requests.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-12 readiness input for take_other_customer_reservation, then separately derived its 2026-01-14 operating outcome under reservation, service priority, item, lot, and repair operation instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_17",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.material_transactions.create",
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100084,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100084
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_materials.list"
+          }
+        ],
+        "description": "Read NS-000084 back through the documented Oracle maintenance materials.list operation after the mutation and confirmed the resource-specific changed fields ['IssuedQuantity', 'LastUpdateDate', 'SupplySubinventory'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "IssuedQuantity": 38,
+          "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+          "SupplySubinventory": "SERVICE-STORES"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": false,
+        "target_identity": {
+          "WorkOrderId": 100084
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.material_transactions.create",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100084,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100084
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_materials.list"
+        }
+      ],
+      "description": "Read NS-000084 back through the documented Oracle maintenance materials.list operation after the mutation and confirmed the resource-specific changed fields ['IssuedQuantity', 'LastUpdateDate', 'SupplySubinventory'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "IssuedQuantity": 38,
+        "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+        "SupplySubinventory": "SERVICE-STORES"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "WorkOrderId": 100084
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-084"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-084 scope, immutable handles, mounted systems, and evidence index before investigating NS-000084.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-084\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-084"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-084 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-084",
+            "messageId": "msg-084-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "Q0FTQ0FERSBJTkRVU1RSSUFMIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogc2VydmljZS1yZXNlcnZhdGlvbi1hbmQtc3BhcmUtaXNzdWUtbGVkZ2VyLTAwODQKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDg0Cklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IHNlcnZpY2UgcmVzZXJ2YXRpb24gYW5kIHNwYXJlLWlzc3VlIGxlZGdlcgpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDg0CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFIxCk1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMjEgRUEKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogdGFrZV9vdGhlcl9jdXN0b21lcl9yZXNlcnZhdGlvbgpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMQpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTIKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTQKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogcmVnaW9uYWwgcmVwbGFjZW1lbnQtc3RvY2sgYXJyaXZhbApDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBzdG9jayByZXNlcnZlZCBmb3IgaGlnaGVyLXByaW9yaXR5IGV2ZW50cyBvciB3cm9uZyBvd25lcnNoaXAKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogcmVzZXJ2YXRpb24sIHNlcnZpY2UgcHJpb3JpdHksIGl0ZW0sIGxvdCwgYW5kIHJlcGFpciBvcGVyYXRpb24KTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDg1IGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogQ2FzY2FkZSBJbmR1c3RyaWFsIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDg0ClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K",
+            "size": 1566
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-12 readiness input for take_other_customer_reservation, then separately derived its 2026-01-14 operating outcome under reservation, service priority, item, lot, and repair operation instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-084"
+          },
+          "expected_result_contains": {
+            "id": "drive-084"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-084",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-084"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-084"
+          },
+          "expected_result_contains": {
+            "id": "drive-084"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R1 and established 59 EA for spare quantity required by the repair operation, with control date 2026-01-13.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PRODUCTION",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000084.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-PRODUCTION",
+            "limit": 100,
+            "ts": "1768000084.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000084.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0084 only to issue_matching_reserved_spare, NS-000084, and the supported 38 EA; kept broader scope and wait_for_standard_supply outside current authority.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-084"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-084"
+              }
+            ],
+            "spreadsheetId": "sheet-084"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-084' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-084"
+              },
+              {
+                "id": "drive-approval-084"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-084 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-084-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-084-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-084-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-12 readiness input for take_other_customer_reservation, then separately derived its 2026-01-14 operating outcome under reservation, service priority, item, lot, and repair operation instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-084-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-084-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-084-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R1 and established 59 EA for spare quantity required by the repair operation, with control date 2026-01-13.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-084-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-084-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-084-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000084 at R1.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-084-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-084-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-084-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 46 observed less 8 excluded to 38 supported EA for reservation tied to the same service request and asset.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-084-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-084-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-084-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-084-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R1 and established 59 EA for spare quantity required by the repair operation, with control date 2026-01-13.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-084"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-084"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-084",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-084"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-084"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-084"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0084 only to issue_matching_reserved_spare, NS-000084, and the supported 38 EA; kept broader scope and wait_for_standard_supply outside current authority.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-084' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400084
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 46 observed less 8 excluded to 38 supported EA for reservation tied to the same service request and asset.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100084,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100084
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_materials.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance materials record: Applied revision R1 and established 59 EA for spare quantity required by the repair operation, with control date 2026-01-13.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100084
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100084
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='MWO-0084'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100084
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance work orders record: Located NS-000084 for reserved emergency spare using immutable IDs and preserved effective revision R1.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0084'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 1500084
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-12 readiness input for take_other_customer_reservation, then separately derived its 2026-01-14 operating outcome under reservation, service priority, item, lot, and repair operation instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_17",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-084"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
     },
     {
@@ -91,14 +1516,37 @@
         "q": "\"CASE-084\"",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-084"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "id": "att-084",
+        "messageId": "msg-084-1",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "data": "Q0FTQ0FERSBJTkRVU1RSSUFMIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogc2VydmljZS1yZXNlcnZhdGlvbi1hbmQtc3BhcmUtaXNzdWUtbGVkZ2VyLTAwODQKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDg0Cklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IHNlcnZpY2UgcmVzZXJ2YXRpb24gYW5kIHNwYXJlLWlzc3VlIGxlZGdlcgpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDg0CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFIxCk1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMjEgRUEKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogdGFrZV9vdGhlcl9jdXN0b21lcl9yZXNlcnZhdGlvbgpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMQpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTIKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTQKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogcmVnaW9uYWwgcmVwbGFjZW1lbnQtc3RvY2sgYXJyaXZhbApDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBzdG9jayByZXNlcnZlZCBmb3IgaGlnaGVyLXByaW9yaXR5IGV2ZW50cyBvciB3cm9uZyBvd25lcnNoaXAKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogcmVzZXJ2YXRpb24sIHNlcnZpY2UgcHJpb3JpdHksIGl0ZW0sIGxvdCwgYW5kIHJlcGFpciBvcGVyYXRpb24KTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDg1IGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogQ2FzY2FkZSBJbmR1c3RyaWFsIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDg0ClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K",
+        "size": 1566
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
         "fileId": "drive-084"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "drive-084"
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.download"
     },
     {
@@ -107,48 +1555,184 @@
         "limit": 100,
         "ts": "1768000084.000100"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000084.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
         "includeGridData": false,
         "ranges": [
-          "Control!A1:H50"
+          "Control!A1:I50"
         ],
         "spreadsheetId": "sheet-084"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "developerMetadata": [
+          {
+            "metadataKey": "case",
+            "metadataValue": "CASE-084"
+          }
+        ],
+        "spreadsheetId": "sheet-084"
+      },
+      "match": "result_contains",
       "tool": "google_sheets.spreadsheets.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-084' and trashed = false"
+      },
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-084"
+          },
+          {
+            "id": "drive-approval-084"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-084-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-084-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-084-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-084-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-084-09",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-084-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-084-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-084-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-084-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-084-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-084"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-084"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-084'"
+        "q": "ItemNumber='NS-COMP-084' and OrganizationCode='SEA'"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "InventoryItemId": 1400084
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.inventory_onhand_balances.list"
     },
     {
       "arguments": {
         "WorkOrderId": 100084,
         "limit": 50,
-        "onlyData": true,
-        "q": "ReferenceNumber='CASE-084'"
+        "onlyData": true
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.work_order_materials.list"
+      "expected_result_contains": {
+        "WorkOrderId": 100084
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.maintenance_materials.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100084
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 100084
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.maintenance_work_orders.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "SupplyOrderReferenceNumber='SUPPLY-0084'"
+      },
+      "expected_result_contains": {
+        "SupplyRequestId": 1500084
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.supply_requests.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
     "gmail.messages.list",
+    "gmail.messages.attachments.get",
     "google_drive.files.download",
     "slack.conversations_replies",
     "google_sheets.spreadsheets.get",
+    "google_drive.files.list",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.export",
+    "google_drive.files.get",
     "oracle_fusion.inventory_onhand_balances.list",
-    "oracle_fusion.work_order_materials.list"
+    "oracle_fusion.maintenance_materials.list",
+    "oracle_fusion.maintenance_work_orders.get",
+    "oracle_fusion.supply_requests.list"
   ],
   "task_id": "factorybench-084",
   "write_tools": [

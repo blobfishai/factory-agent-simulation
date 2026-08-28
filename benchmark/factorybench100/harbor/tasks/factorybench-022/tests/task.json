@@ -7,49 +7,228 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "asset_or_resource": {
+      "accelerated_completion": {
+        "description": "Outcome date for expedite_seal_housing.",
         "type": "string"
       },
-      "maintenance_order": {
+      "baseline_completion": {
+        "description": "Outcome date for standard_repair_plan.",
         "type": "string"
       },
-      "planned_finish": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
+      },
+      "coverage_item_or_resource": {
+        "description": "Immutable item or resource whose requirement and eligible coverage were reconciled.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_completion": {
+        "description": "Outcome date for move_to_overtime_repair.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "expedited_external_readiness": {
+        "description": "Expedited readiness date independently confirmed for seal-housing standard and expedite dates.",
+        "type": "string"
+      },
+      "external_recovery_quantity": {
+        "description": "Uncovered EA that the external recovery must cover.",
+        "type": "integer"
+      },
+      "ineligible_coverage_quantity": {
+        "description": "seal housings quarantined or reserved, plus damage outside the approved scope",
+        "type": "integer"
+      },
+      "observed_coverage_quantity": {
+        "description": "Gross observed coverage for seal housings in stock and eligible for this repair before exclusions.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "quantity_unit": {
+        "description": "Unit shared by the requirement and coverage calculations: EA.",
+        "type": "string"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental recovery cost of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing standard_repair_plan, expedite_seal_housing, move_to_overtime_repair.",
+        "enum": [
+          "standard_repair_plan",
+          "expedite_seal_housing",
+          "move_to_overtime_repair"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "required_quantity": {
+        "description": "seal housings required by the approved teardown scope",
+        "type": "integer"
+      },
+      "shortage_quantity": {
+        "description": "Uncovered EA after netting eligible coverage from the requirement.",
+        "type": "integer"
+      },
+      "standard_external_readiness": {
+        "description": "Standard readiness date independently confirmed for seal-housing standard and expedite dates.",
+        "type": "string"
+      },
+      "usable_coverage_quantity": {
+        "description": "Net eligible coverage after removing seal housings quarantined or reserved, plus damage outside the approved scope.",
+        "type": "integer"
       }
     },
     "required": [
-      "asset_or_resource",
-      "maintenance_order",
-      "planned_finish"
+      "accelerated_completion",
+      "baseline_completion",
+      "business_need_date",
+      "coverage_item_or_resource",
+      "decision_timing_status",
+      "escalated_completion",
+      "escalation_approval_required",
+      "expedited_external_readiness",
+      "external_recovery_quantity",
+      "ineligible_coverage_quantity",
+      "observed_coverage_quantity",
+      "outcome_vs_control_days",
+      "quantity_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "required_quantity",
+      "shortage_quantity",
+      "standard_external_readiness",
+      "usable_coverage_quantity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "asset_or_resource": "FB-022",
-      "maintenance_order": "MWO-0022",
-      "planned_finish": "2026-01-16"
+      "accelerated_completion": "2026-01-22",
+      "baseline_completion": "2026-01-25",
+      "business_need_date": "2026-01-22",
+      "coverage_item_or_resource": "PUMP-SEAL-HSG-07",
+      "decision_timing_status": "ON_TIME",
+      "escalated_completion": "2026-01-21",
+      "escalation_approval_required": 1,
+      "expedited_external_readiness": "2026-01-20",
+      "external_recovery_quantity": 1,
+      "ineligible_coverage_quantity": 2,
+      "observed_coverage_quantity": 2,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 1480,
+      "recommended_option": "expedite_seal_housing",
+      "recommended_outcome_date": "2026-01-22",
+      "required_quantity": 1,
+      "shortage_quantity": 1,
+      "standard_external_readiness": "2026-01-23",
+      "usable_coverage_quantity": 0
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'expedite_seal_housing', tied to NS-000022, revision R4, and the selected expedite_seal_housing outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-22', tied to NS-000022, revision R4, and the selected expedite_seal_housing outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported coverage item or resource as 'PUMP-SEAL-HSG-07', tied to NS-000022, revision R4, and the selected expedite_seal_housing outcome.",
+        "field": "coverage_item_or_resource",
+        "id": "answer_coverage_item_or_resource",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported shortage quantity as 1, tied to NS-000022, revision R4, and the selected expedite_seal_housing outcome.",
+        "field": "shortage_quantity",
+        "id": "answer_shortage_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000022, revision R4, and the selected expedite_seal_housing outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.maintenance_work_orders.update produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000022 to reach business outcome 'Repair scope revised' through oracle_fusion.maintenance_work_orders.update with exact provider-critical values WorkOrderId=100022, requestBody.WorkOrderStatusCode='ORA_RELEASED', requestBody.PlannedCompletionDate='2026-01-22'. Human-authored names, descriptions, notes, and reasons are accepted when they preserve the task-scoped business meaning. The audited transition binds selected option expedite_seal_housing, revision R4, approval AP-0022, and constraint approved scope change, part readiness, and qualified repair window; seal housings quarantined or reserved, plus damage outside the approved scope = 2 EA; uncovered or unsupported scope = 1.0 EA; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "WorkOrderId",
+          "requestBody.PlannedCompletionDate",
+          "requestBody.WorkOrderDescription",
+          "requestBody.WorkOrderStatusCode"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "WorkOrderId": 100022,
+            "requestBody": {
+              "PlannedCompletionDate": "2026-01-22",
+              "WorkOrderStatusCode": "ORA_RELEASED"
+            }
+          },
+          "tool": "oracle_fusion.maintenance_work_orders.update"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"WorkOrderId\":100022,\"requestBody\":{\"PlannedCompletionDate\":\"2026-01-21\",\"WorkOrderDescription\":\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-022\",\"outcome\":\"Use the teardown photos, parts quote, and approved scope change to update the existing maintenance order dates and description.\",\"tool\":\"oracle_fusion.maintenance_work_orders.update\"}",
           "resource_type": "oracle_fusion.maintenance_work_orders",
           "revision": 1,
           "status": "Repair scope revised",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-022-mutation-01",
           "task_id": "factorybench-022"
         }
       },
       {
-        "description": "google_drive.comments.create produced the task-scoped, source-audited state transition.",
+        "description": "Added the Oracle result to the existing case file as a comment containing expedite_seal_housing, completion 2026-01-22, and the binding constraint.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "fileId": "drive-022"
+          },
+          "tool": "google_drive.comments.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-022",
+            "NS-000022",
+            "PUMP-SEAL-HSG-07"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-22",
+          "expedite_seal_housing"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_drive.comments",
@@ -57,14 +236,33 @@
           "status": "Recorded",
           "system": "google_drive"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-022-mutation-02",
           "task_id": "factorybench-022"
         }
       },
       {
-        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "description": "Sent production operations the scoped outcome for CASE-022, including completion 2026-01-22, the binding constraint, alternatives, and the Oracle business reference.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "threadId": "thread-022",
+            "userId": "me"
+          },
+          "tool": "gmail.messages.send"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-022",
+            "NS-000022",
+            "PUMP-SEAL-HSG-07"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-22",
+          "expedite_seal_housing"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "gmail.messages",
@@ -72,38 +270,1284 @@
           "status": "Recorded",
           "system": "gmail"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-022-mutation-03",
           "task_id": "factorybench-022"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-22 as the documented date for pump repair MWO-0022; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 1 EA for seal housings required by the approved teardown scope at revision R4.",
+        "field": "required_quantity",
+        "id": "derive_plan_requirement",
+        "weight": 2.0
+      },
+      {
+        "description": "Read 2 EA of gross observed seal housings in stock and eligible for this repair.",
+        "field": "observed_coverage_quantity",
+        "id": "read_gross_coverage",
+        "weight": 1.0
+      },
+      {
+        "description": "Excluded 2 EA for seal housings quarantined or reserved, plus damage outside the approved scope.",
+        "field": "ineligible_coverage_quantity",
+        "id": "remove_ineligible_coverage",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 2 observed \u2212 2 ineligible = 0 usable EA.",
+        "field": "usable_coverage_quantity",
+        "id": "calculate_usable_coverage",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 1 required \u2212 0 usable = 1 EA uncovered.",
+        "field": "shortage_quantity",
+        "id": "calculate_plan_gap",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept every planning quantity in EA.",
+        "field": "quantity_unit",
+        "id": "preserve_plan_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Calculated standard_repair_plan outcome as 2026-01-25 under electrical-shop base and recovery slots.",
+        "field": "baseline_completion",
+        "id": "compare_baseline_plan",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated expedite_seal_housing outcome as 2026-01-22 using seal-housing standard and expedite dates.",
+        "field": "accelerated_completion",
+        "id": "compare_accelerated_plan",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated move_to_overtime_repair outcome as 2026-01-21 and kept its separate-approval condition.",
+        "field": "escalated_completion",
+        "id": "compare_escalated_plan",
+        "weight": 1.0
+      },
+      {
+        "description": "Read 2026-01-23 as the independently confirmed standard readiness date for seal-housing standard and expedite dates.",
+        "field": "standard_external_readiness",
+        "id": "read_standard_external_readiness",
+        "weight": 1.0
+      },
+      {
+        "description": "Read 2026-01-20 as the independently confirmed expedited readiness date for seal-housing standard and expedite dates.",
+        "field": "expedited_external_readiness",
+        "id": "read_expedited_external_readiness",
+        "weight": 1.0
+      },
+      {
+        "description": "Bound external recovery to the 1 EA uncovered requirement rather than ordering the full header quantity.",
+        "field": "external_recovery_quantity",
+        "id": "bound_external_recovery_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 1480 as the documented incremental recovery cost for expedite_seal_housing; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that move_to_overtime_repair remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of standard_repair_plan, expedite_seal_housing, and move_to_overtime_repair; selected expedite_seal_housing because it alone gives the best currently authorized result under approved scope change, part readiness, and qualified repair window.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-22 as the supported outcome date for expedite_seal_housing.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-22 with the independent control date 2026-01-22 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-022"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-022 scope, immutable handles, mounted systems, and evidence index before investigating NS-000022.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-022\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-022"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-022 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "id": "att-022",
+              "messageId": "msg-022-1",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogdGVhcmRvd24tc2NvcGUtcGFydHMtYW5kLXNob3AtY2FsZW5kYXItMDAyMgpDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMjIKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogdGVhcmRvd24gc2NvcGUsIHBhcnRzLCBhbmQgc2hvcCBjYWxlbmRhcgpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IFBVTVAtU0VBTC1IU0ctMDcKRWZmZWN0aXZlIHJldmlzaW9uIHN1cHBsaWVkIGJ5IHJlcXVlc3RlcjogUjQKTWF4aW11bSBzY29wZSByZXByZXNlbnRlZCBieSB0aGlzIHJlc3BvbnNlOiAxIEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IGV4cGVkaXRlX3NlYWxfaG91c2luZwpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0yMwpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMjAKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMjIKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAxNDgwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogc2VhbC1ob3VzaW5nIHN0YW5kYXJkIGFuZCBleHBlZGl0ZSBkYXRlcwpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBzZWFsIGhvdXNpbmdzIHF1YXJhbnRpbmVkIG9yIHJlc2VydmVkLCBwbHVzIGRhbWFnZSBvdXRzaWRlIHRoZSBhcHByb3ZlZCBzY29wZQpDb250cm9sIG5vdCBldmFsdWF0ZWQgYnkgY291bnRlcnBhcnR5OiBhcHByb3ZlZCBzY29wZSBjaGFuZ2UsIHBhcnQgcmVhZGluZXNzLCBhbmQgcXVhbGlmaWVkIHJlcGFpciB3aW5kb3cKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDIzIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogUmFpbmllciBDb21wb25lbnRzIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDIyClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K",
+              "size": 1584
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.attachments.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-20 readiness input for expedite_seal_housing, then separately derived its 2026-01-22 operating outcome under approved scope change, part readiness, and qualified repair window instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-022"
+            },
+            "expected_result_contains": {
+              "id": "drive-022"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-022",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-022"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-022"
+            },
+            "expected_result_contains": {
+              "id": "drive-022"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R4 and established 1 EA for seal housings required by the approved teardown scope, with control date 2026-01-22.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000022.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000022.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000022.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0022 only to expedite_seal_housing, NS-000022, and the supported 0 EA; kept broader scope and move_to_overtime_repair outside current authority.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "includeGridData": false,
+              "ranges": [
+                "Control!A1:I50"
+              ],
+              "spreadsheetId": "sheet-022"
+            },
+            "expected_result_contains": {
+              "developerMetadata": [
+                {
+                  "metadataKey": "case",
+                  "metadataValue": "CASE-022"
+                }
+              ],
+              "spreadsheetId": "sheet-022"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-022' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-022"
+                },
+                {
+                  "id": "drive-approval-022"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-022 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-022-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-022-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-022-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R4 and established 1 EA for seal housings required by the approved teardown scope, with control date 2026-01-22.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-022-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-022-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-022-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R4 and established 1 EA for seal housings required by the approved teardown scope, with control date 2026-01-22.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-022-11"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-022-11",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-022-11"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the raw operating-window calendar and Applied electrical-shop base and recovery slots to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-022-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-022-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-022-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-20 readiness input for expedite_seal_housing, then separately derived its 2026-01-22 operating outcome under approved scope change, part readiness, and qualified repair window instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-022-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-022-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-022-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-022-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000022 at R4.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-022"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-022"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-022",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-022"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-022"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-022"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0022 only to expedite_seal_housing, NS-000022, and the supported 0 EA; kept broader scope and move_to_overtime_repair outside current authority.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100022
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100022
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='MWO-0022'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100022
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle maintenance work orders record: Located NS-000022 for pump repair MWO-0022 using immutable IDs and preserved effective revision R4.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='PUMP-SEAL-HSG-07' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400022
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 2 observed less 2 excluded to 0 supported EA for seal housings in stock and eligible for this repair.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100022,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100022
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_resources.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle maintenance resources record: Applied electrical-shop base and recovery slots to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100022,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100022
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_operations.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle maintenance operations record: Applied electrical-shop base and recovery slots to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_17",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.maintenance_work_orders.update",
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100022
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100022
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='MWO-0022'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100022
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.list"
+          }
+        ],
+        "description": "Read NS-000022 back through the documented Oracle maintenance work orders.get operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'PlannedCompletionDate', 'WorkOrderStatusCode'], including the effective update at 2026-01-22, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "LastUpdateDate": "2026-01-22T16:00:00-08:00",
+          "PlannedCompletionDate": "2026-01-22",
+          "WorkOrderStatusCode": "ORA_RELEASED"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": false,
+        "target_identity": {
+          "WorkOrderId": 100022
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.maintenance_work_orders.update",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100022
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100022
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='MWO-0022'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100022
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.list"
+        }
+      ],
+      "description": "Read NS-000022 back through the documented Oracle maintenance work orders.get operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'PlannedCompletionDate', 'WorkOrderStatusCode'], including the effective update at 2026-01-22, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "LastUpdateDate": "2026-01-22T16:00:00-08:00",
+        "PlannedCompletionDate": "2026-01-22",
+        "WorkOrderStatusCode": "ORA_RELEASED"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "WorkOrderId": 100022
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-022"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-022 scope, immutable handles, mounted systems, and evidence index before investigating NS-000022.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-022\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-022"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-022 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-022",
+            "messageId": "msg-022-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogdGVhcmRvd24tc2NvcGUtcGFydHMtYW5kLXNob3AtY2FsZW5kYXItMDAyMgpDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMjIKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogdGVhcmRvd24gc2NvcGUsIHBhcnRzLCBhbmQgc2hvcCBjYWxlbmRhcgpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IFBVTVAtU0VBTC1IU0ctMDcKRWZmZWN0aXZlIHJldmlzaW9uIHN1cHBsaWVkIGJ5IHJlcXVlc3RlcjogUjQKTWF4aW11bSBzY29wZSByZXByZXNlbnRlZCBieSB0aGlzIHJlc3BvbnNlOiAxIEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IGV4cGVkaXRlX3NlYWxfaG91c2luZwpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0yMwpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMjAKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMjIKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAxNDgwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogc2VhbC1ob3VzaW5nIHN0YW5kYXJkIGFuZCBleHBlZGl0ZSBkYXRlcwpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBzZWFsIGhvdXNpbmdzIHF1YXJhbnRpbmVkIG9yIHJlc2VydmVkLCBwbHVzIGRhbWFnZSBvdXRzaWRlIHRoZSBhcHByb3ZlZCBzY29wZQpDb250cm9sIG5vdCBldmFsdWF0ZWQgYnkgY291bnRlcnBhcnR5OiBhcHByb3ZlZCBzY29wZSBjaGFuZ2UsIHBhcnQgcmVhZGluZXNzLCBhbmQgcXVhbGlmaWVkIHJlcGFpciB3aW5kb3cKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDIzIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogUmFpbmllciBDb21wb25lbnRzIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDIyClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K",
+            "size": 1584
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-20 readiness input for expedite_seal_housing, then separately derived its 2026-01-22 operating outcome under approved scope change, part readiness, and qualified repair window instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-022"
+          },
+          "expected_result_contains": {
+            "id": "drive-022"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-022",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-022"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-022"
+          },
+          "expected_result_contains": {
+            "id": "drive-022"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R4 and established 1 EA for seal housings required by the approved teardown scope, with control date 2026-01-22.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000022.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000022.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000022.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0022 only to expedite_seal_housing, NS-000022, and the supported 0 EA; kept broader scope and move_to_overtime_repair outside current authority.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-022"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-022"
+              }
+            ],
+            "spreadsheetId": "sheet-022"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-022' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-022"
+              },
+              {
+                "id": "drive-approval-022"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-022 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-022-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-022-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-022-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R4 and established 1 EA for seal housings required by the approved teardown scope, with control date 2026-01-22.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-022-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-022-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-022-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R4 and established 1 EA for seal housings required by the approved teardown scope, with control date 2026-01-22.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-022-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-022-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-022-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied electrical-shop base and recovery slots to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-022-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-022-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-022-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-20 readiness input for expedite_seal_housing, then separately derived its 2026-01-22 operating outcome under approved scope change, part readiness, and qualified repair window instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-022-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-022-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-022-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-022-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000022 at R4.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-022"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-022"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-022",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-022"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-022"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-022"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0022 only to expedite_seal_housing, NS-000022, and the supported 0 EA; kept broader scope and move_to_overtime_repair outside current authority.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100022
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100022
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='MWO-0022'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100022
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance work orders record: Located NS-000022 for pump repair MWO-0022 using immutable IDs and preserved effective revision R4.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='PUMP-SEAL-HSG-07' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400022
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 2 observed less 2 excluded to 0 supported EA for seal housings in stock and eligible for this repair.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100022,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100022
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_resources.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance resources record: Applied electrical-shop base and recovery slots to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100022,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100022
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance operations record: Applied electrical-shop base and recovery slots to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_17",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-022"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
-    },
-    {
-      "arguments": {
-        "channel": "C-QUALITY",
-        "limit": 100,
-        "ts": "1768000022.000100"
-      },
-      "match": "successful_tool_call",
-      "tool": "slack.conversations_replies"
-    },
-    {
-      "arguments": {
-        "includeGridData": false,
-        "ranges": [
-          "Control!A1:H50"
-        ],
-        "spreadsheetId": "sheet-022"
-      },
-      "match": "successful_tool_call",
-      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
@@ -111,41 +1555,223 @@
         "q": "\"CASE-022\"",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-022"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "id": "att-022",
+        "messageId": "msg-022-1",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogdGVhcmRvd24tc2NvcGUtcGFydHMtYW5kLXNob3AtY2FsZW5kYXItMDAyMgpDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMjIKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogdGVhcmRvd24gc2NvcGUsIHBhcnRzLCBhbmQgc2hvcCBjYWxlbmRhcgpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IFBVTVAtU0VBTC1IU0ctMDcKRWZmZWN0aXZlIHJldmlzaW9uIHN1cHBsaWVkIGJ5IHJlcXVlc3RlcjogUjQKTWF4aW11bSBzY29wZSByZXByZXNlbnRlZCBieSB0aGlzIHJlc3BvbnNlOiAxIEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IGV4cGVkaXRlX3NlYWxfaG91c2luZwpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0yMwpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMjAKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMjIKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAxNDgwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogc2VhbC1ob3VzaW5nIHN0YW5kYXJkIGFuZCBleHBlZGl0ZSBkYXRlcwpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBzZWFsIGhvdXNpbmdzIHF1YXJhbnRpbmVkIG9yIHJlc2VydmVkLCBwbHVzIGRhbWFnZSBvdXRzaWRlIHRoZSBhcHByb3ZlZCBzY29wZQpDb250cm9sIG5vdCBldmFsdWF0ZWQgYnkgY291bnRlcnBhcnR5OiBhcHByb3ZlZCBzY29wZSBjaGFuZ2UsIHBhcnQgcmVhZGluZXNzLCBhbmQgcXVhbGlmaWVkIHJlcGFpciB3aW5kb3cKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDIzIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogUmFpbmllciBDb21wb25lbnRzIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDIyClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K",
+        "size": 1584
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
         "fileId": "drive-022"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "drive-022"
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "limit": 50,
-        "onlyData": true,
-        "q": "ReferenceNumber='CASE-022'"
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000022.000100"
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.maintenance_work_orders.list"
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000022.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:I50"
+        ],
+        "spreadsheetId": "sheet-022"
+      },
+      "expected_result_contains": {
+        "developerMetadata": [
+          {
+            "metadataKey": "case",
+            "metadataValue": "CASE-022"
+          }
+        ],
+        "spreadsheetId": "sheet-022"
+      },
+      "match": "result_contains",
+      "tool": "google_sheets.spreadsheets.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-022' and trashed = false"
+      },
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-022"
+          },
+          {
+            "id": "drive-approval-022"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-022-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-022-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-022-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-022-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-022-11"
+      },
+      "expected_result_contains": {
+        "id": "drive-022-11"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-022-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-022-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-022-09"
+      },
+      "expected_result_contains": {
+        "id": "drive-022-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-022"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-022"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
         "WorkOrderId": 100022
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "WorkOrderId": 100022
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.maintenance_work_orders.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ItemNumber='PUMP-SEAL-HSG-07' and OrganizationCode='SEA'"
+      },
+      "expected_result_contains": {
+        "InventoryItemId": 1400022
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100022,
+        "limit": 50,
+        "onlyData": true
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 100022
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.maintenance_resources.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100022,
+        "limit": 50,
+        "onlyData": true
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 100022
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.maintenance_operations.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
+    "gmail.messages.list",
+    "gmail.messages.attachments.get",
+    "google_drive.files.download",
     "slack.conversations_replies",
     "google_sheets.spreadsheets.get",
-    "gmail.messages.list",
+    "google_drive.files.list",
+    "google_drive.files.get",
+    "google_drive.files.export",
     "google_drive.files.download",
-    "oracle_fusion.maintenance_work_orders.list",
-    "oracle_fusion.maintenance_work_orders.get"
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.get",
+    "oracle_fusion.maintenance_work_orders.get",
+    "oracle_fusion.inventory_onhand_balances.list",
+    "oracle_fusion.maintenance_resources.list",
+    "oracle_fusion.maintenance_operations.list"
   ],
   "task_id": "factorybench-022",
   "write_tools": [

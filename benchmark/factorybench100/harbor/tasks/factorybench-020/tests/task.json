@@ -7,49 +7,206 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "affected_order": {
+      "baseline_action_date": {
+        "description": "Action date under hold_exposed_serials_and_open_maintenance.",
         "type": "string"
       },
-      "recovery_route": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
       },
-      "revised_completion": {
+      "candidate_record_count": {
+        "description": "open serials exposed after calibration expiry",
+        "type": "integer"
+      },
+      "controlled_action_date": {
+        "description": "Action date under continue_with_expired_tool.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "effective_revision": {
+        "description": "Effective approved revision after rejecting drafts and superseded records.",
+        "type": "string"
+      },
+      "escalated_action_date": {
+        "description": "Action date under release_all_completed_serials.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "excluded_record_count": {
+        "description": "post-expiry serials and unverified torque records",
+        "type": "integer"
+      },
+      "immutable_match_key": {
+        "description": "Pipe-delimited source_or_target_record|effective_revision|case_reference used to correlate source and target without name matching.",
+        "type": "string"
+      },
+      "matching_record_count": {
+        "description": "serials completed before expiry with valid trace",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing hold_exposed_serials_and_open_maintenance, continue_with_expired_tool, release_all_completed_serials.",
+        "enum": [
+          "hold_exposed_serials_and_open_maintenance",
+          "continue_with_expired_tool",
+          "release_all_completed_serials"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "source_or_target_record": {
+        "description": "Immutable source or target record identifier in the effectivity or traceability decision.",
         "type": "string"
       }
     },
     "required": [
-      "affected_order",
-      "recovery_route",
-      "revised_completion"
+      "baseline_action_date",
+      "business_need_date",
+      "candidate_record_count",
+      "controlled_action_date",
+      "decision_timing_status",
+      "effective_revision",
+      "escalated_action_date",
+      "escalation_approval_required",
+      "excluded_record_count",
+      "immutable_match_key",
+      "matching_record_count",
+      "outcome_vs_control_days",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "source_or_target_record"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "affected_order": "ORD-0020",
-      "recovery_route": "SEA-1",
-      "revised_completion": "2026-01-14"
+      "baseline_action_date": "2026-01-13",
+      "business_need_date": "2026-01-17",
+      "candidate_record_count": 5,
+      "controlled_action_date": "2026-01-12",
+      "decision_timing_status": "ON_TIME",
+      "effective_revision": "R7",
+      "escalated_action_date": "2026-01-20",
+      "escalation_approval_required": 1,
+      "excluded_record_count": 4,
+      "immutable_match_key": "NS-000020|R7|CASE-020",
+      "matching_record_count": 1,
+      "outcome_vs_control_days": -4,
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "hold_exposed_serials_and_open_maintenance",
+      "recommended_outcome_date": "2026-01-13",
+      "source_or_target_record": "NS-000020"
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'hold_exposed_serials_and_open_maintenance', tied to NS-000020, revision R7, and the selected hold_exposed_serials_and_open_maintenance outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-13', tied to NS-000020, revision R7, and the selected hold_exposed_serials_and_open_maintenance outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported source or target record as 'NS-000020', tied to NS-000020, revision R7, and the selected hold_exposed_serials_and_open_maintenance outcome.",
+        "field": "source_or_target_record",
+        "id": "answer_source_or_target_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported immutable match key as 'NS-000020|R7|CASE-020', tied to NS-000020, revision R7, and the selected hold_exposed_serials_and_open_maintenance outcome.",
+        "field": "immutable_match_key",
+        "id": "answer_immutable_match_key",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000020, revision R7, and the selected hold_exposed_serials_and_open_maintenance outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.maintenance_work_orders.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000020 to reach business outcome 'Calibration recovery opened' through oracle_fusion.maintenance_work_orders.create with exact provider-critical values requestBody.OrganizationCode='SEA', requestBody.WorkOrderNumber='MWO-0020', requestBody.AssetNumber='ASSET-020', requestBody.WorkOrderTypeCode='CORRECTIVE', requestBody.WorkOrderStatusCode='ORA_RELEASED', requestBody.PlannedStartDate='2026-01-12', requestBody.PlannedCompletionDate='2026-01-13'. Human-authored names, descriptions, notes, and reasons are accepted when they preserve the task-scoped business meaning. The audited transition binds selected option hold_exposed_serials_and_open_maintenance, revision R7, approval AP-0020, and constraint production stays held until a calibrated tool and corrective work exist; post-expiry serials and unverified torque records = 4 SERIALS; uncovered or unsupported scope = 4.0 SERIALS; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.AssetNumber",
+          "requestBody.OrganizationCode",
+          "requestBody.PlannedCompletionDate",
+          "requestBody.PlannedStartDate",
+          "requestBody.WorkOrderDescription",
+          "requestBody.WorkOrderNumber",
+          "requestBody.WorkOrderStatusCode",
+          "requestBody.WorkOrderTypeCode"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "AssetNumber": "ASSET-020",
+              "OrganizationCode": "SEA",
+              "PlannedCompletionDate": "2026-01-13",
+              "PlannedStartDate": "2026-01-12",
+              "WorkOrderNumber": "MWO-0020",
+              "WorkOrderStatusCode": "ORA_RELEASED",
+              "WorkOrderTypeCode": "CORRECTIVE"
+            }
+          },
+          "tool": "oracle_fusion.maintenance_work_orders.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"AssetNumber\":\"ASSET-020\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-17\",\"PlannedStartDate\":\"2026-01-14\",\"WorkOrderDescription\":\"Confirm the expired certificate and affected serial range, then move the operation out of the unsafe window and create corrective maintenance.\",\"WorkOrderNumber\":\"MWO-0020\",\"WorkOrderStatusCode\":\"Released\",\"WorkOrderTypeCode\":\"CORRECTIVE\"}},\"case\":\"CASE-020\",\"outcome\":\"Confirm the expired certificate and affected serial range, then move the operation out of the unsafe window and create corrective maintenance.\",\"tool\":\"oracle_fusion.maintenance_work_orders.create\"}",
           "resource_type": "oracle_fusion.maintenance_work_orders",
           "revision": 1,
           "status": "Calibration recovery opened",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-020-mutation-01",
           "task_id": "factorybench-020"
         }
       },
       {
-        "description": "google_sheets.spreadsheets.values.append produced the task-scoped, source-audited state transition.",
+        "description": "Appended one audit row for CASE-020 with the selected option, completion, role, and AP-0020.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "range": "Audit!A:G",
+            "spreadsheetId": "sheet-020"
+          },
+          "tool": "google_sheets.spreadsheets.values.append"
+        },
+        "payload_text_contains": [
+          "2026-01-13",
+          "hold_exposed_serials_and_open_maintenance"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_sheets.spreadsheets.values",
@@ -57,14 +214,23 @@
           "status": "Recorded",
           "system": "google_sheets"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-020-mutation-02",
           "task_id": "factorybench-020"
         }
       },
       {
-        "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+        "description": "Marked the existing CASE-020 approval thread complete only after the Oracle decision was persisted.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "channel": "C-PRODUCTION",
+            "name": "white_check_mark",
+            "timestamp": "1768000020.000100"
+          },
+          "tool": "slack.reactions_add"
+        },
         "table": "resource_state",
         "values": {
           "resource_type": "slack",
@@ -72,18 +238,1337 @@
           "status": "Recorded",
           "system": "slack"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-020-mutation-03",
           "task_id": "factorybench-020"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-17 as the documented date for torque operation using an expired tool; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Enumerated 5 candidates for open serials exposed after calibration expiry.",
+        "field": "candidate_record_count",
+        "id": "enumerate_candidate_records",
+        "weight": 1.5
+      },
+      {
+        "description": "Correlated immutable identifiers and retained 1 record(s) for serials completed before expiry with valid trace.",
+        "field": "matching_record_count",
+        "id": "correlate_matching_records",
+        "weight": 2.0
+      },
+      {
+        "description": "Excluded 4 candidate(s) for post-expiry serials and unverified torque records.",
+        "field": "excluded_record_count",
+        "id": "exclude_nonmatching_records",
+        "weight": 1.5
+      },
+      {
+        "description": "Applied released revision R7; did not select a draft or similarly named record.",
+        "field": "effective_revision",
+        "id": "apply_effective_revision",
+        "weight": 1.5
+      },
+      {
+        "description": "Used composite match key NS-000020|R7|CASE-020 to correlate the source and target.",
+        "field": "immutable_match_key",
+        "id": "construct_immutable_match",
+        "weight": 2.0
+      },
+      {
+        "description": "Derived 2026-01-13 for hold_exposed_serials_and_open_maintenance.",
+        "field": "baseline_action_date",
+        "id": "compare_identity_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-12 for continue_with_expired_tool.",
+        "field": "controlled_action_date",
+        "id": "compare_identity_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-20 for release_all_completed_serials and rejected any out-of-scope shortcut.",
+        "field": "escalated_action_date",
+        "id": "compare_identity_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for hold_exposed_serials_and_open_maintenance; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that release_all_completed_serials remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of hold_exposed_serials_and_open_maintenance, continue_with_expired_tool, and release_all_completed_serials; selected hold_exposed_serials_and_open_maintenance because it alone gives the best currently authorized result under production stays held until a calibrated tool and corrective work exist.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-13 as the supported outcome date for hold_exposed_serials_and_open_maintenance.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-13 with the independent control date 2026-01-17 and calculated a signed variance of -4 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-020"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-020 scope, immutable handles, mounted systems, and evidence index before investigating NS-000020.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-020\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-020"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-020 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "id": "att-020",
+              "messageId": "msg-020-1",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "data": "T0xZTVBJQyBNRVRST0xPR1kg4oCUIENPTlRST0xMRUQgQ09NTUVSQ0lBTCAvIFNFUlZJQ0UgUkVDT1JECkRvY3VtZW50OiBjYWxpYnJhdGlvbi1jZXJ0aWZpY2F0ZS1hbmQtc2VyaWFsLWV4cG9zdXJlLXJlcG8tMDAyMApDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMjAKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogY2FsaWJyYXRpb24gY2VydGlmaWNhdGUgYW5kIHNlcmlhbCBleHBvc3VyZSByZXBvcnQKSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTAyMApFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSNwpNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDQgU0VSSUFMUwpUaGlzIGNvbmZpcm1hdGlvbiBpcyBub3QgdmFsaWQgZm9yIHNpbWlsYXJseSBuYW1lZCBpdGVtcywgc3VwZXJzZWRlZCByZXZpc2lvbnMsIG90aGVyIHBsYW50cywgb3IgYW5vdGhlciBjYXNlLgoKMi4gQ09ORklSTUVEIENPTU1FUkNJQUwgLyBDQVBBQ0lUWSBJTlBVVApBbHRlcm5hdGl2ZSBkZXNjcmliZWQgYnkgcmVxdWVzdGVyOiBjb250aW51ZV93aXRoX2V4cGlyZWRfdG9vbApTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMQpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTAKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTIKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogY2FsaWJyYXRpb24gcHJvdmlkZXIncyBlYXJsaWVzdCBzZXJ2aWNlIGRhdGUKQ2FwYWNpdHkgaXMgcmVzZXJ2ZWQgb25seSBhZnRlciB0aGUgYnV5ZXIgb3IgcGxhbm5lciBzdXBwbGllcyB0aGUgbWF0Y2hpbmcgaW1tdXRhYmxlIHJlY29yZCBhbmQgY3VycmVudCBhcHByb3ZhbC4KCjMuIEVYQ0xVU0lPTlMgQU5EIEFTU1VNUFRJT05TCk5vdCBpbmNsdWRlZDogcG9zdC1leHBpcnkgc2VyaWFscyBhbmQgdW52ZXJpZmllZCB0b3JxdWUgcmVjb3JkcwpDb250cm9sIG5vdCBldmFsdWF0ZWQgYnkgY291bnRlcnBhcnR5OiBwcm9kdWN0aW9uIHN0YXlzIGhlbGQgdW50aWwgYSBjYWxpYnJhdGVkIHRvb2wgYW5kIGNvcnJlY3RpdmUgd29yayBleGlzdApOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wMjEgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBPbHltcGljIE1ldHJvbG9neSBvcGVyYXRpb25zIGRlc2sKQ29uZmlybWF0aW9uIG51bWJlcjogQ05GLTAwMDAyMApTdGF0dXM6IENPTkZJUk1FRCBBUyBBTiBJTlBVVCwgTk9UIEEgRklOQUwgT1BFUkFUSU5HIERFQ0lTSU9OCg",
+              "size": 1585
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.attachments.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-10 readiness input for continue_with_expired_tool, then separately derived its 2026-01-12 operating outcome under production stays held until a calibrated tool and corrective work exist instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-020' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-020"
+                },
+                {
+                  "id": "drive-approval-020"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-020 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-020-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-020-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-020-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R7 and established 5 SERIALS for open serials exposed after calibration expiry, with control date 2026-01-17.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-020-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-020-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-020-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000020 at R7.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-020-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-020-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-020-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R7 and established 5 SERIALS for open serials exposed after calibration expiry, with control date 2026-01-17.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-020-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-020-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-020-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-10 readiness input for continue_with_expired_tool, then separately derived its 2026-01-12 operating outcome under production stays held until a calibrated tool and corrective work exist instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-020-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-020-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-020-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-020-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 5 observed less 4 excluded to 1 supported SERIALS for serials completed before expiry with valid trace.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-020"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-020"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-020",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-020"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-020"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-020"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0020 only to hold_exposed_serials_and_open_maintenance, NS-000020, and the supported 1 SERIALS; kept broader scope and release_all_completed_serials outside current authority.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-020"
+            },
+            "expected_result_contains": {
+              "id": "drive-020"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-020",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-020"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-020"
+            },
+            "expected_result_contains": {
+              "id": "drive-020"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R7 and established 5 SERIALS for open serials exposed after calibration expiry, with control date 2026-01-17.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "includeGridData": false,
+              "ranges": [
+                "Control!A1:I50"
+              ],
+              "spreadsheetId": "sheet-020"
+            },
+            "expected_result_contains": {
+              "developerMetadata": [
+                {
+                  "metadataKey": "case",
+                  "metadataValue": "CASE-020"
+                }
+              ],
+              "spreadsheetId": "sheet-020"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PRODUCTION",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000020.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-PRODUCTION",
+              "limit": 100,
+              "ts": "1768000020.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000020.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0020 only to hold_exposed_serials_and_open_maintenance, NS-000020, and the supported 1 SERIALS; kept broader scope and release_all_completed_serials outside current authority.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-020' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400020
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 5 observed less 4 excluded to 1 supported SERIALS for serials completed before expiry with valid trace.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='MWO-0020'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 800020
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle maintenance work orders record: Located NS-000020 for torque operation using an expired tool using immutable IDs and preserved effective revision R7.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100020,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100020
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_operations.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work order operations record: Applied qualified replacement-tool availability to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "MaintenanceProgramId": 500020
+            },
+            "expected_result_contains": {
+              "MaintenanceProgramId": 500020
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_programs.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "MaintenanceProgramCode='PM-0020'"
+            },
+            "expected_result_contains": {
+              "MaintenanceProgramId": 500020
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_programs.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle maintenance programs record: Located NS-000020 for torque operation using an expired tool using immutable IDs and preserved effective revision R7.",
+        "id": "investigation_17",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "DocumentNumber='RCV-0020'"
+            },
+            "expected_result_contains": {
+              "InspectionId": 1100020
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.quality_inspection_results.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle quality inspection results record: Reconciled 5 observed less 4 excluded to 1 supported SERIALS for serials completed before expiry with valid trace.",
+        "id": "investigation_18",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.maintenance_work_orders.create",
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100020
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100020
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='MWO-0020'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100020
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.list"
+          }
+        ],
+        "description": "Read NS-000020 back through the documented Oracle maintenance work orders.list operation after the mutation and confirmed the resource-specific changed fields ['AssetNumber', 'LastUpdateDate', 'OrganizationCode', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkOrderNumber', 'WorkOrderStatusCode'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "AssetNumber": "ASSET-020",
+          "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+          "OrganizationCode": "SEA",
+          "PlannedCompletionDate": "2026-01-13",
+          "PlannedStartDate": "2026-01-12",
+          "WorkOrderNumber": "MWO-0020",
+          "WorkOrderStatusCode": "ORA_RELEASED"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": true,
+        "target_identity": {
+          "WorkOrderId": 100020
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.maintenance_work_orders.create",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100020
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100020
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='MWO-0020'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100020
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.list"
+        }
+      ],
+      "description": "Read NS-000020 back through the documented Oracle maintenance work orders.list operation after the mutation and confirmed the resource-specific changed fields ['AssetNumber', 'LastUpdateDate', 'OrganizationCode', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkOrderNumber', 'WorkOrderStatusCode'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "AssetNumber": "ASSET-020",
+        "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+        "OrganizationCode": "SEA",
+        "PlannedCompletionDate": "2026-01-13",
+        "PlannedStartDate": "2026-01-12",
+        "WorkOrderNumber": "MWO-0020",
+        "WorkOrderStatusCode": "ORA_RELEASED"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": true,
+      "target_identity": {
+        "WorkOrderId": 100020
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-020"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-020 scope, immutable handles, mounted systems, and evidence index before investigating NS-000020.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-020\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-020"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-020 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-020",
+            "messageId": "msg-020-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "T0xZTVBJQyBNRVRST0xPR1kg4oCUIENPTlRST0xMRUQgQ09NTUVSQ0lBTCAvIFNFUlZJQ0UgUkVDT1JECkRvY3VtZW50OiBjYWxpYnJhdGlvbi1jZXJ0aWZpY2F0ZS1hbmQtc2VyaWFsLWV4cG9zdXJlLXJlcG8tMDAyMApDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMjAKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogY2FsaWJyYXRpb24gY2VydGlmaWNhdGUgYW5kIHNlcmlhbCBleHBvc3VyZSByZXBvcnQKSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTAyMApFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSNwpNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDQgU0VSSUFMUwpUaGlzIGNvbmZpcm1hdGlvbiBpcyBub3QgdmFsaWQgZm9yIHNpbWlsYXJseSBuYW1lZCBpdGVtcywgc3VwZXJzZWRlZCByZXZpc2lvbnMsIG90aGVyIHBsYW50cywgb3IgYW5vdGhlciBjYXNlLgoKMi4gQ09ORklSTUVEIENPTU1FUkNJQUwgLyBDQVBBQ0lUWSBJTlBVVApBbHRlcm5hdGl2ZSBkZXNjcmliZWQgYnkgcmVxdWVzdGVyOiBjb250aW51ZV93aXRoX2V4cGlyZWRfdG9vbApTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMQpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTAKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTIKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogY2FsaWJyYXRpb24gcHJvdmlkZXIncyBlYXJsaWVzdCBzZXJ2aWNlIGRhdGUKQ2FwYWNpdHkgaXMgcmVzZXJ2ZWQgb25seSBhZnRlciB0aGUgYnV5ZXIgb3IgcGxhbm5lciBzdXBwbGllcyB0aGUgbWF0Y2hpbmcgaW1tdXRhYmxlIHJlY29yZCBhbmQgY3VycmVudCBhcHByb3ZhbC4KCjMuIEVYQ0xVU0lPTlMgQU5EIEFTU1VNUFRJT05TCk5vdCBpbmNsdWRlZDogcG9zdC1leHBpcnkgc2VyaWFscyBhbmQgdW52ZXJpZmllZCB0b3JxdWUgcmVjb3JkcwpDb250cm9sIG5vdCBldmFsdWF0ZWQgYnkgY291bnRlcnBhcnR5OiBwcm9kdWN0aW9uIHN0YXlzIGhlbGQgdW50aWwgYSBjYWxpYnJhdGVkIHRvb2wgYW5kIGNvcnJlY3RpdmUgd29yayBleGlzdApOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wMjEgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBPbHltcGljIE1ldHJvbG9neSBvcGVyYXRpb25zIGRlc2sKQ29uZmlybWF0aW9uIG51bWJlcjogQ05GLTAwMDAyMApTdGF0dXM6IENPTkZJUk1FRCBBUyBBTiBJTlBVVCwgTk9UIEEgRklOQUwgT1BFUkFUSU5HIERFQ0lTSU9OCg",
+            "size": 1585
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-10 readiness input for continue_with_expired_tool, then separately derived its 2026-01-12 operating outcome under production stays held until a calibrated tool and corrective work exist instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-020' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-020"
+              },
+              {
+                "id": "drive-approval-020"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-020 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-020-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-020-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-020-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R7 and established 5 SERIALS for open serials exposed after calibration expiry, with control date 2026-01-17.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-020-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-020-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-020-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000020 at R7.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-020-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-020-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-020-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R7 and established 5 SERIALS for open serials exposed after calibration expiry, with control date 2026-01-17.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-020-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-020-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-020-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-10 readiness input for continue_with_expired_tool, then separately derived its 2026-01-12 operating outcome under production stays held until a calibrated tool and corrective work exist instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-020-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-020-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-020-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-020-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 5 observed less 4 excluded to 1 supported SERIALS for serials completed before expiry with valid trace.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-020"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-020"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-020",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-020"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-020"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-020"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0020 only to hold_exposed_serials_and_open_maintenance, NS-000020, and the supported 1 SERIALS; kept broader scope and release_all_completed_serials outside current authority.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-020"
+          },
+          "expected_result_contains": {
+            "id": "drive-020"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-020",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-020"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-020"
+          },
+          "expected_result_contains": {
+            "id": "drive-020"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R7 and established 5 SERIALS for open serials exposed after calibration expiry, with control date 2026-01-17.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-020"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-020"
+              }
+            ],
+            "spreadsheetId": "sheet-020"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PRODUCTION",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000020.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-PRODUCTION",
+            "limit": 100,
+            "ts": "1768000020.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000020.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0020 only to hold_exposed_serials_and_open_maintenance, NS-000020, and the supported 1 SERIALS; kept broader scope and release_all_completed_serials outside current authority.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-020' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400020
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 5 observed less 4 excluded to 1 supported SERIALS for serials completed before expiry with valid trace.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='MWO-0020'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 800020
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance work orders record: Located NS-000020 for torque operation using an expired tool using immutable IDs and preserved effective revision R7.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100020,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100020
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order operations record: Applied qualified replacement-tool availability to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "MaintenanceProgramId": 500020
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500020
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "MaintenanceProgramCode='PM-0020'"
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500020
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance programs record: Located NS-000020 for torque operation using an expired tool using immutable IDs and preserved effective revision R7.",
+      "id": "investigation_17",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "DocumentNumber='RCV-0020'"
+          },
+          "expected_result_contains": {
+            "InspectionId": 1100020
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.quality_inspection_results.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle quality inspection results record: Reconciled 5 observed less 4 excluded to 1 supported SERIALS for serials completed before expiry with valid trace.",
+      "id": "investigation_18",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-020"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-020\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-020"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "id": "att-020",
+        "messageId": "msg-020-1",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "data": "T0xZTVBJQyBNRVRST0xPR1kg4oCUIENPTlRST0xMRUQgQ09NTUVSQ0lBTCAvIFNFUlZJQ0UgUkVDT1JECkRvY3VtZW50OiBjYWxpYnJhdGlvbi1jZXJ0aWZpY2F0ZS1hbmQtc2VyaWFsLWV4cG9zdXJlLXJlcG8tMDAyMApDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMjAKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogY2FsaWJyYXRpb24gY2VydGlmaWNhdGUgYW5kIHNlcmlhbCBleHBvc3VyZSByZXBvcnQKSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTAyMApFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSNwpNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDQgU0VSSUFMUwpUaGlzIGNvbmZpcm1hdGlvbiBpcyBub3QgdmFsaWQgZm9yIHNpbWlsYXJseSBuYW1lZCBpdGVtcywgc3VwZXJzZWRlZCByZXZpc2lvbnMsIG90aGVyIHBsYW50cywgb3IgYW5vdGhlciBjYXNlLgoKMi4gQ09ORklSTUVEIENPTU1FUkNJQUwgLyBDQVBBQ0lUWSBJTlBVVApBbHRlcm5hdGl2ZSBkZXNjcmliZWQgYnkgcmVxdWVzdGVyOiBjb250aW51ZV93aXRoX2V4cGlyZWRfdG9vbApTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMQpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTAKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTIKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogY2FsaWJyYXRpb24gcHJvdmlkZXIncyBlYXJsaWVzdCBzZXJ2aWNlIGRhdGUKQ2FwYWNpdHkgaXMgcmVzZXJ2ZWQgb25seSBhZnRlciB0aGUgYnV5ZXIgb3IgcGxhbm5lciBzdXBwbGllcyB0aGUgbWF0Y2hpbmcgaW1tdXRhYmxlIHJlY29yZCBhbmQgY3VycmVudCBhcHByb3ZhbC4KCjMuIEVYQ0xVU0lPTlMgQU5EIEFTU1VNUFRJT05TCk5vdCBpbmNsdWRlZDogcG9zdC1leHBpcnkgc2VyaWFscyBhbmQgdW52ZXJpZmllZCB0b3JxdWUgcmVjb3JkcwpDb250cm9sIG5vdCBldmFsdWF0ZWQgYnkgY291bnRlcnBhcnR5OiBwcm9kdWN0aW9uIHN0YXlzIGhlbGQgdW50aWwgYSBjYWxpYnJhdGVkIHRvb2wgYW5kIGNvcnJlY3RpdmUgd29yayBleGlzdApOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wMjEgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBPbHltcGljIE1ldHJvbG9neSBvcGVyYXRpb25zIGRlc2sKQ29uZmlybWF0aW9uIG51bWJlcjogQ05GLTAwMDAyMApTdGF0dXM6IENPTkZJUk1FRCBBUyBBTiBJTlBVVCwgTk9UIEEgRklOQUwgT1BFUkFUSU5HIERFQ0lTSU9OCg",
+        "size": 1585
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
@@ -91,28 +1576,113 @@
         "pageSize": 50,
         "q": "name contains 'CASE-020' and trashed = false"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-020"
+          },
+          {
+            "id": "drive-approval-020"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.list"
     },
     {
       "arguments": {
-        "fileId": "drive-020"
+        "alt": "media",
+        "fileId": "drive-020-04"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "drive-020-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-020-09"
+      },
+      "expected_result_contains": {
+        "id": "drive-020-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-020-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-020-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-020-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-020-03"
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "majorDimension": "ROWS",
-        "ranges": [
-          "Control!A1:H50",
-          "Approvals!A1:G20"
-        ],
-        "spreadsheetId": "sheet-020",
-        "valueRenderOption": "UNFORMATTED_VALUE"
+        "fileId": "drive-020-10"
       },
-      "match": "successful_tool_call",
-      "tool": "google_sheets.spreadsheets.values.batchGet"
+      "expected_result_contains": {
+        "id": "drive-020-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-020"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-020"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-020",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-020"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:I50"
+        ],
+        "spreadsheetId": "sheet-020"
+      },
+      "expected_result_contains": {
+        "developerMetadata": [
+          {
+            "metadataKey": "case",
+            "metadataValue": "CASE-020"
+          }
+        ],
+        "spreadsheetId": "sheet-020"
+      },
+      "match": "result_contains",
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
@@ -121,35 +1691,94 @@
         "limit": 100,
         "oldest": "1768000000.000000"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000020.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "slack.conversations_history"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ItemNumber='NS-COMP-020' and OrganizationCode='SEA'"
+      },
+      "expected_result_contains": {
+        "InventoryItemId": 1400020
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "WorkOrderNumber='MWO-0020'"
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 800020
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.maintenance_work_orders.list"
     },
     {
       "arguments": {
         "WorkOrderId": 100020,
         "limit": 50,
-        "onlyData": true,
-        "q": "ReferenceNumber='CASE-020'"
+        "onlyData": true
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "WorkOrderId": 100020
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.work_order_operations.list"
     },
     {
       "arguments": {
         "MaintenanceProgramId": 500020
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "MaintenanceProgramId": 500020
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.maintenance_programs.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "DocumentNumber='RCV-0020'"
+      },
+      "expected_result_contains": {
+        "InspectionId": 1100020
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.quality_inspection_results.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
+    "gmail.messages.list",
+    "gmail.messages.attachments.get",
     "google_drive.files.list",
+    "google_drive.files.get",
+    "google_drive.files.get",
+    "google_drive.files.export",
     "google_drive.files.download",
-    "google_sheets.spreadsheets.values.batchGet",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "google_sheets.spreadsheets.get",
     "slack.conversations_history",
+    "oracle_fusion.inventory_onhand_balances.list",
+    "oracle_fusion.maintenance_work_orders.list",
     "oracle_fusion.work_order_operations.list",
-    "oracle_fusion.maintenance_programs.get"
+    "oracle_fusion.maintenance_programs.get",
+    "oracle_fusion.quality_inspection_results.list"
   ],
   "task_id": "factorybench-020",
   "write_tools": [

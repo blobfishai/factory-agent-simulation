@@ -1,5 +1,7 @@
-# Return unused project material from WIP — operating control
+# Return unused project material from WIP — operating policy
 
-Scope: Preserve project and task attribution while moving material and revising production supply.
+Decision scope: unused project material in WIP.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: operation cancellation, project ownership, lot, and count must reconcile. Establish the immutable source record and effective revision, then reconcile project material issued to the canceled operation, physically counted unconsumed same-project lot, and consumed, scrapped, or other-project quantity from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and mark the existing operations thread complete with the approved check reaction.

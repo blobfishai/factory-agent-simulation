@@ -1,29 +1,114 @@
 {
   "answer": {
-    "controlled_quantity": 26,
-    "inspection_reference": "INSP-0055",
-    "quality_result": "Rework supply created"
+    "baseline_resolution_date": "2026-01-14",
+    "business_need_date": "2026-01-14",
+    "controlled_item_or_record": "NS-COMP-055",
+    "controlled_resolution_date": "2026-01-15",
+    "decision_timing_status": "ON_TIME",
+    "escalated_resolution_date": "2026-01-16",
+    "escalation_approval_required": 1,
+    "excluded_quantity": 7,
+    "observed_quantity": 70,
+    "outcome_vs_control_days": 0,
+    "quantity_unit": "EA",
+    "recommended_incremental_cost_usd": 0,
+    "recommended_option": "create_scoped_rework_supply",
+    "recommended_outcome_date": "2026-01-14",
+    "source_quantity": 72,
+    "supported_quantity": 63,
+    "transaction_quantity": 63
   },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'create_scoped_rework_supply', tied to NS-000055, revision R7, and the selected create_scoped_rework_supply outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-14', tied to NS-000055, revision R7, and the selected create_scoped_rework_supply outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported controlled item or record as 'NS-COMP-055', tied to NS-000055, revision R7, and the selected create_scoped_rework_supply outcome.",
+      "field": "controlled_item_or_record",
+      "id": "answer_controlled_item_or_record",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported transaction quantity as 63, tied to NS-000055, revision R7, and the selected create_scoped_rework_supply outcome.",
+      "field": "transaction_quantity",
+      "id": "answer_transaction_quantity",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000055, revision R7, and the selected create_scoped_rework_supply outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "weight": 1.0
+    }
+  ],
   "assertions": [
     {
-      "description": "oracle_fusion.supply_requests.create produced the task-scoped, source-audited state transition.",
+      "description": "Required immutable record NS-000055 to reach business outcome 'Rework supply created' through oracle_fusion.supply_requests.create with exact provider-critical values requestBody.SupplyOrderReferenceNumber='SUPPLY-0055', requestBody.SupplyRequestSystem='EXT', requestBody.SupplyRequestDate='2026-01-12', requestBody.supplyRequestLines[0].SupplyOrderSource='EXT', requestBody.supplyRequestLines[0].SupplyType='BUY', requestBody.supplyRequestLines[0].ItemNumber='NS-COMP-055', requestBody.supplyRequestLines[0].Quantity=63, requestBody.supplyRequestLines[0].NeedByDate='2026-01-14', requestBody.supplyRequestLines[0].DestinationOrganizationCode='SEA'. The audited transition binds selected option create_scoped_rework_supply, revision R7, approval AP-0055, and constraint supply covers only approved rework yield and component demand; scrap and accepted units = 7 EA; uncovered or unsupported scope = 9.0 EA; no other provider record satisfies this state criterion.",
       "id": "mutation_01",
+      "payload_allowed_argument_paths": [
+        "requestBody.SupplyOrderReferenceNumber",
+        "requestBody.SupplyRequestDate",
+        "requestBody.SupplyRequestSystem",
+        "requestBody.supplyRequestLines[0].DestinationOrganizationCode",
+        "requestBody.supplyRequestLines[0].ItemNumber",
+        "requestBody.supplyRequestLines[0].NeedByDate",
+        "requestBody.supplyRequestLines[0].Quantity",
+        "requestBody.supplyRequestLines[0].SupplyOrderSource",
+        "requestBody.supplyRequestLines[0].SupplyType"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "requestBody": {
+            "SupplyOrderReferenceNumber": "SUPPLY-0055",
+            "SupplyRequestDate": "2026-01-12",
+            "SupplyRequestSystem": "EXT",
+            "supplyRequestLines": [
+              {
+                "DestinationOrganizationCode": "SEA",
+                "ItemNumber": "NS-COMP-055",
+                "NeedByDate": "2026-01-14",
+                "Quantity": 63,
+                "SupplyOrderSource": "EXT",
+                "SupplyType": "BUY"
+              }
+            ]
+          }
+        },
+        "tool": "oracle_fusion.supply_requests.create"
+      },
       "table": "resource_state",
       "values": {
-        "payload_json": "{\"arguments\":{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0055\",\"SupplyRequestDate\":\"2026-01-30\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-055\",\"NeedByDate\":\"2026-02-02\",\"Quantity\":26,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}},\"case\":\"CASE-055\",\"outcome\":\"Use the approved disposition and remaining good quantity to create the specific rework supply request.\",\"tool\":\"oracle_fusion.supply_requests.create\"}",
         "resource_type": "oracle_fusion.supply_requests",
         "revision": 1,
         "status": "Rework supply created",
         "system": "oracle_fusion"
       },
+      "weight": 3.0,
       "where": {
         "resource_id": "factorybench-055-mutation-01",
         "task_id": "factorybench-055"
       }
     },
     {
-      "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+      "description": "Marked the existing CASE-055 approval thread complete only after the Oracle decision was persisted.",
       "id": "mutation_02",
+      "payload_contains": {
+        "arguments": {
+          "channel": "C-FINANCE",
+          "name": "white_check_mark",
+          "timestamp": "1768000055.000100"
+        },
+        "tool": "slack.reactions_add"
+      },
       "table": "resource_state",
       "values": {
         "resource_type": "slack",
@@ -31,14 +116,35 @@
         "status": "Recorded",
         "system": "slack"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-055-mutation-02",
         "task_id": "factorybench-055"
       }
     },
     {
-      "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+      "description": "Created\u2014but did not send\u2014the requested CASE-055 decision draft with completion, constraint, alternatives, and the Oracle business reference.",
       "id": "mutation_03",
+      "payload_contains": {
+        "arguments": {
+          "message": {
+            "threadId": "thread-055"
+          },
+          "userId": "me"
+        },
+        "tool": "gmail.drafts.create"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-055",
+          "NS-000055",
+          "NS-COMP-055"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-14",
+        "create_scoped_rework_supply"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "gmail.drafts",
@@ -46,10 +152,714 @@
         "status": "Recorded",
         "system": "gmail"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-055-mutation-03",
         "task_id": "factorybench-055"
       }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-14 as the documented date for failed final-inspection quantity; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Established 72 EA for units rejected by final inspection.",
+      "field": "source_quantity",
+      "id": "establish_source_quantity",
+      "weight": 1.5
+    },
+    {
+      "description": "Correlated the independent source records to 70 observed EA.",
+      "field": "observed_quantity",
+      "id": "reconcile_observed_quantity",
+      "weight": 1.5
+    },
+    {
+      "description": "Removed 7 EA for scrap and accepted units.",
+      "field": "excluded_quantity",
+      "id": "identify_excluded_quantity",
+      "weight": 1.5
+    },
+    {
+      "description": "Calculated 70 observed \u2212 7 excluded = 63 supported EA.",
+      "field": "supported_quantity",
+      "id": "calculate_supported_quantity",
+      "weight": 2.0
+    },
+    {
+      "description": "Bound the Oracle transaction to exactly 63 EA, the measure required by the chosen disposition; did not substitute the header or another business quantity.",
+      "field": "transaction_quantity",
+      "id": "bound_transaction_quantity",
+      "weight": 2.0
+    },
+    {
+      "description": "Kept the receipt, issue, transfer, inspection, or completion quantity in EA.",
+      "field": "quantity_unit",
+      "id": "preserve_transaction_unit",
+      "weight": 0.5
+    },
+    {
+      "description": "Derived 2026-01-14 for create_scoped_rework_supply.",
+      "field": "baseline_resolution_date",
+      "id": "compare_quantity_option_one",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 2026-01-15 for create_supply_for_full_order.",
+      "field": "controlled_resolution_date",
+      "id": "compare_quantity_option_two",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 2026-01-16 for scrap_all_failed_units and recognized its control impact.",
+      "field": "escalated_resolution_date",
+      "id": "compare_quantity_option_three",
+      "weight": 1.0
+    },
+    {
+      "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for create_scoped_rework_supply; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that scrap_all_failed_units remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of create_scoped_rework_supply, create_supply_for_full_order, and scrap_all_failed_units; selected create_scoped_rework_supply because it alone gives the best currently authorized result under supply covers only approved rework yield and component demand.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-14 as the supported outcome date for create_scoped_rework_supply.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-14 with the independent control date 2026-01-14 and calculated a signed variance of 0 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-055"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-055 scope, immutable handles, mounted systems, and evidence index before investigating NS-000055.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-055",
+            "messageId": "msg-055-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogZmluYWwtaW5zcGVjdGlvbi1hbmQtcmV3b3JrLW1hdGVyaWFsLWNhbGN1bGF0aW9uLTAwNTUKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDU1Cklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IGZpbmFsIGluc3BlY3Rpb24gYW5kIHJld29yay1tYXRlcmlhbCBjYWxjdWxhdGlvbgpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDU1CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFI3Ck1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogOSBFQQpUaGlzIGNvbmZpcm1hdGlvbiBpcyBub3QgdmFsaWQgZm9yIHNpbWlsYXJseSBuYW1lZCBpdGVtcywgc3VwZXJzZWRlZCByZXZpc2lvbnMsIG90aGVyIHBsYW50cywgb3IgYW5vdGhlciBjYXNlLgoKMi4gQ09ORklSTUVEIENPTU1FUkNJQUwgLyBDQVBBQ0lUWSBJTlBVVApBbHRlcm5hdGl2ZSBkZXNjcmliZWQgYnkgcmVxdWVzdGVyOiBjcmVhdGVfc3VwcGx5X2Zvcl9mdWxsX29yZGVyClN0YW5kYXJkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTExCkV4cGVkaXRlZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMgpSZXN1bHRpbmcgb3BlcmF0aW5nIG91dGNvbWUgc3RhdGVkIGJ5IHJlcXVlc3Rlciwgbm90IGJ5IGNvdW50ZXJwYXJ0eTogMjAyNi0wMS0xNQpFY29ub21pYyBpbXBhY3Qgc3RhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogVVNEIDAKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiByZXBsYWNlbWVudC1jb21wb25lbnQgcmVhZGluZXNzCkNhcGFjaXR5IGlzIHJlc2VydmVkIG9ubHkgYWZ0ZXIgdGhlIGJ1eWVyIG9yIHBsYW5uZXIgc3VwcGxpZXMgdGhlIG1hdGNoaW5nIGltbXV0YWJsZSByZWNvcmQgYW5kIGN1cnJlbnQgYXBwcm92YWwuCgozLiBFWENMVVNJT05TIEFORCBBU1NVTVBUSU9OUwpOb3QgaW5jbHVkZWQ6IHNjcmFwIGFuZCBhY2NlcHRlZCB1bml0cwpDb250cm9sIG5vdCBldmFsdWF0ZWQgYnkgY291bnRlcnBhcnR5OiBzdXBwbHkgY292ZXJzIG9ubHkgYXBwcm92ZWQgcmV3b3JrIHlpZWxkIGFuZCBjb21wb25lbnQgZGVtYW5kCk5lYXJieSBidXQgdW5yZWxhdGVkIHJlZmVyZW5jZSBDQVNFLTA1NiBpcyBleHBsaWNpdGx5IGV4Y2x1ZGVkLgpGcmVpZ2h0LCBwcmVtaXVtLCBjZXJ0aWZpY2F0aW9uLCBhbmQgbG90IHRlcm1zIGFwcGx5IG9ubHkgd2hlcmUgc3RhdGVkIGFib3ZlOyBzaWxlbmNlIGlzIG5vdCBhcHByb3ZhbC4KCjQuIEFDQ0VQVEFOQ0UKUHJlcGFyZWQgYnk6IFJhaW5pZXIgQ29tcG9uZW50cyBvcGVyYXRpb25zIGRlc2sKQ29uZmlybWF0aW9uIG51bWJlcjogQ05GLTAwMDA1NQpTdGF0dXM6IENPTkZJUk1FRCBBUyBBTiBJTlBVVCwgTk9UIEEgRklOQUwgT1BFUkFUSU5HIERFQ0lTSU9OCg",
+            "size": 1534
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-12 readiness input for create_supply_for_full_order, then separately derived its 2026-01-15 operating outcome under supply covers only approved rework yield and component demand instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000055.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000055.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000055.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0055 only to create_scoped_rework_supply, NS-000055, and the supported 63 EA; kept broader scope and scrap_all_failed_units outside current authority.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-055",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-055"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-055",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-055"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 70 observed less 7 excluded to 63 supported EA for units with approved rework disposition and recoverable BOM. Applied rework-cell capacity to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-055' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-055"
+              },
+              {
+                "id": "drive-approval-055"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-055 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-055-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-055-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-055-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R7 and established 72 EA for units rejected by final inspection, with control date 2026-01-14.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-055-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-055-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-055-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000055 at R7.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-055-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-055-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-055-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 70 observed less 7 excluded to 63 supported EA for units with approved rework disposition and recoverable BOM.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-055-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-055-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-055-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R7 and established 72 EA for units rejected by final inspection, with control date 2026-01-14.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-055-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-055-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-055-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-055-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-12 readiness input for create_supply_for_full_order, then separately derived its 2026-01-15 operating outcome under supply covers only approved rework yield and component demand instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-055"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-055"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-055",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-055"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-055"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-055"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0055 only to create_scoped_rework_supply, NS-000055, and the supported 63 EA; kept broader scope and scrap_all_failed_units outside current authority.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-055"
+          },
+          "expected_result_contains": {
+            "id": "drive-055"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-055",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-055"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-055"
+          },
+          "expected_result_contains": {
+            "id": "drive-055"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R7 and established 72 EA for units rejected by final inspection, with control date 2026-01-14.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-055\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-055"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-055 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0055"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000055
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0055'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000055
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-12 readiness input for create_supply_for_full_order, then separately derived its 2026-01-15 operating outcome under supply covers only approved rework yield and component demand instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "DocumentNumber='RCV-0055'"
+          },
+          "expected_result_contains": {
+            "InspectionId": 1100055
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.quality_inspection_results.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle quality inspection results record: Reconciled 70 observed less 7 excluded to 63 supported EA for units with approved rework disposition and recoverable BOM.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "InspectionPlanName='PLAN-08'"
+          },
+          "expected_result_contains": {
+            "InspectionPlanId": 1200055
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inspection_plans.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inspection plans record: Located NS-000055 for failed final-inspection quantity using immutable IDs and preserved effective revision R7.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0055'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 2200055
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-12 readiness input for create_supply_for_full_order, then separately derived its 2026-01-15 operating outcome under supply covers only approved rework yield and component demand instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_17",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-055' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400055
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 70 observed less 7 excluded to 63 supported EA for units with approved rework disposition and recoverable BOM.",
+      "id": "investigation_18",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.supply_requests.create",
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0055'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 1500055
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "description": "Read NS-000055 back through the documented Oracle supply requests.list operation after the mutation and confirmed the resource-specific changed fields ['DestinationOrganizationCode', 'ItemNumber', 'LastUpdateDate', 'NeedByDate', 'Quantity', 'SupplyOrderReferenceNumber', 'SupplyRequestDate', 'SupplyRequestStatus', 'SupplyRequestSystem'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "DestinationOrganizationCode": "SEA",
+        "ItemNumber": "NS-COMP-055",
+        "LastUpdateDate": "2026-01-14T16:00:00-08:00",
+        "NeedByDate": "2026-01-14",
+        "Quantity": 63,
+        "SupplyOrderReferenceNumber": "SUPPLY-0055",
+        "SupplyRequestDate": "2026-01-12",
+        "SupplyRequestStatus": "NEW",
+        "SupplyRequestSystem": "EXT"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": true,
+      "target_identity": {
+        "SupplyRequestId": 1500055
+      },
+      "weight": 2.0
     }
   ]
 }

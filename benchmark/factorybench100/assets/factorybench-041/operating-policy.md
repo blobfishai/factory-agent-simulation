@@ -1,5 +1,7 @@
-# Validate a clean three-way-matched invoice — operating control
+# Validate a clean three-way-matched invoice — operating policy
 
-Scope: Apply Oracle invoice validation and hold operations to multi-document invoice evidence.
+Decision scope: supplier invoice INV-0041.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: supplier, PO line, receipt, currency, tax, and tolerance must reconcile. Establish the immutable source record and effective revision, then reconcile invoice gross amount, PO-backed accepted-receipt amount within tolerance, and unmatched tax, freight, or quantity variance from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction.

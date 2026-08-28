@@ -1,5 +1,7 @@
-# Advance lubrication after a meter spike — operating control
+# Advance lubrication after a meter spike — operating policy
 
-Scope: Maintain meter- and calendar-driven programs and generate bounded forecasts and work orders.
+Decision scope: meter-based lubrication program.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: effective meter threshold and blackout calendar determine the due date. Establish the immutable source record and effective revision, then reconcile meter usage since last lubrication, usage accepted after removing reset and duplicate readings, and invalid spikes and readings before the last service from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file.

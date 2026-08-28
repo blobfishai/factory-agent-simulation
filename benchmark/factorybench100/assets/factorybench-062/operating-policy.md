@@ -1,5 +1,7 @@
-# Pull in supply after a forecast-consumption jump — operating control
+# Pull in supply after a forecast-consumption jump — operating policy
 
-Scope: Create or revise supply execution from shortages, allocation decisions, and constrained-plan approvals.
+Decision scope: forecast-consumption jump.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: sales-order consumption, pegging, supplier promise, and finite dates. Establish the immutable source record and effective revision, then reconcile firm supply quantity pegged to consumed forecast, quantity supplier confirmed for an earlier date, and unconfirmed or unrelated supply from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and mark the existing operations thread complete with the approved check reaction.

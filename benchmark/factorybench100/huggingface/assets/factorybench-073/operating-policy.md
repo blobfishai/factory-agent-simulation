@@ -1,5 +1,7 @@
-# Record scrap discovered during final count — operating control
+# Record scrap discovered during final count — operating policy
 
-Scope: Post and reconcile production actuals against time, material, invoice, and close evidence.
+Decision scope: final-count scrap.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: good plus scrap plus prior reject must reconcile to operation input. Establish the immutable source record and effective revision, then reconcile production quantity reported before final count, good completed units physically verified, and scrap units signed by the supervisor from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it.

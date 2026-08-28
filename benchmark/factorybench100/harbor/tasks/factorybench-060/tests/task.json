@@ -7,49 +7,244 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "controlled_quantity": {
+      "accelerated_completion": {
+        "description": "Outcome date for order_full_maximum.",
+        "type": "string"
+      },
+      "baseline_completion": {
+        "description": "Outcome date for create_net_kanban_supply.",
+        "type": "string"
+      },
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
+        "type": "string"
+      },
+      "coverage_item_or_resource": {
+        "description": "Immutable item or resource whose requirement and eligible coverage were reconciled.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_completion": {
+        "description": "Outcome date for ignore_approved_breach.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
         "type": "integer"
       },
-      "from_to_location": {
+      "expedited_external_readiness": {
+        "description": "Expedited readiness date independently confirmed for supplier or source-org replenishment.",
         "type": "string"
       },
-      "inventory_transaction": {
+      "external_recovery_quantity": {
+        "description": "Uncovered EA that the external recovery must cover.",
+        "type": "integer"
+      },
+      "ineligible_coverage_quantity": {
+        "description": "reserved stock and duplicate open supply",
+        "type": "integer"
+      },
+      "observed_coverage_quantity": {
+        "description": "Gross observed coverage for usable stock and firm inbound within replenishment time before exclusions.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "quantity_unit": {
+        "description": "Unit shared by the requirement and coverage calculations: EA.",
         "type": "string"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental recovery cost of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing create_net_kanban_supply, order_full_maximum, ignore_approved_breach.",
+        "enum": [
+          "create_net_kanban_supply",
+          "order_full_maximum",
+          "ignore_approved_breach"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "required_quantity": {
+        "description": "replenishment needed to restore the approved card level",
+        "type": "integer"
+      },
+      "shortage_quantity": {
+        "description": "Uncovered EA after netting eligible coverage from the requirement.",
+        "type": "integer"
+      },
+      "standard_external_readiness": {
+        "description": "Standard readiness date independently confirmed for supplier or source-org replenishment.",
+        "type": "string"
+      },
+      "usable_coverage_quantity": {
+        "description": "Net eligible coverage after removing reserved stock and duplicate open supply.",
+        "type": "integer"
       }
     },
     "required": [
-      "controlled_quantity",
-      "from_to_location",
-      "inventory_transaction"
+      "accelerated_completion",
+      "baseline_completion",
+      "business_need_date",
+      "coverage_item_or_resource",
+      "decision_timing_status",
+      "escalated_completion",
+      "escalation_approval_required",
+      "expedited_external_readiness",
+      "external_recovery_quantity",
+      "ineligible_coverage_quantity",
+      "observed_coverage_quantity",
+      "outcome_vs_control_days",
+      "quantity_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "required_quantity",
+      "shortage_quantity",
+      "standard_external_readiness",
+      "usable_coverage_quantity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "controlled_quantity": 31,
-      "from_to_location": "SEA-1",
-      "inventory_transaction": "Replenishment requested"
+      "accelerated_completion": "2026-01-16",
+      "baseline_completion": "2026-01-20",
+      "business_need_date": "2026-01-19",
+      "coverage_item_or_resource": "NS-COMP-060",
+      "decision_timing_status": "LATE",
+      "escalated_completion": "2026-01-15",
+      "escalation_approval_required": 1,
+      "expedited_external_readiness": "2026-01-14",
+      "external_recovery_quantity": 14,
+      "ineligible_coverage_quantity": 18,
+      "observed_coverage_quantity": 131,
+      "outcome_vs_control_days": 1,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "create_net_kanban_supply",
+      "recommended_outcome_date": "2026-01-20",
+      "required_quantity": 127,
+      "shortage_quantity": 14,
+      "standard_external_readiness": "2026-01-18",
+      "usable_coverage_quantity": 113
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'create_net_kanban_supply', tied to NS-000060, revision R5, and the selected create_net_kanban_supply outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-20', tied to NS-000060, revision R5, and the selected create_net_kanban_supply outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported coverage item or resource as 'NS-COMP-060', tied to NS-000060, revision R5, and the selected create_net_kanban_supply outcome.",
+        "field": "coverage_item_or_resource",
+        "id": "answer_coverage_item_or_resource",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported shortage quantity as 14, tied to NS-000060, revision R5, and the selected create_net_kanban_supply outcome.",
+        "field": "shortage_quantity",
+        "id": "answer_shortage_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'LATE', tied to NS-000060, revision R5, and the selected create_net_kanban_supply outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.supply_requests.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000060 to reach business outcome 'Replenishment requested' through oracle_fusion.supply_requests.create with exact provider-critical values requestBody.SupplyOrderReferenceNumber='SUPPLY-0060', requestBody.SupplyRequestSystem='EXT', requestBody.SupplyRequestDate='2026-01-19', requestBody.supplyRequestLines[0].SupplyOrderSource='EXT', requestBody.supplyRequestLines[0].SupplyType='BUY', requestBody.supplyRequestLines[0].ItemNumber='NS-COMP-060', requestBody.supplyRequestLines[0].Quantity=14.0, requestBody.supplyRequestLines[0].NeedByDate='2026-01-20', requestBody.supplyRequestLines[0].DestinationOrganizationCode='SEA'. The audited transition binds selected option create_net_kanban_supply, revision R5, approval AP-0060, and constraint breach approval, card size, minimum, maximum, and open supply; reserved stock and duplicate open supply = 18 EA; uncovered or unsupported scope = 14.0 EA; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.SupplyOrderReferenceNumber",
+          "requestBody.SupplyRequestDate",
+          "requestBody.SupplyRequestSystem",
+          "requestBody.supplyRequestLines[0].DestinationOrganizationCode",
+          "requestBody.supplyRequestLines[0].ItemNumber",
+          "requestBody.supplyRequestLines[0].NeedByDate",
+          "requestBody.supplyRequestLines[0].Quantity",
+          "requestBody.supplyRequestLines[0].SupplyOrderSource",
+          "requestBody.supplyRequestLines[0].SupplyType"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "SupplyOrderReferenceNumber": "SUPPLY-0060",
+              "SupplyRequestDate": "2026-01-19",
+              "SupplyRequestSystem": "EXT",
+              "supplyRequestLines": [
+                {
+                  "DestinationOrganizationCode": "SEA",
+                  "ItemNumber": "NS-COMP-060",
+                  "NeedByDate": "2026-01-20",
+                  "Quantity": 14.0,
+                  "SupplyOrderSource": "EXT",
+                  "SupplyType": "BUY"
+                }
+              ]
+            }
+          },
+          "tool": "oracle_fusion.supply_requests.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0060\",\"SupplyRequestDate\":\"2026-01-16\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-060\",\"NeedByDate\":\"2026-01-19\",\"Quantity\":31,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}},\"case\":\"CASE-060\",\"outcome\":\"Validate the physical count and min-max exception before creating a replenishment supply request.\",\"tool\":\"oracle_fusion.supply_requests.create\"}",
           "resource_type": "oracle_fusion.supply_requests",
           "revision": 1,
           "status": "Replenishment requested",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-060-mutation-01",
           "task_id": "factorybench-060"
         }
       },
       {
-        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "description": "Sent material control the scoped outcome for CASE-060, including completion 2026-01-20, the binding constraint, alternatives, and the Oracle business reference.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "threadId": "thread-060",
+            "userId": "me"
+          },
+          "tool": "gmail.messages.send"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-060",
+            "NS-000060",
+            "NS-COMP-060"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-20",
+          "create_net_kanban_supply"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "gmail.messages",
@@ -57,14 +252,26 @@
           "status": "Recorded",
           "system": "gmail"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-060-mutation-02",
           "task_id": "factorybench-060"
         }
       },
       {
-        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "description": "Wrote create_net_kanban_supply, completion 2026-01-20, and the binding constraint into the existing task-scoped control cell without altering another row.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "range": "Control!H22",
+            "spreadsheetId": "sheet-060"
+          },
+          "tool": "google_sheets.spreadsheets.values.update"
+        },
+        "payload_text_contains": [
+          "2026-01-20",
+          "create_net_kanban_supply"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_sheets.spreadsheets.values",
@@ -72,43 +279,1328 @@
           "status": "Recorded",
           "system": "google_sheets"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-060-mutation-03",
           "task_id": "factorybench-060"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-19 as the documented date for kanban breach; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 127 EA for replenishment needed to restore the approved card level at revision R5.",
+        "field": "required_quantity",
+        "id": "derive_plan_requirement",
+        "weight": 2.0
+      },
+      {
+        "description": "Read 131 EA of gross observed usable stock and firm inbound within replenishment time.",
+        "field": "observed_coverage_quantity",
+        "id": "read_gross_coverage",
+        "weight": 1.0
+      },
+      {
+        "description": "Excluded 18 EA for reserved stock and duplicate open supply.",
+        "field": "ineligible_coverage_quantity",
+        "id": "remove_ineligible_coverage",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 131 observed \u2212 18 ineligible = 113 usable EA.",
+        "field": "usable_coverage_quantity",
+        "id": "calculate_usable_coverage",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 127 required \u2212 113 usable = 14 EA uncovered.",
+        "field": "shortage_quantity",
+        "id": "calculate_plan_gap",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept every planning quantity in EA.",
+        "field": "quantity_unit",
+        "id": "preserve_plan_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Calculated create_net_kanban_supply outcome as 2026-01-20 under line-side consumption window.",
+        "field": "baseline_completion",
+        "id": "compare_baseline_plan",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated order_full_maximum outcome as 2026-01-16 using supplier or source-org replenishment.",
+        "field": "accelerated_completion",
+        "id": "compare_accelerated_plan",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated ignore_approved_breach outcome as 2026-01-15 and kept its separate-approval condition.",
+        "field": "escalated_completion",
+        "id": "compare_escalated_plan",
+        "weight": 1.0
+      },
+      {
+        "description": "Read 2026-01-18 as the independently confirmed standard readiness date for supplier or source-org replenishment.",
+        "field": "standard_external_readiness",
+        "id": "read_standard_external_readiness",
+        "weight": 1.0
+      },
+      {
+        "description": "Read 2026-01-14 as the independently confirmed expedited readiness date for supplier or source-org replenishment.",
+        "field": "expedited_external_readiness",
+        "id": "read_expedited_external_readiness",
+        "weight": 1.0
+      },
+      {
+        "description": "Bound external recovery to the 14 EA uncovered requirement rather than ordering the full header quantity.",
+        "field": "external_recovery_quantity",
+        "id": "bound_external_recovery_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental recovery cost for create_net_kanban_supply; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that ignore_approved_breach remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of create_net_kanban_supply, order_full_maximum, and ignore_approved_breach; selected create_net_kanban_supply because it alone gives the best currently authorized result under breach approval, card size, minimum, maximum, and open supply.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-20 as the supported outcome date for create_net_kanban_supply.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-20 with the independent control date 2026-01-19 and calculated a signed variance of 1 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported LATE; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-060"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-060 scope, immutable handles, mounted systems, and evidence index before investigating NS-000060.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-060\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-060"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-060 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-060",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-060",
+              "threadId": "thread-060"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-060",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-060"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-14 readiness input for order_full_maximum, then separately derived its 2026-01-16 operating outcome under breach approval, card size, minimum, maximum, and open supply instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "ranges": [
+                "Control!A1:I50",
+                "Approvals!A1:G20"
+              ],
+              "spreadsheetId": "sheet-060",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-060"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.batchGet"
+          },
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!A1:I50",
+              "spreadsheetId": "sheet-060",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-060"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Reconciled 131 observed less 18 excluded to 113 supported EA for usable stock and firm inbound within replenishment time. Applied line-side consumption window to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-060' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-060"
+                },
+                {
+                  "id": "drive-approval-060"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-060 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-060-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-060-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-060-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-14 readiness input for order_full_maximum, then separately derived its 2026-01-16 operating outcome under breach approval, card size, minimum, maximum, and open supply instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-060-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-060-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-060-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000060 at R5.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-060-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-060-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-060-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R5 and established 127 EA for replenishment needed to restore the approved card level, with control date 2026-01-19.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-060-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-060-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-060-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R5 and established 127 EA for replenishment needed to restore the approved card level, with control date 2026-01-19.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-060-11"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-060-11",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-060-11"
+            },
+            "expected_result_contains": {
+              "id": "drive-060-11"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the raw operating-window calendar and Applied line-side consumption window to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-060"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-060"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-060",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-060"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-060"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-060"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0060 only to create_net_kanban_supply, NS-000060, and the supported 14.0 EA; kept broader scope and ignore_approved_breach outside current authority.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-060"
+            },
+            "expected_result_contains": {
+              "id": "drive-060"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-060",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-060"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-060"
+            },
+            "expected_result_contains": {
+              "id": "drive-060"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R5 and established 127 EA for replenishment needed to restore the approved card level, with control date 2026-01-19.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "file": "F-000060"
+            },
+            "expected_result_contains": {
+              "file": {
+                "id": "F-000060"
+              }
+            },
+            "match": "result_contains",
+            "tool": "slack.files_info"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Inspected the attachment linked from the scoped Slack discussion and correlated its case and source revision before using its control evidence.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0060"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000060
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "OrderNumber='PO-0060'"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000060
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-14 readiness input for order_full_maximum, then separately derived its 2026-01-16 operating outcome under breach approval, card size, minimum, maximum, and open supply instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-060' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400060
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 131 observed less 18 excluded to 113 supported EA for usable stock and firm inbound within replenishment time.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "SupplyOrderReferenceNumber='SUPPLY-0060'"
+            },
+            "expected_result_contains": {
+              "SupplyRequestId": 2200060
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.supply_requests.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-14 readiness input for order_full_maximum, then separately derived its 2026-01-16 operating outcome under breach approval, card size, minimum, maximum, and open supply instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0060"
+            },
+            "expected_result_contains": {
+              "HeaderId": 12000060
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.sales_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "OrderNumber='SO-47060'"
+            },
+            "expected_result_contains": {
+              "HeaderId": 12000060
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.sales_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle sales orders record: Applied revision R5 and established 127 EA for replenishment needed to restore the approved card level, with control date 2026-01-19.",
+        "id": "investigation_17",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.supply_requests.create",
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "SupplyOrderReferenceNumber='SUPPLY-0060'"
+            },
+            "expected_result_contains": {
+              "SupplyRequestId": 1500060
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.supply_requests.list"
+          }
+        ],
+        "description": "Read NS-000060 back through the documented Oracle supply requests.list operation after the mutation and confirmed the resource-specific changed fields ['DestinationOrganizationCode', 'ItemNumber', 'LastUpdateDate', 'NeedByDate', 'Quantity', 'SupplyOrderReferenceNumber', 'SupplyRequestDate', 'SupplyRequestStatus', 'SupplyRequestSystem'], including the effective update at 2026-01-20, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "DestinationOrganizationCode": "SEA",
+          "ItemNumber": "NS-COMP-060",
+          "LastUpdateDate": "2026-01-20T16:00:00-08:00",
+          "NeedByDate": "2026-01-20",
+          "Quantity": 14.0,
+          "SupplyOrderReferenceNumber": "SUPPLY-0060",
+          "SupplyRequestDate": "2026-01-19",
+          "SupplyRequestStatus": "NEW",
+          "SupplyRequestSystem": "EXT"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": true,
+        "target_identity": {
+          "SupplyRequestId": 1500060
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.supply_requests.create",
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0060'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 1500060
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "description": "Read NS-000060 back through the documented Oracle supply requests.list operation after the mutation and confirmed the resource-specific changed fields ['DestinationOrganizationCode', 'ItemNumber', 'LastUpdateDate', 'NeedByDate', 'Quantity', 'SupplyOrderReferenceNumber', 'SupplyRequestDate', 'SupplyRequestStatus', 'SupplyRequestSystem'], including the effective update at 2026-01-20, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "DestinationOrganizationCode": "SEA",
+        "ItemNumber": "NS-COMP-060",
+        "LastUpdateDate": "2026-01-20T16:00:00-08:00",
+        "NeedByDate": "2026-01-20",
+        "Quantity": 14.0,
+        "SupplyOrderReferenceNumber": "SUPPLY-0060",
+        "SupplyRequestDate": "2026-01-19",
+        "SupplyRequestStatus": "NEW",
+        "SupplyRequestSystem": "EXT"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": true,
+      "target_identity": {
+        "SupplyRequestId": 1500060
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-060"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-060 scope, immutable handles, mounted systems, and evidence index before investigating NS-000060.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-060\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-060"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-060 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-060",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-060",
+            "threadId": "thread-060"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-060",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-060"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-14 readiness input for order_full_maximum, then separately derived its 2026-01-16 operating outcome under breach approval, card size, minimum, maximum, and open supply instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-060",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-060"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-060",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-060"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 131 observed less 18 excluded to 113 supported EA for usable stock and firm inbound within replenishment time. Applied line-side consumption window to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-060' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-060"
+              },
+              {
+                "id": "drive-approval-060"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-060 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-060-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-060-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-060-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-14 readiness input for order_full_maximum, then separately derived its 2026-01-16 operating outcome under breach approval, card size, minimum, maximum, and open supply instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-060-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-060-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-060-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000060 at R5.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-060-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-060-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-060-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R5 and established 127 EA for replenishment needed to restore the approved card level, with control date 2026-01-19.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-060-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-060-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-060-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R5 and established 127 EA for replenishment needed to restore the approved card level, with control date 2026-01-19.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-060-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-060-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-060-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-060-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied line-side consumption window to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-060"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-060"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-060",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-060"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-060"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-060"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0060 only to create_net_kanban_supply, NS-000060, and the supported 14.0 EA; kept broader scope and ignore_approved_breach outside current authority.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-060"
+          },
+          "expected_result_contains": {
+            "id": "drive-060"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-060",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-060"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-060"
+          },
+          "expected_result_contains": {
+            "id": "drive-060"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R5 and established 127 EA for replenishment needed to restore the approved card level, with control date 2026-01-19.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "file": "F-000060"
+          },
+          "expected_result_contains": {
+            "file": {
+              "id": "F-000060"
+            }
+          },
+          "match": "result_contains",
+          "tool": "slack.files_info"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Inspected the attachment linked from the scoped Slack discussion and correlated its case and source revision before using its control evidence.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0060"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000060
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0060'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000060
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-14 readiness input for order_full_maximum, then separately derived its 2026-01-16 operating outcome under breach approval, card size, minimum, maximum, and open supply instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-060' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400060
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 131 observed less 18 excluded to 113 supported EA for usable stock and firm inbound within replenishment time.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0060'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 2200060
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-14 readiness input for order_full_maximum, then separately derived its 2026-01-16 operating outcome under breach approval, card size, minimum, maximum, and open supply instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0060"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000060
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='SO-47060'"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000060
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle sales orders record: Applied revision R5 and established 127 EA for replenishment needed to restore the approved card level, with control date 2026-01-19.",
+      "id": "investigation_17",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-060"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
     },
     {
       "arguments": {
-        "majorDimension": "ROWS",
-        "range": "Control!A1:H50",
-        "spreadsheetId": "sheet-060",
-        "valueRenderOption": "UNFORMATTED_VALUE"
+        "maxResults": 20,
+        "q": "\"CASE-060\"",
+        "userId": "me"
       },
-      "match": "successful_tool_call",
-      "tool": "google_sheets.spreadsheets.values.get"
-    },
-    {
-      "arguments": {
-        "fileId": "drive-060",
-        "mimeType": "text/plain"
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-060"
+          }
+        ]
       },
-      "match": "successful_tool_call",
-      "tool": "google_drive.files.export"
-    },
-    {
-      "arguments": {
-        "file": "F-000060"
-      },
-      "match": "successful_tool_call",
-      "tool": "slack.files_info"
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     },
     {
       "arguments": {
@@ -116,36 +1608,203 @@
         "id": "msg-060",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "msg-060",
+        "threadId": "thread-060"
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.get"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!A1:I50",
+        "spreadsheetId": "sheet-060",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "expected_result_contains": {
+        "values": [
+          [
+            "CASE-060"
+          ]
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-060' and trashed = false"
+      },
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-060"
+          },
+          {
+            "id": "drive-approval-060"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-060-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-060-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-060-09"
+      },
+      "expected_result_contains": {
+        "id": "drive-060-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-060-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-060-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-060-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-060-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-060-11"
+      },
+      "expected_result_contains": {
+        "id": "drive-060-11"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-060"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-060"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-060",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-060"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "file": "F-000060"
+      },
+      "expected_result_contains": {
+        "file": {
+          "id": "F-000060"
+        }
+      },
+      "match": "result_contains",
+      "tool": "slack.files_info"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-060'"
+        "q": "OrderNumber='PO-0060'"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "POHeaderId": 2000060
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.purchase_orders.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ItemNumber='NS-COMP-060' and OrganizationCode='SEA'"
+      },
+      "expected_result_contains": {
+        "InventoryItemId": 1400060
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.inventory_onhand_balances.list"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-060'"
+        "q": "SupplyOrderReferenceNumber='SUPPLY-0060'"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "SupplyRequestId": 2200060
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "OrderNumber='SO-47060'"
+      },
+      "expected_result_contains": {
+        "HeaderId": 12000060
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.sales_orders.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
+    "gmail.messages.list",
+    "gmail.messages.get",
     "google_sheets.spreadsheets.values.get",
+    "google_drive.files.list",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.get",
     "google_drive.files.export",
     "slack.files_info",
-    "gmail.messages.get",
+    "oracle_fusion.purchase_orders.list",
     "oracle_fusion.inventory_onhand_balances.list",
-    "oracle_fusion.supply_requests.list"
+    "oracle_fusion.supply_requests.list",
+    "oracle_fusion.sales_orders.list"
   ],
   "task_id": "factorybench-060",
   "write_tools": [

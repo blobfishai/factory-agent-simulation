@@ -105,13 +105,20 @@ def _contract(
     }
 
 
-def _oracle_list(name: str, resource: str, source_page: str, description: str) -> Json:
+def _oracle_list(
+    name: str,
+    resource: str,
+    source_page: str,
+    description: str,
+    *,
+    financials: bool = False,
+) -> Json:
     return _contract(
         name,
         server="oracle_fusion",
         method="GET",
         path=f"/fscmRestApi/resources/11.13.18.05/{resource}",
-        source=f"{ORACLE_SCM}{source_page}",
+        source=f"{ORACLE_FINANCIALS if financials else ORACLE_SCM}{source_page}",
         description=description,
         input_schema=deepcopy(LIST_SCHEMA),
         read_only=True,
@@ -217,6 +224,8 @@ def _collection_contracts() -> list[Json]:
         ("oracle_fusion.maintenance_work_orders.list", "maintenanceWorkOrders", "api-maintenance-maintenance-work-orders.html", "Get maintenance work orders."),
         ("oracle_fusion.maintenance_programs.list", "maintenancePrograms", "api-maintenance-maintenance-programs.html", "Get maintenance programs."),
         ("oracle_fusion.inventory_onhand_balances.list", "inventoryOnhandBalances", "api-inventory-management-inventory-on-hand-balances.html", "Get inventory on-hand balances."),
+        ("oracle_fusion.cycle_count_definitions.list", "cycleCountDefinitions", "op-cyclecountdefinitions-get.html", "Get cycle-count definitions and approval tolerances."),
+        ("oracle_fusion.cycle_count_sequence_details.list", "cycleCountSequenceDetails", "op-cyclecountsequencedetails-get.html", "Get cycle-count sequence quantities, recounts, and approval status."),
         ("oracle_fusion.supply_requests.list", "supplyRequests", "api-inventory-management-supply-requests.html", "Get supply requests."),
         ("oracle_fusion.receiving_receipt_requests.list", "receivingReceiptRequests", "api-inventory-management-receiving-receipt-requests.html", "Get receiving receipt requests."),
         ("oracle_fusion.quality_inspection_results.list", "inspectionResults", "api-quality-inspection-results.html", "Get quality inspection results."),
@@ -227,6 +236,15 @@ def _collection_contracts() -> list[Json]:
         ("oracle_fusion.sales_orders.list", "salesOrdersForOrderHub", "api-order-management-sales-orders-for-order-hub.html", "Get sales orders from Order Management."),
     ):
         contracts.append(_oracle_list(name, resource, page, description))
+    contracts.append(
+        _oracle_list(
+            "oracle_fusion.invoices.list",
+            "invoices",
+            "op-invoices-get.html",
+            "Get Payables invoices.",
+            financials=True,
+        )
+    )
 
     contracts.extend(
         [
@@ -287,7 +305,10 @@ def _child_and_transaction_contracts() -> list[Json]:
         ("oracle_fusion.work_order_materials.list", "/workOrders/{WorkOrderId}/child/WorkOrderMaterial", "WorkOrderId", "Get materials for a discrete work order."),
         ("oracle_fusion.work_order_resources.list", "/workOrders/{WorkOrderId}/child/WorkOrderResource", "WorkOrderId", "Get resources for a discrete work order."),
         ("oracle_fusion.maintenance_operations.list", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderOperation", "WorkOrderId", "Get operations for a maintenance work order."),
+        ("oracle_fusion.maintenance_materials.list", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderMaterial", "WorkOrderId", "Get material requirements for a maintenance work order."),
+        ("oracle_fusion.maintenance_resources.list", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderResource", "WorkOrderId", "Get labor and equipment resources for a maintenance work order."),
         ("oracle_fusion.maintenance_documents.list", "/maintenanceWorkOrders/{WorkOrderId}/child/documentReference", "WorkOrderId", "Get document references for a maintenance work order."),
+        ("oracle_fusion.cycle_count_history.list", "/cycleCountSequenceDetails/{cycleCountSequenceDetailsUniqID}/child/history", "cycleCountSequenceDetailsUniqID", "Get the independently recorded count history for one cycle-count sequence."),
         ("oracle_fusion.receiving_receipt_transactions.list", "/receivingReceiptRequests/{HeaderInterfaceId}/child/lines", "HeaderInterfaceId", "Get receiving transaction requests."),
         ("oracle_fusion.purchase_order_lines.list", "/purchaseOrders/{purchaseOrdersUniqID}/child/lines", "purchaseOrdersUniqID", "Get purchase-order lines."),
     )
@@ -402,18 +423,19 @@ def _action_contracts() -> list[Json]:
 def _workspace_contracts() -> list[Json]:
     raw_message = _object({"raw": _string(), "threadId": _string()}, ["raw"])
     contracts = [
-        _contract("gmail.messages.list", server="gmail", method="GET", path="/gmail/v1/users/{userId}/messages", source=f"{GMAIL}.messages/list", description="Search messages using Gmail's q grammar.", input_schema=_object({"userId": _string(), "q": _string(), "labelIds": {"type": "array", "items": _string()}, "maxResults": _integer(), "pageToken": _string(), "includeSpamTrash": _boolean()}), read_only=True),
-        _contract("gmail.messages.get", server="gmail", method="GET", path="/gmail/v1/users/{userId}/messages/{id}", source=f"{GMAIL}.messages/get", description="Get one Gmail message.", input_schema=_object({"userId": _string(), "id": _string(), "format": {"type": "string", "enum": ["minimal", "full", "raw", "metadata"]}, "metadataHeaders": {"type": "array", "items": _string()}}, ["id"]), read_only=True),
-        _contract("gmail.messages.attachments.get", server="gmail", method="GET", path="/gmail/v1/users/{userId}/messages/{messageId}/attachments/{id}", source=f"{GMAIL}.messages.attachments/get", description="Get an externalized Gmail attachment body.", input_schema=_object({"userId": _string(), "messageId": _string(), "id": _string()}, ["messageId", "id"]), read_only=True),
-        _contract("gmail.threads.get", server="gmail", method="GET", path="/gmail/v1/users/{userId}/threads/{id}", source=f"{GMAIL}.threads/get", description="Get one Gmail thread.", input_schema=_object({"userId": _string(), "id": _string(), "format": _string(), "metadataHeaders": {"type": "array", "items": _string()}}, ["id"]), read_only=True),
-        _contract("gmail.drafts.create", server="gmail", method="POST", path="/gmail/v1/users/{userId}/drafts", source=f"{GMAIL}.drafts/create", description="Create a Gmail draft from a base64url RFC 2822 message.", input_schema=_object({"userId": _string(), "message": raw_message}, ["message"]), read_only=False),
-        _contract("gmail.messages.send", server="gmail", method="POST", path="/gmail/v1/users/{userId}/messages/send", source=f"{GMAIL}.messages/send", description="Send a base64url RFC 2822 Gmail message.", input_schema=_object({"userId": _string(), "raw": _string(), "threadId": _string()}, ["raw"]), read_only=False),
+        _contract("gmail.messages.list", server="gmail", method="GET", path="/gmail/v1/users/{userId}/messages", source=f"{GMAIL}.messages/list", description="Search messages using Gmail's q grammar.", input_schema=_object({"userId": _string(), "q": _string(), "labelIds": {"type": "array", "items": _string()}, "maxResults": _integer(), "pageToken": _string(), "includeSpamTrash": _boolean()}, ["userId"]), read_only=True),
+        _contract("gmail.messages.get", server="gmail", method="GET", path="/gmail/v1/users/{userId}/messages/{id}", source=f"{GMAIL}.messages/get", description="Get one Gmail message.", input_schema=_object({"userId": _string(), "id": _string(), "format": {"type": "string", "enum": ["minimal", "full", "raw", "metadata"]}, "metadataHeaders": {"type": "array", "items": _string()}}, ["userId", "id"]), read_only=True),
+        _contract("gmail.messages.attachments.get", server="gmail", method="GET", path="/gmail/v1/users/{userId}/messages/{messageId}/attachments/{id}", source=f"{GMAIL}.messages.attachments/get", description="Get an externalized Gmail attachment body.", input_schema=_object({"userId": _string(), "messageId": _string(), "id": _string()}, ["userId", "messageId", "id"]), read_only=True),
+        _contract("gmail.threads.get", server="gmail", method="GET", path="/gmail/v1/users/{userId}/threads/{id}", source=f"{GMAIL}.threads/get", description="Get one Gmail thread.", input_schema=_object({"userId": _string(), "id": _string(), "format": _string(), "metadataHeaders": {"type": "array", "items": _string()}}, ["userId", "id"]), read_only=True),
+        _contract("gmail.drafts.get", server="gmail", method="GET", path="/gmail/v1/users/{userId}/drafts/{id}", source=f"{GMAIL}.drafts/get", description="Get one Gmail draft and its current message.", input_schema=_object({"userId": _string(), "id": _string(), "format": {"type": "string", "enum": ["minimal", "full", "raw", "metadata"]}}, ["userId", "id"]), read_only=True),
+        _contract("gmail.drafts.create", server="gmail", method="POST", path="/gmail/v1/users/{userId}/drafts", source=f"{GMAIL}.drafts/create", description="Create a Gmail draft from a base64url RFC 2822 message.", input_schema=_object({"userId": _string(), "message": raw_message}, ["userId", "message"]), read_only=False),
+        _contract("gmail.messages.send", server="gmail", method="POST", path="/gmail/v1/users/{userId}/messages/send", source=f"{GMAIL}.messages/send", description="Send a base64url RFC 2822 Gmail message.", input_schema=_object({"userId": _string(), "raw": _string(), "threadId": _string()}, ["userId", "raw"]), read_only=False),
         _contract("google_drive.files.list", server="google_drive", method="GET", path="/drive/v3/files", source=f"{DRIVE}/files/list", description="Search Drive files using the q grammar.", input_schema=_object({"q": _string(), "spaces": _string(), "orderBy": _string(), "pageSize": _integer(), "pageToken": _string(), "fields": _string()}), read_only=True),
         _contract("google_drive.files.get", server="google_drive", method="GET", path="/drive/v3/files/{fileId}", source=f"{DRIVE}/files/get", description="Get Drive file metadata or media.", input_schema=_object({"fileId": _string(), "alt": _string(), "fields": _string(), "acknowledgeAbuse": _boolean()}, ["fileId"]), read_only=True),
         _contract("google_drive.files.download", server="google_drive", method="POST", path="/drive/v3/files/{fileId}/download", source=f"{DRIVE}/files/download", description="Download file content from Drive.", input_schema=_object({"fileId": _string()}, ["fileId"]), read_only=True),
         _contract("google_drive.files.export", server="google_drive", method="GET", path="/drive/v3/files/{fileId}/export", source=f"{DRIVE}/files/export", description="Export a Google Workspace document.", input_schema=_object({"fileId": _string(), "mimeType": _string()}, ["fileId", "mimeType"]), read_only=True),
-        _contract("google_drive.approvals.list", server="google_drive", method="GET", path="/drive/v3/files/{fileId}/approvals", source=f"{DRIVE}/files.approvals/list", description="List approval processes on a Drive file.", input_schema=_object({"fileId": _string(), "pageSize": _integer(), "pageToken": _string()}, ["fileId"]), read_only=True),
-        _contract("google_drive.approvals.approve", server="google_drive", method="POST", path="/drive/v3/files/{fileId}/approvals/{approvalId}:approve", source=f"{DRIVE}/files.approvals/approve", description="Approve a Drive approval as the current reviewer.", input_schema=_object({"fileId": _string(), "approvalId": _string(), "requestBody": _object({"message": _string()})}, ["fileId", "approvalId"]), read_only=False),
+        _contract("google_drive.comments.list", server="google_drive", method="GET", path="/drive/v3/files/{fileId}/comments", source=f"{DRIVE}/comments/list", description="List comments on a Drive file.", input_schema=_object({"fileId": _string(), "pageSize": _integer(), "pageToken": _string(), "includeDeleted": _boolean(), "fields": _string()}, ["fileId"]), read_only=True),
+        _contract("google_drive.comments.get", server="google_drive", method="GET", path="/drive/v3/files/{fileId}/comments/{commentId}", source=f"{DRIVE}/comments/get", description="Get one Drive comment.", input_schema=_object({"fileId": _string(), "commentId": _string(), "includeDeleted": _boolean(), "fields": _string()}, ["fileId", "commentId"]), read_only=True),
         _contract("google_drive.comments.create", server="google_drive", method="POST", path="/drive/v3/files/{fileId}/comments", source=f"{DRIVE}/comments/create", description="Create a comment on a Drive file.", input_schema=_object({"fileId": _string(), "requestBody": _object({"content": _string()}, ["content"])}, ["fileId", "requestBody"]), read_only=False),
         _contract("google_sheets.spreadsheets.get", server="google_sheets", method="GET", path="/v4/spreadsheets/{spreadsheetId}", source=f"{SHEETS}/get", description="Get a spreadsheet.", input_schema=_object({"spreadsheetId": _string(), "ranges": {"type": "array", "items": _string()}, "includeGridData": _boolean(), "fields": _string()}, ["spreadsheetId"]), read_only=True),
         _contract("google_sheets.spreadsheets.values.get", server="google_sheets", method="GET", path="/v4/spreadsheets/{spreadsheetId}/values/{range}", source=f"{SHEETS}.values/get", description="Get values from a spreadsheet range.", input_schema=_object({"spreadsheetId": _string(), "range": _string(), "majorDimension": _string(), "valueRenderOption": _string(), "dateTimeRenderOption": _string()}, ["spreadsheetId", "range"]), read_only=True),

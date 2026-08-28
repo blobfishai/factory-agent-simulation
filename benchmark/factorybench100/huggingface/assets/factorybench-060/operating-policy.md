@@ -1,5 +1,7 @@
-# Create supply for an approved kanban breach — operating control
+# Create supply for an approved kanban breach — operating policy
 
-Scope: Correct and move lot-, serial-, project-, and organization-controlled inventory through documented transactions.
+Decision scope: kanban breach.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: breach approval, card size, minimum, maximum, and open supply. Establish the immutable source record and effective revision, then reconcile replenishment needed to restore the approved card level, usable stock and firm inbound within replenishment time, and reserved stock and duplicate open supply from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: send the scoped completion reply in the existing email thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell.

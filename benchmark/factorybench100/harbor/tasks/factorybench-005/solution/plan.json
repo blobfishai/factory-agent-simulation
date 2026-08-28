@@ -6,11 +6,59 @@
   {
     "arguments": {
       "majorDimension": "ROWS",
-      "range": "Control!A1:H50",
+      "range": "Control!A1:I50",
       "spreadsheetId": "sheet-005",
       "valueRenderOption": "UNFORMATTED_VALUE"
     },
     "tool": "google_sheets.spreadsheets.values.get"
+  },
+  {
+    "arguments": {
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-005' and trashed = false"
+    },
+    "tool": "google_drive.files.list"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-005-04"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-005-09",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-005-10"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-005-12",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-005-03"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-approval-005"
+    },
+    "tool": "google_drive.files.get"
   },
   {
     "arguments": {
@@ -27,6 +75,14 @@
   },
   {
     "arguments": {
+      "maxResults": 20,
+      "q": "\"CASE-005\"",
+      "userId": "me"
+    },
+    "tool": "gmail.messages.list"
+  },
+  {
+    "arguments": {
       "format": "full",
       "id": "msg-005",
       "userId": "me"
@@ -37,9 +93,9 @@
     "arguments": {
       "limit": 50,
       "onlyData": true,
-      "q": "ReferenceNumber='CASE-005'"
+      "q": "ItemNumber='NS-COMP-005' and OrganizationCode='SEA'"
     },
-    "tool": "oracle_fusion.sales_orders.list"
+    "tool": "oracle_fusion.inventory_onhand_balances.list"
   },
   {
     "arguments": {
@@ -49,10 +105,34 @@
   },
   {
     "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "OrderNumber='SO-47005'"
+    },
+    "tool": "oracle_fusion.sales_orders.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0005"
+    },
+    "tool": "oracle_fusion.purchase_order_lines.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "SupplyOrderReferenceNumber='SUPPLY-0005'"
+    },
+    "tool": "oracle_fusion.supply_requests.list"
+  },
+  {
+    "arguments": {
       "purchaseOrdersUniqID": "purchaseOrdersUniqID-0005",
       "requestBody": {
         "cancelUnfulfilledDemandFlag": true,
-        "cancellationReason": "Prove that the EDI release duplicates an existing order and cancel only the unconsumed purchase commitment created for the duplicate.",
+        "cancellationReason": "Duplicate supply canceled: cancel_duplicate_supply; completion 2026-01-15; constraint customer PO, line, revision, quantity, and ship window must all duplicate an existing release; quantity reserved or pegged to legitimate demand = 12 EA; uncovered or unsupported scope = 10.0 EA; approval AP-0005",
         "initiatingParty": "buyer"
       }
     },
@@ -60,7 +140,13 @@
   },
   {
     "arguments": {
-      "raw": "RnJvbTogb3JkZXIuZnVsZmlsbG1lbnQubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG9wZXJhdGlvbnMtY29udHJvbEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMDUg4oCUIENvbXBsZXRlZCBlbnRlcnByaXNlIHdvcmtmbG93DQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRHVwbGljYXRlIHN1cHBseSBjYW5jZWxlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDA1Lg0K",
+      "purchaseOrdersUniqID": "purchaseOrdersUniqID-0005"
+    },
+    "tool": "oracle_fusion.purchase_orders.get"
+  },
+  {
+    "arguments": {
+      "raw": "RnJvbTogb3JkZXIuZnVsZmlsbG1lbnQubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IGFjY291bnQudGVhbUBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMDUg4oCUIENvbXBsZXRlZCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogY2FuY2VsX2R1cGxpY2F0ZV9zdXBwbHkuIENvbXBsZXRpb246IDIwMjYtMDEtMTUuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IGN1c3RvbWVyIFBPLCBsaW5lLCByZXZpc2lvbiwgcXVhbnRpdHksIGFuZCBzaGlwIHdpbmRvdyBtdXN0IGFsbCBkdXBsaWNhdGUgYW4gZXhpc3RpbmcgcmVsZWFzZTsgcXVhbnRpdHkgcmVzZXJ2ZWQgb3IgcGVnZ2VkIHRvIGxlZ2l0aW1hdGUgZGVtYW5kID0gMTIgRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDEwLjAgRUEuDQpBbHRlcm5hdGl2ZXM6IHJldGFpbl9ib3RoX3JlbGVhc2VzOiBvdXRjb21lIDIwMjYtMDEtMTcsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBjYW5jZWxfZHVwbGljYXRlX3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGZyZWV6ZV9hbGxfY3VzdG9tZXJfc3VwcGx5OiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAwNS4gQXBwcm92YWw6IEFQLTAwMDUuIENhc2U6IENBU0UtMDA1Lg0K",
       "threadId": "thread-005",
       "userId": "me"
     },
@@ -72,10 +158,9 @@
       "range": "Control!H7",
       "requestBody": {
         "majorDimension": "ROWS",
-        "range": "Control!H7",
         "values": [
           [
-            "Duplicate supply canceled"
+            "CASE-005 | cancel_duplicate_supply | 2026-01-15 | NS-000005 | customer PO, line, revision, quantity, and ship window must all duplicate an existing release; quantity reserved or pegged to legitimate demand = 12 EA; uncovered or unsupported scope = 10.0 EA | AP-0005"
           ]
         ]
       },
@@ -86,9 +171,23 @@
   },
   {
     "arguments": {
-      "order_number": "ORD-0005",
-      "revised_commit_date": "2026-01-18",
-      "supply_action": "Duplicate supply canceled"
+      "baseline_resolution_date": "2026-01-17",
+      "business_need_date": "2026-01-15",
+      "controlled_item_or_record": "NS-COMP-005",
+      "controlled_resolution_date": "2026-01-15",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-16",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 12,
+      "observed_quantity": 105,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "cancel_duplicate_supply",
+      "recommended_outcome_date": "2026-01-15",
+      "source_quantity": 103,
+      "supported_quantity": 93,
+      "transaction_quantity": 93
     },
     "tool": "factorybench.submit_answer"
   }

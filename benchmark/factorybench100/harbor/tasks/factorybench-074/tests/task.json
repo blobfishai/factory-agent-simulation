@@ -7,50 +7,203 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "cost_reference": {
+      "baseline_settlement_date": {
+        "description": "Posting, payment, or close date under validate_supported_outside_invoice.",
         "type": "string"
       },
-      "posting_action": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
       },
-      "reconciled_amount": {
+      "control_threshold_usd": {
+        "description": "Exact USD threshold for document-specific matching tolerance.",
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "controlled_settlement_date": {
+        "description": "Posting, payment, or close date under pay_billed_quantity.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "document_amount_usd": {
+        "description": "invoice amount and billed operation quantity",
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "escalated_settlement_date": {
+        "description": "Posting, payment, or close date under hold_entire_supplier_account.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "exception_amount_usd": {
+        "description": "rejected, unreceived, duplicate, or rate-variance value",
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "financial_control": {
+        "description": "Task-specific monetary control that governs the action; it is not assumed to be an invoice tolerance.",
+        "type": "string"
+      },
+      "financial_document_or_record": {
+        "description": "Immutable invoice, PO, cost record, or close exception being reconciled.",
+        "type": "string"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing validate_supported_outside_invoice, pay_billed_quantity, hold_entire_supplier_account.",
+        "enum": [
+          "validate_supported_outside_invoice",
+          "pay_billed_quantity",
+          "hold_entire_supplier_account"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "supported_amount_usd": {
+        "description": "accepted supplier-operation quantity at the PO rate",
         "multipleOf": 0.01,
         "type": "number"
       }
     },
     "required": [
-      "cost_reference",
-      "posting_action",
-      "reconciled_amount"
+      "baseline_settlement_date",
+      "business_need_date",
+      "control_threshold_usd",
+      "controlled_settlement_date",
+      "decision_timing_status",
+      "document_amount_usd",
+      "escalated_settlement_date",
+      "escalation_approval_required",
+      "exception_amount_usd",
+      "financial_control",
+      "financial_document_or_record",
+      "outcome_vs_control_days",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "supported_amount_usd"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "cost_reference": "REF-0074",
-      "posting_action": "Outside-processing invoice validated",
-      "reconciled_amount": 1032.64
+      "baseline_settlement_date": "2026-01-16",
+      "business_need_date": "2026-01-16",
+      "control_threshold_usd": 88.28,
+      "controlled_settlement_date": "2026-01-17",
+      "decision_timing_status": "ON_TIME",
+      "document_amount_usd": 17656.5,
+      "escalated_settlement_date": "2026-01-18",
+      "escalation_approval_required": 1,
+      "exception_amount_usd": 0.0,
+      "financial_control": "document-specific matching tolerance",
+      "financial_document_or_record": "INV-0074",
+      "outcome_vs_control_days": 0,
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "validate_supported_outside_invoice",
+      "recommended_outcome_date": "2026-01-16",
+      "supported_amount_usd": 17656.5
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'validate_supported_outside_invoice', tied to NS-000074, revision R5, and the selected validate_supported_outside_invoice outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-16', tied to NS-000074, revision R5, and the selected validate_supported_outside_invoice outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported financial document or record as 'INV-0074', tied to NS-000074, revision R5, and the selected validate_supported_outside_invoice outcome.",
+        "field": "financial_document_or_record",
+        "id": "answer_financial_document_or_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported supported amount usd as 17656.5, tied to NS-000074, revision R5, and the selected validate_supported_outside_invoice outcome.",
+        "field": "supported_amount_usd",
+        "id": "answer_supported_amount_usd",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000074, revision R5, and the selected validate_supported_outside_invoice outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.invoices.validate produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000074 to reach business outcome 'Outside-processing invoice validated' through oracle_fusion.invoices.validate with exact provider-critical values requestBody.ProcessAction='Validate', requestBody.BusinessUnit='Northstar Manufacturing BU', requestBody.Supplier='Cascade Industrial', requestBody.InvoiceNumber='INV-0074'. The audited transition binds selected option validate_supported_outside_invoice, revision R5, approval AP-0074, and constraint PO line, receipt, inspection, invoice, currency, and tolerance; rejected, unreceived, duplicate, or rate-variance value = 0 USD; uncovered or unsupported scope = 0.0 USD; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.BusinessUnit",
+          "requestBody.InvoiceNumber",
+          "requestBody.ProcessAction",
+          "requestBody.Supplier"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "BusinessUnit": "Northstar Manufacturing BU",
+              "InvoiceNumber": "INV-0074",
+              "ProcessAction": "Validate",
+              "Supplier": "Cascade Industrial"
+            }
+          },
+          "tool": "oracle_fusion.invoices.validate"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"BusinessUnit\":\"Northstar Manufacturing BU\",\"InvoiceNumber\":\"INV-0074\",\"ProcessAction\":\"Validate\",\"Supplier\":\"Cascade Industrial\"}},\"case\":\"CASE-074\",\"outcome\":\"Tie accepted supplier-operation quantity to the PO and invoice before invoking invoice validation.\",\"tool\":\"oracle_fusion.invoices.validate\"}",
           "resource_type": "oracle_fusion.invoices",
           "revision": 1,
           "status": "Outside-processing invoice validated",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-074-mutation-01",
           "task_id": "factorybench-074"
         }
       },
       {
-        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "description": "Wrote validate_supported_outside_invoice, completion 2026-01-16, and the binding constraint into the existing task-scoped control cell without altering another row.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "range": "Control!H36",
+            "spreadsheetId": "sheet-074"
+          },
+          "tool": "google_sheets.spreadsheets.values.update"
+        },
+        "payload_text_contains": [
+          "2026-01-16",
+          "validate_supported_outside_invoice"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_sheets.spreadsheets.values",
@@ -58,14 +211,33 @@
           "status": "Recorded",
           "system": "google_sheets"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-074-mutation-02",
           "task_id": "factorybench-074"
         }
       },
       {
-        "description": "gmail.messages.send produced the task-scoped, source-audited state transition.",
+        "description": "Sent plant controller the scoped outcome for CASE-074, including completion 2026-01-16, the binding constraint, alternatives, and the Oracle business reference.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "threadId": "thread-074",
+            "userId": "me"
+          },
+          "tool": "gmail.messages.send"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-074",
+            "NS-000074",
+            "NS-COMP-074"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-16",
+          "validate_supported_outside_invoice"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "gmail.messages",
@@ -73,33 +245,1388 @@
           "status": "Recorded",
           "system": "gmail"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-074-mutation-03",
           "task_id": "factorybench-074"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-16 as the documented date for outside-processing invoice; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Established the exact invoice amount and billed operation quantity as USD 17656.50.",
+        "field": "document_amount_usd",
+        "id": "establish_document_amount",
+        "weight": 2.0
+      },
+      {
+        "description": "Reconciled independent source activity to USD 17656.50 of accepted supplier-operation quantity at the PO rate.",
+        "field": "supported_amount_usd",
+        "id": "calculate_supported_amount",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated USD 17656.50 document \u2212 USD 17656.50 supported = USD 0.00 exception for rejected, unreceived, duplicate, or rate-variance value.",
+        "field": "exception_amount_usd",
+        "id": "calculate_exception_amount",
+        "weight": 2.0
+      },
+      {
+        "description": "Identified document-specific matching tolerance as the governing monetary control for Validate an outside-processing invoice; did not substitute a generic invoice tolerance.",
+        "field": "financial_control",
+        "id": "identify_financial_control",
+        "weight": 1.5
+      },
+      {
+        "description": "Applied the exact USD 88.28 threshold for document-specific matching tolerance to the USD 0.00 unsupported or residual value.",
+        "field": "control_threshold_usd",
+        "id": "apply_financial_control_threshold",
+        "weight": 1.5
+      },
+      {
+        "description": "Derived 2026-01-16 for validate_supported_outside_invoice.",
+        "field": "baseline_settlement_date",
+        "id": "compare_financial_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-17 for pay_billed_quantity.",
+        "field": "controlled_settlement_date",
+        "id": "compare_financial_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-18 for hold_entire_supplier_account and applied its approval impact.",
+        "field": "escalated_settlement_date",
+        "id": "compare_financial_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for validate_supported_outside_invoice; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that hold_entire_supplier_account remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of validate_supported_outside_invoice, pay_billed_quantity, and hold_entire_supplier_account; selected validate_supported_outside_invoice because it alone gives the best currently authorized result under PO line, receipt, inspection, invoice, currency, and tolerance.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-16 as the supported outcome date for validate_supported_outside_invoice.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-16 with the independent control date 2026-01-16 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-074"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-074 scope, immutable handles, mounted systems, and evidence index before investigating NS-000074.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "file": "F-000074"
+            },
+            "expected_result_contains": {
+              "file": {
+                "id": "F-000074"
+              }
+            },
+            "match": "result_contains",
+            "tool": "slack.files_info"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Inspected the attachment linked from the scoped Slack discussion and correlated its case and source revision before using its control evidence.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-074\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-074"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-074 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-074",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-074",
+              "threadId": "thread-074"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-074",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-074"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-15 readiness input for pay_billed_quantity, then separately derived its 2026-01-17 operating outcome under PO line, receipt, inspection, invoice, currency, and tolerance instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "ranges": [
+                "Control!A1:I50",
+                "Approvals!A1:G20"
+              ],
+              "spreadsheetId": "sheet-074",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-074"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.batchGet"
+          },
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!A1:I50",
+              "spreadsheetId": "sheet-074",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-074"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Reconciled 17656.5 observed less 0 excluded to 17656.5 supported USD for accepted supplier-operation quantity at the PO rate. Applied payment and production-close cutoff to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-074' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-074"
+                },
+                {
+                  "id": "drive-approval-074"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-074 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-074-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-074-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-074-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R5 and established 17656.5 USD for invoice amount and billed operation quantity, with control date 2026-01-16.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-074-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-074-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-074-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-15 readiness input for pay_billed_quantity, then separately derived its 2026-01-17 operating outcome under PO line, receipt, inspection, invoice, currency, and tolerance instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-074-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-074-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-074-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000074 at R5.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-074-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-074-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-074-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R5 and established 17656.5 USD for invoice amount and billed operation quantity, with control date 2026-01-16.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-074-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-074-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-074-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-074-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 17656.5 observed less 0 excluded to 17656.5 supported USD for accepted supplier-operation quantity at the PO rate.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-074"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-074"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-074",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-074"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-074"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-074"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0074 only to validate_supported_outside_invoice, NS-000074, and the supported 17656.5 USD; kept broader scope and hold_entire_supplier_account outside current authority.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-074"
+            },
+            "expected_result_contains": {
+              "id": "drive-074"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-074",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-074"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-074"
+            },
+            "expected_result_contains": {
+              "id": "drive-074"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R5 and established 17656.5 USD for invoice amount and billed operation quantity, with control date 2026-01-16.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "invoicesUniqID": "invoicesUniqID-0074"
+            },
+            "expected_result_contains": {
+              "InvoiceId": 900074
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.invoices.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "InvoiceNumber='INV-0074'"
+            },
+            "expected_result_contains": {
+              "InvoiceId": 900074
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.invoices.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle invoices record: Applied revision R5 and established 17656.5 USD for invoice amount and billed operation quantity, with control date 2026-01-16.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100074
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100074
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='WO-0074'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100074
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work orders record: Located NS-000074 for outside-processing invoice using immutable IDs and preserved effective revision R5.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0074"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000074
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "OrderNumber='PO-0074'"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000074
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-15 readiness input for pay_billed_quantity, then separately derived its 2026-01-17 operating outcome under PO line, receipt, inspection, invoice, currency, and tolerance instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "HeaderInterfaceId": 700074,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "HeaderInterfaceId": 700074
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.receiving_receipt_transactions.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle receiving receipt transactions record: Reconciled 17656.5 observed less 0 excluded to 17656.5 supported USD for accepted supplier-operation quantity at the PO rate.",
+        "id": "investigation_17",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0074"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000074
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_order_lines.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle purchase order lines record: Applied revision R5 and established 17656.5 USD for invoice amount and billed operation quantity, with control date 2026-01-16.",
+        "id": "investigation_18",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.invoices.validate",
+        "any_of": [
+          {
+            "arguments": {
+              "invoicesUniqID": "invoicesUniqID-0074"
+            },
+            "expected_result_contains": {
+              "InvoiceId": 900074
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.invoices.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "InvoiceNumber='INV-0074'"
+            },
+            "expected_result_contains": {
+              "InvoiceId": 900074
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.invoices.list"
+          }
+        ],
+        "description": "Read NS-000074 back through the documented Oracle invoices.get operation after the mutation and confirmed the resource-specific changed fields ['BusinessUnit', 'InvoiceNumber', 'LastUpdateDate', 'Supplier', 'ValidationStatus'], including the effective update at 2026-01-16, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "BusinessUnit": "Northstar Manufacturing BU",
+          "InvoiceNumber": "INV-0074",
+          "LastUpdateDate": "2026-01-16T16:00:00-08:00",
+          "Supplier": "Cascade Industrial",
+          "ValidationStatus": "VALIDATED"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": false,
+        "target_identity": {
+          "InvoiceId": 900074
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.invoices.validate",
+      "any_of": [
+        {
+          "arguments": {
+            "invoicesUniqID": "invoicesUniqID-0074"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900074
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "InvoiceNumber='INV-0074'"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900074
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.list"
+        }
+      ],
+      "description": "Read NS-000074 back through the documented Oracle invoices.get operation after the mutation and confirmed the resource-specific changed fields ['BusinessUnit', 'InvoiceNumber', 'LastUpdateDate', 'Supplier', 'ValidationStatus'], including the effective update at 2026-01-16, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "BusinessUnit": "Northstar Manufacturing BU",
+        "InvoiceNumber": "INV-0074",
+        "LastUpdateDate": "2026-01-16T16:00:00-08:00",
+        "Supplier": "Cascade Industrial",
+        "ValidationStatus": "VALIDATED"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "InvoiceId": 900074
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-074"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-074 scope, immutable handles, mounted systems, and evidence index before investigating NS-000074.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "file": "F-000074"
+          },
+          "expected_result_contains": {
+            "file": {
+              "id": "F-000074"
+            }
+          },
+          "match": "result_contains",
+          "tool": "slack.files_info"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Inspected the attachment linked from the scoped Slack discussion and correlated its case and source revision before using its control evidence.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-074\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-074"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-074 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-074",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-074",
+            "threadId": "thread-074"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-074",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-074"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-15 readiness input for pay_billed_quantity, then separately derived its 2026-01-17 operating outcome under PO line, receipt, inspection, invoice, currency, and tolerance instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-074",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-074"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-074",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-074"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 17656.5 observed less 0 excluded to 17656.5 supported USD for accepted supplier-operation quantity at the PO rate. Applied payment and production-close cutoff to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-074' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-074"
+              },
+              {
+                "id": "drive-approval-074"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-074 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-074-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-074-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-074-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R5 and established 17656.5 USD for invoice amount and billed operation quantity, with control date 2026-01-16.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-074-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-074-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-074-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-15 readiness input for pay_billed_quantity, then separately derived its 2026-01-17 operating outcome under PO line, receipt, inspection, invoice, currency, and tolerance instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-074-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-074-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-074-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000074 at R5.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-074-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-074-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-074-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R5 and established 17656.5 USD for invoice amount and billed operation quantity, with control date 2026-01-16.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-074-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-074-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-074-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-074-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 17656.5 observed less 0 excluded to 17656.5 supported USD for accepted supplier-operation quantity at the PO rate.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-074"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-074"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-074",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-074"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-074"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-074"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0074 only to validate_supported_outside_invoice, NS-000074, and the supported 17656.5 USD; kept broader scope and hold_entire_supplier_account outside current authority.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-074"
+          },
+          "expected_result_contains": {
+            "id": "drive-074"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-074",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-074"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-074"
+          },
+          "expected_result_contains": {
+            "id": "drive-074"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R5 and established 17656.5 USD for invoice amount and billed operation quantity, with control date 2026-01-16.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "invoicesUniqID": "invoicesUniqID-0074"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900074
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "InvoiceNumber='INV-0074'"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900074
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle invoices record: Applied revision R5 and established 17656.5 USD for invoice amount and billed operation quantity, with control date 2026-01-16.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100074
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100074
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0074'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100074
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000074 for outside-processing invoice using immutable IDs and preserved effective revision R5.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0074"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000074
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0074'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000074
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-15 readiness input for pay_billed_quantity, then separately derived its 2026-01-17 operating outcome under PO line, receipt, inspection, invoice, currency, and tolerance instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "HeaderInterfaceId": 700074,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "HeaderInterfaceId": 700074
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.receiving_receipt_transactions.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle receiving receipt transactions record: Reconciled 17656.5 observed less 0 excluded to 17656.5 supported USD for accepted supplier-operation quantity at the PO rate.",
+      "id": "investigation_17",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0074"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000074
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_order_lines.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase order lines record: Applied revision R5 and established 17656.5 USD for invoice amount and billed operation quantity, with control date 2026-01-16.",
+      "id": "investigation_18",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
-      "tool": "factorybench.context.get"
-    },
-    {
-      "arguments": {
-        "fileId": "drive-074",
-        "mimeType": "text/plain"
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-074"
+        }
       },
-      "match": "successful_tool_call",
-      "tool": "google_drive.files.export"
+      "match": "result_contains",
+      "tool": "factorybench.context.get"
     },
     {
       "arguments": {
         "file": "F-000074"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "file": {
+          "id": "F-000074"
+        }
+      },
+      "match": "result_contains",
       "tool": "slack.files_info"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-074\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-074"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     },
     {
       "arguments": {
@@ -107,42 +1634,197 @@
         "id": "msg-074",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "msg-074",
+        "threadId": "thread-074"
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.get"
     },
     {
       "arguments": {
         "majorDimension": "ROWS",
-        "range": "Control!A1:H50",
+        "range": "Control!A1:I50",
         "spreadsheetId": "sheet-074",
         "valueRenderOption": "UNFORMATTED_VALUE"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "values": [
+          [
+            "CASE-074"
+          ]
+        ]
+      },
+      "match": "result_contains",
       "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-074' and trashed = false"
+      },
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-074"
+          },
+          {
+            "id": "drive-approval-074"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-074-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-074-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-074-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-074-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-074-09"
+      },
+      "expected_result_contains": {
+        "id": "drive-074-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-074-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-074-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-074-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-074-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-074"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-074"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-074",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-074"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "invoicesUniqID": "invoicesUniqID-0074"
+      },
+      "expected_result_contains": {
+        "InvoiceId": 900074
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.invoices.get"
     },
     {
       "arguments": {
         "WorkOrderId": 100074
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "WorkOrderId": 100074
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.work_orders.get"
     },
     {
       "arguments": {
         "purchaseOrdersUniqID": "purchaseOrdersUniqID-0074"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "POHeaderId": 2000074
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.purchase_orders.get"
+    },
+    {
+      "arguments": {
+        "HeaderInterfaceId": 700074,
+        "limit": 50,
+        "onlyData": true
+      },
+      "expected_result_contains": {
+        "HeaderInterfaceId": 700074
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.receiving_receipt_transactions.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0074"
+      },
+      "expected_result_contains": {
+        "POHeaderId": 2000074
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.purchase_order_lines.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
-    "google_drive.files.export",
     "slack.files_info",
+    "gmail.messages.list",
     "gmail.messages.get",
     "google_sheets.spreadsheets.values.get",
+    "google_drive.files.list",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "oracle_fusion.invoices.get",
     "oracle_fusion.work_orders.get",
-    "oracle_fusion.purchase_orders.get"
+    "oracle_fusion.purchase_orders.get",
+    "oracle_fusion.receiving_receipt_transactions.list",
+    "oracle_fusion.purchase_order_lines.list"
   ],
   "task_id": "factorybench-074",
   "write_tools": [

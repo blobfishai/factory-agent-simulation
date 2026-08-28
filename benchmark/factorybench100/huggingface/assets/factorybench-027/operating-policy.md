@@ -1,5 +1,7 @@
-# Generate the quarterly compressor forecast — operating control
+# Generate the quarterly compressor forecast — operating policy
 
-Scope: Maintain meter- and calendar-driven programs and generate bounded forecasts and work orders.
+Decision scope: quarterly compressor program.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: generate only due rows inside the bounded horizon. Establish the immutable source record and effective revision, then reconcile eligible active compressors in the forecast horizon, assets with approved quarterly pattern and no existing forecast, and inactive assets, blackout dates, and duplicate forecasts from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: mark the existing operations thread complete with the approved check reaction; and append one dated decision row to the existing audit tab; do not overwrite prior entries.

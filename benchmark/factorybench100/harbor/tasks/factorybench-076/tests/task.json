@@ -7,64 +7,254 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "manufacturing_record": {
+      "baseline_resolution_date": {
+        "description": "Resolution date for transfer_project_owned_quantity.",
         "type": "string"
       },
-      "ownership_result": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
       },
-      "project_task": {
+      "controlled_item_or_record": {
+        "description": "Immutable item, lot, serial set, or transaction record in scope.",
         "type": "string"
+      },
+      "controlled_resolution_date": {
+        "description": "Resolution date for use_common_stock.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_resolution_date": {
+        "description": "Resolution date for move_other_project_stock.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "excluded_quantity": {
+        "description": "common, other-project, quarantined, or reserved quantity",
+        "type": "integer"
+      },
+      "observed_quantity": {
+        "description": "Observed source quantity before applying the control for project-owned relay transfer.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "quantity_unit": {
+        "description": "Unit of measure for every controlled quantity: EA.",
+        "type": "string"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing transfer_project_owned_quantity, use_common_stock, move_other_project_stock.",
+        "enum": [
+          "transfer_project_owned_quantity",
+          "use_common_stock",
+          "move_other_project_stock"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "source_quantity": {
+        "description": "project demand at the destination",
+        "type": "integer"
+      },
+      "supported_quantity": {
+        "description": "same-project, same-task available lot quantity",
+        "type": "integer"
+      },
+      "transaction_quantity": {
+        "description": "Exact quantity the Oracle mutation may persist.",
+        "type": "integer"
       }
     },
     "required": [
-      "manufacturing_record",
-      "ownership_result",
-      "project_task"
+      "baseline_resolution_date",
+      "business_need_date",
+      "controlled_item_or_record",
+      "controlled_resolution_date",
+      "decision_timing_status",
+      "escalated_resolution_date",
+      "escalation_approval_required",
+      "excluded_quantity",
+      "observed_quantity",
+      "outcome_vs_control_days",
+      "quantity_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "source_quantity",
+      "supported_quantity",
+      "transaction_quantity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "manufacturing_record": "NS-0076",
-      "ownership_result": "Project material transferred",
-      "project_task": "PRJ-0076"
+      "baseline_resolution_date": "2026-01-14",
+      "business_need_date": "2026-01-14",
+      "controlled_item_or_record": "NS-COMP-076",
+      "controlled_resolution_date": "2026-01-15",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-16",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 7,
+      "observed_quantity": 48,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "transfer_project_owned_quantity",
+      "recommended_outcome_date": "2026-01-14",
+      "source_quantity": 54,
+      "supported_quantity": 41,
+      "transaction_quantity": 41
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'transfer_project_owned_quantity', tied to NS-000076, revision R7, and the selected transfer_project_owned_quantity outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-14', tied to NS-000076, revision R7, and the selected transfer_project_owned_quantity outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported controlled item or record as 'NS-COMP-076', tied to NS-000076, revision R7, and the selected transfer_project_owned_quantity outcome.",
+        "field": "controlled_item_or_record",
+        "id": "answer_controlled_item_or_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported transaction quantity as 41, tied to NS-000076, revision R7, and the selected transfer_project_owned_quantity outcome.",
+        "field": "transaction_quantity",
+        "id": "answer_transaction_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000076, revision R7, and the selected transfer_project_owned_quantity outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.inventory_transactions.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000076 to reach business outcome 'Project material transferred' through oracle_fusion.inventory_transactions.create with exact provider-critical values requestBody.SourceSystemCode='EXTERNAL', requestBody.TransactionMode='ONLINE', requestBody.TransactionLines[0].OrganizationCode='SEA', requestBody.TransactionLines[0].Item='NS-COMP-076', requestBody.TransactionLines[0].Subinventory='STORES', requestBody.TransactionLines[0].TransactionType='Subinventory Transfer', requestBody.TransactionLines[0].TransactionQuantity=41, requestBody.TransactionLines[0].TransactionUnitOfMeasure='EA', requestBody.TransactionLines[0].LotNumber='LOT-0076', requestBody.TransactionLines[0].TransferSubinventory='CONTROLLED'. The audited transition binds selected option transfer_project_owned_quantity, revision R7, approval AP-0076, and constraint project, task, lot, source, destination, and approval must persist; common, other-project, quarantined, or reserved quantity = 7 EA; uncovered or unsupported scope = 13.0 EA; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.SourceSystemCode",
+          "requestBody.TransactionLines[0].Item",
+          "requestBody.TransactionLines[0].LotNumber",
+          "requestBody.TransactionLines[0].OrganizationCode",
+          "requestBody.TransactionLines[0].Subinventory",
+          "requestBody.TransactionLines[0].TransactionQuantity",
+          "requestBody.TransactionLines[0].TransactionType",
+          "requestBody.TransactionLines[0].TransactionUnitOfMeasure",
+          "requestBody.TransactionLines[0].TransferSubinventory",
+          "requestBody.TransactionMode"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "SourceSystemCode": "EXTERNAL",
+              "TransactionLines": [
+                {
+                  "Item": "NS-COMP-076",
+                  "LotNumber": "LOT-0076",
+                  "OrganizationCode": "SEA",
+                  "Subinventory": "STORES",
+                  "TransactionQuantity": 41,
+                  "TransactionType": "Subinventory Transfer",
+                  "TransactionUnitOfMeasure": "EA",
+                  "TransferSubinventory": "CONTROLLED"
+                }
+              ],
+              "TransactionMode": "ONLINE"
+            }
+          },
+          "tool": "oracle_fusion.inventory_transactions.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"SourceSystemCode\":\"EXTERNAL\",\"TransactionLines\":[{\"Item\":\"NS-COMP-076\",\"LotNumber\":\"LOT-0076\",\"OrganizationCode\":\"SEA\",\"Subinventory\":\"STORES\",\"TransactionQuantity\":10,\"TransactionType\":\"Subinventory Transfer\",\"TransactionUnitOfMeasure\":\"EA\",\"TransferSubinventory\":\"CONTROLLED\"}],\"TransactionMode\":\"ONLINE\"}},\"case\":\"CASE-076\",\"outcome\":\"Verify project, task, lot, and approval before posting the project inventory transfer.\",\"tool\":\"oracle_fusion.inventory_transactions.create\"}",
           "resource_type": "oracle_fusion.inventory_transactions",
           "revision": 1,
           "status": "Project material transferred",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-076-mutation-01",
           "task_id": "factorybench-076"
         }
       },
       {
-        "description": "google_drive.approvals.approve produced the task-scoped, source-audited state transition.",
+        "description": "Added the Oracle result to the existing case file as a comment containing transfer_project_owned_quantity, completion 2026-01-14, and the binding constraint.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "fileId": "drive-076"
+          },
+          "tool": "google_drive.comments.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-076",
+            "NS-000076",
+            "NS-COMP-076"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-14",
+          "transfer_project_owned_quantity"
+        ],
         "table": "resource_state",
         "values": {
-          "resource_type": "google_drive.approvals",
+          "resource_type": "google_drive.comments",
           "revision": 1,
           "status": "Recorded",
           "system": "google_drive"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-076-mutation-02",
           "task_id": "factorybench-076"
         }
       },
       {
-        "description": "google_sheets.spreadsheets.values.append produced the task-scoped, source-audited state transition.",
+        "description": "Appended one audit row for CASE-076 with the selected option, completion, role, and AP-0076.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "range": "Audit!A:G",
+            "spreadsheetId": "sheet-076"
+          },
+          "tool": "google_sheets.spreadsheets.values.append"
+        },
+        "payload_text_contains": [
+          "2026-01-14",
+          "transfer_project_owned_quantity"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_sheets.spreadsheets.values",
@@ -72,17 +262,1285 @@
           "status": "Recorded",
           "system": "google_sheets"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-076-mutation-03",
           "task_id": "factorybench-076"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-14 as the documented date for project-owned relay transfer; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Established 54 EA for project demand at the destination.",
+        "field": "source_quantity",
+        "id": "establish_source_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Correlated the independent source records to 48 observed EA.",
+        "field": "observed_quantity",
+        "id": "reconcile_observed_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Removed 7 EA for common, other-project, quarantined, or reserved quantity.",
+        "field": "excluded_quantity",
+        "id": "identify_excluded_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 48 observed \u2212 7 excluded = 41 supported EA.",
+        "field": "supported_quantity",
+        "id": "calculate_supported_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Bound the Oracle transaction to exactly 41 EA, the measure required by the chosen disposition; did not substitute the header or another business quantity.",
+        "field": "transaction_quantity",
+        "id": "bound_transaction_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept the receipt, issue, transfer, inspection, or completion quantity in EA.",
+        "field": "quantity_unit",
+        "id": "preserve_transaction_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Derived 2026-01-14 for transfer_project_owned_quantity.",
+        "field": "baseline_resolution_date",
+        "id": "compare_quantity_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-15 for use_common_stock.",
+        "field": "controlled_resolution_date",
+        "id": "compare_quantity_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-16 for move_other_project_stock and recognized its control impact.",
+        "field": "escalated_resolution_date",
+        "id": "compare_quantity_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for transfer_project_owned_quantity; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that move_other_project_stock remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of transfer_project_owned_quantity, use_common_stock, and move_other_project_stock; selected transfer_project_owned_quantity because it alone gives the best currently authorized result under project, task, lot, source, destination, and approval must persist.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-14 as the supported outcome date for transfer_project_owned_quantity.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-14 with the independent control date 2026-01-14 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-076"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-076 scope, immutable handles, mounted systems, and evidence index before investigating NS-000076.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-076",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-076",
+              "threadId": "thread-076"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-076",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-076"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-13 readiness input for use_common_stock, then separately derived its 2026-01-15 operating outcome under project, task, lot, source, destination, and approval must persist instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "includeGridData": false,
+              "ranges": [
+                "Control!A1:I50"
+              ],
+              "spreadsheetId": "sheet-076"
+            },
+            "expected_result_contains": {
+              "developerMetadata": [
+                {
+                  "metadataKey": "case",
+                  "metadataValue": "CASE-076"
+                }
+              ],
+              "spreadsheetId": "sheet-076"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-076' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-076"
+                },
+                {
+                  "id": "drive-approval-076"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-076 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-076-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-076-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-076-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000076 at R7.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-076-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-076-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-076-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 48 observed less 7 excluded to 41 supported EA for same-project, same-task available lot quantity.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-076-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-076-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-076-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R7 and established 54 EA for project demand at the destination, with control date 2026-01-14.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-076-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-076-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-076-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-13 readiness input for use_common_stock, then separately derived its 2026-01-15 operating outcome under project, task, lot, source, destination, and approval must persist instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-076-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-076-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-076-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-076-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R7 and established 54 EA for project demand at the destination, with control date 2026-01-14.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-076"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-076"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-076",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-076"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-076"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-076"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0076 only to transfer_project_owned_quantity, NS-000076, and the supported 41 EA; kept broader scope and move_other_project_stock outside current authority.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-076"
+            },
+            "expected_result_contains": {
+              "id": "drive-076"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-076",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-076"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-076"
+            },
+            "expected_result_contains": {
+              "id": "drive-076"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R7 and established 54 EA for project demand at the destination, with control date 2026-01-14.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "count": 50,
+              "query": "\"CASE-076\"",
+              "sort": "timestamp",
+              "sort_dir": "asc"
+            },
+            "expected_result_contains": {
+              "messages": {
+                "matches": [
+                  {
+                    "ts": "1768000076.000100"
+                  }
+                ]
+              }
+            },
+            "match": "result_contains",
+            "tool": "slack.search_messages"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the existing operations thread for CASE-076 and its immutable channel and thread timestamp before using the discussion.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-076\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-076"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-076 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100076,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100076
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_materials.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work order materials record: Applied revision R7 and established 54 EA for project demand at the destination, with control date 2026-01-14.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "SupplyOrderReferenceNumber='SUPPLY-0076'"
+            },
+            "expected_result_contains": {
+              "SupplyRequestId": 1500076
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.supply_requests.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-13 readiness input for use_common_stock, then separately derived its 2026-01-15 operating outcome under project, task, lot, source, destination, and approval must persist instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "DocumentNumber='RCV-0076'"
+            },
+            "expected_result_contains": {
+              "InspectionId": 1100076
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.quality_inspection_results.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle quality inspection results record: Reconciled 48 observed less 7 excluded to 41 supported EA for same-project, same-task available lot quantity.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100076
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100076
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='WO-0076'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100076
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work orders record: Located NS-000076 for project-owned relay transfer using immutable IDs and preserved effective revision R7.",
+        "id": "investigation_17",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-076' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400076
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 48 observed less 7 excluded to 41 supported EA for same-project, same-task available lot quantity.",
+        "id": "investigation_18",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.inventory_transactions.create",
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-076' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400076
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "description": "Read NS-000076 back through the documented Oracle inventory onhand balances.list operation after the mutation and confirmed the resource-specific changed fields ['AvailableToTransact', 'LastUpdateDate', 'LotNumber', 'PrimaryQuantity', 'SubinventoryCode'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "AvailableToTransact": 0,
+          "LastUpdateDate": "2026-01-14T16:00:00-08:00",
+          "LotNumber": "LOT-0076",
+          "PrimaryQuantity": 41,
+          "SubinventoryCode": "CONTROLLED"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": false,
+        "target_identity": {
+          "InventoryItemId": 1400076
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.inventory_transactions.create",
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-076' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400076
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "description": "Read NS-000076 back through the documented Oracle inventory onhand balances.list operation after the mutation and confirmed the resource-specific changed fields ['AvailableToTransact', 'LastUpdateDate', 'LotNumber', 'PrimaryQuantity', 'SubinventoryCode'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "AvailableToTransact": 0,
+        "LastUpdateDate": "2026-01-14T16:00:00-08:00",
+        "LotNumber": "LOT-0076",
+        "PrimaryQuantity": 41,
+        "SubinventoryCode": "CONTROLLED"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "InventoryItemId": 1400076
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-076"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-076 scope, immutable handles, mounted systems, and evidence index before investigating NS-000076.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-076",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-076",
+            "threadId": "thread-076"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-076",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-076"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-13 readiness input for use_common_stock, then separately derived its 2026-01-15 operating outcome under project, task, lot, source, destination, and approval must persist instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-076"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-076"
+              }
+            ],
+            "spreadsheetId": "sheet-076"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-076' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-076"
+              },
+              {
+                "id": "drive-approval-076"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-076 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-076-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-076-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-076-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000076 at R7.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-076-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-076-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-076-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 48 observed less 7 excluded to 41 supported EA for same-project, same-task available lot quantity.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-076-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-076-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-076-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R7 and established 54 EA for project demand at the destination, with control date 2026-01-14.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-076-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-076-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-076-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-13 readiness input for use_common_stock, then separately derived its 2026-01-15 operating outcome under project, task, lot, source, destination, and approval must persist instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-076-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-076-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-076-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-076-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R7 and established 54 EA for project demand at the destination, with control date 2026-01-14.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-076"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-076"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-076",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-076"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-076"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-076"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0076 only to transfer_project_owned_quantity, NS-000076, and the supported 41 EA; kept broader scope and move_other_project_stock outside current authority.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-076"
+          },
+          "expected_result_contains": {
+            "id": "drive-076"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-076",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-076"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-076"
+          },
+          "expected_result_contains": {
+            "id": "drive-076"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R7 and established 54 EA for project demand at the destination, with control date 2026-01-14.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "count": 50,
+            "query": "\"CASE-076\"",
+            "sort": "timestamp",
+            "sort_dir": "asc"
+          },
+          "expected_result_contains": {
+            "messages": {
+              "matches": [
+                {
+                  "ts": "1768000076.000100"
+                }
+              ]
+            }
+          },
+          "match": "result_contains",
+          "tool": "slack.search_messages"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the existing operations thread for CASE-076 and its immutable channel and thread timestamp before using the discussion.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-076\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-076"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-076 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100076,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100076
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_materials.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order materials record: Applied revision R7 and established 54 EA for project demand at the destination, with control date 2026-01-14.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0076'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 1500076
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-13 readiness input for use_common_stock, then separately derived its 2026-01-15 operating outcome under project, task, lot, source, destination, and approval must persist instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "DocumentNumber='RCV-0076'"
+          },
+          "expected_result_contains": {
+            "InspectionId": 1100076
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.quality_inspection_results.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle quality inspection results record: Reconciled 48 observed less 7 excluded to 41 supported EA for same-project, same-task available lot quantity.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100076
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100076
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0076'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100076
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000076 for project-owned relay transfer using immutable IDs and preserved effective revision R7.",
+      "id": "investigation_17",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-076' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400076
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 48 observed less 7 excluded to 41 supported EA for same-project, same-task available lot quantity.",
+      "id": "investigation_18",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-076"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
     },
     {
@@ -91,18 +1549,30 @@
         "id": "thread-076",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "thread-076"
+      },
+      "match": "result_contains",
       "tool": "gmail.threads.get"
     },
     {
       "arguments": {
         "includeGridData": false,
         "ranges": [
-          "Control!A1:H50"
+          "Control!A1:I50"
         ],
         "spreadsheetId": "sheet-076"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "developerMetadata": [
+          {
+            "metadataKey": "case",
+            "metadataValue": "CASE-076"
+          }
+        ],
+        "spreadsheetId": "sheet-076"
+      },
+      "match": "result_contains",
       "tool": "google_sheets.spreadsheets.get"
     },
     {
@@ -111,8 +1581,92 @@
         "pageSize": 50,
         "q": "name contains 'CASE-076' and trashed = false"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-076"
+          },
+          {
+            "id": "drive-approval-076"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-076-09",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-076-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-076-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-076-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-076-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-076-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-076-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-076-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-076-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-076-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-076"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-076"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-076"
+      },
+      "expected_result_contains": {
+        "id": "drive-076"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
     },
     {
       "arguments": {
@@ -121,25 +1675,92 @@
         "sort": "timestamp",
         "sort_dir": "asc"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": {
+          "matches": [
+            {
+              "ts": "1768000076.000100"
+            }
+          ]
+        }
+      },
+      "match": "result_contains",
       "tool": "slack.search_messages"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-076\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-076"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100076,
+        "limit": 50,
+        "onlyData": true
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 100076
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.work_order_materials.list"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-076'"
+        "q": "SupplyOrderReferenceNumber='SUPPLY-0076'"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "SupplyRequestId": 1500076
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "DocumentNumber='RCV-0076'"
+      },
+      "expected_result_contains": {
+        "InspectionId": 1100076
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.quality_inspection_results.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "WorkOrderNumber='WO-0076'"
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 100076
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.work_orders.list"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-076'"
+        "q": "ItemNumber='NS-COMP-076' and OrganizationCode='SEA'"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "InventoryItemId": 1400076
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.inventory_onhand_balances.list"
     }
   ],
@@ -148,14 +1769,25 @@
     "gmail.threads.get",
     "google_sheets.spreadsheets.get",
     "google_drive.files.list",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.get",
+    "google_drive.files.download",
     "slack.search_messages",
+    "gmail.messages.list",
+    "oracle_fusion.work_order_materials.list",
+    "oracle_fusion.supply_requests.list",
+    "oracle_fusion.quality_inspection_results.list",
     "oracle_fusion.work_orders.list",
     "oracle_fusion.inventory_onhand_balances.list"
   ],
   "task_id": "factorybench-076",
   "write_tools": [
     "factorybench.submit_answer",
-    "google_drive.approvals.approve",
+    "google_drive.comments.create",
     "google_sheets.spreadsheets.values.append",
     "oracle_fusion.inventory_transactions.create"
   ]

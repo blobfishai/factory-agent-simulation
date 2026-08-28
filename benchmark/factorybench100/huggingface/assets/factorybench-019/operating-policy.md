@@ -1,5 +1,7 @@
-# Apply approved weekend overtime to backlog — operating control
+# Apply approved weekend overtime to backlog — operating policy
 
-Scope: Recover constrained production with approved work-center, labor, tooling, and timing decisions.
+Decision scope: weekend backlog recovery.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: only listed orders and cost center may use the overtime window. Establish the immutable source record and effective revision, then reconcile operation-hours in the approved backlog scope, authorized weekend hours with qualified crew, and hours outside the named orders or approval cap from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread.

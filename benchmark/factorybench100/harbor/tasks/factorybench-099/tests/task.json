@@ -7,49 +7,226 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "accepted_output": {
+      "baseline_resolution_date": {
+        "description": "Resolution date for record_verified_yield_loss.",
         "type": "string"
       },
-      "execution_action": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
       },
-      "supplier_operation": {
+      "controlled_item_or_record": {
+        "description": "Immutable item, lot, serial set, or transaction record in scope.",
         "type": "string"
+      },
+      "controlled_resolution_date": {
+        "description": "Resolution date for complete_full_sent_quantity.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_resolution_date": {
+        "description": "Resolution date for scrap_unreconciled_difference.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "excluded_quantity": {
+        "description": "inspection-rejected and missing quantity",
+        "type": "integer"
+      },
+      "observed_quantity": {
+        "description": "Observed source quantity before applying the control for outside-processing yield loss.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "quantity_unit": {
+        "description": "Unit of measure for every controlled quantity: EA.",
+        "type": "string"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing record_verified_yield_loss, complete_full_sent_quantity, scrap_unreconciled_difference.",
+        "enum": [
+          "record_verified_yield_loss",
+          "complete_full_sent_quantity",
+          "scrap_unreconciled_difference"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "source_quantity": {
+        "description": "quantity sent for processing",
+        "type": "integer"
+      },
+      "supported_quantity": {
+        "description": "accepted processed quantity",
+        "type": "integer"
+      },
+      "transaction_quantity": {
+        "description": "Exact quantity the Oracle mutation may persist.",
+        "type": "integer"
       }
     },
     "required": [
-      "accepted_output",
-      "execution_action",
-      "supplier_operation"
+      "baseline_resolution_date",
+      "business_need_date",
+      "controlled_item_or_record",
+      "controlled_resolution_date",
+      "decision_timing_status",
+      "escalated_resolution_date",
+      "escalation_approval_required",
+      "excluded_quantity",
+      "observed_quantity",
+      "outcome_vs_control_days",
+      "quantity_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "source_quantity",
+      "supported_quantity",
+      "transaction_quantity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "accepted_output": "FB-099",
-      "execution_action": "Yield loss recorded",
-      "supplier_operation": "SUP-0099"
+      "baseline_resolution_date": "2026-01-13",
+      "business_need_date": "2026-01-13",
+      "controlled_item_or_record": "NS-COMP-099",
+      "controlled_resolution_date": "2026-01-14",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-15",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 5,
+      "observed_quantity": 44,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "record_verified_yield_loss",
+      "recommended_outcome_date": "2026-01-13",
+      "source_quantity": 58,
+      "supported_quantity": 39,
+      "transaction_quantity": 5
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'record_verified_yield_loss', tied to NS-000099, revision R2, and the selected record_verified_yield_loss outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-13', tied to NS-000099, revision R2, and the selected record_verified_yield_loss outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported controlled item or record as 'NS-COMP-099', tied to NS-000099, revision R2, and the selected record_verified_yield_loss outcome.",
+        "field": "controlled_item_or_record",
+        "id": "answer_controlled_item_or_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported transaction quantity as 5, tied to NS-000099, revision R2, and the selected record_verified_yield_loss outcome.",
+        "field": "transaction_quantity",
+        "id": "answer_transaction_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000099, revision R2, and the selected record_verified_yield_loss outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.operation_transactions.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000099 to reach business outcome 'Yield loss recorded' through oracle_fusion.operation_transactions.create with exact provider-critical values requestBody.SourceSystemCode='FUSION_MOBILE', requestBody.SourceSystemType='EXTERNAL', requestBody.OperationTransactionDetail[0].OrganizationCode='SEA', requestBody.OperationTransactionDetail[0].WorkOrderNumber='WO-0099', requestBody.OperationTransactionDetail[0].WoOperationSequenceNumber=10, requestBody.OperationTransactionDetail[0].FromDispatchState='READY', requestBody.OperationTransactionDetail[0].ToDispatchState='REJECT', requestBody.OperationTransactionDetail[0].TransactionQuantity=5, requestBody.OperationTransactionDetail[0].TransactionUnitOfMeasure='EA'. The audited transition binds selected option record_verified_yield_loss, revision R2, approval AP-0099, and constraint accepted plus rejected plus missing must reconcile to sent quantity; inspection-rejected and missing quantity = 5 EA; uncovered or unsupported scope = 19.0 EA; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.OperationTransactionDetail[0].FromDispatchState",
+          "requestBody.OperationTransactionDetail[0].OrganizationCode",
+          "requestBody.OperationTransactionDetail[0].ToDispatchState",
+          "requestBody.OperationTransactionDetail[0].TransactionQuantity",
+          "requestBody.OperationTransactionDetail[0].TransactionUnitOfMeasure",
+          "requestBody.OperationTransactionDetail[0].WoOperationSequenceNumber",
+          "requestBody.OperationTransactionDetail[0].WorkOrderNumber",
+          "requestBody.SourceSystemCode",
+          "requestBody.SourceSystemType"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "OperationTransactionDetail": [
+                {
+                  "FromDispatchState": "READY",
+                  "OrganizationCode": "SEA",
+                  "ToDispatchState": "REJECT",
+                  "TransactionQuantity": 5,
+                  "TransactionUnitOfMeasure": "EA",
+                  "WoOperationSequenceNumber": 10,
+                  "WorkOrderNumber": "WO-0099"
+                }
+              ],
+              "SourceSystemCode": "FUSION_MOBILE",
+              "SourceSystemType": "EXTERNAL"
+            }
+          },
+          "tool": "oracle_fusion.operation_transactions.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"OperationTransactionDetail\":[{\"FromDispatchState\":\"READY\",\"OrganizationCode\":\"SEA\",\"ToDispatchState\":\"COMPLETE\",\"TransactionQuantity\":33,\"TransactionUnitOfMeasure\":\"EA\",\"WoOperationSequenceNumber\":10,\"WorkOrderNumber\":\"WO-0099\"}],\"SourceSystemCode\":\"FUSION_MOBILE\",\"SourceSystemType\":\"EXTERNAL\"}},\"case\":\"CASE-099\",\"outcome\":\"Use the supplier concession and quality result to post the rejected operation quantity without completing it as good output.\",\"tool\":\"oracle_fusion.operation_transactions.create\"}",
           "resource_type": "oracle_fusion.operation_transactions",
           "revision": 1,
           "status": "Yield loss recorded",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-099-mutation-01",
           "task_id": "factorybench-099"
         }
       },
       {
-        "description": "slack.chat_postMessage produced the task-scoped, source-audited state transition.",
+        "description": "Replied in the existing operations thread with record_verified_yield_loss, completion 2026-01-13, the constraint, alternatives, and Oracle result.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "thread_ts": "1768000099.000100"
+          },
+          "tool": "slack.chat_postMessage"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-099",
+            "NS-000099",
+            "NS-COMP-099"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-13",
+          "record_verified_yield_loss"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "slack",
@@ -57,14 +234,35 @@
           "status": "Recorded",
           "system": "slack"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-099-mutation-02",
           "task_id": "factorybench-099"
         }
       },
       {
-        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "description": "Created\u2014but did not send\u2014the requested CASE-099 decision draft with completion, constraint, alternatives, and the Oracle business reference.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "message": {
+              "threadId": "thread-099"
+            },
+            "userId": "me"
+          },
+          "tool": "gmail.drafts.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-099",
+            "NS-000099",
+            "NS-COMP-099"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-13",
+          "record_verified_yield_loss"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "gmail.drafts",
@@ -72,18 +270,1467 @@
           "status": "Recorded",
           "system": "gmail"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-099-mutation-03",
           "task_id": "factorybench-099"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-13 as the documented date for outside-processing yield loss; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Established 58 EA for quantity sent for processing.",
+        "field": "source_quantity",
+        "id": "establish_source_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Correlated the independent source records to 44 observed EA.",
+        "field": "observed_quantity",
+        "id": "reconcile_observed_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Removed 5 EA for inspection-rejected and missing quantity.",
+        "field": "excluded_quantity",
+        "id": "identify_excluded_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 44 observed \u2212 5 excluded = 39 supported EA.",
+        "field": "supported_quantity",
+        "id": "calculate_supported_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Bound the Oracle transaction to exactly 5 EA, the measure required by the chosen disposition; did not substitute the header or another business quantity.",
+        "field": "transaction_quantity",
+        "id": "bound_transaction_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept the receipt, issue, transfer, inspection, or completion quantity in EA.",
+        "field": "quantity_unit",
+        "id": "preserve_transaction_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Derived 2026-01-13 for record_verified_yield_loss.",
+        "field": "baseline_resolution_date",
+        "id": "compare_quantity_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-14 for complete_full_sent_quantity.",
+        "field": "controlled_resolution_date",
+        "id": "compare_quantity_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-15 for scrap_unreconciled_difference and recognized its control impact.",
+        "field": "escalated_resolution_date",
+        "id": "compare_quantity_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for record_verified_yield_loss; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that scrap_unreconciled_difference remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of record_verified_yield_loss, complete_full_sent_quantity, and scrap_unreconciled_difference; selected record_verified_yield_loss because it alone gives the best currently authorized result under accepted plus rejected plus missing must reconcile to sent quantity.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-13 as the supported outcome date for record_verified_yield_loss.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-13 with the independent control date 2026-01-13 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-099"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-099 scope, immutable handles, mounted systems, and evidence index before investigating NS-000099.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "ranges": [
+                "Control!A1:I50",
+                "Approvals!A1:G20"
+              ],
+              "spreadsheetId": "sheet-099",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-099"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.batchGet"
+          },
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!A1:I50",
+              "spreadsheetId": "sheet-099",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-099"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Reconciled 44 observed less 5 excluded to 39 supported EA for accepted processed quantity. Applied remaining production requirement to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-099' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-099"
+                },
+                {
+                  "id": "drive-approval-099"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-099 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-099-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-099-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-099-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-11 readiness input for complete_full_sent_quantity, then separately derived its 2026-01-14 operating outcome under accepted plus rejected plus missing must reconcile to sent quantity instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-099-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-099-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-099-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R2 and established 58 EA for quantity sent for processing, with control date 2026-01-13.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-099-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-099-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-099-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000099 at R2.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-099-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-099-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-099-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 44 observed less 5 excluded to 39 supported EA for accepted processed quantity.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-099-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-099-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-099-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-099-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R2 and established 58 EA for quantity sent for processing, with control date 2026-01-13.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-099"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-099"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-099",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-099"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-099"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-099"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0099 only to record_verified_yield_loss, NS-000099, and the supported 5 EA; kept broader scope and scrap_unreconciled_difference outside current authority.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-FINANCE",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000099.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-FINANCE",
+              "limit": 100,
+              "ts": "1768000099.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000099.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0099 only to record_verified_yield_loss, NS-000099, and the supported 5 EA; kept broader scope and scrap_unreconciled_difference outside current authority.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-099\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-099"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-099 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-099",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-099",
+              "threadId": "thread-099"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-099",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-099"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-11 readiness input for complete_full_sent_quantity, then separately derived its 2026-01-14 operating outcome under accepted plus rejected plus missing must reconcile to sent quantity instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-099"
+            },
+            "expected_result_contains": {
+              "id": "drive-099"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-099",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-099"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-099"
+            },
+            "expected_result_contains": {
+              "id": "drive-099"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R2 and established 58 EA for quantity sent for processing, with control date 2026-01-13.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100099
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100099
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='WO-0099'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100099
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work orders record: Located NS-000099 for outside-processing yield loss using immutable IDs and preserved effective revision R2.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "HeaderInterfaceId": 700099,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "HeaderInterfaceId": 700099
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.receiving_receipt_transactions.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle receiving receipt transactions record: Reconciled 44 observed less 5 excluded to 39 supported EA for accepted processed quantity.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "DocumentNumber='RCV-0099'"
+            },
+            "expected_result_contains": {
+              "InspectionId": 1100099
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.quality_inspection_results.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle quality inspection results record: Reconciled 44 observed less 5 excluded to 39 supported EA for accepted processed quantity.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0099"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000099
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "OrderNumber='PO-0099'"
+            },
+            "expected_result_contains": {
+              "POHeaderId": 2000099
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.purchase_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-11 readiness input for complete_full_sent_quantity, then separately derived its 2026-01-14 operating outcome under accepted plus rejected plus missing must reconcile to sent quantity instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_17",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100099,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100099
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_operations.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work order operations record: Applied remaining production requirement to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_18",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.operation_transactions.create",
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100099,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100099
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_operations.list"
+          }
+        ],
+        "description": "Read NS-000099 back through the documented Oracle work order operations.list operation after the mutation and confirmed the resource-specific changed fields ['DispatchStatus', 'LastUpdateDate', 'RejectedQuantity'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "DispatchStatus": "REJECT",
+          "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+          "RejectedQuantity": 5
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": false,
+        "target_identity": {
+          "WorkOrderId": 100099
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.operation_transactions.create",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100099,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100099
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_operations.list"
+        }
+      ],
+      "description": "Read NS-000099 back through the documented Oracle work order operations.list operation after the mutation and confirmed the resource-specific changed fields ['DispatchStatus', 'LastUpdateDate', 'RejectedQuantity'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "DispatchStatus": "REJECT",
+        "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+        "RejectedQuantity": 5
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "WorkOrderId": 100099
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-099"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-099 scope, immutable handles, mounted systems, and evidence index before investigating NS-000099.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-099",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-099"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-099",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-099"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 44 observed less 5 excluded to 39 supported EA for accepted processed quantity. Applied remaining production requirement to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-099' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-099"
+              },
+              {
+                "id": "drive-approval-099"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-099 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-099-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-099-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-099-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-11 readiness input for complete_full_sent_quantity, then separately derived its 2026-01-14 operating outcome under accepted plus rejected plus missing must reconcile to sent quantity instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-099-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-099-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-099-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R2 and established 58 EA for quantity sent for processing, with control date 2026-01-13.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-099-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-099-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-099-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000099 at R2.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-099-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-099-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-099-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 44 observed less 5 excluded to 39 supported EA for accepted processed quantity.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-099-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-099-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-099-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-099-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R2 and established 58 EA for quantity sent for processing, with control date 2026-01-13.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-099"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-099"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-099",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-099"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-099"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-099"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0099 only to record_verified_yield_loss, NS-000099, and the supported 5 EA; kept broader scope and scrap_unreconciled_difference outside current authority.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000099.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000099.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000099.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0099 only to record_verified_yield_loss, NS-000099, and the supported 5 EA; kept broader scope and scrap_unreconciled_difference outside current authority.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-099\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-099"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-099 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-099",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-099",
+            "threadId": "thread-099"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-099",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-099"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-11 readiness input for complete_full_sent_quantity, then separately derived its 2026-01-14 operating outcome under accepted plus rejected plus missing must reconcile to sent quantity instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-099"
+          },
+          "expected_result_contains": {
+            "id": "drive-099"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-099",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-099"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-099"
+          },
+          "expected_result_contains": {
+            "id": "drive-099"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R2 and established 58 EA for quantity sent for processing, with control date 2026-01-13.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100099
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100099
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0099'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100099
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000099 for outside-processing yield loss using immutable IDs and preserved effective revision R2.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "HeaderInterfaceId": 700099,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "HeaderInterfaceId": 700099
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.receiving_receipt_transactions.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle receiving receipt transactions record: Reconciled 44 observed less 5 excluded to 39 supported EA for accepted processed quantity.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "DocumentNumber='RCV-0099'"
+          },
+          "expected_result_contains": {
+            "InspectionId": 1100099
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.quality_inspection_results.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle quality inspection results record: Reconciled 44 observed less 5 excluded to 39 supported EA for accepted processed quantity.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0099"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000099
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0099'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000099
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-11 readiness input for complete_full_sent_quantity, then separately derived its 2026-01-14 operating outcome under accepted plus rejected plus missing must reconcile to sent quantity instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_17",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100099,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100099
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order operations record: Applied remaining production requirement to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_18",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-099"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "ranges": [
+          "Control!A1:I50",
+          "Approvals!A1:G20"
+        ],
+        "spreadsheetId": "sheet-099",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "expected_result_contains": {
+        "values": [
+          [
+            "CASE-099"
+          ]
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_sheets.spreadsheets.values.batchGet"
+    },
+    {
+      "arguments": {
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-099' and trashed = false"
+      },
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-099"
+          },
+          {
+            "id": "drive-approval-099"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-099-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-099-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-099-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-099-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-099-09",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-099-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-099-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-099-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-099-12",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-099-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-099"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-099"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
     },
     {
       "arguments": {
@@ -92,7 +1739,14 @@
         "limit": 100,
         "oldest": "1768000000.000000"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000099.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "slack.conversations_history"
     },
     {
@@ -101,55 +1755,116 @@
         "q": "\"CASE-099\"",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-099"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-099",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-099",
+        "threadId": "thread-099"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
         "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
         "fileId": "drive-099"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "drive-099"
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.get"
     },
     {
       "arguments": {
-        "majorDimension": "ROWS",
-        "ranges": [
-          "Control!A1:H50",
-          "Approvals!A1:G20"
-        ],
-        "spreadsheetId": "sheet-099",
-        "valueRenderOption": "UNFORMATTED_VALUE"
+        "WorkOrderId": 100099
       },
-      "match": "successful_tool_call",
-      "tool": "google_sheets.spreadsheets.values.batchGet"
+      "expected_result_contains": {
+        "WorkOrderId": 100099
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.work_orders.get"
     },
     {
       "arguments": {
-        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0099"
+        "HeaderInterfaceId": 700099,
+        "limit": 50,
+        "onlyData": true
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.purchase_orders.get"
+      "expected_result_contains": {
+        "HeaderInterfaceId": 700099
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.receiving_receipt_transactions.list"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-099'"
+        "q": "DocumentNumber='RCV-0099'"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "InspectionId": 1100099
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.quality_inspection_results.list"
+    },
+    {
+      "arguments": {
+        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0099"
+      },
+      "expected_result_contains": {
+        "POHeaderId": 2000099
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.purchase_orders.get"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100099,
+        "limit": 50,
+        "onlyData": true
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 100099
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.work_order_operations.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
+    "google_sheets.spreadsheets.values.batchGet",
+    "google_drive.files.list",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.export",
+    "google_drive.files.get",
     "slack.conversations_history",
     "gmail.messages.list",
+    "gmail.messages.get",
     "google_drive.files.get",
-    "google_sheets.spreadsheets.values.batchGet",
+    "oracle_fusion.work_orders.get",
+    "oracle_fusion.receiving_receipt_transactions.list",
+    "oracle_fusion.quality_inspection_results.list",
     "oracle_fusion.purchase_orders.get",
-    "oracle_fusion.quality_inspection_results.list"
+    "oracle_fusion.work_order_operations.list"
   ],
   "task_id": "factorybench-099",
   "write_tools": [

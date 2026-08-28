@@ -1,5 +1,7 @@
-# Open corrective maintenance after a safety interlock bypass — operating control
+# Open corrective maintenance after a safety interlock bypass — operating policy
 
-Scope: Contain regulated material and assemble document, lot, serial, and approval evidence for audit.
+Decision scope: safety interlock bypass.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: safety event, asset, control circuit, isolation, and approval. Establish the immutable source record and effective revision, then reconcile assets and operation-hours exposed by the bypass, confirmed affected asset with approved corrective scope, and similar alarms and unrelated assets from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it.

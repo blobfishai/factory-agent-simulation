@@ -1,5 +1,7 @@
-# Implement a released relay substitution — operating control
+# Implement a released relay substitution — operating policy
 
-Scope: Apply approved engineering changes to active work-order operations, materials, resources, and attachments.
+Decision scope: released relay ECO.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: ECO status, item relationship, conversion, serial break, and order state. Establish the immutable source record and effective revision, then reconcile open material lines evaluated for effectivity, lines inside ECO date, revision, and serial breakpoint, and completed or out-of-effectivity lines from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it.

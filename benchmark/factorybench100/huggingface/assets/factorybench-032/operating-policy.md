@@ -1,5 +1,7 @@
-# Record the supplier's expedited promise — operating control
+# Record the supplier's expedited promise — operating policy
 
-Scope: Turn approved demand and supplier evidence into correctly controlled purchase-order actions.
+Decision scope: open purchase order PO-0032.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: supplier reference, PO line, quantity, and promised date must correlate. Establish the immutable source record and effective revision, then reconcile open quantity covered by the acknowledgment, quantity and date explicitly confirmed by the supplier, and closed lines and quantities omitted from the acknowledgment from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell.

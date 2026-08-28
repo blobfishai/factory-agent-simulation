@@ -5,19 +5,20 @@
   },
   {
     "arguments": {
-      "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
-      "fileId": "drive-064"
-    },
-    "tool": "google_drive.files.get"
-  },
-  {
-    "arguments": {
       "majorDimension": "ROWS",
-      "range": "Control!A1:H50",
+      "range": "Control!A1:I50",
       "spreadsheetId": "sheet-064",
       "valueRenderOption": "UNFORMATTED_VALUE"
     },
     "tool": "google_sheets.spreadsheets.values.get"
+  },
+  {
+    "arguments": {
+      "format": "full",
+      "id": "thread-064",
+      "userId": "me"
+    },
+    "tool": "gmail.threads.get"
   },
   {
     "arguments": {
@@ -38,9 +39,63 @@
   },
   {
     "arguments": {
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-064' and trashed = false"
+    },
+    "tool": "google_drive.files.list"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-064-03"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-064-04"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-064-09",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-064-10"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-064-12",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-approval-064"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "WorkOrderId": 100064
+    },
+    "tool": "oracle_fusion.work_orders.get"
+  },
+  {
+    "arguments": {
       "limit": 50,
       "onlyData": true,
-      "q": "ReferenceNumber='CASE-064'"
+      "q": "SupplyOrderReferenceNumber='SUPPLY-0064'"
     },
     "tool": "oracle_fusion.supply_requests.list"
   },
@@ -48,10 +103,25 @@
     "arguments": {
       "WorkOrderId": 100064,
       "limit": 50,
-      "onlyData": true,
-      "q": "ReferenceNumber='CASE-064'"
+      "onlyData": true
     },
     "tool": "oracle_fusion.work_order_materials.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "DocumentNumber='RCV-0064'"
+    },
+    "tool": "oracle_fusion.quality_inspection_results.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "ItemNumber='NS-COMP-064' and OrganizationCode='SEA'"
+    },
+    "tool": "oracle_fusion.inventory_onhand_balances.list"
   },
   {
     "arguments": {
@@ -60,34 +130,55 @@
       "WorkOrderId": 100064,
       "requestBody": {
         "SubstituteItemNumber": "NS-SUB-064",
-        "SubstituteQuantity": 35
+        "SubstituteQuantity": 70
       }
     },
     "tool": "oracle_fusion.work_order_materials.replace_with_substitute"
   },
   {
     "arguments": {
-      "approvalId": "approval-064",
-      "fileId": "drive-approval-064",
+      "WorkOrderId": 100064,
+      "limit": 50,
+      "onlyData": true
+    },
+    "tool": "oracle_fusion.work_order_materials.list"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-064",
       "requestBody": {
-        "message": "Approved for CASE-064 only."
+        "content": "CASE-064: apply_planning_substitute recorded on Oracle record NS-000064; completion 2026-01-14; constraint substitution approval, effectivity, ratio, and planned-order scope; stock outside effectivity or committed elsewhere = 12 EA; uncovered or unsupported scope = 18.0 EA; approval AP-0064."
       }
     },
-    "tool": "google_drive.approvals.approve"
+    "tool": "google_drive.comments.create"
   },
   {
     "arguments": {
       "channel": "C-PRODUCTION",
-      "text": "CASE-064: Planning substitute applied. Oracle reference REF-0064; control workbook updated.",
+      "text": "CASE-064: Oracle record NS-000064 now reflects apply_planning_substitute with completion 2026-01-14. Binding constraint: substitution approval, effectivity, ratio, and planned-order scope; stock outside effectivity or committed elsewhere = 12 EA; uncovered or unsupported scope = 18.0 EA. Alternatives: apply_planning_substitute: outcome 2026-01-14, economic impact USD 0, SUPPORTED_AND_APPROVED; wait_for_original_component: outcome 2026-01-15, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; substitute_all_open_orders: outcome 2026-01-16, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0064.",
       "thread_ts": "1768000064.000100"
     },
     "tool": "slack.chat_postMessage"
   },
   {
     "arguments": {
-      "need_by_date": "2026-01-20",
-      "planning_action": "Planning substitute applied",
-      "supply_reference": "SUPPLY-0064"
+      "baseline_resolution_date": "2026-01-14",
+      "business_need_date": "2026-01-14",
+      "controlled_item_or_record": "NS-COMP-064",
+      "controlled_resolution_date": "2026-01-15",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-16",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 12,
+      "observed_quantity": 82,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "apply_planning_substitute",
+      "recommended_outcome_date": "2026-01-14",
+      "source_quantity": 88,
+      "supported_quantity": 70,
+      "transaction_quantity": 70
     },
     "tool": "factorybench.submit_answer"
   }

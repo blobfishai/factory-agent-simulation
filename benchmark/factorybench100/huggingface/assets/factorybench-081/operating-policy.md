@@ -1,5 +1,7 @@
-# Replenish a technician's critical relay stock — operating control
+# Replenish a technician's critical relay stock — operating policy
 
-Scope: Replenish and recover technician stock from field evidence without losing item or ownership controls.
+Decision scope: technician critical-relay stock.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: technician, territory, entitlement, min-max, and destination. Establish the immutable source record and effective revision, then reconcile entitled min-max replenishment quantity, usable van and regional stock already allocated, and reserved, quarantined, or wrong-owner relays from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: send the scoped completion reply in the existing email thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell.

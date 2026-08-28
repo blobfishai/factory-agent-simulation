@@ -1,5 +1,7 @@
-# Align an order to the corrected project task — operating control
+# Align an order to the corrected project task — operating policy
 
-Scope: Preserve project and task attribution while moving material and revising production supply.
+Decision scope: work-order project attribution.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: project ID, task ID, contract line, open work order, and effective date. Establish the immutable source record and effective revision, then reconcile candidate project/task corrections, finance-approved task matching contract and milestone, and similar project names and closed tasks from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread.

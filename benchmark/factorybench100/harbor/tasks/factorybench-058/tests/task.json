@@ -7,49 +7,221 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "controlled_quantity": {
+      "baseline_resolution_date": {
+        "description": "Resolution date for move_affected_stock_to_quarantine.",
+        "type": "string"
+      },
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
+        "type": "string"
+      },
+      "controlled_item_or_record": {
+        "description": "Immutable item, lot, serial set, or transaction record in scope.",
+        "type": "string"
+      },
+      "controlled_resolution_date": {
+        "description": "Resolution date for quarantine_all_housings.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "escalated_resolution_date": {
+        "description": "Resolution date for leave_reserved_stock_available.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
         "type": "integer"
       },
-      "from_to_location": {
+      "excluded_quantity": {
+        "description": "unaffected lots and already issued material",
+        "type": "integer"
+      },
+      "observed_quantity": {
+        "description": "Observed source quantity before applying the control for suspect housing lot.",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "quantity_unit": {
+        "description": "Unit of measure for every controlled quantity: EA.",
         "type": "string"
       },
-      "inventory_transaction": {
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing move_affected_stock_to_quarantine, quarantine_all_housings, leave_reserved_stock_available.",
+        "enum": [
+          "move_affected_stock_to_quarantine",
+          "quarantine_all_housings",
+          "leave_reserved_stock_available"
+        ],
         "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "source_quantity": {
+        "description": "on-hand housings in the implicated lots",
+        "type": "integer"
+      },
+      "supported_quantity": {
+        "description": "quantity inside the nonconformance serial or lot scope",
+        "type": "integer"
+      },
+      "transaction_quantity": {
+        "description": "Exact quantity the Oracle mutation may persist.",
+        "type": "integer"
       }
     },
     "required": [
-      "controlled_quantity",
-      "from_to_location",
-      "inventory_transaction"
+      "baseline_resolution_date",
+      "business_need_date",
+      "controlled_item_or_record",
+      "controlled_resolution_date",
+      "decision_timing_status",
+      "escalated_resolution_date",
+      "escalation_approval_required",
+      "excluded_quantity",
+      "observed_quantity",
+      "outcome_vs_control_days",
+      "quantity_unit",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "source_quantity",
+      "supported_quantity",
+      "transaction_quantity"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "controlled_quantity": 29,
-      "from_to_location": "SEA-3",
-      "inventory_transaction": "Suspect stock quarantined"
+      "baseline_resolution_date": "2026-01-14",
+      "business_need_date": "2026-01-14",
+      "controlled_item_or_record": "NS-COMP-058",
+      "controlled_resolution_date": "2026-01-15",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-16",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 11,
+      "observed_quantity": 104,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "EA",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "move_affected_stock_to_quarantine",
+      "recommended_outcome_date": "2026-01-14",
+      "source_quantity": 105,
+      "supported_quantity": 93,
+      "transaction_quantity": 93
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'move_affected_stock_to_quarantine', tied to NS-000058, revision R3, and the selected move_affected_stock_to_quarantine outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-14', tied to NS-000058, revision R3, and the selected move_affected_stock_to_quarantine outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported controlled item or record as 'NS-COMP-058', tied to NS-000058, revision R3, and the selected move_affected_stock_to_quarantine outcome.",
+        "field": "controlled_item_or_record",
+        "id": "answer_controlled_item_or_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported transaction quantity as 93, tied to NS-000058, revision R3, and the selected move_affected_stock_to_quarantine outcome.",
+        "field": "transaction_quantity",
+        "id": "answer_transaction_quantity",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000058, revision R3, and the selected move_affected_stock_to_quarantine outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.inventory_transactions.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000058 to reach business outcome 'Suspect stock quarantined' through oracle_fusion.inventory_transactions.create with exact provider-critical values requestBody.SourceSystemCode='EXTERNAL', requestBody.TransactionMode='ONLINE', requestBody.TransactionLines[0].OrganizationCode='SEA', requestBody.TransactionLines[0].Item='NS-COMP-058', requestBody.TransactionLines[0].Subinventory='STORES', requestBody.TransactionLines[0].TransactionType='Subinventory Transfer', requestBody.TransactionLines[0].TransactionQuantity=93, requestBody.TransactionLines[0].TransactionUnitOfMeasure='EA', requestBody.TransactionLines[0].LotNumber='LOT-0058', requestBody.TransactionLines[0].TransferSubinventory='CONTROLLED'. The audited transition binds selected option move_affected_stock_to_quarantine, revision R3, approval AP-0058, and constraint quality scope, location, reservations, and physical quantity must correlate; unaffected lots and already issued material = 11 EA; uncovered or unsupported scope = 12.0 EA; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "requestBody.SourceSystemCode",
+          "requestBody.TransactionLines[0].Item",
+          "requestBody.TransactionLines[0].LotNumber",
+          "requestBody.TransactionLines[0].OrganizationCode",
+          "requestBody.TransactionLines[0].Subinventory",
+          "requestBody.TransactionLines[0].TransactionQuantity",
+          "requestBody.TransactionLines[0].TransactionType",
+          "requestBody.TransactionLines[0].TransactionUnitOfMeasure",
+          "requestBody.TransactionLines[0].TransferSubinventory",
+          "requestBody.TransactionMode"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "requestBody": {
+              "SourceSystemCode": "EXTERNAL",
+              "TransactionLines": [
+                {
+                  "Item": "NS-COMP-058",
+                  "LotNumber": "LOT-0058",
+                  "OrganizationCode": "SEA",
+                  "Subinventory": "STORES",
+                  "TransactionQuantity": 93,
+                  "TransactionType": "Subinventory Transfer",
+                  "TransactionUnitOfMeasure": "EA",
+                  "TransferSubinventory": "CONTROLLED"
+                }
+              ],
+              "TransactionMode": "ONLINE"
+            }
+          },
+          "tool": "oracle_fusion.inventory_transactions.create"
+        },
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"requestBody\":{\"SourceSystemCode\":\"EXTERNAL\",\"TransactionLines\":[{\"Item\":\"NS-COMP-058\",\"LotNumber\":\"LOT-0058\",\"OrganizationCode\":\"SEA\",\"Subinventory\":\"STORES\",\"TransactionQuantity\":29,\"TransactionType\":\"Subinventory Transfer\",\"TransactionUnitOfMeasure\":\"EA\",\"TransferSubinventory\":\"CONTROLLED\"}],\"TransactionMode\":\"ONLINE\"}},\"case\":\"CASE-058\",\"outcome\":\"Match the supplier alert to affected lots and post only those quantities to the quarantine subinventory.\",\"tool\":\"oracle_fusion.inventory_transactions.create\"}",
           "resource_type": "oracle_fusion.inventory_transactions",
           "revision": 1,
           "status": "Suspect stock quarantined",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-058-mutation-01",
           "task_id": "factorybench-058"
         }
       },
       {
-        "description": "google_sheets.spreadsheets.values.append produced the task-scoped, source-audited state transition.",
+        "description": "Appended one audit row for CASE-058 with the selected option, completion, role, and AP-0058.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "range": "Audit!A:G",
+            "spreadsheetId": "sheet-058"
+          },
+          "tool": "google_sheets.spreadsheets.values.append"
+        },
+        "payload_text_contains": [
+          "2026-01-14",
+          "move_affected_stock_to_quarantine"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_sheets.spreadsheets.values",
@@ -57,14 +229,23 @@
           "status": "Recorded",
           "system": "google_sheets"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-058-mutation-02",
           "task_id": "factorybench-058"
         }
       },
       {
-        "description": "slack.reactions_add produced the task-scoped, source-audited state transition.",
+        "description": "Marked the existing CASE-058 approval thread complete only after the Oracle decision was persisted.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "name": "white_check_mark",
+            "timestamp": "1768000058.000100"
+          },
+          "tool": "slack.reactions_add"
+        },
         "table": "resource_state",
         "values": {
           "resource_type": "slack",
@@ -72,18 +253,1259 @@
           "status": "Recorded",
           "system": "slack"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-058-mutation-03",
           "task_id": "factorybench-058"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-14 as the documented date for suspect housing lot; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Established 105 EA for on-hand housings in the implicated lots.",
+        "field": "source_quantity",
+        "id": "establish_source_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Correlated the independent source records to 104 observed EA.",
+        "field": "observed_quantity",
+        "id": "reconcile_observed_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Removed 11 EA for unaffected lots and already issued material.",
+        "field": "excluded_quantity",
+        "id": "identify_excluded_quantity",
+        "weight": 1.5
+      },
+      {
+        "description": "Calculated 104 observed \u2212 11 excluded = 93 supported EA.",
+        "field": "supported_quantity",
+        "id": "calculate_supported_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Bound the Oracle transaction to exactly 93 EA, the measure required by the chosen disposition; did not substitute the header or another business quantity.",
+        "field": "transaction_quantity",
+        "id": "bound_transaction_quantity",
+        "weight": 2.0
+      },
+      {
+        "description": "Kept the receipt, issue, transfer, inspection, or completion quantity in EA.",
+        "field": "quantity_unit",
+        "id": "preserve_transaction_unit",
+        "weight": 0.5
+      },
+      {
+        "description": "Derived 2026-01-14 for move_affected_stock_to_quarantine.",
+        "field": "baseline_resolution_date",
+        "id": "compare_quantity_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-15 for quarantine_all_housings.",
+        "field": "controlled_resolution_date",
+        "id": "compare_quantity_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-16 for leave_reserved_stock_available and recognized its control impact.",
+        "field": "escalated_resolution_date",
+        "id": "compare_quantity_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for move_affected_stock_to_quarantine; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that leave_reserved_stock_available remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of move_affected_stock_to_quarantine, quarantine_all_housings, and leave_reserved_stock_available; selected move_affected_stock_to_quarantine because it alone gives the best currently authorized result under quality scope, location, reservations, and physical quantity must correlate.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-14 as the supported outcome date for move_affected_stock_to_quarantine.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-14 with the independent control date 2026-01-14 and calculated a signed variance of 0 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-058"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-058 scope, immutable handles, mounted systems, and evidence index before investigating NS-000058.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-058\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-058"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-058 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "id": "att-058",
+              "messageId": "msg-058-1",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogbm9uY29uZm9ybWFuY2Utc2NvcGUtYW5kLWxvdC1sb2NhdGlvbi1sZWRnZXItMDA1OApDYXNlIHJlZmVyZW5jZTogQ0FTRS0wNTgKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogbm9uY29uZm9ybWFuY2Ugc2NvcGUgYW5kIGxvdC1sb2NhdGlvbiBsZWRnZXIKSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTA1OApFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSMwpNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDEyIEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IHF1YXJhbnRpbmVfYWxsX2hvdXNpbmdzClN0YW5kYXJkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTEyCkV4cGVkaXRlZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMwpSZXN1bHRpbmcgb3BlcmF0aW5nIG91dGNvbWUgc3RhdGVkIGJ5IHJlcXVlc3Rlciwgbm90IGJ5IGNvdW50ZXJwYXJ0eTogMjAyNi0wMS0xNQpFY29ub21pYyBpbXBhY3Qgc3RhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogVVNEIDAKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiBpbnZlc3RpZ2F0aW9uIGNvbXBsZXRpb24gZGF0ZQpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiB1bmFmZmVjdGVkIGxvdHMgYW5kIGFscmVhZHkgaXNzdWVkIG1hdGVyaWFsCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IHF1YWxpdHkgc2NvcGUsIGxvY2F0aW9uLCByZXNlcnZhdGlvbnMsIGFuZCBwaHlzaWNhbCBxdWFudGl0eSBtdXN0IGNvcnJlbGF0ZQpOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wNTkgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBSYWluaWVyIENvbXBvbmVudHMgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwNTgKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+              "size": 1553
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.attachments.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-13 readiness input for quarantine_all_housings, then separately derived its 2026-01-15 operating outcome under quality scope, location, reservations, and physical quantity must correlate instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-058' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-058"
+                },
+                {
+                  "id": "drive-approval-058"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-058 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-058-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-058-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-058-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R3 and established 105 EA for on-hand housings in the implicated lots, with control date 2026-01-14.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-058-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-058-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-058-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-13 readiness input for quarantine_all_housings, then separately derived its 2026-01-15 operating outcome under quality scope, location, reservations, and physical quantity must correlate instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-058-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-058-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-058-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R3 and established 105 EA for on-hand housings in the implicated lots, with control date 2026-01-14.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-058-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-058-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-058-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000058 at R3.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-058-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-058-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-058-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-058-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 104 observed less 11 excluded to 93 supported EA for quantity inside the nonconformance serial or lot scope.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-058"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-058"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-058",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-058"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-058"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-058"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0058 only to move_affected_stock_to_quarantine, NS-000058, and the supported 93 EA; kept broader scope and leave_reserved_stock_available outside current authority.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-058"
+            },
+            "expected_result_contains": {
+              "id": "drive-058"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-058",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-058"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-058"
+            },
+            "expected_result_contains": {
+              "id": "drive-058"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R3 and established 105 EA for on-hand housings in the implicated lots, with control date 2026-01-14.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "includeGridData": false,
+              "ranges": [
+                "Control!A1:I50"
+              ],
+              "spreadsheetId": "sheet-058"
+            },
+            "expected_result_contains": {
+              "developerMetadata": [
+                {
+                  "metadataKey": "case",
+                  "metadataValue": "CASE-058"
+                }
+              ],
+              "spreadsheetId": "sheet-058"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000058.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000058.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000058.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0058 only to move_affected_stock_to_quarantine, NS-000058, and the supported 93 EA; kept broader scope and leave_reserved_stock_available outside current authority.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "DocumentNumber='RCV-0058'"
+            },
+            "expected_result_contains": {
+              "InspectionId": 1100058
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.quality_inspection_results.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle quality inspection results record: Reconciled 104 observed less 11 excluded to 93 supported EA for quantity inside the nonconformance serial or lot scope.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100058,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100058
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.work_order_materials.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle work order materials record: Applied revision R3 and established 105 EA for on-hand housings in the implicated lots, with control date 2026-01-14.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "SupplyOrderReferenceNumber='SUPPLY-0058'"
+            },
+            "expected_result_contains": {
+              "SupplyRequestId": 1500058
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.supply_requests.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-13 readiness input for quarantine_all_housings, then separately derived its 2026-01-15 operating outcome under quality scope, location, reservations, and physical quantity must correlate instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-058' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400058
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle inventory onhand balances record: Reconciled 104 observed less 11 excluded to 93 supported EA for quantity inside the nonconformance serial or lot scope.",
+        "id": "investigation_17",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.inventory_transactions.create",
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "ItemNumber='NS-COMP-058' and OrganizationCode='SEA'"
+            },
+            "expected_result_contains": {
+              "InventoryItemId": 1400058
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.inventory_onhand_balances.list"
+          }
+        ],
+        "description": "Read NS-000058 back through the documented Oracle inventory onhand balances.list operation after the mutation and confirmed the resource-specific changed fields ['AvailableToTransact', 'LastUpdateDate', 'LotNumber', 'PrimaryQuantity', 'SubinventoryCode'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "AvailableToTransact": 0,
+          "LastUpdateDate": "2026-01-14T16:00:00-08:00",
+          "LotNumber": "LOT-0058",
+          "PrimaryQuantity": 93,
+          "SubinventoryCode": "CONTROLLED"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": false,
+        "target_identity": {
+          "InventoryItemId": 1400058
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.inventory_transactions.create",
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-058' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400058
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "description": "Read NS-000058 back through the documented Oracle inventory onhand balances.list operation after the mutation and confirmed the resource-specific changed fields ['AvailableToTransact', 'LastUpdateDate', 'LotNumber', 'PrimaryQuantity', 'SubinventoryCode'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "AvailableToTransact": 0,
+        "LastUpdateDate": "2026-01-14T16:00:00-08:00",
+        "LotNumber": "LOT-0058",
+        "PrimaryQuantity": 93,
+        "SubinventoryCode": "CONTROLLED"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "InventoryItemId": 1400058
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-058"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-058 scope, immutable handles, mounted systems, and evidence index before investigating NS-000058.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-058\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-058"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-058 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-058",
+            "messageId": "msg-058-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogbm9uY29uZm9ybWFuY2Utc2NvcGUtYW5kLWxvdC1sb2NhdGlvbi1sZWRnZXItMDA1OApDYXNlIHJlZmVyZW5jZTogQ0FTRS0wNTgKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogbm9uY29uZm9ybWFuY2Ugc2NvcGUgYW5kIGxvdC1sb2NhdGlvbiBsZWRnZXIKSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTA1OApFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSMwpNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDEyIEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IHF1YXJhbnRpbmVfYWxsX2hvdXNpbmdzClN0YW5kYXJkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTEyCkV4cGVkaXRlZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMwpSZXN1bHRpbmcgb3BlcmF0aW5nIG91dGNvbWUgc3RhdGVkIGJ5IHJlcXVlc3Rlciwgbm90IGJ5IGNvdW50ZXJwYXJ0eTogMjAyNi0wMS0xNQpFY29ub21pYyBpbXBhY3Qgc3RhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogVVNEIDAKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiBpbnZlc3RpZ2F0aW9uIGNvbXBsZXRpb24gZGF0ZQpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiB1bmFmZmVjdGVkIGxvdHMgYW5kIGFscmVhZHkgaXNzdWVkIG1hdGVyaWFsCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IHF1YWxpdHkgc2NvcGUsIGxvY2F0aW9uLCByZXNlcnZhdGlvbnMsIGFuZCBwaHlzaWNhbCBxdWFudGl0eSBtdXN0IGNvcnJlbGF0ZQpOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wNTkgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBSYWluaWVyIENvbXBvbmVudHMgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwNTgKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+            "size": 1553
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-13 readiness input for quarantine_all_housings, then separately derived its 2026-01-15 operating outcome under quality scope, location, reservations, and physical quantity must correlate instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-058' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-058"
+              },
+              {
+                "id": "drive-approval-058"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-058 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-058-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-058-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-058-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R3 and established 105 EA for on-hand housings in the implicated lots, with control date 2026-01-14.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-058-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-058-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-058-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-13 readiness input for quarantine_all_housings, then separately derived its 2026-01-15 operating outcome under quality scope, location, reservations, and physical quantity must correlate instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-058-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-058-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-058-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R3 and established 105 EA for on-hand housings in the implicated lots, with control date 2026-01-14.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-058-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-058-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-058-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000058 at R3.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-058-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-058-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-058-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-058-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 104 observed less 11 excluded to 93 supported EA for quantity inside the nonconformance serial or lot scope.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-058"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-058"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-058",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-058"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-058"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-058"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0058 only to move_affected_stock_to_quarantine, NS-000058, and the supported 93 EA; kept broader scope and leave_reserved_stock_available outside current authority.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-058"
+          },
+          "expected_result_contains": {
+            "id": "drive-058"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-058",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-058"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-058"
+          },
+          "expected_result_contains": {
+            "id": "drive-058"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R3 and established 105 EA for on-hand housings in the implicated lots, with control date 2026-01-14.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-058"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-058"
+              }
+            ],
+            "spreadsheetId": "sheet-058"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000058.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000058.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000058.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0058 only to move_affected_stock_to_quarantine, NS-000058, and the supported 93 EA; kept broader scope and leave_reserved_stock_available outside current authority.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "DocumentNumber='RCV-0058'"
+          },
+          "expected_result_contains": {
+            "InspectionId": 1100058
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.quality_inspection_results.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle quality inspection results record: Reconciled 104 observed less 11 excluded to 93 supported EA for quantity inside the nonconformance serial or lot scope.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100058,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100058
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_materials.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order materials record: Applied revision R3 and established 105 EA for on-hand housings in the implicated lots, with control date 2026-01-14.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplyOrderReferenceNumber='SUPPLY-0058'"
+          },
+          "expected_result_contains": {
+            "SupplyRequestId": 1500058
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.supply_requests.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle supply requests record: Used the independently confirmed 2026-01-13 readiness input for quarantine_all_housings, then separately derived its 2026-01-15 operating outcome under quality scope, location, reservations, and physical quantity must correlate instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-058' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400058
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 104 observed less 11 excluded to 93 supported EA for quantity inside the nonconformance serial or lot scope.",
+      "id": "investigation_17",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-058"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-058\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-058"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "id": "att-058",
+        "messageId": "msg-058-1",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "data": "UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogbm9uY29uZm9ybWFuY2Utc2NvcGUtYW5kLWxvdC1sb2NhdGlvbi1sZWRnZXItMDA1OApDYXNlIHJlZmVyZW5jZTogQ0FTRS0wNTgKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogbm9uY29uZm9ybWFuY2Ugc2NvcGUgYW5kIGxvdC1sb2NhdGlvbiBsZWRnZXIKSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTA1OApFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSMwpNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDEyIEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IHF1YXJhbnRpbmVfYWxsX2hvdXNpbmdzClN0YW5kYXJkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTEyCkV4cGVkaXRlZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMwpSZXN1bHRpbmcgb3BlcmF0aW5nIG91dGNvbWUgc3RhdGVkIGJ5IHJlcXVlc3Rlciwgbm90IGJ5IGNvdW50ZXJwYXJ0eTogMjAyNi0wMS0xNQpFY29ub21pYyBpbXBhY3Qgc3RhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogVVNEIDAKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiBpbnZlc3RpZ2F0aW9uIGNvbXBsZXRpb24gZGF0ZQpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiB1bmFmZmVjdGVkIGxvdHMgYW5kIGFscmVhZHkgaXNzdWVkIG1hdGVyaWFsCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IHF1YWxpdHkgc2NvcGUsIGxvY2F0aW9uLCByZXNlcnZhdGlvbnMsIGFuZCBwaHlzaWNhbCBxdWFudGl0eSBtdXN0IGNvcnJlbGF0ZQpOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wNTkgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBSYWluaWVyIENvbXBvbmVudHMgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwNTgKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+        "size": 1553
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.attachments.get"
     },
     {
       "arguments": {
@@ -91,28 +1513,113 @@
         "pageSize": 50,
         "q": "name contains 'CASE-058' and trashed = false"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-058"
+          },
+          {
+            "id": "drive-approval-058"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.list"
     },
     {
       "arguments": {
-        "fileId": "drive-058"
+        "fileId": "drive-058-12",
+        "mimeType": "text/plain"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "drive-058-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-058-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-058-03"
+      },
+      "match": "result_contains",
       "tool": "google_drive.files.download"
     },
     {
       "arguments": {
-        "majorDimension": "ROWS",
-        "ranges": [
-          "Control!A1:H50",
-          "Approvals!A1:G20"
-        ],
-        "spreadsheetId": "sheet-058",
-        "valueRenderOption": "UNFORMATTED_VALUE"
+        "alt": "media",
+        "fileId": "drive-058-04"
       },
-      "match": "successful_tool_call",
-      "tool": "google_sheets.spreadsheets.values.batchGet"
+      "expected_result_contains": {
+        "id": "drive-058-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-058-09",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-058-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-058-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-058-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-058"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-058"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-058",
+        "mimeType": "text/plain"
+      },
+      "expected_result_contains": {
+        "id": "drive-058"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "includeGridData": false,
+        "ranges": [
+          "Control!A1:I50"
+        ],
+        "spreadsheetId": "sheet-058"
+      },
+      "expected_result_contains": {
+        "developerMetadata": [
+          {
+            "metadataKey": "case",
+            "metadataValue": "CASE-058"
+          }
+        ],
+        "spreadsheetId": "sheet-058"
+      },
+      "match": "result_contains",
+      "tool": "google_sheets.spreadsheets.get"
     },
     {
       "arguments": {
@@ -121,36 +1628,83 @@
         "limit": 100,
         "oldest": "1768000000.000000"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000058.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "slack.conversations_history"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-058'"
+        "q": "DocumentNumber='RCV-0058'"
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.inventory_onhand_balances.list"
+      "expected_result_contains": {
+        "InspectionId": 1100058
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.quality_inspection_results.list"
+    },
+    {
+      "arguments": {
+        "WorkOrderId": 100058,
+        "limit": 50,
+        "onlyData": true
+      },
+      "expected_result_contains": {
+        "WorkOrderId": 100058
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.work_order_materials.list"
     },
     {
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "q": "ReferenceNumber='CASE-058'"
+        "q": "SupplyOrderReferenceNumber='SUPPLY-0058'"
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.quality_inspection_results.list"
+      "expected_result_contains": {
+        "SupplyRequestId": 1500058
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "ItemNumber='NS-COMP-058' and OrganizationCode='SEA'"
+      },
+      "expected_result_contains": {
+        "InventoryItemId": 1400058
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.inventory_onhand_balances.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
+    "gmail.messages.list",
+    "gmail.messages.attachments.get",
     "google_drive.files.list",
+    "google_drive.files.export",
     "google_drive.files.download",
-    "google_sheets.spreadsheets.values.batchGet",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.export",
+    "google_sheets.spreadsheets.get",
     "slack.conversations_history",
-    "oracle_fusion.inventory_onhand_balances.list",
-    "oracle_fusion.quality_inspection_results.list"
+    "oracle_fusion.quality_inspection_results.list",
+    "oracle_fusion.work_order_materials.list",
+    "oracle_fusion.supply_requests.list",
+    "oracle_fusion.inventory_onhand_balances.list"
   ],
   "task_id": "factorybench-058",
   "write_tools": [

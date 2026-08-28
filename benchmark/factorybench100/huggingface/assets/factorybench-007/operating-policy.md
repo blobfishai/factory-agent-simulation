@@ -1,5 +1,7 @@
-# Resequence burn-in ahead of final assembly — operating control
+# Resequence burn-in ahead of final assembly — operating policy
 
-Scope: Release or revise discrete production only after checking drawings, dispatch state, materials, and resource constraints.
+Decision scope: burn-in operation on WO-0007.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: precedence, cure time, and completed quantities cannot be violated. Establish the immutable source record and effective revision, then reconcile burn-in chamber-hours required, open certified chamber-hours before final assembly, and protected qualification runs from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file.

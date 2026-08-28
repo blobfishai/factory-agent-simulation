@@ -1,5 +1,7 @@
-# Move suspect housings into quarantine — operating control
+# Move suspect housings into quarantine — operating policy
 
-Scope: Correct and move lot-, serial-, project-, and organization-controlled inventory through documented transactions.
+Decision scope: suspect housing lot.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: quality scope, location, reservations, and physical quantity must correlate. Establish the immutable source record and effective revision, then reconcile on-hand housings in the implicated lots, quantity inside the nonconformance serial or lot scope, and unaffected lots and already issued material from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction.

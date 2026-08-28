@@ -1,5 +1,7 @@
-# Move inspection to the revised routing step — operating control
+# Move inspection to the revised routing step — operating policy
 
-Scope: Apply approved engineering changes to active work-order operations, materials, resources, and attachments.
+Decision scope: routing inspection step.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: routing sequence, predecessor, workcenter qualification, and open state. Establish the immutable source record and effective revision, then reconcile open operations affected by the routing revision, operation inside effectivity and not yet started, and completed or out-of-effectivity operations from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and send the scoped completion reply in the existing email thread.

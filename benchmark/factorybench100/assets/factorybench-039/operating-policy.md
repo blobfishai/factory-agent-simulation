@@ -1,5 +1,7 @@
-# Deliver inspected copper to project stores — operating control
+# Deliver inspected copper to project stores — operating policy
 
-Scope: Process receipt, inspection, correction, delivery, and return evidence against source documents.
+Decision scope: accepted project copper receipt.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: delivery must preserve project, task, lot, and accepted status. Establish the immutable source record and effective revision, then reconcile quantity received for the project PO, inspection-accepted quantity with matching project and task, and rejected or common-owned quantity from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file; and send the scoped completion reply in the existing email thread.

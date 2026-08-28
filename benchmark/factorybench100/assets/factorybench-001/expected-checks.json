@@ -1,29 +1,109 @@
 {
   "answer": {
-    "order_number": "ORD-0001",
-    "revised_commit_date": "2026-01-14",
-    "supply_action": "Rescheduled"
+    "accelerated_completion": "2026-01-20",
+    "baseline_completion": "2026-01-20",
+    "business_need_date": "2026-01-21",
+    "coverage_item_or_resource": "LMP-BULB-12",
+    "decision_timing_status": "ON_TIME",
+    "earliest_qualified_base_slot": "2026-01-18",
+    "escalated_completion": "2026-01-18",
+    "escalation_approval_required": 1,
+    "expedite_completion_days_saved": 0,
+    "expedited_external_readiness": "2026-01-14",
+    "external_recovery_quantity": 120,
+    "ineligible_coverage_quantity": 60,
+    "observed_coverage_quantity": 420,
+    "outcome_vs_control_days": -1,
+    "quantity_unit": "EA",
+    "recommended_incremental_cost_usd": 0,
+    "recommended_option": "standard_plan",
+    "recommended_outcome_date": "2026-01-20",
+    "required_quantity": 480,
+    "shortage_quantity": 120,
+    "standard_external_readiness": "2026-01-17",
+    "usable_coverage_quantity": 360,
+    "weekend_shift_completion_days_saved": 2
   },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'standard_plan', tied to NS-000001, revision C, and the selected standard_plan outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-20', tied to NS-000001, revision C, and the selected standard_plan outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported coverage item or resource as 'LMP-BULB-12', tied to NS-000001, revision C, and the selected standard_plan outcome.",
+      "field": "coverage_item_or_resource",
+      "id": "answer_coverage_item_or_resource",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported shortage quantity as 120, tied to NS-000001, revision C, and the selected standard_plan outcome.",
+      "field": "shortage_quantity",
+      "id": "answer_shortage_quantity",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000001, revision C, and the selected standard_plan outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "weight": 1.0
+    }
+  ],
   "assertions": [
     {
-      "description": "oracle_fusion.work_orders.update produced the task-scoped, source-audited state transition.",
+      "description": "Required immutable record NS-000001 to reach business outcome 'Production plan committed' through oracle_fusion.work_orders.update with exact provider-critical values WorkOrderId=100001, requestBody.WorkOrderStatusCode='ORA_RELEASED', requestBody.PlannedStartDate='2026-01-18', requestBody.PlannedCompletionDate='2026-01-20'. The audited transition binds selected option standard_plan, revision C, approval AP-0001, and constraint material readiness versus the protected assembly calendar; quarantined and reserved bulb units = 60 EA; uncovered or unsupported scope = 120.0 EA; no other provider record satisfies this state criterion.",
       "id": "mutation_01",
+      "payload_allowed_argument_paths": [
+        "WorkOrderId",
+        "requestBody.PlannedCompletionDate",
+        "requestBody.PlannedStartDate",
+        "requestBody.WorkOrderStatusCode"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "WorkOrderId": 100001,
+          "requestBody": {
+            "PlannedCompletionDate": "2026-01-20",
+            "PlannedStartDate": "2026-01-18",
+            "WorkOrderStatusCode": "ORA_RELEASED"
+          }
+        },
+        "tool": "oracle_fusion.work_orders.update"
+      },
       "table": "resource_state",
       "values": {
-        "payload_json": "{\"arguments\":{\"WorkOrderId\":100001,\"requestBody\":{\"PlannedCompletionDate\":\"2026-01-18\",\"PlannedStartDate\":\"2026-01-14\",\"WorkOrderStatusCode\":\"Released\"}},\"case\":\"CASE-001\",\"outcome\":\"Verify the signed service-level addendum and planner approval, then move the linked production supply to the approved commit date and notify the account team.\",\"tool\":\"oracle_fusion.work_orders.update\"}",
         "resource_type": "oracle_fusion.work_orders",
         "revision": 1,
-        "status": "Rescheduled",
+        "status": "Production plan committed",
         "system": "oracle_fusion"
       },
+      "weight": 3.0,
       "where": {
         "resource_id": "factorybench-001-mutation-01",
         "task_id": "factorybench-001"
       }
     },
     {
-      "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+      "description": "Wrote standard_plan, completion 2026-01-20, and the binding constraint into the existing task-scoped control cell without altering another row.",
       "id": "mutation_02",
+      "payload_contains": {
+        "arguments": {
+          "range": "Control!H3",
+          "spreadsheetId": "sheet-001"
+        },
+        "tool": "google_sheets.spreadsheets.values.update"
+      },
+      "payload_text_contains": [
+        "2026-01-20",
+        "standard_plan"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "google_sheets.spreadsheets.values",
@@ -31,14 +111,35 @@
         "status": "Recorded",
         "system": "google_sheets"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-001-mutation-02",
         "task_id": "factorybench-001"
       }
     },
     {
-      "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+      "description": "Created\u2014but did not send\u2014the requested CASE-001 decision draft with completion, constraint, alternatives, and the Oracle business reference.",
       "id": "mutation_03",
+      "payload_contains": {
+        "arguments": {
+          "message": {
+            "threadId": "thread-001"
+          },
+          "userId": "me"
+        },
+        "tool": "gmail.drafts.create"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-001",
+          "NS-000001",
+          "LMP-BULB-12"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-20",
+        "standard_plan"
+      ],
       "table": "resource_state",
       "values": {
         "resource_type": "gmail.drafts",
@@ -46,10 +147,777 @@
         "status": "Recorded",
         "system": "gmail"
       },
+      "weight": 1.5,
       "where": {
         "resource_id": "factorybench-001-mutation-03",
         "task_id": "factorybench-001"
       }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-21 as the documented date for one pallet of Luma lamps; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 480 EA for revision-C bulbs required for 120 four-lamp kits at revision C.",
+      "field": "required_quantity",
+      "id": "derive_plan_requirement",
+      "weight": 2.0
+    },
+    {
+      "description": "Read 420 EA of gross observed nettable LMP-BULB-12 units.",
+      "field": "observed_coverage_quantity",
+      "id": "read_gross_coverage",
+      "weight": 1.0
+    },
+    {
+      "description": "Excluded 60 EA for quarantined and reserved bulb units.",
+      "field": "ineligible_coverage_quantity",
+      "id": "remove_ineligible_coverage",
+      "weight": 1.5
+    },
+    {
+      "description": "Calculated 420 observed \u2212 60 ineligible = 360 usable EA.",
+      "field": "usable_coverage_quantity",
+      "id": "calculate_usable_coverage",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 480 required \u2212 360 usable = 120 EA uncovered.",
+      "field": "shortage_quantity",
+      "id": "calculate_plan_gap",
+      "weight": 2.0
+    },
+    {
+      "description": "Kept every planning quantity in EA.",
+      "field": "quantity_unit",
+      "id": "preserve_plan_unit",
+      "weight": 0.5
+    },
+    {
+      "description": "Calculated standard_plan outcome as 2026-01-20 under qualified non-displacing WC-2 slots.",
+      "field": "baseline_completion",
+      "id": "compare_baseline_plan",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated expedite_bulbs outcome as 2026-01-20 using Rainier's confirmed standard and expedite dates.",
+      "field": "accelerated_completion",
+      "id": "compare_accelerated_plan",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated add_weekend_shift outcome as 2026-01-18 and kept its separate-approval condition.",
+      "field": "escalated_completion",
+      "id": "compare_escalated_plan",
+      "weight": 1.0
+    },
+    {
+      "description": "Read 2026-01-17 as the independently confirmed standard readiness date for Rainier's confirmed standard and expedite dates.",
+      "field": "standard_external_readiness",
+      "id": "read_standard_external_readiness",
+      "weight": 1.0
+    },
+    {
+      "description": "Read 2026-01-14 as the independently confirmed expedited readiness date for Rainier's confirmed standard and expedite dates.",
+      "field": "expedited_external_readiness",
+      "id": "read_expedited_external_readiness",
+      "weight": 1.0
+    },
+    {
+      "description": "Bound external recovery to the 120 EA uncovered requirement rather than ordering the full header quantity.",
+      "field": "external_recovery_quantity",
+      "id": "bound_external_recovery_quantity",
+      "weight": 1.0
+    },
+    {
+      "description": "Calculated 120 Luma lamp kits \u00d7 4 revision-C bulbs per kit = 480 LMP-BULB-12 bulbs.",
+      "field": "required_quantity",
+      "id": "calculate_lamp_bom",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared the 2026-01-14 expedited bulb readiness with the first non-displacing WC-2 slot on 2026-01-18 and proved that expediting alone still completes on 2026-01-20, saving 0 days.",
+      "field": "expedite_completion_days_saved",
+      "id": "test_lamp_expedite_against_capacity",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated that the 2026-01-17 weekend slot would complete on 2026-01-18, two days earlier than the selected plan, but kept it outside action because the shift lacks approval.",
+      "field": "weekend_shift_completion_days_saved",
+      "id": "test_lamp_weekend_shift",
+      "weight": 2.0
+    },
+    {
+      "description": "Applied USD 0 as the documented incremental recovery cost for standard_plan; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that add_weekend_shift remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of standard_plan, expedite_bulbs, and add_weekend_shift; selected standard_plan because it alone gives the best currently authorized result under material readiness versus the protected assembly calendar.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-20 as the supported outcome date for standard_plan.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-20 with the independent control date 2026-01-21 and calculated a signed variance of -1 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-001"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-001 scope, immutable handles, mounted systems, and evidence index before investigating NS-000001.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-001\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-001"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-001 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-001",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-001",
+            "threadId": "thread-001"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-001",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-001"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-14 readiness input for expedite_bulbs, then separately derived its 2026-01-20 operating outcome under material readiness versus the protected assembly calendar instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-001' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-001"
+              },
+              {
+                "id": "drive-approval-001"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-001 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-001-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-001-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-001-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000001 at C.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-001-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-001-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-001-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision C and established 480 EA for revision-C bulbs required for 120 four-lamp kits, with control date 2026-01-21.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-001-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-001-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-001-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision C and established 480 EA for revision-C bulbs required for 120 four-lamp kits, with control date 2026-01-21.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-001-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-001-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-001-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied qualified non-displacing WC-2 slots to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-001-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-001-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-001-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-001-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-14 readiness input for expedite_bulbs, then separately derived its 2026-01-20 operating outcome under material readiness versus the protected assembly calendar instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-001"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-001"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-001",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-001"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-001"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-001"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0001 only to standard_plan, NS-000001, and the supported 360 EA; kept broader scope and add_weekend_shift outside current authority.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-001"
+          },
+          "expected_result_contains": {
+            "id": "drive-001"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-001",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-001"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-001"
+          },
+          "expected_result_contains": {
+            "id": "drive-001"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision C and established 480 EA for revision-C bulbs required for 120 four-lamp kits, with control date 2026-01-21.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-001",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-001"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-001",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-001"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 420 observed less 60 excluded to 360 supported EA for nettable LMP-BULB-12 units. Applied qualified non-displacing WC-2 slots to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000001.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000001.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000001.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0001 only to standard_plan, NS-000001, and the supported 360 EA; kept broader scope and add_weekend_shift outside current authority.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "salesOrdersForOrderHubUniqID": "salesOrdersForOrderHubUniqID-0001"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000001
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='SO-47001'"
+          },
+          "expected_result_contains": {
+            "HeaderId": 12000001
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.sales_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle sales orders record: Applied revision C and established 480 EA for revision-C bulbs required for 120 four-lamp kits, with control date 2026-01-21.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100001
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100001
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0001'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100001
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000001 for one pallet of Luma lamps using immutable IDs and preserved effective revision C.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100001,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100001
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order operations record: Applied qualified non-displacing WC-2 slots to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100001,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100001
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_materials.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order materials record: Applied revision C and established 480 EA for revision-C bulbs required for 120 four-lamp kits, with control date 2026-01-21.",
+      "id": "investigation_17",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='LMP-BULB-12' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400001
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 420 observed less 60 excluded to 360 supported EA for nettable LMP-BULB-12 units.",
+      "id": "investigation_18",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.work_orders.update",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100001
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100001
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0001'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100001
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "description": "Read NS-000001 back through the documented Oracle work orders.get operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkOrderStatusCode'], including the effective update at 2026-01-20, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "LastUpdateDate": "2026-01-20T16:00:00-08:00",
+        "PlannedCompletionDate": "2026-01-20",
+        "PlannedStartDate": "2026-01-18",
+        "WorkOrderStatusCode": "ORA_RELEASED"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "target_identity": {
+        "WorkOrderId": 100001
+      },
+      "weight": 2.0
     }
   ]
 }

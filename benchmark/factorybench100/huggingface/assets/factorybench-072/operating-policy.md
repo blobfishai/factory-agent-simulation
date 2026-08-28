@@ -1,5 +1,7 @@
-# Reverse a duplicated copper issue — operating control
+# Reverse a duplicated copper issue — operating policy
 
-Scope: Post and reconcile production actuals against time, material, invoice, and close evidence.
+Decision scope: duplicated copper material issue.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: scanner identity, timestamp, lot, operation, and physical stock prove duplication. Establish the immutable source record and effective revision, then reconcile cost and quantity posted by the suspect scan, one legitimate issue supported by consumption, and duplicate issue quantity and cost from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: mark the existing operations thread complete with the approved check reaction; and append one dated decision row to the existing audit tab; do not overwrite prior entries.

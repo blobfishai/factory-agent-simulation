@@ -1,5 +1,7 @@
-# Close a supplier remediation purchase order — operating control
+# Close a supplier remediation purchase order — operating policy
 
-Scope: Combine supplier master, performance, approval, and collaboration evidence into controlled ERP follow-up.
+Decision scope: supplier remediation PO.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: all CAPA deliverables and financial documents must be complete. Establish the immutable source record and effective revision, then reconcile remediation milestone value, accepted milestones with approved evidence and matched invoice, and open corrective actions or unaccepted milestones from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell.

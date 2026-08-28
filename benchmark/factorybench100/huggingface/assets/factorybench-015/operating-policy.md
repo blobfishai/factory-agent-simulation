@@ -1,5 +1,7 @@
-# Post calibrated test-bench labor actuals — operating control
+# Post calibrated test-bench labor actuals — operating policy
 
-Scope: Post traceable material, inventory, operation, and resource transactions from controlled shop-floor evidence.
+Decision scope: test-bench resource actual.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: employee, operation, rate, and calibration interval must reconcile. Establish the immutable source record and effective revision, then reconcile signed test-bench hours presented for posting, hours inside the calibration window and correct operation, and duplicate, out-of-window, or unsigned hours from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: send the scoped completion reply in the existing email thread; and add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file.

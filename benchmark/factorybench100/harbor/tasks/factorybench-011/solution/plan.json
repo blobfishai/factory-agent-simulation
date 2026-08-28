@@ -5,10 +5,69 @@
   },
   {
     "arguments": {
-      "fileId": "drive-approval-011",
-      "pageSize": 20
+      "includeGridData": false,
+      "ranges": [
+        "Control!A1:I50"
+      ],
+      "spreadsheetId": "sheet-011"
     },
-    "tool": "google_drive.approvals.list"
+    "tool": "google_sheets.spreadsheets.get"
+  },
+  {
+    "arguments": {
+      "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+      "pageSize": 50,
+      "q": "name contains 'CASE-011' and trashed = false"
+    },
+    "tool": "google_drive.files.list"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-011-09",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-011-10"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-011-12",
+      "mimeType": "text/plain"
+    },
+    "tool": "google_drive.files.export"
+  },
+  {
+    "arguments": {
+      "fileId": "drive-011-03"
+    },
+    "tool": "google_drive.files.download"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-011-04"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "alt": "media",
+      "fileId": "drive-approval-011"
+    },
+    "tool": "google_drive.files.get"
+  },
+  {
+    "arguments": {
+      "maxResults": 20,
+      "q": "\"CASE-011\"",
+      "userId": "me"
+    },
+    "tool": "gmail.messages.list"
   },
   {
     "arguments": {
@@ -29,30 +88,33 @@
   },
   {
     "arguments": {
-      "includeGridData": false,
-      "ranges": [
-        "Control!A1:H50"
-      ],
-      "spreadsheetId": "sheet-011"
+      "WorkOrderId": 100011
     },
-    "tool": "google_sheets.spreadsheets.get"
+    "tool": "oracle_fusion.work_orders.get"
   },
   {
     "arguments": {
       "limit": 50,
       "onlyData": true,
-      "q": "ReferenceNumber='CASE-011'"
+      "q": "DocumentNumber='RCV-0011'"
     },
-    "tool": "oracle_fusion.inventory_onhand_balances.list"
+    "tool": "oracle_fusion.quality_inspection_results.list"
   },
   {
     "arguments": {
       "WorkOrderId": 100011,
       "limit": 50,
-      "onlyData": true,
-      "q": "ReferenceNumber='CASE-011'"
+      "onlyData": true
     },
     "tool": "oracle_fusion.work_order_materials.list"
+  },
+  {
+    "arguments": {
+      "limit": 50,
+      "onlyData": true,
+      "q": "ItemNumber='NS-COMP-011' and OrganizationCode='SEA'"
+    },
+    "tool": "oracle_fusion.inventory_onhand_balances.list"
   },
   {
     "arguments": {
@@ -63,9 +125,9 @@
             "LotNumber": "LOT-0011",
             "OrganizationCode": "SEA",
             "SubinventoryCode": "STORES",
-            "TransactionQuantity": 19,
+            "TransactionQuantity": 70,
             "TransactionTypeCode": "MATERIAL_ISSUE",
-            "TransactionUnitOfMeasure": "EA",
+            "TransactionUnitOfMeasure": "KG",
             "WorkOrderNumber": "WO-0011"
           }
         ],
@@ -77,9 +139,17 @@
   },
   {
     "arguments": {
+      "WorkOrderId": 100011,
+      "limit": 50,
+      "onlyData": true
+    },
+    "tool": "oracle_fusion.work_order_materials.list"
+  },
+  {
+    "arguments": {
       "fileId": "drive-011",
       "requestBody": {
-        "content": "CASE-011: Material issued; Oracle reference recorded."
+        "content": "CASE-011: issue_fefo_conforming_lot recorded on Oracle record NS-000011; completion 2026-01-15; constraint issue the earliest-expiry conforming lot without breaking its reservation; expired, reserved, or wrong-revision adhesive = 8 KG; uncovered or unsupported scope = 16.0 KG; approval AP-0011."
       }
     },
     "tool": "google_drive.comments.create"
@@ -87,7 +157,7 @@
   {
     "arguments": {
       "message": {
-        "raw": "RnJvbTogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogb3BlcmF0aW9ucy1jb250cm9sQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAxMSDigJQgRHJhZnQgZW50ZXJwcmlzZSB3b3JrZmxvdw0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCk1hdGVyaWFsIGlzc3VlZC4gT3JhY2xlIGFuZCBjb2xsYWJvcmF0aW9uIHJlZmVyZW5jZXMgYXJlIHJlY29yZGVkIHVuZGVyIENBU0UtMDExLg0K",
+        "raw": "RnJvbTogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogc2hpZnQuc3VwZXJ2aXNvckBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMTEg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBpc3N1ZV9mZWZvX2NvbmZvcm1pbmdfbG90LiBDb21wbGV0aW9uOiAyMDI2LTAxLTE1Lg0KQmluZGluZyBjb25zdHJhaW50OiBpc3N1ZSB0aGUgZWFybGllc3QtZXhwaXJ5IGNvbmZvcm1pbmcgbG90IHdpdGhvdXQgYnJlYWtpbmcgaXRzIHJlc2VydmF0aW9uOyBleHBpcmVkLCByZXNlcnZlZCwgb3Igd3JvbmctcmV2aXNpb24gYWRoZXNpdmUgPSA4IEtHOyB1bmNvdmVyZWQgb3IgdW5zdXBwb3J0ZWQgc2NvcGUgPSAxNi4wIEtHLg0KQWx0ZXJuYXRpdmVzOiBpc3N1ZV9mZWZvX2NvbmZvcm1pbmdfbG90OiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgaXNzdWVfbGF0ZXJfZXhwaXJ5X2xvdDogb3V0Y29tZSAyMDI2LTAxLTE2LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IHJlcXVlc3Rfc2hlbGZfbGlmZV93YWl2ZXI6IG91dGNvbWUgMjAyNi0wMS0xNywgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDExLiBBcHByb3ZhbDogQVAtMDAxMS4gQ2FzZTogQ0FTRS0wMTEuDQo",
         "threadId": "thread-011"
       },
       "userId": "me"
@@ -96,9 +166,23 @@
   },
   {
     "arguments": {
-      "item_lot": "FB-011",
-      "posted_quantity": 19,
-      "transaction_reference": "Material issued"
+      "baseline_resolution_date": "2026-01-15",
+      "business_need_date": "2026-01-15",
+      "controlled_item_or_record": "NS-COMP-011",
+      "controlled_resolution_date": "2026-01-16",
+      "decision_timing_status": "ON_TIME",
+      "escalated_resolution_date": "2026-01-17",
+      "escalation_approval_required": 1,
+      "excluded_quantity": 8,
+      "observed_quantity": 78,
+      "outcome_vs_control_days": 0,
+      "quantity_unit": "KG",
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "issue_fefo_conforming_lot",
+      "recommended_outcome_date": "2026-01-15",
+      "source_quantity": 86,
+      "supported_quantity": 70,
+      "transaction_quantity": 70
     },
     "tool": "factorybench.submit_answer"
   }

@@ -1,5 +1,7 @@
-# Acknowledge the anodizer's revised promise — operating control
+# Acknowledge the anodizer's revised promise — operating policy
 
-Scope: Coordinate outside processing purchase orders, receipts, yield, and manufacturing completion.
+Decision scope: anodizing PO schedule.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: PO line, supplier operation, quantity, and acknowledged date. Establish the immutable source record and effective revision, then reconcile open outside-processing quantity, quantity covered by the signed revised promise, and received, canceled, or omitted quantity from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction.

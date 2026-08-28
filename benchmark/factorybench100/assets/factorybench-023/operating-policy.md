@@ -1,5 +1,7 @@
-# Move a repair to the qualified electrical shop — operating control
+# Move a repair to the qualified electrical shop — operating policy
 
-Scope: Convert equipment failures into auditable maintenance work, routing, resources, and technical references.
+Decision scope: maintenance operation requiring electrical qualification.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: shop qualification, active status, tooling, and capacity must all pass. Establish the immutable source record and effective revision, then reconcile repair-hours remaining, open hours in qualified electrical shops, and mechanical-only shops and protected electrical work from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread.

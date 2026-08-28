@@ -1,0 +1,30 @@
+# blind count and variance approval
+
+Case: CASE-057
+Document control number: SPEC-0057
+Effective revision: R2
+Superseded revision visible in archive: R8
+Subject: blind cycle count
+Primary measure: book quantity before count
+Source finished or header quantity: 94
+Effective usage per finished or header unit: 1 EA
+Unit: EA
+Eligibility definition: independently counted physical quantity
+Exclusion definition: counted units with the wrong lot or unverified ownership
+Control: the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls
+
+## Applicability
+
+Apply only to NS-000057, organization SEA, and CASE-057. A matching title, filename, supplier, or item description is insufficient without the immutable record and released revision.
+
+## Reconciliation rule
+
+Build the supported measure from the independent observed rows and subtract only rows carrying an effective exclusion reason. Do not use archive, draft, other-case, or other-plant rows in either side of the equation.
+
+## Timing and authority
+
+Internal timing comes from inventory accounting cutoff; external timing is conditional on recount completion. Protected work is not displaceable. Separate approval is required for the escalation path, and a faster date does not waive the control.
+
+## Output control
+
+The system action must preserve the source identity, effective revision, supported measure, and scoped approval. This specification deliberately does not contain a netted result, selected option, or final outcome date.

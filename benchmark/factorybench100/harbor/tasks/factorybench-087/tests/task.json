@@ -7,49 +7,219 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
-      "compliance_case": {
+      "baseline_action_date": {
+        "description": "Action date under attach_matching_certificate.",
         "type": "string"
       },
-      "contained_record": {
+      "business_need_date": {
+        "description": "Documented business or control date that the decision must protect.",
         "type": "string"
       },
-      "evidence_reference": {
+      "candidate_record_count": {
+        "description": "candidate certificates",
+        "type": "integer"
+      },
+      "controlled_action_date": {
+        "description": "Action date under attach_latest_certificate_name.",
+        "type": "string"
+      },
+      "decision_timing_status": {
+        "description": "Use ON_TIME when the selected outcome is on or before the control date; otherwise use LATE.",
+        "enum": [
+          "ON_TIME",
+          "LATE"
+        ],
+        "type": "string"
+      },
+      "effective_revision": {
+        "description": "Effective approved revision after rejecting drafts and superseded records.",
+        "type": "string"
+      },
+      "escalated_action_date": {
+        "description": "Action date under release_without_certificate.",
+        "type": "string"
+      },
+      "escalation_approval_required": {
+        "description": "Use 1 because the third option is outside current authority; otherwise use 0.",
+        "type": "integer"
+      },
+      "excluded_record_count": {
+        "description": "expired, unsigned, wrong-lot, or similar-item certificates",
+        "type": "integer"
+      },
+      "immutable_match_key": {
+        "description": "Pipe-delimited source_or_target_record|effective_revision|case_reference used to correlate source and target without name matching.",
+        "type": "string"
+      },
+      "matching_record_count": {
+        "description": "certificate matching supplier, lot, item, asset repair, revision, and signature",
+        "type": "integer"
+      },
+      "outcome_vs_control_days": {
+        "description": "Selected outcome date minus the independently documented business/control date; positive means late.",
+        "type": "integer"
+      },
+      "recommended_incremental_cost_usd": {
+        "description": "Documented incremental spend or avoidable exposure of the selected option in USD; zero when spend is not a decision driver.",
+        "type": "integer"
+      },
+      "recommended_option": {
+        "description": "Best authorized option identifier after comparing attach_matching_certificate, attach_latest_certificate_name, release_without_certificate.",
+        "enum": [
+          "attach_matching_certificate",
+          "attach_latest_certificate_name",
+          "release_without_certificate"
+        ],
+        "type": "string"
+      },
+      "recommended_outcome_date": {
+        "description": "Date produced by the selected option after applying all source constraints.",
+        "type": "string"
+      },
+      "source_or_target_record": {
+        "description": "Immutable source or target record identifier in the effectivity or traceability decision.",
         "type": "string"
       }
     },
     "required": [
-      "compliance_case",
-      "contained_record",
-      "evidence_reference"
+      "baseline_action_date",
+      "business_need_date",
+      "candidate_record_count",
+      "controlled_action_date",
+      "decision_timing_status",
+      "effective_revision",
+      "escalated_action_date",
+      "escalation_approval_required",
+      "excluded_record_count",
+      "immutable_match_key",
+      "matching_record_count",
+      "outcome_vs_control_days",
+      "recommended_incremental_cost_usd",
+      "recommended_option",
+      "recommended_outcome_date",
+      "source_or_target_record"
     ],
     "type": "object"
   },
   "expected": {
     "answer": {
-      "compliance_case": "CASE-0087",
-      "contained_record": "NS-0087",
-      "evidence_reference": "REF-0087"
+      "baseline_action_date": "2026-01-13",
+      "business_need_date": "2026-01-15",
+      "candidate_record_count": 3,
+      "controlled_action_date": "2026-01-12",
+      "decision_timing_status": "ON_TIME",
+      "effective_revision": "R4",
+      "escalated_action_date": "2026-01-18",
+      "escalation_approval_required": 1,
+      "excluded_record_count": 2,
+      "immutable_match_key": "NS-000087|R4|CASE-087",
+      "matching_record_count": 1,
+      "outcome_vs_control_days": -2,
+      "recommended_incremental_cost_usd": 0,
+      "recommended_option": "attach_matching_certificate",
+      "recommended_outcome_date": "2026-01-13",
+      "source_or_target_record": "NS-000087"
     },
+    "answer_checks": [
+      {
+        "description": "Reported recommended option as 'attach_matching_certificate', tied to NS-000087, revision R4, and the selected attach_matching_certificate outcome.",
+        "field": "recommended_option",
+        "id": "answer_recommended_option",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported recommended outcome date as '2026-01-13', tied to NS-000087, revision R4, and the selected attach_matching_certificate outcome.",
+        "field": "recommended_outcome_date",
+        "id": "answer_recommended_outcome_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported source or target record as 'NS-000087', tied to NS-000087, revision R4, and the selected attach_matching_certificate outcome.",
+        "field": "source_or_target_record",
+        "id": "answer_source_or_target_record",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported immutable match key as 'NS-000087|R4|CASE-087', tied to NS-000087, revision R4, and the selected attach_matching_certificate outcome.",
+        "field": "immutable_match_key",
+        "id": "answer_immutable_match_key",
+        "weight": 1.0
+      },
+      {
+        "description": "Reported decision timing status as 'ON_TIME', tied to NS-000087, revision R4, and the selected attach_matching_certificate outcome.",
+        "field": "decision_timing_status",
+        "id": "answer_decision_timing_status",
+        "weight": 1.0
+      }
+    ],
     "assertions": [
       {
-        "description": "oracle_fusion.maintenance_documents.create produced the task-scoped, source-audited state transition.",
+        "description": "Required immutable record NS-000087 to reach business outcome 'Certificate attached' through oracle_fusion.maintenance_documents.create with exact provider-critical values WorkOrderId=100087, requestBody.DocumentType='URL'. Human-authored names, descriptions, notes, and reasons are accepted when they preserve the task-scoped business meaning. The audited transition binds selected option attach_matching_certificate, revision R4, approval AP-0087, and constraint immutable certificate identity and applicability to the repair material; expired, unsigned, wrong-lot, or similar-item certificates = 2 FILES; uncovered or unsupported scope = 2.0 FILES; no other provider record satisfies this state criterion.",
         "id": "mutation_01",
+        "payload_allowed_argument_paths": [
+          "WorkOrderId",
+          "requestBody.Description",
+          "requestBody.DocumentName",
+          "requestBody.DocumentNumber",
+          "requestBody.DocumentType"
+        ],
+        "payload_contains": {
+          "arguments": {
+            "WorkOrderId": 100087,
+            "requestBody": {
+              "DocumentType": "URL"
+            }
+          },
+          "tool": "oracle_fusion.maintenance_documents.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-087",
+            "NS-000087"
+          ],
+          [
+            "attach_matching_certificate",
+            "2026-01-13",
+            "R4",
+            "AP-0087"
+          ]
+        ],
         "table": "resource_state",
         "values": {
-          "payload_json": "{\"arguments\":{\"WorkOrderId\":100087,\"requestBody\":{\"Description\":\"Verify certificate issuer, lot, and asset applicability before creating the maintenance document reference.\",\"DocumentName\":\"CASE-087-technical-evidence\",\"DocumentNumber\":\"DOC-0087\",\"DocumentType\":\"URL\"}},\"case\":\"CASE-087\",\"outcome\":\"Verify certificate issuer, lot, and asset applicability before creating the maintenance document reference.\",\"tool\":\"oracle_fusion.maintenance_documents.create\"}",
           "resource_type": "oracle_fusion.maintenance_documents",
           "revision": 1,
           "status": "Certificate attached",
           "system": "oracle_fusion"
         },
+        "weight": 3.0,
         "where": {
           "resource_id": "factorybench-087-mutation-01",
           "task_id": "factorybench-087"
         }
       },
       {
-        "description": "gmail.drafts.create produced the task-scoped, source-audited state transition.",
+        "description": "Created\u2014but did not send\u2014the requested CASE-087 decision draft with completion, constraint, alternatives, and the Oracle business reference.",
         "id": "mutation_02",
+        "payload_contains": {
+          "arguments": {
+            "message": {
+              "threadId": "thread-087"
+            },
+            "userId": "me"
+          },
+          "tool": "gmail.drafts.create"
+        },
+        "payload_text_any_of": [
+          [
+            "CASE-087",
+            "NS-000087",
+            "NS-COMP-087"
+          ]
+        ],
+        "payload_text_contains": [
+          "2026-01-13",
+          "attach_matching_certificate"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "gmail.drafts",
@@ -57,14 +227,26 @@
           "status": "Recorded",
           "system": "gmail"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-087-mutation-02",
           "task_id": "factorybench-087"
         }
       },
       {
-        "description": "google_sheets.spreadsheets.values.update produced the task-scoped, source-audited state transition.",
+        "description": "Wrote attach_matching_certificate, completion 2026-01-13, and the binding constraint into the existing task-scoped control cell without altering another row.",
         "id": "mutation_03",
+        "payload_contains": {
+          "arguments": {
+            "range": "Control!H9",
+            "spreadsheetId": "sheet-087"
+          },
+          "tool": "google_sheets.spreadsheets.values.update"
+        },
+        "payload_text_contains": [
+          "2026-01-13",
+          "attach_matching_certificate"
+        ],
         "table": "resource_state",
         "values": {
           "resource_type": "google_sheets.spreadsheets.values",
@@ -72,17 +254,1315 @@
           "status": "Recorded",
           "system": "google_sheets"
         },
+        "weight": 1.5,
         "where": {
           "resource_id": "factorybench-087-mutation-03",
           "task_id": "factorybench-087"
         }
       }
+    ],
+    "calculations": [
+      {
+        "description": "Preserved 2026-01-15 as the documented date for certificate of conformance; did not infer urgency from the title.",
+        "field": "business_need_date",
+        "id": "identify_business_date",
+        "weight": 1.0
+      },
+      {
+        "description": "Enumerated 3 candidates for candidate certificates.",
+        "field": "candidate_record_count",
+        "id": "enumerate_candidate_records",
+        "weight": 1.5
+      },
+      {
+        "description": "Correlated immutable identifiers and retained 1 record(s) for certificate matching supplier, lot, item, asset repair, revision, and signature.",
+        "field": "matching_record_count",
+        "id": "correlate_matching_records",
+        "weight": 2.0
+      },
+      {
+        "description": "Excluded 2 candidate(s) for expired, unsigned, wrong-lot, or similar-item certificates.",
+        "field": "excluded_record_count",
+        "id": "exclude_nonmatching_records",
+        "weight": 1.5
+      },
+      {
+        "description": "Applied released revision R4; did not select a draft or similarly named record.",
+        "field": "effective_revision",
+        "id": "apply_effective_revision",
+        "weight": 1.5
+      },
+      {
+        "description": "Used composite match key NS-000087|R4|CASE-087 to correlate the source and target.",
+        "field": "immutable_match_key",
+        "id": "construct_immutable_match",
+        "weight": 2.0
+      },
+      {
+        "description": "Derived 2026-01-13 for attach_matching_certificate.",
+        "field": "baseline_action_date",
+        "id": "compare_identity_option_one",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-12 for attach_latest_certificate_name.",
+        "field": "controlled_action_date",
+        "id": "compare_identity_option_two",
+        "weight": 1.0
+      },
+      {
+        "description": "Derived 2026-01-18 for release_without_certificate and rejected any out-of-scope shortcut.",
+        "field": "escalated_action_date",
+        "id": "compare_identity_option_three",
+        "weight": 1.0
+      },
+      {
+        "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for attach_matching_certificate; did not invent a premium where spend is not a decision driver.",
+        "field": "recommended_incremental_cost_usd",
+        "id": "calculate_selected_cost",
+        "weight": 1.0
+      },
+      {
+        "description": "Recognized that release_without_certificate remains outside current authority and requires an additional approval.",
+        "field": "escalation_approval_required",
+        "id": "apply_escalation_authority",
+        "weight": 1.0
+      },
+      {
+        "description": "Compared the timing, economic impact, control status, and consequence of attach_matching_certificate, attach_latest_certificate_name, and release_without_certificate; selected attach_matching_certificate because it alone gives the best currently authorized result under immutable certificate identity and applicability to the repair material.",
+        "field": "recommended_option",
+        "id": "choose_task_specific_option",
+        "weight": 2.0
+      },
+      {
+        "description": "Calculated 2026-01-13 as the supported outcome date for attach_matching_certificate.",
+        "field": "recommended_outcome_date",
+        "id": "calculate_recommended_outcome",
+        "weight": 2.0
+      },
+      {
+        "description": "Compared 2026-01-13 with the independent control date 2026-01-15 and calculated a signed variance of -2 day(s).",
+        "field": "outcome_vs_control_days",
+        "id": "calculate_outcome_variance",
+        "weight": 1.5
+      },
+      {
+        "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+        "field": "decision_timing_status",
+        "id": "state_honest_timing_status",
+        "weight": 1.0
+      }
+    ],
+    "investigations": [
+      {
+        "any_of": [
+          {
+            "arguments": {},
+            "expected_result_contains": {
+              "reference_records": {
+                "case_reference": "CASE-087"
+              }
+            },
+            "match": "result_contains",
+            "tool": "factorybench.context.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Established the isolated CASE-087 scope, immutable handles, mounted systems, and evidence index before investigating NS-000087.",
+        "id": "investigation_01",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-087",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-087",
+              "threadId": "thread-087"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-087",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-087"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-09 readiness input for attach_latest_certificate_name, then separately derived its 2026-01-12 operating outcome under immutable certificate identity and applicability to the repair material instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_02",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+              "pageSize": 50,
+              "q": "name contains 'CASE-087' and trashed = false"
+            },
+            "expected_result_contains": {
+              "files": [
+                {
+                  "id": "drive-087"
+                },
+                {
+                  "id": "drive-approval-087"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Enumerated the case-scoped Drive records for CASE-087 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+        "id": "investigation_03",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-087-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-087-12",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-087-12"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-12"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the effective control specification and Applied revision R4 and established 3 FILES for candidate certificates, with control date 2026-01-15.",
+        "id": "investigation_04",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-087-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-087-03",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-087-03"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-03"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-09 readiness input for attach_latest_certificate_name, then separately derived its 2026-01-12 operating outcome under immutable certificate identity and applicability to the repair material instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_05",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-087-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-087-10",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-087-10"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-10"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the independent reconciliation rows and Reconciled 3 observed less 2 excluded to 1 supported FILES for certificate matching supplier, lot, item, asset repair, revision, and signature.",
+        "id": "investigation_06",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-087-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-087-04",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-087-04"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-04"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped source-input workbook and Applied revision R4 and established 3 FILES for candidate certificates, with control date 2026-01-15.",
+        "id": "investigation_07",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-087-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-087-09",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-087-09"
+            },
+            "expected_result_contains": {
+              "id": "drive-087-09"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000087 at R4.",
+        "id": "investigation_08",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-approval-087"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-087"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-approval-087",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-087"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-approval-087"
+            },
+            "expected_result_contains": {
+              "id": "drive-approval-087"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Opened the task-scoped signed approval record and Applied AP-0087 only to attach_matching_certificate, NS-000087, and the supported 1 FILES; kept broader scope and release_without_certificate outside current authority.",
+        "id": "investigation_09",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "fileId": "drive-087"
+            },
+            "expected_result_contains": {
+              "id": "drive-087"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.download"
+          },
+          {
+            "arguments": {
+              "fileId": "drive-087",
+              "mimeType": "text/plain"
+            },
+            "expected_result_contains": {
+              "id": "drive-087"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.export"
+          },
+          {
+            "arguments": {
+              "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+              "fileId": "drive-087"
+            },
+            "expected_result_contains": {
+              "id": "drive-087"
+            },
+            "match": "result_contains",
+            "tool": "google_drive.files.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Applied revision R4 and established 3 FILES for candidate certificates, with control date 2026-01-15.",
+        "id": "investigation_10",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "ranges": [
+                "Control!A1:I50",
+                "Approvals!A1:G20"
+              ],
+              "spreadsheetId": "sheet-087",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-087"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.batchGet"
+          },
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!A1:I50",
+              "spreadsheetId": "sheet-087",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "values": [
+                [
+                  "CASE-087"
+                ]
+              ]
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Reconciled 3 observed less 2 excluded to 1 supported FILES for certificate matching supplier, lot, item, asset repair, revision, and signature. Applied repair release window to derive the three option outcomes without using excluded or protected scope.",
+        "id": "investigation_11",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-FINANCE",
+              "inclusive": true,
+              "limit": 100,
+              "oldest": "1768000000.000000"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000087.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_history"
+          },
+          {
+            "arguments": {
+              "channel": "C-FINANCE",
+              "limit": 100,
+              "ts": "1768000087.000100"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "ts": "1768000087.000100"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0087 only to attach_matching_certificate, NS-000087, and the supported 1 FILES; kept broader scope and release_without_certificate outside current authority.",
+        "id": "investigation_12",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-087\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-087"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-087 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_13",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100087,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 800087
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_documents.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle maintenance documents record: Located NS-000087 for certificate of conformance using immutable IDs and preserved effective revision R4.",
+        "id": "investigation_14",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "MaintenanceProgramId": 500087
+            },
+            "expected_result_contains": {
+              "MaintenanceProgramId": 500087
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_programs.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "MaintenanceProgramCode='PM-0087'"
+            },
+            "expected_result_contains": {
+              "MaintenanceProgramId": 500087
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_programs.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle maintenance programs record: Located NS-000087 for certificate of conformance using immutable IDs and preserved effective revision R4.",
+        "id": "investigation_15",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100087
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100087
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.get"
+          },
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "WorkOrderNumber='MWO-0087'"
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100087
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_work_orders.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle maintenance work orders record: Located NS-000087 for certificate of conformance using immutable IDs and preserved effective revision R4.",
+        "id": "investigation_16",
+        "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "limit": 50,
+              "onlyData": true,
+              "q": "DocumentNumber='RCV-0087'"
+            },
+            "expected_result_contains": {
+              "InspectionId": 1100087
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.quality_inspection_results.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Correlated the Oracle quality inspection results record: Reconciled 3 observed less 2 excluded to 1 supported FILES for certificate matching supplier, lot, item, asset repair, revision, and signature.",
+        "id": "investigation_17",
+        "weight": 1.0
+      }
+    ],
+    "post_write_verifications": [
+      {
+        "after_tool": "oracle_fusion.maintenance_documents.create",
+        "any_of": [
+          {
+            "arguments": {
+              "WorkOrderId": 100087,
+              "limit": 50,
+              "onlyData": true
+            },
+            "expected_result_contains": {
+              "WorkOrderId": 100087
+            },
+            "match": "result_contains",
+            "tool": "oracle_fusion.maintenance_documents.list"
+          }
+        ],
+        "description": "Read NS-000087 back through the documented Oracle maintenance documents.list operation after the mutation and confirmed the resource-specific changed fields ['DocumentType', 'LastUpdateDate'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+        "expected_result_contains": {
+          "DocumentType": "URL",
+          "LastUpdateDate": "2026-01-13T16:00:00-08:00"
+        },
+        "id": "verify_primary_oracle_state",
+        "materializes_new_record": true,
+        "target_identity": {
+          "WorkOrderId": 100087
+        },
+        "weight": 2.0
+      }
     ]
   },
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.maintenance_documents.create",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100087,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100087
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_documents.list"
+        }
+      ],
+      "description": "Read NS-000087 back through the documented Oracle maintenance documents.list operation after the mutation and confirmed the resource-specific changed fields ['DocumentType', 'LastUpdateDate'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "DocumentType": "URL",
+        "LastUpdateDate": "2026-01-13T16:00:00-08:00"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": true,
+      "target_identity": {
+        "WorkOrderId": 100087
+      },
+      "weight": 2.0
+    }
+  ],
+  "required_investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-087"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-087 scope, immutable handles, mounted systems, and evidence index before investigating NS-000087.",
+      "id": "investigation_01",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-087",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-087",
+            "threadId": "thread-087"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-087",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-087"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-09 readiness input for attach_latest_certificate_name, then separately derived its 2026-01-12 operating outcome under immutable certificate identity and applicability to the repair material instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_02",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-087' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-087"
+              },
+              {
+                "id": "drive-approval-087"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-087 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_03",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-087-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-087-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-087-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R4 and established 3 FILES for candidate certificates, with control date 2026-01-15.",
+      "id": "investigation_04",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-087-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-087-03",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-087-03"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-03"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped external source document and Used the independently confirmed 2026-01-09 readiness input for attach_latest_certificate_name, then separately derived its 2026-01-12 operating outcome under immutable certificate identity and applicability to the repair material instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_05",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-087-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-087-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-087-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 3 observed less 2 excluded to 1 supported FILES for certificate matching supplier, lot, item, asset repair, revision, and signature.",
+      "id": "investigation_06",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-087-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-087-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-087-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R4 and established 3 FILES for candidate certificates, with control date 2026-01-15.",
+      "id": "investigation_07",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-087-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-087-09",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-087-09"
+          },
+          "expected_result_contains": {
+            "id": "drive-087-09"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the Oracle starting-record and setup crosswalk, matched the independently supported option to its provider identifiers, and preserved NS-000087 at R4.",
+      "id": "investigation_08",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-087"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-087"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-087",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-087"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-087"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-087"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0087 only to attach_matching_certificate, NS-000087, and the supported 1 FILES; kept broader scope and release_without_certificate outside current authority.",
+      "id": "investigation_09",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-087"
+          },
+          "expected_result_contains": {
+            "id": "drive-087"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-087",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-087"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-087"
+          },
+          "expected_result_contains": {
+            "id": "drive-087"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Applied revision R4 and established 3 FILES for candidate certificates, with control date 2026-01-15.",
+      "id": "investigation_10",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-087",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-087"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-087",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-087"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 3 observed less 2 excluded to 1 supported FILES for certificate matching supplier, lot, item, asset repair, revision, and signature. Applied repair release window to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_11",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000087.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000087.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000087.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0087 only to attach_matching_certificate, NS-000087, and the supported 1 FILES; kept broader scope and release_without_certificate outside current authority.",
+      "id": "investigation_12",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-087\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-087"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-087 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_13",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100087,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 800087
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_documents.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance documents record: Located NS-000087 for certificate of conformance using immutable IDs and preserved effective revision R4.",
+      "id": "investigation_14",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "MaintenanceProgramId": 500087
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500087
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "MaintenanceProgramCode='PM-0087'"
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500087
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance programs record: Located NS-000087 for certificate of conformance using immutable IDs and preserved effective revision R4.",
+      "id": "investigation_15",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100087
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100087
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='MWO-0087'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100087
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance work orders record: Located NS-000087 for certificate of conformance using immutable IDs and preserved effective revision R4.",
+      "id": "investigation_16",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "DocumentNumber='RCV-0087'"
+          },
+          "expected_result_contains": {
+            "InspectionId": 1100087
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.quality_inspection_results.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle quality inspection results record: Reconciled 3 observed less 2 excluded to 1 supported FILES for certificate matching supplier, lot, item, asset repair, revision, and signature.",
+      "id": "investigation_17",
+      "weight": 1.0
+    }
+  ],
   "required_read_calls": [
     {
       "arguments": {},
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "reference_records": {
+          "case_reference": "CASE-087"
+        }
+      },
+      "match": "result_contains",
       "tool": "factorybench.context.get"
     },
     {
@@ -91,25 +1571,141 @@
         "id": "msg-087",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "id": "msg-087",
+        "threadId": "thread-087"
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.get"
     },
     {
       "arguments": {
-        "id": "att-087",
-        "messageId": "msg-087",
-        "userId": "me"
+        "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+        "pageSize": 50,
+        "q": "name contains 'CASE-087' and trashed = false"
       },
-      "match": "successful_tool_call",
-      "tool": "gmail.messages.attachments.get"
+      "expected_result_contains": {
+        "files": [
+          {
+            "id": "drive-087"
+          },
+          {
+            "id": "drive-approval-087"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.list"
     },
     {
       "arguments": {
-        "fileId": "drive-approval-087",
-        "pageSize": 20
+        "fileId": "drive-087-12",
+        "mimeType": "text/plain"
       },
-      "match": "successful_tool_call",
-      "tool": "google_drive.approvals.list"
+      "expected_result_contains": {
+        "id": "drive-087-12"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.export"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-087-03"
+      },
+      "expected_result_contains": {
+        "id": "drive-087-03"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-087-10"
+      },
+      "expected_result_contains": {
+        "id": "drive-087-10"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-087-04"
+      },
+      "expected_result_contains": {
+        "id": "drive-087-04"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-087-09"
+      },
+      "expected_result_contains": {
+        "id": "drive-087-09"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "alt": "media",
+        "fileId": "drive-approval-087"
+      },
+      "expected_result_contains": {
+        "id": "drive-approval-087"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.get"
+    },
+    {
+      "arguments": {
+        "fileId": "drive-087"
+      },
+      "expected_result_contains": {
+        "id": "drive-087"
+      },
+      "match": "result_contains",
+      "tool": "google_drive.files.download"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "ranges": [
+          "Control!A1:I50",
+          "Approvals!A1:G20"
+        ],
+        "spreadsheetId": "sheet-087",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "expected_result_contains": {
+        "values": [
+          [
+            "CASE-087"
+          ]
+        ]
+      },
+      "match": "result_contains",
+      "tool": "google_sheets.spreadsheets.values.batchGet"
+    },
+    {
+      "arguments": {
+        "channel": "C-FINANCE",
+        "limit": 100,
+        "ts": "1768000087.000100"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "ts": "1768000087.000100"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
@@ -117,34 +1713,79 @@
         "q": "\"CASE-087\"",
         "userId": "me"
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-087"
+          }
+        ]
+      },
+      "match": "result_contains",
       "tool": "gmail.messages.list"
     },
     {
       "arguments": {
+        "WorkOrderId": 100087,
         "limit": 50,
-        "onlyData": true,
-        "q": "ReferenceNumber='CASE-087'"
+        "onlyData": true
       },
-      "match": "successful_tool_call",
-      "tool": "oracle_fusion.quality_inspection_results.list"
+      "expected_result_contains": {
+        "WorkOrderId": 800087
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.maintenance_documents.list"
+    },
+    {
+      "arguments": {
+        "MaintenanceProgramId": 500087
+      },
+      "expected_result_contains": {
+        "MaintenanceProgramId": 500087
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.maintenance_programs.get"
     },
     {
       "arguments": {
         "WorkOrderId": 100087
       },
-      "match": "successful_tool_call",
+      "expected_result_contains": {
+        "WorkOrderId": 100087
+      },
+      "match": "result_contains",
       "tool": "oracle_fusion.maintenance_work_orders.get"
+    },
+    {
+      "arguments": {
+        "limit": 50,
+        "onlyData": true,
+        "q": "DocumentNumber='RCV-0087'"
+      },
+      "expected_result_contains": {
+        "InspectionId": 1100087
+      },
+      "match": "result_contains",
+      "tool": "oracle_fusion.quality_inspection_results.list"
     }
   ],
   "required_reads": [
     "factorybench.context.get",
     "gmail.messages.get",
-    "gmail.messages.attachments.get",
-    "google_drive.approvals.list",
+    "google_drive.files.list",
+    "google_drive.files.export",
+    "google_drive.files.download",
+    "google_drive.files.download",
+    "google_drive.files.get",
+    "google_drive.files.get",
+    "google_drive.files.get",
+    "google_drive.files.download",
+    "google_sheets.spreadsheets.values.batchGet",
+    "slack.conversations_replies",
     "gmail.messages.list",
-    "oracle_fusion.quality_inspection_results.list",
-    "oracle_fusion.maintenance_work_orders.get"
+    "oracle_fusion.maintenance_documents.list",
+    "oracle_fusion.maintenance_programs.get",
+    "oracle_fusion.maintenance_work_orders.get",
+    "oracle_fusion.quality_inspection_results.list"
   ],
   "task_id": "factorybench-087",
   "write_tools": [

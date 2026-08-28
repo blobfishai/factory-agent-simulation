@@ -1,5 +1,7 @@
-# Close a fully received calibration-services PO — operating control
+# Close a fully received calibration-services PO — operating policy
 
-Scope: Turn approved demand and supplier evidence into correctly controlled purchase-order actions.
+Decision scope: calibration-services PO.
 
-The operator must reconcile the authoritative ERP record with the named collaboration and document evidence. A write is permitted only after the record identity, effective revision, quantity or amount, and recorded approval agree. Preserve task, lot, serial, supplier, project, and work-order references. Communicate the resulting identifier and effective date; never infer approval from silence.
+Control rule: receipt, acceptance, invoice, and buyer approval must all be complete. Establish the immutable source record and effective revision, then reconcile ordered service value, accepted service-entry and matched invoice value, and unaccepted or unmatched value from independent records. Do not treat a header total, filename, similar name, or unapproved alternative as evidence. The final mutation must be atomic and limited to the supported record and measure.
+
+Required closeout records: mark the existing operations thread complete with the approved check reaction; and append one dated decision row to the existing audit tab; do not overwrite prior entries.
