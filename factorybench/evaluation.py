@@ -376,7 +376,7 @@ def qualify(tasks: Iterable[dict[str, Any]] | None = None) -> dict[str, Any]:
     oracle = next(result for result in results if result["policy"] == "oracle")
     mutation_omissions = evaluate_mutation_omissions(selected)
     with tempfile.TemporaryDirectory(prefix="factorybench-determinism-") as first_dir, tempfile.TemporaryDirectory(prefix="factorybench-determinism-") as second_dir:
-        sample = random.Random(100).sample(selected, min(10, len(selected)))
+        sample = random.Random(100).sample(selected, len(selected))
         first = [run_episode(task, "oracle", Path(first_dir) / f"{task['task_id']}.db") for task in sample]
         second = [run_episode(task, "oracle", Path(second_dir) / f"{task['task_id']}.db") for task in sample]
     deterministic = all(
