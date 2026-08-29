@@ -58,7 +58,7 @@ reported only as supporting evidence.
 - Incomplete-workflow control: 97.25
 - Read-only control: 34.96
 - No-control ablation: 68.71
-- Deterministic replay sample: 10/10 matched
+- Deterministic replay sample: 100/100 matched
 - Single-mutation omission checks: 300/300 detected
 
 These rows are measured controls, not claims about frontier models.
