@@ -1,0 +1,795 @@
+{
+  "answer": {
+    "baseline_resolution_date": "2026-01-13",
+    "business_need_date": "2026-01-13",
+    "controlled_item_or_record": "NS-COMP-015",
+    "controlled_resolution_date": "2026-01-14",
+    "decision_timing_status": "ON_TIME",
+    "escalated_resolution_date": "2026-01-15",
+    "escalation_approval_required": 1,
+    "excluded_quantity": 13,
+    "observed_quantity": 123,
+    "outcome_vs_control_days": 0,
+    "quantity_unit": "HR",
+    "recommended_incremental_cost_usd": 0,
+    "recommended_option": "post_supported_labor",
+    "recommended_outcome_date": "2026-01-13",
+    "source_quantity": 130,
+    "supported_quantity": 110,
+    "transaction_quantity": 110
+  },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'post_supported_labor', tied to NS-000015, revision R2, and the selected post_supported_labor outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-13', tied to NS-000015, revision R2, and the selected post_supported_labor outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported controlled item or record as 'NS-COMP-015', tied to NS-000015, revision R2, and the selected post_supported_labor outcome.",
+      "field": "controlled_item_or_record",
+      "id": "answer_controlled_item_or_record",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported transaction quantity as 110, tied to NS-000015, revision R2, and the selected post_supported_labor outcome.",
+      "field": "transaction_quantity",
+      "id": "answer_transaction_quantity",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000015, revision R2, and the selected post_supported_labor outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    }
+  ],
+  "assertions": [
+    {
+      "description": "Required immutable record NS-000015 to reach business outcome 'Resource actuals posted' through oracle_fusion.resource_transactions.create with exact provider-critical values requestBody.SourceSystemCode='FUSION_MOBILE', requestBody.ResourceTransactionDetail[0].OrganizationCode='SEA', requestBody.ResourceTransactionDetail[0].WorkOrderNumber='WO-0015', requestBody.ResourceTransactionDetail[0].WoOperationSequenceNumber=10, requestBody.ResourceTransactionDetail[0].ResourceCode='RES-015', requestBody.ResourceTransactionDetail[0].TransactionQuantity=110, requestBody.ResourceTransactionDetail[0].TransactionUnitOfMeasure='HR'. The audited transition binds selected option post_supported_labor, revision R2, approval AP-0015, and constraint employee, operation, rate, and calibration interval must reconcile; duplicate, out-of-window, or unsigned hours = 13 HR; uncovered or unsupported scope = 20.0 HR; no other provider record satisfies this state criterion.",
+      "id": "mutation_01",
+      "milestone_id": "state.primary",
+      "payload_allowed_argument_paths": [
+        "requestBody.ResourceTransactionDetail[0].OrganizationCode",
+        "requestBody.ResourceTransactionDetail[0].ResourceCode",
+        "requestBody.ResourceTransactionDetail[0].TransactionQuantity",
+        "requestBody.ResourceTransactionDetail[0].TransactionUnitOfMeasure",
+        "requestBody.ResourceTransactionDetail[0].WoOperationSequenceNumber",
+        "requestBody.ResourceTransactionDetail[0].WorkOrderNumber",
+        "requestBody.SourceSystemCode"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "requestBody": {
+            "ResourceTransactionDetail": [
+              {
+                "OrganizationCode": "SEA",
+                "ResourceCode": "RES-015",
+                "TransactionQuantity": 110,
+                "TransactionUnitOfMeasure": "HR",
+                "WoOperationSequenceNumber": 10,
+                "WorkOrderNumber": "WO-0015"
+              }
+            ],
+            "SourceSystemCode": "FUSION_MOBILE"
+          }
+        },
+        "tool": "oracle_fusion.resource_transactions.create"
+      },
+      "table": "resource_state",
+      "values": {
+        "resource_type": "oracle_fusion.resource_transactions",
+        "revision": 1,
+        "status": "Resource actuals posted",
+        "system": "oracle_fusion"
+      },
+      "weight": 3.0,
+      "where": {
+        "resource_id": "factorybench-015-mutation-01",
+        "task_id": "factorybench-015"
+      }
+    },
+    {
+      "description": "Sent shift supervisor the scoped outcome for CASE-015, including completion 2026-01-13, the binding constraint, alternatives, and the Oracle business reference.",
+      "id": "mutation_02",
+      "milestone_id": "state.collaboration",
+      "payload_contains": {
+        "arguments": {
+          "threadId": "thread-015",
+          "userId": "me"
+        },
+        "tool": "gmail.messages.send"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-015",
+          "NS-000015",
+          "NS-COMP-015"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-13",
+        "post_supported_labor"
+      ],
+      "table": "resource_state",
+      "values": {
+        "resource_type": "gmail.messages",
+        "revision": 1,
+        "status": "Recorded",
+        "system": "gmail"
+      },
+      "weight": 1.5,
+      "where": {
+        "resource_id": "factorybench-015-mutation-02",
+        "task_id": "factorybench-015"
+      }
+    },
+    {
+      "description": "Added the Oracle result to the existing case file as a comment containing post_supported_labor, completion 2026-01-13, and the binding constraint.",
+      "id": "mutation_03",
+      "milestone_id": "state.collaboration",
+      "payload_contains": {
+        "arguments": {
+          "fileId": "drive-015"
+        },
+        "tool": "google_drive.comments.create"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-015",
+          "NS-000015",
+          "NS-COMP-015"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-13",
+        "post_supported_labor"
+      ],
+      "table": "resource_state",
+      "values": {
+        "resource_type": "google_drive.comments",
+        "revision": 1,
+        "status": "Recorded",
+        "system": "google_drive"
+      },
+      "weight": 1.5,
+      "where": {
+        "resource_id": "factorybench-015-mutation-03",
+        "task_id": "factorybench-015"
+      }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-13 as the documented date for test-bench resource actual; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    },
+    {
+      "description": "Established 130 HR for signed test-bench hours presented for posting.",
+      "field": "source_quantity",
+      "id": "establish_source_quantity",
+      "milestone_id": "analysis.inputs",
+      "weight": 1.5
+    },
+    {
+      "description": "Correlated the independent source records to 123 observed HR.",
+      "field": "observed_quantity",
+      "id": "reconcile_observed_quantity",
+      "milestone_id": "analysis.inputs",
+      "weight": 1.5
+    },
+    {
+      "description": "Removed 13 HR for duplicate, out-of-window, or unsigned hours.",
+      "field": "excluded_quantity",
+      "id": "identify_excluded_quantity",
+      "milestone_id": "analysis.inputs",
+      "weight": 1.5
+    },
+    {
+      "description": "Calculated 123 observed \u2212 13 excluded = 110 supported HR.",
+      "field": "supported_quantity",
+      "id": "calculate_supported_quantity",
+      "milestone_id": "analysis.inputs",
+      "weight": 2.0
+    },
+    {
+      "description": "Bound the Oracle transaction to exactly 110 HR, the measure required by the chosen disposition; did not substitute the header or another business quantity.",
+      "field": "transaction_quantity",
+      "id": "bound_transaction_quantity",
+      "milestone_id": "analysis.inputs",
+      "weight": 2.0
+    },
+    {
+      "description": "Kept the receipt, issue, transfer, inspection, or completion quantity in HR.",
+      "field": "quantity_unit",
+      "id": "preserve_transaction_unit",
+      "milestone_id": "analysis.inputs",
+      "weight": 0.5
+    },
+    {
+      "description": "Derived 2026-01-13 for post_supported_labor.",
+      "field": "baseline_resolution_date",
+      "id": "compare_quantity_option_one",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 2026-01-14 for hold_for_timecard_correction.",
+      "field": "controlled_resolution_date",
+      "id": "compare_quantity_option_two",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 2026-01-15 for post_supervisor_estimate and recognized its control impact.",
+      "field": "escalated_resolution_date",
+      "id": "compare_quantity_option_three",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    },
+    {
+      "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for post_supported_labor; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "milestone_id": "decision.options",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that post_supervisor_estimate remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "milestone_id": "decision.options",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of post_supported_labor, hold_for_timecard_correction, and post_supervisor_estimate; selected post_supported_labor because it alone gives the best currently authorized result under employee, operation, rate, and calibration interval must reconcile.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "milestone_id": "decision.options",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-13 as the supported outcome date for post_supported_labor.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "milestone_id": "analysis.timeline",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-13 with the independent control date 2026-01-13 and calculated a signed variance of 0 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-015"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-015 scope, immutable handles, mounted systems, and evidence index before investigating NS-000015.",
+      "id": "investigation_01",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000015.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000015.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000015.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0015 only to post_supported_labor, NS-000015, and the supported 110 HR; kept broader scope and post_supervisor_estimate outside current authority.",
+      "id": "investigation_02",
+      "milestone_id": "investigation.authority",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-015"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-015"
+              }
+            ],
+            "spreadsheetId": "sheet-015"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_03",
+      "milestone_id": "investigation.constraints",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-015' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-015"
+              },
+              {
+                "id": "drive-approval-015"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-015 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_04",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-015-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-015-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-015-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied open resource-transaction period to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_05",
+      "milestone_id": "investigation.constraints",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-015-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-015-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-015-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R2 and established 130 HR for signed test-bench hours presented for posting, with control date 2026-01-13.",
+      "id": "investigation_06",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-015-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-015-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-015-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R2 and established 130 HR for signed test-bench hours presented for posting, with control date 2026-01-13.",
+      "id": "investigation_07",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-015-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-015-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-015-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-015-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 123 observed less 13 excluded to 110 supported HR for hours inside the calibration window and correct operation.",
+      "id": "investigation_08",
+      "milestone_id": "investigation.constraints",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-015"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-015"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-015",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-015"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-015"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-015"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0015 only to post_supported_labor, NS-000015, and the supported 110 HR; kept broader scope and post_supervisor_estimate outside current authority.",
+      "id": "investigation_09",
+      "milestone_id": "investigation.authority",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-015\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-015"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-015 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_10",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-015",
+            "messageId": "msg-015-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "Q0FTQ0FERSBJTkRVU1RSSUFMIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogdGltZWNhcmQtcmF0ZS1hbmQtY2FsaWJyYXRpb24tcmVjb25jaWxpYXRpb24tMDAxNQpDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMTUKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogdGltZWNhcmQsIHJhdGUsIGFuZCBjYWxpYnJhdGlvbiByZWNvbmNpbGlhdGlvbgpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDE1CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFIyCk1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMjAgSFIKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogaG9sZF9mb3JfdGltZWNhcmRfY29ycmVjdGlvbgpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMApFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTEKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTQKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogY29ycmVjdGVkIHRpbWVjYXJkIGF2YWlsYWJpbGl0eQpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBkdXBsaWNhdGUsIG91dC1vZi13aW5kb3csIG9yIHVuc2lnbmVkIGhvdXJzCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IGVtcGxveWVlLCBvcGVyYXRpb24sIHJhdGUsIGFuZCBjYWxpYnJhdGlvbiBpbnRlcnZhbCBtdXN0IHJlY29uY2lsZQpOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wMTYgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBDYXNjYWRlIEluZHVzdHJpYWwgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwMTUKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+            "size": 1553
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-01-11 readiness input for hold_for_timecard_correction, then separately derived its 2026-01-14 operating outcome under employee, operation, rate, and calibration interval must reconcile instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_11",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100015,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100015
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_resources.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order resources record: Applied open resource-transaction period to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_12",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "MaintenanceProgramId": 500015
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500015
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "MaintenanceProgramCode='PM-0015'"
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500015
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance programs record: Located NS-000015 for test-bench resource actual using immutable IDs and preserved effective revision R2.",
+      "id": "investigation_13",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100015
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100015
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='WO-0015'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100015
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work orders record: Located NS-000015 for test-bench resource actual using immutable IDs and preserved effective revision R2.",
+      "id": "investigation_14",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100015,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100015
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order operations record: Applied open resource-transaction period to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_15",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.resource_transactions.create",
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100015,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100015
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_resources.list"
+        }
+      ],
+      "description": "Read NS-000015 back through the documented Oracle work order resources.list operation after the mutation and confirmed the resource-specific changed fields ['ChargedQuantity', 'LastUpdateDate', 'ResourceCode'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "ChargedQuantity": 110,
+        "LastUpdateDate": "2026-01-13T16:00:00-08:00",
+        "ResourceCode": "RES-015"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "milestone_id": "verification.readback",
+      "target_identity": {
+        "WorkOrderId": 100015
+      },
+      "weight": 2.0
+    }
+  ]
+}

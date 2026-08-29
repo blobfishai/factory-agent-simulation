@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import argparse
 import json
-import random
 import tempfile
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -21,7 +21,19 @@ from .world import (
     payload_assertion_mismatches,
 )
 
-POLICIES = ("oracle", "incomplete_workflow", "read_only", "no_control")
+NEGATIVE_POLICIES = (
+    "noop",
+    "shortcut",
+    "state_only",
+    "incomplete_read",
+    "write_before_read",
+    "missing_readback",
+    "unauthorized_write",
+    "wrong_value",
+    "wrong_decision",
+    "wrong_evidence",
+)
+POLICIES = ("oracle", *NEGATIVE_POLICIES)
 
 
 def _query_rows(world: FactoryWorld, assertion: dict[str, Any]) -> list[dict[str, Any]]:
@@ -46,6 +58,84 @@ def _values_match(actual: dict[str, Any], expected: dict[str, Any]) -> tuple[boo
         if not matched:
             mismatches[field] = {"expected": expected_value, "actual": actual_value}
     return not mismatches, mismatches
+
+
+def _aggregate_semantic_checks(
+    task: dict[str, Any],
+    atomic_checks: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Roll deterministic evidence checks into stable, human-readable milestones."""
+
+    milestones = task.get("rubric_milestones", [])
+    if not milestones:
+        return [
+            {
+                **check,
+                "earned_weight": float(check["weight"]) if check["passed"] else 0.0,
+            }
+            for check in atomic_checks
+        ]
+
+    by_id: dict[str, dict[str, Any]] = {}
+    for check in atomic_checks:
+        check_id = str(check["id"])
+        if check_id in by_id:
+            raise ValueError(f"duplicate atomic check id: {check_id}")
+        by_id[check_id] = check
+
+    assigned: set[str] = set()
+    aggregated: list[dict[str, Any]] = []
+    for milestone in milestones:
+        criterion_ids = [str(value) for value in milestone["criterion_ids"]]
+        if not criterion_ids:
+            raise ValueError(f"semantic milestone {milestone['id']} has no evidence criteria")
+        duplicates = sorted({value for value in criterion_ids if criterion_ids.count(value) > 1})
+        if duplicates:
+            raise ValueError(
+                f"semantic milestone {milestone['id']} repeats criteria: {duplicates}"
+            )
+        reused = sorted(set(criterion_ids) & assigned)
+        if reused:
+            raise ValueError(f"atomic checks assigned to multiple milestones: {reused}")
+        missing = sorted(set(criterion_ids) - set(by_id))
+        if missing:
+            raise ValueError(
+                f"semantic milestone {milestone['id']} references missing checks: {missing}"
+            )
+        assigned.update(criterion_ids)
+        subchecks = [by_id[criterion_id] for criterion_id in criterion_ids]
+        atomic_weight = sum(float(check["weight"]) for check in subchecks)
+        expected_atomic_weight = float(milestone.get("atomic_weight", atomic_weight))
+        if abs(atomic_weight - expected_atomic_weight) > 1e-6:
+            raise ValueError(
+                f"semantic milestone {milestone['id']} atomic weight changed: "
+                f"expected {expected_atomic_weight}, observed {atomic_weight}"
+            )
+        passed_atomic_weight = sum(
+            float(check["weight"]) for check in subchecks if check["passed"]
+        )
+        milestone_weight = float(milestone["weight"])
+        earned_weight = milestone_weight * passed_atomic_weight / atomic_weight
+        aggregated.append(
+            {
+                "id": milestone["id"],
+                "category": milestone["category"],
+                "description": milestone["description"],
+                "weight": milestone_weight,
+                "earned_weight": round(earned_weight, 6),
+                "passed": all(check["passed"] for check in subchecks),
+                "evidence": {
+                    "passed_criteria": sum(check["passed"] for check in subchecks),
+                    "total_criteria": len(subchecks),
+                    "subchecks": subchecks,
+                },
+            }
+        )
+
+    unassigned = sorted(set(by_id) - assigned)
+    if unassigned:
+        raise ValueError(f"atomic checks omitted from semantic rubric: {unassigned}")
+    return aggregated
 
 
 def verify_episode(task: dict[str, Any], world: FactoryWorld) -> dict[str, Any]:
@@ -223,10 +313,12 @@ def verify_episode(task: dict[str, Any], world: FactoryWorld) -> dict[str, Any]:
         }
     )
 
+    atomic_checks = checks
+    checks = _aggregate_semantic_checks(task, atomic_checks)
     passed = sum(1 for check in checks if check["passed"])
     total = len(checks)
-    passed_weight = sum(check["weight"] for check in checks if check["passed"])
-    total_weight = sum(check["weight"] for check in checks)
+    passed_weight = sum(float(check["earned_weight"]) for check in checks)
+    total_weight = sum(float(check["weight"]) for check in checks)
     score = round(passed_weight / total_weight * 100, 2)
     return {
         "task_id": task["task_id"],
@@ -237,6 +329,8 @@ def verify_episode(task: dict[str, Any], world: FactoryWorld) -> dict[str, Any]:
         "passed_weight": round(passed_weight, 2),
         "total_weight": round(total_weight, 2),
         "strict_pass": passed == total,
+        "passed_atomic_checks": sum(check["passed"] for check in atomic_checks),
+        "total_atomic_checks": len(atomic_checks),
         "checks": checks,
     }
 
@@ -256,20 +350,216 @@ def _state_diff(before: dict[str, list[dict[str, Any]]], after: dict[str, list[d
     return changed
 
 
+def _drive_file_id(task: dict[str, Any], index: int) -> str:
+    ordinal = int(task["task_id"].rsplit("-", 1)[1])
+    path = task["assets"][index - 1]["path"]
+    if path == "business-request-and-control.md":
+        return f"drive-{ordinal:03d}"
+    if path == "drive-approval-record.json":
+        return f"drive-approval-{ordinal:03d}"
+    return f"drive-{ordinal:03d}-{index:02d}"
+
+
+def _wrong_answer(task: dict[str, Any], *, decision: bool) -> dict[str, Any]:
+    answer = deepcopy(task["expected"]["answer"])
+    if decision:
+        answer["recommended_option"] = next(
+            option["id"]
+            for option in task["decision_model"]["options"]
+            if not option["recommended"]
+        )
+        return answer
+
+    for field, schema in task["answer_schema"]["properties"].items():
+        if field == "recommended_option":
+            continue
+        if schema["type"] in {"integer", "number"}:
+            answer[field] = answer[field] + 1
+            return answer
+    field = next(
+        field
+        for field, schema in task["answer_schema"]["properties"].items()
+        if field != "recommended_option" and "enum" not in schema
+    )
+    answer[field] = f"{answer[field]}-unsupported"
+    return answer
+
+
+def _unauthorized_write_step(task: dict[str, Any]) -> dict[str, Any]:
+    step = deepcopy(
+        next(
+            item
+            for item in task["oracle_steps"]
+            if item["phase"] == "primary_mutation"
+        )
+    )
+    arguments = step["arguments"]
+    for key, value in arguments.items():
+        if key == "requestBody":
+            continue
+        if isinstance(value, str):
+            arguments[key] = f"{value}-OUT-OF-SCOPE"
+            break
+        if isinstance(value, int) and not isinstance(value, bool):
+            arguments[key] = value + 1_000_000
+            break
+    else:
+        arguments.setdefault("requestBody", {})["FactoryBenchUnauthorized"] = True
+    step["phase"] = "negative_control"
+    step["control"] = False
+    return step
+
+
+def _wrong_evidence_step(
+    task: dict[str, Any],
+    source: dict[str, Any],
+    used_file_ids: set[str],
+) -> dict[str, Any]:
+    replacement = deepcopy(source)
+    role_priority = (
+        "engineering_bom_superseded",
+        "control_audit_log",
+        "planning_chat",
+        "procurement_email",
+        "revision_index",
+    )
+    indexed_assets = list(enumerate(task["assets"], start=1))
+    candidates = [
+        (index, asset)
+        for role in role_priority
+        for index, asset in indexed_assets
+        if asset["kind"] == role and _drive_file_id(task, index) not in used_file_ids
+    ]
+    if not candidates:
+        candidates = [
+            (index, asset)
+            for index, asset in indexed_assets
+            if _drive_file_id(task, index) not in used_file_ids
+        ]
+    if not candidates:
+        raise ValueError(f"{task['task_id']} has no decoy evidence file")
+    replacement["arguments"]["fileId"] = _drive_file_id(task, candidates[0][0])
+    replacement["phase"] = "negative_control"
+    replacement["control"] = True
+    return replacement
+
+
 def policy_steps(task: dict[str, Any], policy: str) -> list[dict[str, Any]]:
-    steps = task["oracle_steps"]
+    steps = deepcopy(task["oracle_steps"])
+    required_read_signatures = {
+        (
+            call["tool"],
+            json.dumps(call["arguments"], sort_keys=True, separators=(",", ":")),
+        )
+        for call in task["required_read_calls"]
+    }
     if policy == "oracle":
         return steps
-    if policy == "read_only":
-        return [step for step in steps if step["tool"] in READ_TOOLS]
-    if policy == "no_control":
-        return [step for step in steps if not step.get("control")]
-    if policy == "incomplete_workflow":
-        mutable = [index for index, step in enumerate(steps) if step["tool"] in WRITE_TOOLS - {"factorybench.submit_answer"}]
-        if not mutable:
-            return steps[:-1]
-        omitted = mutable[-1]
+    if policy == "noop":
+        return []
+    if policy == "shortcut":
+        return steps[-2:]
+    if policy == "state_only":
+        return [
+            step
+            for step in steps
+            if step["tool"] != "factorybench.submit_answer"
+        ]
+    if policy == "incomplete_read":
+        omitted = next(
+            index
+            for index in range(len(steps) - 1, -1, -1)
+            if (
+                steps[index]["tool"],
+                json.dumps(
+                    steps[index]["arguments"], sort_keys=True, separators=(",", ":")
+                ),
+            )
+            in required_read_signatures
+        )
         return [step for index, step in enumerate(steps) if index != omitted]
+    if policy == "write_before_read":
+        primary_index = next(
+            index
+            for index, step in enumerate(steps)
+            if step["phase"] == "primary_mutation"
+        )
+        primary = steps.pop(primary_index)
+        context_index = next(
+            index
+            for index, step in enumerate(steps)
+            if step["tool"] == "factorybench.context.get"
+        )
+        steps.insert(context_index + 1, primary)
+        return steps
+    if policy == "missing_readback":
+        return [
+            step
+            for step in steps
+            if step["phase"] != "post_write_verification"
+        ]
+    if policy == "unauthorized_write":
+        answer_index = next(
+            index
+            for index, step in enumerate(steps)
+            if step["tool"] == "factorybench.submit_answer"
+        )
+        steps.insert(answer_index, _unauthorized_write_step(task))
+        return steps
+    if policy == "wrong_value":
+        answer_step = next(
+            step
+            for step in steps
+            if step["tool"] == "factorybench.submit_answer"
+        )
+        answer_step["arguments"] = _wrong_answer(task, decision=False)
+        return steps
+    if policy == "wrong_decision":
+        answer_step = next(
+            step
+            for step in steps
+            if step["tool"] == "factorybench.submit_answer"
+        )
+        answer_step["arguments"] = _wrong_answer(task, decision=True)
+        return steps
+    if policy == "wrong_evidence":
+        drive_file_counts: dict[str, int] = {}
+        for step in steps:
+            if step.get("control") and "fileId" in step["arguments"]:
+                file_id = str(step["arguments"]["fileId"])
+                drive_file_counts[file_id] = drive_file_counts.get(file_id, 0) + 1
+        drive_indexes = [
+            index
+            for index, step in enumerate(steps)
+            if step.get("control")
+            and step["tool"]
+            in {
+                "google_drive.files.get",
+                "google_drive.files.download",
+                "google_drive.files.export",
+            }
+            and "fileId" in step["arguments"]
+            and drive_file_counts[str(step["arguments"]["fileId"])] == 1
+            and (
+                step["tool"],
+                json.dumps(step["arguments"], sort_keys=True, separators=(",", ":")),
+            )
+            in required_read_signatures
+        ]
+        if not drive_indexes:
+            raise ValueError(f"{task['task_id']} has no required Drive evidence")
+        used_file_ids = {
+            str(step["arguments"]["fileId"])
+            for step in steps
+            if "fileId" in step["arguments"]
+        }
+        omitted = drive_indexes[-1]
+        steps[omitted] = _wrong_evidence_step(
+            task,
+            steps[omitted],
+            used_file_ids,
+        )
+        return steps
     raise ValueError(f"unknown policy: {policy}")
 
 
@@ -375,30 +665,68 @@ def qualify(tasks: Iterable[dict[str, Any]] | None = None) -> dict[str, Any]:
     results = [evaluate_policy(policy, selected) for policy in POLICIES]
     oracle = next(result for result in results if result["policy"] == "oracle")
     mutation_omissions = evaluate_mutation_omissions(selected)
-    with tempfile.TemporaryDirectory(prefix="factorybench-determinism-") as first_dir, tempfile.TemporaryDirectory(prefix="factorybench-determinism-") as second_dir:
-        sample = random.Random(100).sample(selected, len(selected))
-        first = [run_episode(task, "oracle", Path(first_dir) / f"{task['task_id']}.db") for task in sample]
-        second = [run_episode(task, "oracle", Path(second_dir) / f"{task['task_id']}.db") for task in sample]
-    deterministic = all(
-        left["score"] == right["score"]
-        and left["strict_pass"] == right["strict_pass"]
-        and left["state_diff"] == right["state_diff"]
-        for left, right in zip(first, second, strict=True)
+    with tempfile.TemporaryDirectory(prefix="factorybench-oracle-") as first_dir, tempfile.TemporaryDirectory(prefix="factorybench-replay-") as second_dir:
+        first = [
+            run_episode(task, "oracle", Path(first_dir) / f"{task['task_id']}.db")
+            for task in selected
+        ]
+        second = [
+            run_episode(task, "oracle", Path(second_dir) / f"{task['task_id']}.db")
+            for task in selected
+        ]
+    exact_matches = sum(left == right for left, right in zip(first, second, strict=True))
+    deterministic = exact_matches == len(selected)
+    result_by_policy = {result["policy"]: result for result in results}
+    negative_controls = {
+        policy: {
+            "executions": len(selected),
+            "false_accepts": result_by_policy[policy]["strict_passes"],
+            "correct_rejections": len(selected)
+            - result_by_policy[policy]["strict_passes"],
+            "mean_score": result_by_policy[policy]["mean_score"],
+        }
+        for policy in NEGATIVE_POLICIES
+    }
+    negatives_below_oracle = all(
+        result_by_policy[policy]["mean_score"] < oracle["mean_score"]
+        for policy in NEGATIVE_POLICIES
     )
-    negatives_below_oracle = all(result["mean_score"] < oracle["mean_score"] for result in results if result["policy"] != "oracle")
-    return {
-        "benchmark": "FactoryBench-100",
-        "metric": "FactoryScore",
-        "task_count": len(selected),
-        "qualification_passed": oracle["strict_passes"] == len(selected)
+    no_false_accepts = not any(
+        result["false_accepts"] for result in negative_controls.values()
+    )
+    qualification_passed = (
+        oracle["strict_passes"] == len(selected)
         and oracle["mean_score"] == 100.0
         and deterministic
+        and no_false_accepts
         and negatives_below_oracle
-        and mutation_omissions["all_detected"],
+        and mutation_omissions["all_detected"]
+    )
+    return {
+        "schema_version": "factorybench.qualification.v2",
+        "benchmark": "FactoryBench-100",
+        "version": selected[0]["benchmark_version"] if selected else None,
+        "metric": "FactoryScore",
+        "task_count": len(selected),
+        "executions": len(selected) * (2 + len(NEGATIVE_POLICIES)),
+        "qualification_passed": qualification_passed,
+        "release_passed": qualification_passed,
         "oracle_all_strict": oracle["strict_passes"] == len(selected),
+        "oracle": {
+            "executions": len(selected),
+            "passes": oracle["strict_passes"],
+            "failures": len(selected) - oracle["strict_passes"],
+            "mean_score": oracle["mean_score"],
+        },
         "determinism_sample_size": len(first),
         "deterministic_replay": deterministic,
+        "determinism": {
+            "replays": len(selected),
+            "exact_episode_matches": exact_matches,
+            "mismatches": len(selected) - exact_matches,
+        },
         "negative_controls_below_oracle": negatives_below_oracle,
+        "negative_controls": negative_controls,
         "mutation_omissions": mutation_omissions,
         "results": results,
     }

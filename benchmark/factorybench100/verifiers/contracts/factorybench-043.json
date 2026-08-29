@@ -1,0 +1,808 @@
+{
+  "answer": {
+    "baseline_settlement_date": "2026-01-17",
+    "business_need_date": "2026-01-17",
+    "control_threshold_usd": 0.0,
+    "controlled_settlement_date": "2026-01-17",
+    "decision_timing_status": "ON_TIME",
+    "document_amount_usd": 402.05,
+    "escalated_settlement_date": "2026-01-19",
+    "escalation_approval_required": 1,
+    "exception_amount_usd": 0.0,
+    "financial_control": "credit-to-hold residual variance",
+    "financial_document_or_record": "INV-0043",
+    "hold_amount_usd": 402.05,
+    "matched_credit_amount_usd": 402.05,
+    "outcome_vs_control_days": 0,
+    "recommended_incremental_cost_usd": 0,
+    "recommended_option": "release_matched_hold",
+    "recommended_outcome_date": "2026-01-17",
+    "supported_amount_usd": 402.05
+  },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'release_matched_hold', tied to NS-000043, revision R2, and the selected release_matched_hold outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-17', tied to NS-000043, revision R2, and the selected release_matched_hold outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported financial document or record as 'INV-0043', tied to NS-000043, revision R2, and the selected release_matched_hold outcome.",
+      "field": "financial_document_or_record",
+      "id": "answer_financial_document_or_record",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported supported amount usd as 402.05, tied to NS-000043, revision R2, and the selected release_matched_hold outcome.",
+      "field": "supported_amount_usd",
+      "id": "answer_supported_amount_usd",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000043, revision R2, and the selected release_matched_hold outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    }
+  ],
+  "assertions": [
+    {
+      "description": "Required immutable record NS-000043 to reach business outcome 'Hold released' through oracle_fusion.invoice_holds.update with exact provider-critical values HoldId=1000043, requestBody.ReleaseName='APPROVED EVIDENCE'. Human-authored names, descriptions, notes, and reasons are accepted when they preserve the task-scoped business meaning. The audited transition binds selected option release_matched_hold, revision R2, approval AP-0043, and constraint credit, invoice, hold, and manager release approval must match; unapplied or unrelated credit value = 0.0 USD; uncovered or unsupported scope = 0.0 USD; no other provider record satisfies this state criterion.",
+      "id": "mutation_01",
+      "milestone_id": "state.primary",
+      "payload_allowed_argument_paths": [
+        "HoldId",
+        "requestBody.ReleaseName",
+        "requestBody.ReleaseReason"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "HoldId": 1000043,
+          "requestBody": {
+            "ReleaseName": "APPROVED EVIDENCE"
+          }
+        },
+        "tool": "oracle_fusion.invoice_holds.update"
+      },
+      "table": "resource_state",
+      "values": {
+        "resource_type": "oracle_fusion.invoice_holds",
+        "revision": 1,
+        "status": "Hold released",
+        "system": "oracle_fusion"
+      },
+      "weight": 3.0,
+      "where": {
+        "resource_id": "factorybench-043-mutation-01",
+        "task_id": "factorybench-043"
+      }
+    },
+    {
+      "description": "Sent accounts payable the scoped outcome for CASE-043, including completion 2026-01-17, the binding constraint, alternatives, and the Oracle business reference.",
+      "id": "mutation_02",
+      "milestone_id": "state.collaboration",
+      "payload_contains": {
+        "arguments": {
+          "threadId": "thread-043",
+          "userId": "me"
+        },
+        "tool": "gmail.messages.send"
+      },
+      "payload_text_any_of": [
+        [
+          "CASE-043",
+          "NS-000043",
+          "NS-COMP-043"
+        ]
+      ],
+      "payload_text_contains": [
+        "2026-01-17",
+        "release_matched_hold"
+      ],
+      "table": "resource_state",
+      "values": {
+        "resource_type": "gmail.messages",
+        "revision": 1,
+        "status": "Recorded",
+        "system": "gmail"
+      },
+      "weight": 1.5,
+      "where": {
+        "resource_id": "factorybench-043-mutation-02",
+        "task_id": "factorybench-043"
+      }
+    },
+    {
+      "description": "Wrote release_matched_hold, completion 2026-01-17, and the binding constraint into the existing task-scoped control cell without altering another row.",
+      "id": "mutation_03",
+      "milestone_id": "state.collaboration",
+      "payload_contains": {
+        "arguments": {
+          "range": "Control!H5",
+          "spreadsheetId": "sheet-043"
+        },
+        "tool": "google_sheets.spreadsheets.values.update"
+      },
+      "payload_text_contains": [
+        "2026-01-17",
+        "release_matched_hold"
+      ],
+      "table": "resource_state",
+      "values": {
+        "resource_type": "google_sheets.spreadsheets.values",
+        "revision": 1,
+        "status": "Recorded",
+        "system": "google_sheets"
+      },
+      "weight": 1.5,
+      "where": {
+        "resource_id": "factorybench-043-mutation-03",
+        "task_id": "factorybench-043"
+      }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-17 as the documented date for existing invoice hold on INV-0043; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    },
+    {
+      "description": "Established the exact held variance amount as USD 402.05.",
+      "field": "document_amount_usd",
+      "id": "establish_document_amount",
+      "milestone_id": "analysis.inputs",
+      "weight": 2.0
+    },
+    {
+      "description": "Reconciled independent source activity to USD 402.05 of credit memo applied to the same invoice and reason.",
+      "field": "supported_amount_usd",
+      "id": "calculate_supported_amount",
+      "milestone_id": "analysis.inputs",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated USD 402.05 document \u2212 USD 402.05 supported = USD 0.00 exception for unapplied or unrelated credit value.",
+      "field": "exception_amount_usd",
+      "id": "calculate_exception_amount",
+      "milestone_id": "analysis.inputs",
+      "weight": 2.0
+    },
+    {
+      "description": "Identified credit-to-hold residual variance as the governing monetary control for Release a hold after the supplier credit arrives; did not substitute a generic invoice tolerance.",
+      "field": "financial_control",
+      "id": "identify_financial_control",
+      "milestone_id": "analysis.inputs",
+      "weight": 1.5
+    },
+    {
+      "description": "Applied the exact USD 0.00 threshold for credit-to-hold residual variance to the USD 0.00 unsupported or residual value.",
+      "field": "control_threshold_usd",
+      "id": "apply_financial_control_threshold",
+      "milestone_id": "analysis.inputs",
+      "weight": 1.5
+    },
+    {
+      "description": "Derived 2026-01-17 for keep_hold_open.",
+      "field": "baseline_settlement_date",
+      "id": "compare_financial_option_one",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 2026-01-17 for release_matched_hold.",
+      "field": "controlled_settlement_date",
+      "id": "compare_financial_option_two",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    },
+    {
+      "description": "Derived 2026-01-19 for release_all_supplier_holds and applied its approval impact.",
+      "field": "escalated_settlement_date",
+      "id": "compare_financial_option_three",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    },
+    {
+      "description": "Established the scoped hold amount as USD 402.05.",
+      "field": "hold_amount_usd",
+      "id": "establish_held_variance",
+      "milestone_id": "analysis.inputs",
+      "weight": 1.5
+    },
+    {
+      "description": "Matched the USD 402.05 credit to that exact hold and proved a zero residual.",
+      "field": "matched_credit_amount_usd",
+      "id": "match_supplier_credit",
+      "milestone_id": "analysis.inputs",
+      "weight": 2.0
+    },
+    {
+      "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for release_matched_hold; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "milestone_id": "decision.options",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that release_all_supplier_holds remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "milestone_id": "decision.options",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of keep_hold_open, release_matched_hold, and release_all_supplier_holds; selected release_matched_hold because it alone gives the best currently authorized result under credit, invoice, hold, and manager release approval must match.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "milestone_id": "decision.options",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-17 as the supported outcome date for release_matched_hold.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "milestone_id": "analysis.timeline",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-17 with the independent control date 2026-01-17 and calculated a signed variance of 0 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-043"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-043 scope, immutable handles, mounted systems, and evidence index before investigating NS-000043.",
+      "id": "investigation_01",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "ranges": [
+              "Control!A1:I50",
+              "Approvals!A1:G20"
+            ],
+            "spreadsheetId": "sheet-043",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-043"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.batchGet"
+        },
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!A1:I50",
+            "spreadsheetId": "sheet-043",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "values": [
+              [
+                "CASE-043"
+              ]
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Reconciled 402.05 observed less 0.0 excluded to 402.05 supported USD for credit memo applied to the same invoice and reason. Applied next payment-run cutoff to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_02",
+      "milestone_id": "investigation.constraints",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-043' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-043"
+              },
+              {
+                "id": "drive-approval-043"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-043 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_03",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-043-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-043-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-043-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R2 and established 402.05 USD for held variance amount, with control date 2026-01-17.",
+      "id": "investigation_04",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-043-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-043-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-043-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R2 and established 402.05 USD for held variance amount, with control date 2026-01-17.",
+      "id": "investigation_05",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-043"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-043"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-043",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-043"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-043"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-043"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0043 only to release_matched_hold, NS-000043, and the supported 402.05 USD; kept broader scope and release_all_supplier_holds outside current authority.",
+      "id": "investigation_06",
+      "milestone_id": "investigation.authority",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-043-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-043-10",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-043-10"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-10"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the independent reconciliation rows and Reconciled 402.05 observed less 0.0 excluded to 402.05 supported USD for credit memo applied to the same invoice and reason.",
+      "id": "investigation_07",
+      "milestone_id": "investigation.constraints",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-043-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-043-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-043-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-043-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied next payment-run cutoff to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_08",
+      "milestone_id": "investigation.constraints",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "file": "F-000043"
+          },
+          "expected_result_contains": {
+            "file": {
+              "id": "F-000043"
+            }
+          },
+          "match": "result_contains",
+          "tool": "slack.files_info"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Inspected the attachment linked from the scoped Slack discussion and correlated its case and source revision before using its control evidence.",
+      "id": "investigation_09",
+      "milestone_id": "investigation.authority",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-043\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-043"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-043 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_10",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-043",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-043",
+            "threadId": "thread-043"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-043",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-043"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-14 readiness input for release_matched_hold, then separately derived its 2026-01-17 operating outcome under credit, invoice, hold, and manager release approval must match instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_11",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0043"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000043
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_order_lines.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase order lines record: Applied revision R2 and established 402.05 USD for held variance amount, with control date 2026-01-17.",
+      "id": "investigation_12",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "HeaderInterfaceId": 700043,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "HeaderInterfaceId": 700043
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.receiving_receipt_transactions.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle receiving receipt transactions record: Reconciled 402.05 observed less 0.0 excluded to 402.05 supported USD for credit memo applied to the same invoice and reason.",
+      "id": "investigation_13",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "invoicesUniqID": "invoicesUniqID-0043"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900043
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "InvoiceNumber='INV-0043'"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900043
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle invoices record: Applied revision R2 and established 402.05 USD for held variance amount, with control date 2026-01-17.",
+      "id": "investigation_14",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "purchaseOrdersUniqID": "purchaseOrdersUniqID-0043"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000043
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "OrderNumber='PO-0043'"
+          },
+          "expected_result_contains": {
+            "POHeaderId": 2000043
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.purchase_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle purchase orders record: Used the independently confirmed 2026-01-14 readiness input for release_matched_hold, then separately derived its 2026-01-17 operating outcome under credit, invoice, hold, and manager release approval must match instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_15",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.invoice_holds.update",
+      "any_of": [
+        {
+          "arguments": {
+            "invoicesUniqID": "invoicesUniqID-0043"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900043
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "InvoiceNumber='INV-0043'"
+          },
+          "expected_result_contains": {
+            "InvoiceId": 900043
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.invoices.list"
+        }
+      ],
+      "description": "Read NS-000043 back through the documented Oracle invoices.get operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'invoiceHolds'], including the effective update at 2026-01-17, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "LastUpdateDate": "2026-01-17T16:00:00-08:00",
+        "invoiceHolds": [
+          {
+            "HoldId": 1000043,
+            "HoldStatus": "RELEASED",
+            "ReleaseName": "APPROVED EVIDENCE",
+            "ReleaseReason": null
+          }
+        ]
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "milestone_id": "verification.readback",
+      "target_identity": {
+        "InvoiceId": 900043
+      },
+      "weight": 2.0
+    }
+  ]
+}

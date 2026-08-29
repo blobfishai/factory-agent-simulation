@@ -23,6 +23,19 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
     harbor_tasks = list((RELEASE / "harbor" / "tasks").glob("*/task.toml"))
     harbor_manifest = tomllib.loads((RELEASE / "harbor" / "dataset.toml").read_text())
     assert qualification["qualification_passed"] is True
+    assert qualification["executions"] == 1200
+    assert qualification["determinism"] == {
+        "replays": 100,
+        "exact_episode_matches": 100,
+        "mismatches": 0,
+    }
+    assert len(qualification["negative_controls"]) == 10
+    assert all(
+        row["executions"] == 100
+        and row["false_accepts"] == 0
+        and row["correct_rejections"] == 100
+        for row in qualification["negative_controls"].values()
+    )
     assert qualification["mutation_omissions"] == {
         "total": 300,
         "detected": 300,
@@ -34,7 +47,7 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
     assert fidelity["closest_pair"]["similarity"] <= 0.80
     assert website["benchmark"]["taskCount"] == 100
     assert len(website["benchmark"]["categories"]) == 20
-    assert website["benchmark"]["world"]["documents"] == 1200
+    assert website["benchmark"]["world"]["documents"] == 2800
     assert len(hf_rows) == 100
     assert len(harbor_tasks) == 100
     assert len(harbor_manifest["tasks"]) == 100
@@ -43,7 +56,6 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
     assert not {"approve_invoice", "hold_invoice"} & {tool["name"] for tool in website["tools"]}
 
     model_rows = [row for row in website["leaderboard"] if row["kind"] == "model"]
-    assert model_rows
     assert all(row["tasks"] == 100 for row in model_rows)
     semantic_rows = []
     harbor_task_root = RELEASE / "harbor" / "tasks"
@@ -68,11 +80,38 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
             assert (RELEASE / mirror / overlay["artifact"]).is_file()
 
     for row in map(json.loads, hf_rows):
-        assert len(row["context_files"]) >= 13
+        assert len(row["context_files"]) == 28
+        assert len(row["rubric_criteria"]) == 14
+        assert sum(criterion["weight"] for criterion in row["rubric_criteria"]) == 100.0
+        assert len({criterion["id"] for criterion in row["rubric_criteria"]}) == 14
+        assert row["call_order_policy"].startswith(
+            "The reference trajectory is illustrative, not graded."
+        )
+        assert len(row["reference_read_calls"]) > len(row["required_read_calls"])
+        assert not any(
+            path.endswith(("starting-state.json", "expected-checks.json"))
+            for path in row["context_files"]
+        )
         assert all((RELEASE / "huggingface" / path).is_file() for path in row["context_files"])
+        task_id = row["task_id"]
+        assert (
+            RELEASE
+            / "huggingface"
+            / "evaluation"
+            / "state"
+            / task_id
+            / "starting-state.json"
+        ).is_file()
+        assert (
+            RELEASE
+            / "huggingface"
+            / "evaluation"
+            / "verifier-contracts"
+            / f"{task_id}.json"
+        ).is_file()
 
     for sample in website["samples"].values():
-        assert len(sample["assets"]) == 14
+        assert len(sample["assets"]) == 28
         for asset in sample["assets"]:
             path = RELEASE / asset["path"]
             assert path.is_file()
@@ -126,7 +165,7 @@ def test_harbor_tasks_protect_authoritative_state() -> None:
     assert "http://erp:8765/call" in compose
     assert "factorybench-evidence:/var/lib/factorybench-evidence:ro" in compose
     assert environment_task["world"]["id"] == WORLD_ID
-    assert len(environment_task["seed_tables"]["evidence_files"]) == 12
+    assert len(environment_task["seed_tables"]["evidence_files"]) == 28
     assert environment_task["answer_schema"]["additionalProperties"] is False
     assert "urlopen" not in verifier
     assert "/var/lib/factorybench-evidence/evidence.json" in verifier
@@ -157,7 +196,7 @@ def test_mcp_initialize_and_tool_list(tmp_path: Path) -> None:
     with FactoryWorld.fresh(task, tmp_path / "world.db") as world:
         initialized = handle_request(world, {"jsonrpc": "2.0", "id": 1, "method": "initialize"})
         listed = handle_request(world, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
-    assert initialized["result"]["serverInfo"] == {"name": "factorybench", "version": "3.0.0"}
+    assert initialized["result"]["serverInfo"] == {"name": "factorybench", "version": "3.2.0"}
     assert len(listed["result"]["tools"]) == len(tool_definitions())
     submit = next(tool for tool in listed["result"]["tools"] if tool["name"] == "factorybench.submit_answer")
     assert submit["inputSchema"] == task["answer_schema"]
@@ -179,7 +218,7 @@ def test_environment_context_exposes_evidence_and_mounted_systems(tmp_path: Path
         "persistence": "episode-local SQLite",
         "network": "closed",
     }
-    assert len(context["evidence_index"]) == 12
+    assert len(context["evidence_index"]) == 28
     assert set(task["world"]["systems"]) == {server["name"] for server in context["tool_servers"]}
     assert context["reference_records"]["case_reference"] == "CASE-001"
     assert context["reference_records"]["google_sheets"]["outcome_write_range"] == "Control!H3"

@@ -23,7 +23,7 @@ from .scenarios import FAMILIES, FAMILY_DESCRIPTIONS, SCENARIOS, Scenario
 
 
 BENCHMARK_NAME = "FactoryBench-100"
-BENCHMARK_VERSION = "3.0.0"
+BENCHMARK_VERSION = "3.2.0"
 AS_OF_DATE = date(2026, 1, 12)
 WORLD_ID = "northstar-enterprise-fusion-v3"
 
@@ -675,34 +675,70 @@ def _required_asset_read_calls(
     scenario: Scenario,
     decision: dict[str, Any],
 ) -> list[dict[str, Any]]:
-    """Require several independent task documents, not one synthetic packet."""
+    """Require a mode-specific causal chain across 14 independent documents."""
 
+    get = "google_drive.files.get"
+    download = "google_drive.files.download"
+    export = "google_drive.files.export"
     mode_layouts: dict[str, tuple[tuple[str, int], ...]] = {
-        "plan": (("google_drive.files.download", 3), ("google_drive.files.get", 9), ("google_drive.files.get", 4), ("google_drive.files.export", 12), ("google_drive.files.download", 11)),
-        "quantity": (("google_drive.files.get", 4), ("google_drive.files.export", 9), ("google_drive.files.download", 10), ("google_drive.files.export", 12), ("google_drive.files.download", 3)),
-        "schedule": (("google_drive.files.export", 12), ("google_drive.files.get", 9), ("google_drive.files.get", 4), ("google_drive.files.download", 11), ("google_drive.files.download", 3)),
-        "financial": (("google_drive.files.download", 3), ("google_drive.files.download", 9), ("google_drive.files.get", 4), ("google_drive.files.download", 10), ("google_drive.files.export", 12)),
-        "identity": (("google_drive.files.get", 4), ("google_drive.files.get", 9), ("google_drive.files.export", 12), ("google_drive.files.download", 3), ("google_drive.files.download", 10)),
-        "forecast": (("google_drive.files.export", 12), ("google_drive.files.export", 9), ("google_drive.files.download", 3), ("google_drive.files.get", 4), ("google_drive.files.download", 11)),
+        "plan": (
+            (get, 2), (get, 1), (get, 12), (download, 13), (export, 21),
+            (export, 4), (export, 20), (export, 10), (export, 18),
+            (export, 11), (export, 16), (get, 9), (get, 8), (get, 26),
+        ),
+        "quantity": (
+            (get, 2), (get, 1), (get, 12), (download, 13), (download, 14),
+            (export, 4), (export, 20), (export, 22), (export, 10),
+            (get, 9), (get, 8), (get, 26), (export, 11), (export, 21),
+        ),
+        "schedule": (
+            (get, 2), (get, 1), (get, 12), (download, 13), (get, 23),
+            (export, 17), (export, 16), (export, 11), (export, 4),
+            (export, 10), (get, 9), (export, 19), (get, 8), (get, 26),
+        ),
+        "financial": (
+            (get, 2), (get, 1), (get, 12), (export, 4), (download, 15),
+            (export, 18), (export, 19), (get, 8), (export, 10),
+            (export, 22), (get, 9), (export, 11), (get, 26), (get, 27),
+        ),
+        "identity": (
+            (get, 2), (get, 1), (get, 12), (download, 13), (download, 14),
+            (get, 28), (get, 26), (export, 4), (export, 10),
+            (get, 9), (get, 8), (export, 19), (get, 27), (export, 11),
+        ),
+        "forecast": (
+            (get, 2), (get, 1), (get, 12), (download, 13), (export, 21),
+            (export, 4), (export, 16), (export, 17), (get, 23),
+            (export, 11), (get, 9), (get, 8), (get, 28), (get, 26),
+        ),
     }
+    # Different operating teams enter the evidence graph at different control
+    # points: planners begin with demand or schedule, maintenance begins with
+    # outage and qualification, service begins with ownership, and close teams
+    # begin with authority and reconciliation.  Rotate the mode-specific chain
+    # by family/case and reverse it for teams whose control review runs outward
+    # from the transaction.  The verifier still permits any causally valid read
+    # order; this is the human reference path for that scenario.
     layout = list(mode_layouts[decision["decision_mode"]])
-    rotation = ordinal % len(layout)
-    layout = layout[rotation:] + layout[:rotation]
+    family_index = FAMILIES.index(scenario.family)
+    pivot = (family_index * 5 + ordinal) % len(layout)
+    layout = layout[pivot:] + layout[:pivot]
+    if family_index % 2:
+        layout.reverse()
     calls: list[dict[str, Any]] = []
     for tool, asset_index in layout:
         arguments = _arguments(tool, ordinal, scenario)
-        arguments["fileId"] = f"drive-{ordinal:03d}-{asset_index:02d}"
+        arguments["fileId"] = (
+            f"drive-{ordinal:03d}"
+            if asset_index == 2
+            else f"drive-approval-{ordinal:03d}"
+            if asset_index == 8
+            else f"drive-{ordinal:03d}-{asset_index:02d}"
+        )
         if tool == "google_drive.files.get":
             arguments.pop("fields", None)
             arguments["alt"] = "media"
         calls.append({"tool": tool, "arguments": arguments})
-    approval_arguments = _arguments("google_drive.files.get", ordinal, scenario)
-    approval_arguments["fileId"] = f"drive-approval-{ordinal:03d}"
-    approval_arguments.pop("fields", None)
-    approval_arguments["alt"] = "media"
-    calls.append(
-        {"tool": "google_drive.files.get", "arguments": approval_arguments}
-    )
     return calls
 
 
@@ -1999,6 +2035,236 @@ def _investigation_alternatives(
     return alternatives
 
 
+def _key_investigation_slot(call: dict[str, Any]) -> tuple[str, str] | None:
+    """Map one reference read to a material business discovery, if it is key.
+
+    The reference trajectory deliberately traverses a broad enterprise evidence
+    room.  The verifier should not turn every surrounding or corroborative file
+    into a mandatory click.  This selector retains the records a human must
+    actually join to establish identity, operative requirements, constraints,
+    authority, and the relevant ERP state.
+    """
+
+    tool = str(call["tool"])
+    arguments = call.get("arguments") or {}
+    if tool == "factorybench.context.get":
+        return "scope.context", "investigation.scope"
+    if tool == "gmail.messages.list":
+        return "scope.email_index", "investigation.scope"
+    if tool in {"gmail.messages.get", "gmail.threads.get"}:
+        return "requirements.email_content", "investigation.requirements"
+    if tool == "gmail.messages.attachments.get":
+        return "requirements.email_attachment", "investigation.requirements"
+    if tool == "google_drive.files.list":
+        return "scope.drive_index", "investigation.scope"
+    if tool.startswith("google_drive.files."):
+        file_id = str(arguments.get("fileId") or "")
+        if file_id.startswith("drive-approval-"):
+            return "authority.approval", "investigation.authority"
+        suffix_to_slot = {
+            "-04": ("requirements.source_workbook", "investigation.requirements"),
+            "-10": ("constraints.reconciliation", "investigation.constraints"),
+            "-11": ("constraints.calendar", "investigation.constraints"),
+            "-12": ("requirements.control_spec", "investigation.requirements"),
+        }
+        for suffix, mapped in suffix_to_slot.items():
+            if file_id.endswith(suffix):
+                return mapped
+        return None
+    if tool.startswith("google_sheets.spreadsheets"):
+        return "constraints.control_workbook", "investigation.constraints"
+    if tool.startswith("slack.") and tool in {
+        "slack.search_messages",
+        "slack.conversations_history",
+        "slack.conversations_replies",
+        "slack.files_info",
+    }:
+        return "authority.operations_thread", "investigation.authority"
+    if tool.startswith("oracle_fusion."):
+        resource = tool.rsplit(".", 1)[0]
+        return f"erp.{resource}", "investigation.erp_correlation"
+    return None
+
+
+def _select_key_read_calls(calls: list[dict[str, Any]]) -> list[tuple[dict[str, Any], str]]:
+    selected: list[tuple[dict[str, Any], str]] = []
+    observed_slots: set[str] = set()
+    for call in calls:
+        mapped = _key_investigation_slot(call)
+        if mapped is None:
+            continue
+        slot, milestone_id = mapped
+        if slot in observed_slots:
+            continue
+        observed_slots.add(slot)
+        selected.append((call, milestone_id))
+    return selected
+
+
+def _calculation_milestone_id(criterion: dict[str, Any]) -> str:
+    field = str(criterion.get("field") or criterion.get("id") or "").casefold()
+    if any(token in field for token in ("option", "cost", "approval", "escalation")):
+        return "decision.options"
+    if any(
+        token in field
+        for token in (
+            "date",
+            "due",
+            "window",
+            "horizon",
+            "outcome",
+            "timing",
+            "variance",
+        )
+    ):
+        return "analysis.timeline"
+    return "analysis.inputs"
+
+
+def _rubric_milestones(
+    *,
+    scenario: Scenario,
+    decision: dict[str, Any],
+    investigations: list[dict[str, Any]],
+    calculations: list[dict[str, Any]],
+    assertions: list[dict[str, Any]],
+    answer_checks: list[dict[str, Any]],
+    post_write_verifications: list[dict[str, Any]],
+    collaboration_writes: tuple[str, ...],
+) -> list[dict[str, Any]]:
+    facts = {fact["id"]: fact for fact in decision["facts"]}
+    oracle_resources = sorted(
+        {
+            alternative["tool"].removeprefix("oracle_fusion.").rsplit(".", 1)[0].replace("_", " ")
+            for investigation in investigations
+            if investigation["milestone_id"] == "investigation.erp_correlation"
+            for alternative in investigation["any_of"][:1]
+        }
+    )
+    descriptions = {
+        "investigation.scope": (
+            f"Establish the isolated {decision['case_reference']} scope and immutable identities across the mailbox, Drive index, and mounted systems before relying on similarly named records."
+        ),
+        "investigation.requirements": (
+            f"Determine the operative {decision['revision']} requirement for {decision['record']}, reconcile the current source material, and distinguish current evidence from superseded or merely contextual records."
+        ),
+        "investigation.constraints": (
+            f"Reconcile the supported operating inputs: {facts['eligible_coverage']['rubric']} {facts['finite_capacity']['rubric']}"
+        ),
+        "investigation.authority": (
+            f"Establish what is actually authorized and what remains conditional: {facts['approval_scope']['rubric']}"
+        ),
+        "investigation.erp_correlation": (
+            f"Correlate {decision['record']} by immutable IDs across the material Oracle records ({', '.join(oracle_resources)}) and preserve the effective {decision['revision']} state."
+        ),
+        "analysis.inputs": (
+            f"Derive the eligible scope, exclusions, unit, and controlling threshold from the joined evidence rather than copying a headline quantity for {decision['record_noun']}."
+        ),
+        "analysis.timeline": (
+            f"Calculate the feasible timing for {decision['selected_option']} under the actual operating window and report whether the {decision['selected_completion']} outcome meets the control date."
+        ),
+        "decision.options": (
+            f"Compare all three task-specific alternatives, including timing, cost or exposure, authority, and residual risk; select {decision['selected_option']} only because the joined evidence supports it."
+        ),
+        "state.primary": (
+            f"Persist exactly the supported {scenario.result_status!r} transition for {decision['record']} through the documented Oracle operation, with no neighboring record or unsupported field changed."
+        ),
+        "state.collaboration": (
+            f"After the Oracle outcome is known, {_communication_requirement(collaboration_writes)} with the supported decision, timing, constraint, and business reference."
+        ),
+        "verification.readback": (
+            f"Read {decision['record']} back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement."
+        ),
+        "answer.insights": (
+            f"Return the exact task-supported recommendation, outcome date, immutable business record, decisive operating insight, and timing status for {decision['record_noun']}."
+        ),
+        "containment.scope": (
+            f"Keep all successful changes inside {decision['case_reference']}'s declared Oracle, collaboration, answer, and audit scope."
+        ),
+        "execution.mutations": (
+            "Complete without a rejected state-changing call; failed exploratory reads may be recovered from, but an invalid mutation is not accepted."
+        ),
+    }
+    categories = {
+        "investigation.scope": "investigation",
+        "investigation.requirements": "investigation",
+        "investigation.constraints": "investigation",
+        "investigation.authority": "investigation",
+        "investigation.erp_correlation": "investigation",
+        "analysis.inputs": "analysis",
+        "analysis.timeline": "analysis",
+        "decision.options": "decision",
+        "state.primary": "state",
+        "state.collaboration": "state",
+        "verification.readback": "verification",
+        "answer.insights": "answer",
+        "containment.scope": "containment",
+        "execution.mutations": "execution",
+    }
+    semantic_weights = {
+        "investigation.scope": 4.0,
+        "investigation.requirements": 6.0,
+        "investigation.constraints": 8.0,
+        "investigation.authority": 6.0,
+        "investigation.erp_correlation": 10.0,
+        "analysis.inputs": 8.0,
+        "analysis.timeline": 8.0,
+        "decision.options": 8.0,
+        "state.primary": 14.0,
+        "state.collaboration": 6.0,
+        "verification.readback": 6.0,
+        "answer.insights": 10.0,
+        "containment.scope": 4.0,
+        "execution.mutations": 2.0,
+    }
+    atomic = [
+        *investigations,
+        *calculations,
+        *assertions,
+        *post_write_verifications,
+        *answer_checks,
+        {
+            "id": "write_scope",
+            "weight": 1.0,
+            "milestone_id": "containment.scope",
+        },
+        {
+            "id": "no_rejected_mutation",
+            "weight": 1.0,
+            "milestone_id": "execution.mutations",
+        },
+    ]
+    by_milestone: dict[str, list[dict[str, Any]]] = {}
+    for criterion in atomic:
+        by_milestone.setdefault(str(criterion["milestone_id"]), []).append(criterion)
+    missing_descriptions = sorted(set(by_milestone) - set(descriptions))
+    if missing_descriptions:
+        raise ValueError(f"missing semantic milestone descriptions: {missing_descriptions}")
+    missing_weights = sorted(set(by_milestone) - set(semantic_weights))
+    if missing_weights:
+        raise ValueError(f"missing semantic milestone weights: {missing_weights}")
+    if set(by_milestone) != set(semantic_weights):
+        absent = sorted(set(semantic_weights) - set(by_milestone))
+        raise ValueError(f"task omitted required semantic milestones: {absent}")
+    if sum(semantic_weights.values()) != 100.0:
+        raise ValueError("semantic milestone weights must total 100")
+    return [
+        {
+            "id": milestone_id,
+            "category": categories[milestone_id],
+            "description": descriptions[milestone_id],
+            "weight": semantic_weights[milestone_id],
+            "atomic_weight": round(
+                sum(float(criterion.get("weight", 1.0)) for criterion in criteria),
+                2,
+            ),
+            "criterion_ids": [str(criterion["id"]) for criterion in criteria],
+        }
+        for milestone_id in semantic_weights
+        for criteria in (by_milestone[milestone_id],)
+    ]
+
+
 def _provider_argument_summary(arguments: dict[str, Any]) -> str:
     leaves: list[tuple[str, Any]] = []
 
@@ -2282,6 +2548,7 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
             }
             assertion = {
                 "id": f"mutation_{write_number:02d}",
+                "milestone_id": "state.primary" if primary else "state.collaboration",
                 "description": _mutation_description(
                     tool,
                     scenario,
@@ -2437,7 +2704,7 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
         ),
         "revision": 0,
     }
-    required_read_calls = [
+    reference_read_calls = [
         {
             "tool": step["tool"],
             "arguments": deepcopy(step["arguments"]),
@@ -2452,15 +2719,18 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
         for step in steps
         if step["control"]
     ]
+    selected_read_calls = _select_key_read_calls(reference_read_calls)
+    required_read_calls = [call for call, _ in selected_read_calls]
     required_investigations = [
         {
             "id": f"investigation_{index:02d}",
+            "milestone_id": milestone_id,
             "description": _investigation_description(call["tool"], decision, call["arguments"]),
             "weight": 1.0,
             "before_primary_mutation": True,
             "any_of": _investigation_alternatives(call["tool"], ordinal, scenario, call["arguments"]),
         }
-        for index, call in enumerate(required_read_calls, start=1)
+        for index, (call, milestone_id) in enumerate(selected_read_calls, start=1)
     ]
     post_read_quantity: float | int = (
         decision["transaction_measure"]
@@ -2490,6 +2760,7 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
     post_write_verifications = [
         {
             "id": "verify_primary_oracle_state",
+            "milestone_id": "verification.readback",
             "description": (
                 f"Read {decision['record']} back through the documented Oracle "
                 f"{post_write_read.removeprefix('oracle_fusion.').replace('_', ' ')} operation after the mutation and confirmed "
@@ -2519,9 +2790,13 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
         "forecast": ("recommended_option", "recommended_outcome_date", "program_or_asset_record", "safe_window_start", "decision_timing_status"),
         "financial": ("recommended_option", "recommended_outcome_date", "financial_document_or_record", "supported_amount_usd", "decision_timing_status"),
     }
+    calculations = deepcopy(decision["calculations"])
+    for criterion in calculations:
+        criterion["milestone_id"] = _calculation_milestone_id(criterion)
     answer_checks = [
         {
             "id": f"answer_{field}",
+            "milestone_id": "answer.insights",
             "field": field,
             "weight": 1.0,
             "description": (
@@ -2531,6 +2806,16 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
         for field in insight_fields_by_mode[decision["decision_mode"]]
         for value in (answer[field],)
     ]
+    rubric_milestones = _rubric_milestones(
+        scenario=scenario,
+        decision=decision,
+        investigations=required_investigations,
+        calculations=calculations,
+        assertions=assertions,
+        answer_checks=answer_checks,
+        post_write_verifications=post_write_verifications,
+        collaboration_writes=tuple(pattern_writes),
+    )
     instruction = decision["request"]
     return {
         "benchmark": BENCHMARK_NAME,
@@ -2589,9 +2874,11 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
             "api_fixtures": fixture_rows,
             "resource_state": [initial_record],
         },
-        "required_reads": [step["tool"] for step in steps if step["control"]],
+        "required_reads": [call["tool"] for call in required_read_calls],
         "required_read_calls": required_read_calls,
+        "reference_read_calls": reference_read_calls,
         "required_investigations": required_investigations,
+        "rubric_milestones": rubric_milestones,
         "post_write_verifications": post_write_verifications,
         "answer_schema": answer_schema,
         "allowed_write_tables": ["resource_state", "answers", "audit_log"],
@@ -2599,7 +2886,7 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
         "expected": {
             "investigations": required_investigations,
             "post_write_verifications": post_write_verifications,
-            "calculations": deepcopy(decision["calculations"]),
+            "calculations": calculations,
             "assertions": assertions,
             "answer_checks": answer_checks,
             "answer": answer,
@@ -2669,6 +2956,10 @@ def catalog_quality_report(tasks: list[dict[str, Any]]) -> dict[str, Any]:
         if name.startswith("oracle_") and name not in TOOL_BY_NAME
     )
     asset_counts = [len(task["assets"]) for task in tasks]
+    native_format_counts = [
+        len({asset["path"].rsplit(".", 1)[-1].casefold() for asset in task["assets"]})
+        for task in tasks
+    ]
     system_counts = [len(task["world"]["systems"]) for task in tasks]
     asset_content_hashes: dict[str, set[str]] = {}
     for task in tasks:
@@ -2884,11 +3175,23 @@ def catalog_quality_report(tasks: list[dict[str, Any]]) -> dict[str, Any]:
         prompt = task["instruction"]
         violations = [marker for marker in recipe_markers if marker in prompt.lower()]
         word_count = len(prompt.split())
-        if word_count < 20 or word_count > 90:
+        if word_count < 45 or word_count > 220:
             violations.append(f"word_count={word_count}")
         if violations:
             prompt_violations[task["task_id"]] = violations
     closest_prompt_pair: dict[str, Any] = {"task_ids": [], "similarity": 0.0}
+    closest_prompt_shingle_pair: dict[str, Any] = {
+        "task_ids": [],
+        "similarity": 0.0,
+    }
+
+    def prompt_shingles(value: str) -> set[tuple[str, ...]]:
+        words = re.findall(r"[a-z0-9]+", value.casefold())
+        return {
+            tuple(words[index : index + 5])
+            for index in range(max(0, len(words) - 4))
+        }
+
     for left_index, left_task in enumerate(tasks):
         for right_task in tasks[left_index + 1 :]:
             similarity = SequenceMatcher(
@@ -2900,6 +3203,17 @@ def catalog_quality_report(tasks: list[dict[str, Any]]) -> dict[str, Any]:
                 closest_prompt_pair = {
                     "task_ids": [left_task["task_id"], right_task["task_id"]],
                     "similarity": round(similarity, 4),
+                }
+            left_shingles = prompt_shingles(left_task["instruction"])
+            right_shingles = prompt_shingles(right_task["instruction"])
+            union = left_shingles | right_shingles
+            shingle_similarity = (
+                len(left_shingles & right_shingles) / len(union) if union else 1.0
+            )
+            if shingle_similarity > closest_prompt_shingle_pair["similarity"]:
+                closest_prompt_shingle_pair = {
+                    "task_ids": [left_task["task_id"], right_task["task_id"]],
+                    "similarity": round(shingle_similarity, 6),
                 }
     structured_roles = (
         "source_workbook",
@@ -2950,13 +3264,7 @@ def catalog_quality_report(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     maximum_precomputed_options_in_one_read = 0
     preassembled_packet_leaks: list[dict[str, str]] = []
     for task in tasks:
-        criteria = [
-            *task["expected"]["investigations"],
-            *task["expected"].get("post_write_verifications", []),
-            *task["expected"]["calculations"],
-            *task["expected"]["assertions"],
-            *task["expected"]["answer_checks"],
-        ]
+        criteria = task["rubric_milestones"]
         minimum_criteria = min(minimum_criteria, len(criteria))
         criterion_signatures.add(
             hashlib.sha256("\n".join(criterion["description"] for criterion in criteria).encode()).hexdigest()
@@ -2997,6 +3305,7 @@ def catalog_quality_report(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     realism = {
         "prompt_violations": prompt_violations,
         "closest_prompt_pair": closest_prompt_pair,
+        "closest_prompt_5_shingle_pair": closest_prompt_shingle_pair,
         "minimum_structured_rows_by_asset_role": minimum_structured_rows_by_asset_role,
         "minimum_email_chars": minimum_email_chars,
         "minimum_slack_messages": minimum_slack_messages,
@@ -3022,6 +3331,7 @@ def catalog_quality_report(tasks: list[dict[str, Any]]) -> dict[str, Any]:
         "closest_pair": closest_pair,
         "minimum_assets_per_task": min(asset_counts),
         "maximum_assets_per_task": max(asset_counts),
+        "minimum_native_formats_per_task": min(native_format_counts),
         "asset_role_count": len(asset_content_hashes),
         "asset_role_unique_content_counts": asset_role_unique_content_counts,
         "asset_roles_with_unique_task_content": sum(
@@ -3037,14 +3347,16 @@ def catalog_quality_report(tasks: list[dict[str, Any]]) -> dict[str, Any]:
             and len({task["title"] for task in tasks}) == 100
             and not duplicate_sequences
             and closest_pair["similarity"] <= 0.80
-            and min(asset_counts) >= 12
-            and len(asset_content_hashes) >= 12
+            and min(asset_counts) >= 28
+            and min(native_format_counts) >= 7
+            and len(asset_content_hashes) >= 28
             and all(count == len(tasks) for count in asset_role_unique_content_counts.values())
             and not semantic_violations
             and min(system_counts) >= 5
             and not generic_oracle_tools
             and not prompt_violations
             and closest_prompt_pair["similarity"] <= 0.70
+            and closest_prompt_shingle_pair["similarity"] <= 0.72
             and minimum_structured_rows_by_asset_role["source_workbook"] >= 10
             and minimum_structured_rows_by_asset_role["spreadsheet_export"] >= 8
             and minimum_structured_rows_by_asset_role["source_reconciliation"] >= 10
@@ -3056,7 +3368,7 @@ def catalog_quality_report(tasks: list[dict[str, Any]]) -> dict[str, Any]:
             and minimum_options >= 3
             and minimum_answer_fields >= 6
             and minimum_oracle_read_tables >= 3
-            and minimum_criteria >= 20
+            and minimum_criteria >= 10
             and len(criterion_signatures) == len(tasks)
             and len(decision_mode_counts) == 6
             and len(option_signatures) == len(tasks)
