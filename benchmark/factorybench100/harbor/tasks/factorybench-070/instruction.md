@@ -1,3 +1,3 @@
-Engineering wants a pilot build of the revised design before broader release. Determine the quantity, revision, isolated material, fixture coverage, and first slot the approval can support, then compare that plan with waiting or reducing scope. Create only the approved pilot order.
+Engineering wants a pilot build of the revised design before broader release. Determine the quantity, revision, isolated material, fixture coverage, and first slot the approval can support, then compare that plan with waiting or reducing scope. Create only the approved pilot order. If the evidence still conflicts, keep the unsupported scope unchanged and leave operations with the unresolved risk and owner.
 
 The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

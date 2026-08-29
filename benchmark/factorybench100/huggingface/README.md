@@ -54,20 +54,17 @@ reported only as supporting evidence.
 
 ## Qualification
 
+- Canonical executions: 1200 (100 oracle + 100 exact replay + 1,000 adversarial controls)
 - Reference oracle: 100.00 FactoryScore, 100/100 strict passes
-- Incomplete-workflow control: 97.25
-- Read-only control: 34.96
-- No-control ablation: 68.71
-- Deterministic replay sample: 100/100 matched
+- Exact deterministic replay: 100/100 matched
+- Negative controls: 1000/1000 correctly rejected across 10 failure modes
 - Single-mutation omission checks: 300/300 detected
 
 These rows are measured controls, not claims about frontier models.
 
 ## Pinned model runs
 
-| Model | Harness | Coverage | FactoryScore | Strict passes | Selection |
-|---|---|---:|---:|---:|---|
-| [gpt-5.6-luna](model-runs/gpt-5.6-luna-full-100.json) | Harbor 0.21.0 / codex 0.150.1 / max | 100/100 | 89.21 | 4/100 | Full FactoryBench-100 v3.0.0 suite (100/100 tasks); high-level human requests, multi-source investigation, and task-specific deterministic scoring. Runtime overlay changed only the agent image to preinstall Codex 0.150.1; all semantic task and verifier files matched the released tree. |
+No version-pinned model run is published for this release.
 
 Coverage is part of the result. A stratified subset is not presented as a
 100-task score. Full manifests and task-level traces are mirrored under
@@ -76,10 +73,12 @@ Coverage is part of the result. A stratified subset is not presented as a
 ## Fields
 
 Each JSONL row includes the natural-language prompt, role, workflow family,
-12 heterogeneous context files, reference tools, prerequisite investigation
+28 heterogeneous context files, reference tools, prerequisite investigation
 groups, allowed write tables, weighted human-readable rubric, and metric
-contract. Executable worlds, oracle traces,
-exact verifier specifications, and Harbor tasks live in the source repository.
+contract. Context files are the only agent-visible artifacts. Exact starting
+state and verifier contracts are published separately under `evaluation/` for
+audit and are not mounted into the agent's asset room. Executable worlds, oracle
+traces, and Harbor tasks live in the source repository.
 
 ## Links
 

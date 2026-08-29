@@ -14,12 +14,12 @@ It ships no Oracle code, proprietary UI, or customer data.
 
 - An isolated multi-system SQLite starting state for every task
 - 94 typed, source-pinned operations across Oracle Fusion, Gmail, Drive, Sheets, Slack, and the benchmark harness
-- 12 task-specific source artifacts per task: policies, email, Slack, PDFs, Excel, CSV, approvals, specifications, and ERP exports
-- 100 unique call sequences with a maximum pairwise sequence similarity of 0.7568
+- 28 task-specific source artifacts per task: policies, email, Slack, PDFs, Excel, CSV, approvals, specifications, revision history, capacity, inventory, and ERP exports
+- 100 unique raw tool sequences and 100 unique semantic action graphs, with no duplicated reference workflow
 - High-level employee requests that leave the investigation path to the agent
 - Scored discovery-before-mutation evidence, persisted provider payloads, and post-write readback
 - Task-specific calculations, decisions, state, answer, containment, and tool-validity checks
-- Replayed oracle trajectories and three measured negative controls
+- Replayed oracle trajectories, exact deterministic replay, and ten measured negative controls
 - Harbor isolation with the ERP state and trace in a private root-owned sidecar
 - Upload-ready Hugging Face and Harbor distributions
 - Website data for the public task, asset, environment, and trajectory explorer
@@ -30,29 +30,29 @@ completion is supporting evidence, not a second benchmark metric.
 
 ## Qualification results
 
-| Measured control | FactoryScore | Strict passes |
-|---|---:|---:|
-| Reference oracle | 100.00 | 100/100 |
-| Incomplete workflow | 97.14 | 0/100 |
-| No controls | 69.43 | 0/100 |
-| Read only | 34.38 | 0/100 |
+The v3.2 release executes 1,200 canonical trials:
+
+- 100/100 reference-oracle strict passes at 100.00 FactoryScore
+- 100/100 exact deterministic replay matches
+- 1,000/1,000 correct rejections across no-op, shortcut, state-only,
+  incomplete-read, write-before-read, missing-readback, unauthorized-write,
+  wrong-value, wrong-decision, and wrong-evidence controls
+- 300/300 supplemental single-mutation omissions detected
 
 The reference oracle establishes solvability; it is not a model submission. The
-other rows are deliberately impaired controls that demonstrate diagnostic range.
+other executions are deliberately impaired controls that demonstrate diagnostic range.
 Schema-valid but business-wrong writes are accepted by the sandbox just as they
 would be by the provider. They persist as actual state and fail the task-specific
 payload or readback criteria; the API never reveals a hidden approved value.
 
 ## Full-suite model run
 
-The v3 release includes a version-pinned, maximum-reasoning `gpt-5.6-luna`
-run over all 100 tasks. Its manifest publishes coverage, aggregate and
-task-level FactoryScores, exceptions, tool calls, cost, trajectories, verifier
-verdicts, reward records, and the disclosed agent-image runtime overlay. The
-leaderboard result is imported directly from Harbor rather than reconstructed
-from oracle traces. Release qualification also detects all 300 single-mutation
-omissions, proving that no reference write is dispensable under the published
-verifier contract.
+Only version-pinned full-suite model runs are eligible for the public leaderboard.
+Each accepted manifest publishes coverage, aggregate and task-level FactoryScores,
+exceptions, tool calls, cost, trajectories, verifier verdicts, reward records,
+and any disclosed runtime overlay. Results are imported directly from Harbor;
+they are never reconstructed from oracle traces or carried forward across a
+benchmark version change.
 
 ## Run locally
 
@@ -87,9 +87,11 @@ directly into Codex, Claude Desktop, or another stdio MCP client.
 The checked-in release is under [`benchmark/factorybench100`](benchmark/factorybench100):
 
 - `tasks/` — complete task specifications
-- `assets/` — 1,200 source artifacts plus starting state and verifier contracts
+- `assets/` — 2,800 agent-visible source artifacts
+- `state/` — exact evaluator starting state, outside the agent-visible asset room
 - `environment/` — SQLite schema and tool contracts
 - `trajectories/` — replayed oracle tool traces and state diffs
+- `verifiers/contracts/` — sealed deterministic verifier contracts
 - `reports/` — build and qualification evidence
 - `huggingface/` — dataset-card and JSONL upload tree
 - `harbor/` — 100 portable Harbor 1.4 tasks

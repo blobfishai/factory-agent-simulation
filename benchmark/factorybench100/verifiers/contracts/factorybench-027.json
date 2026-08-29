@@ -1,0 +1,729 @@
+{
+  "answer": {
+    "business_need_date": "2026-01-14",
+    "decision_timing_status": "ON_TIME",
+    "due_date": "2026-01-25",
+    "escalation_approval_required": 1,
+    "excluded_measure": 4,
+    "forecast_horizon_end": "2026-05-28",
+    "measure_unit": "ASSETS",
+    "outcome_vs_control_days": 0,
+    "program_or_asset_record": "PM-0027",
+    "qualifying_measure": 10,
+    "recommended_incremental_cost_usd": 0,
+    "recommended_option": "generate_bounded_forecast",
+    "recommended_outcome_date": "2026-01-14",
+    "safe_window_start": "2026-01-28",
+    "source_measure": 14,
+    "trigger_threshold": 1
+  },
+  "answer_checks": [
+    {
+      "description": "Reported recommended option as 'generate_bounded_forecast', tied to NS-000027, revision R7, and the selected generate_bounded_forecast outcome.",
+      "field": "recommended_option",
+      "id": "answer_recommended_option",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported recommended outcome date as '2026-01-14', tied to NS-000027, revision R7, and the selected generate_bounded_forecast outcome.",
+      "field": "recommended_outcome_date",
+      "id": "answer_recommended_outcome_date",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported program or asset record as 'PM-0027', tied to NS-000027, revision R7, and the selected generate_bounded_forecast outcome.",
+      "field": "program_or_asset_record",
+      "id": "answer_program_or_asset_record",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported safe window start as '2026-01-28', tied to NS-000027, revision R7, and the selected generate_bounded_forecast outcome.",
+      "field": "safe_window_start",
+      "id": "answer_safe_window_start",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    },
+    {
+      "description": "Reported decision timing status as 'ON_TIME', tied to NS-000027, revision R7, and the selected generate_bounded_forecast outcome.",
+      "field": "decision_timing_status",
+      "id": "answer_decision_timing_status",
+      "milestone_id": "answer.insights",
+      "weight": 1.0
+    }
+  ],
+  "assertions": [
+    {
+      "description": "Required immutable record NS-000027 to reach business outcome 'Forecast generated' through oracle_fusion.maintenance_programs.generate_forecasts with exact provider-critical values requestBody.MaintenanceProgramCode='PM-0027', requestBody.ForecastStartDate='2026-01-12', requestBody.ForecastEndDate='2026-04-12'. The audited transition binds selected option generate_bounded_forecast, revision R7, approval AP-0027, and constraint generate only due rows inside the bounded horizon; inactive assets, blackout dates, and duplicate forecasts = 4 ASSETS; uncovered or unsupported scope = 4.0 ASSETS; no other provider record satisfies this state criterion.",
+      "id": "mutation_01",
+      "milestone_id": "state.primary",
+      "payload_allowed_argument_paths": [
+        "requestBody.ForecastEndDate",
+        "requestBody.ForecastStartDate",
+        "requestBody.MaintenanceProgramCode"
+      ],
+      "payload_contains": {
+        "arguments": {
+          "requestBody": {
+            "ForecastEndDate": "2026-04-12",
+            "ForecastStartDate": "2026-01-12",
+            "MaintenanceProgramCode": "PM-0027"
+          }
+        },
+        "tool": "oracle_fusion.maintenance_programs.generate_forecasts"
+      },
+      "table": "resource_state",
+      "values": {
+        "resource_type": "oracle_fusion.maintenance_programs",
+        "revision": 1,
+        "status": "Forecast generated",
+        "system": "oracle_fusion"
+      },
+      "weight": 3.0,
+      "where": {
+        "resource_id": "factorybench-027-mutation-01",
+        "task_id": "factorybench-027"
+      }
+    },
+    {
+      "description": "Marked the existing CASE-027 approval thread complete only after the Oracle decision was persisted.",
+      "id": "mutation_02",
+      "milestone_id": "state.collaboration",
+      "payload_contains": {
+        "arguments": {
+          "channel": "C-FINANCE",
+          "name": "white_check_mark",
+          "timestamp": "1768000027.000100"
+        },
+        "tool": "slack.reactions_add"
+      },
+      "table": "resource_state",
+      "values": {
+        "resource_type": "slack",
+        "revision": 1,
+        "status": "Recorded",
+        "system": "slack"
+      },
+      "weight": 1.5,
+      "where": {
+        "resource_id": "factorybench-027-mutation-02",
+        "task_id": "factorybench-027"
+      }
+    },
+    {
+      "description": "Appended one audit row for CASE-027 with the selected option, completion, role, and AP-0027.",
+      "id": "mutation_03",
+      "milestone_id": "state.collaboration",
+      "payload_contains": {
+        "arguments": {
+          "range": "Audit!A:G",
+          "spreadsheetId": "sheet-027"
+        },
+        "tool": "google_sheets.spreadsheets.values.append"
+      },
+      "payload_text_contains": [
+        "2026-01-14",
+        "generate_bounded_forecast"
+      ],
+      "table": "resource_state",
+      "values": {
+        "resource_type": "google_sheets.spreadsheets.values",
+        "revision": 1,
+        "status": "Recorded",
+        "system": "google_sheets"
+      },
+      "weight": 1.5,
+      "where": {
+        "resource_id": "factorybench-027-mutation-03",
+        "task_id": "factorybench-027"
+      }
+    }
+  ],
+  "calculations": [
+    {
+      "description": "Preserved 2026-01-14 as the documented date for quarterly compressor program; did not infer urgency from the title.",
+      "field": "business_need_date",
+      "id": "identify_business_date",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    },
+    {
+      "description": "Established 14 ASSETS for eligible active compressors in the forecast horizon.",
+      "field": "source_measure",
+      "id": "establish_forecast_source_measure",
+      "milestone_id": "analysis.inputs",
+      "weight": 1.5
+    },
+    {
+      "description": "Retained 10 ASSETS for assets with approved quarterly pattern and no existing forecast.",
+      "field": "qualifying_measure",
+      "id": "qualify_forecast_measure",
+      "milestone_id": "analysis.inputs",
+      "weight": 2.0
+    },
+    {
+      "description": "Removed 4 ASSETS for inactive assets, blackout dates, and duplicate forecasts.",
+      "field": "excluded_measure",
+      "id": "exclude_invalid_forecast_measure",
+      "milestone_id": "analysis.inputs",
+      "weight": 1.5
+    },
+    {
+      "description": "Applied the trigger and reconciliation in ASSETS.",
+      "field": "measure_unit",
+      "id": "preserve_forecast_measure_unit",
+      "milestone_id": "analysis.inputs",
+      "weight": 0.5
+    },
+    {
+      "description": "Applied the effective 1 ASSETS threshold under generate only due rows inside the bounded horizon.",
+      "field": "trigger_threshold",
+      "id": "apply_trigger_threshold",
+      "milestone_id": "analysis.inputs",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-25 from the qualifying measure and effective trigger.",
+      "field": "due_date",
+      "id": "calculate_due_date",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.5
+    },
+    {
+      "description": "Identified 2026-01-28 as the first safe window under shutdown calendar availability.",
+      "field": "safe_window_start",
+      "id": "identify_safe_window",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.5
+    },
+    {
+      "description": "Bound generation at 2026-05-28; did not use the emergency-option date as the horizon.",
+      "field": "forecast_horizon_end",
+      "id": "bound_forecast_horizon",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    },
+    {
+      "description": "Applied USD 0 as the documented incremental spend or avoidable exposure for generate_bounded_forecast; did not invent a premium where spend is not a decision driver.",
+      "field": "recommended_incremental_cost_usd",
+      "id": "calculate_selected_cost",
+      "milestone_id": "decision.options",
+      "weight": 1.0
+    },
+    {
+      "description": "Recognized that defer_entire_quarter remains outside current authority and requires an additional approval.",
+      "field": "escalation_approval_required",
+      "id": "apply_escalation_authority",
+      "milestone_id": "decision.options",
+      "weight": 1.0
+    },
+    {
+      "description": "Compared the timing, economic impact, control status, and consequence of generate_bounded_forecast, forecast_all_asset_rows, and defer_entire_quarter; selected generate_bounded_forecast because it alone gives the best currently authorized result under generate only due rows inside the bounded horizon.",
+      "field": "recommended_option",
+      "id": "choose_task_specific_option",
+      "milestone_id": "decision.options",
+      "weight": 2.0
+    },
+    {
+      "description": "Calculated 2026-01-14 as the supported outcome date for generate_bounded_forecast.",
+      "field": "recommended_outcome_date",
+      "id": "calculate_recommended_outcome",
+      "milestone_id": "analysis.timeline",
+      "weight": 2.0
+    },
+    {
+      "description": "Compared 2026-01-14 with the independent control date 2026-01-14 and calculated a signed variance of 0 day(s).",
+      "field": "outcome_vs_control_days",
+      "id": "calculate_outcome_variance",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.5
+    },
+    {
+      "description": "Reported ON_TIME; did not relabel a controlled but late result as on time.",
+      "field": "decision_timing_status",
+      "id": "state_honest_timing_status",
+      "milestone_id": "analysis.timeline",
+      "weight": 1.0
+    }
+  ],
+  "investigations": [
+    {
+      "any_of": [
+        {
+          "arguments": {},
+          "expected_result_contains": {
+            "reference_records": {
+              "case_reference": "CASE-027"
+            }
+          },
+          "match": "result_contains",
+          "tool": "factorybench.context.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Established the isolated CASE-027 scope, immutable handles, mounted systems, and evidence index before investigating NS-000027.",
+      "id": "investigation_01",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "includeGridData": false,
+            "ranges": [
+              "Control!A1:I50"
+            ],
+            "spreadsheetId": "sheet-027"
+          },
+          "expected_result_contains": {
+            "developerMetadata": [
+              {
+                "metadataKey": "case",
+                "metadataValue": "CASE-027"
+              }
+            ],
+            "spreadsheetId": "sheet-027"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Confirmed the case, effective source revision, and actual Control, Approvals, and Audit tabs in the workbook metadata before relying on its cells.",
+      "id": "investigation_02",
+      "milestone_id": "investigation.constraints",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "inclusive": true,
+            "limit": 100,
+            "oldest": "1768000000.000000"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000027.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_history"
+        },
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000027.000100"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "ts": "1768000027.000100"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Read the scoped operations discussion, confirmed the independently stated stakeholder need date, and separated operational context from formal approval: Applied AP-0027 only to generate_bounded_forecast, NS-000027, and the supported 10 ASSETS; kept broader scope and defer_entire_quarter outside current authority.",
+      "id": "investigation_03",
+      "milestone_id": "investigation.authority",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-027\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-027"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-027 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_04",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "id": "att-027",
+            "messageId": "msg-027-1",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "data": "Q0FTQ0FERSBJTkRVU1RSSUFMIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogY29tcHJlc3Nvci1yb3N0ZXItYW5kLW1haW50ZW5hbmNlLWNhbGVuZGFyLTAwMjcKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDI3Cklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IGNvbXByZXNzb3Igcm9zdGVyIGFuZCBtYWludGVuYW5jZSBjYWxlbmRhcgpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDI3CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFI3Ck1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogNCBBU1NFVFMKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogZm9yZWNhc3RfYWxsX2Fzc2V0X3Jvd3MKU3RhbmRhcmQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTEKRXhwZWRpdGVkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAyLTIxClJlc3VsdGluZyBvcGVyYXRpbmcgb3V0Y29tZSBzdGF0ZWQgYnkgcmVxdWVzdGVyLCBub3QgYnkgY291bnRlcnBhcnR5OiAyMDI2LTAyLTI0CkVjb25vbWljIGltcGFjdCBzdGF0ZWQgYnkgY291bnRlcnBhcnR5OiBVU0QgMApJbmRlcGVuZGVudCBjb25kaXRpb246IGNvbnRyYWN0b3IgY292ZXJhZ2UgYnkgbW9udGgKQ2FwYWNpdHkgaXMgcmVzZXJ2ZWQgb25seSBhZnRlciB0aGUgYnV5ZXIgb3IgcGxhbm5lciBzdXBwbGllcyB0aGUgbWF0Y2hpbmcgaW1tdXRhYmxlIHJlY29yZCBhbmQgY3VycmVudCBhcHByb3ZhbC4KCjMuIEVYQ0xVU0lPTlMgQU5EIEFTU1VNUFRJT05TCk5vdCBpbmNsdWRlZDogaW5hY3RpdmUgYXNzZXRzLCBibGFja291dCBkYXRlcywgYW5kIGR1cGxpY2F0ZSBmb3JlY2FzdHMKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogZ2VuZXJhdGUgb25seSBkdWUgcm93cyBpbnNpZGUgdGhlIGJvdW5kZWQgaG9yaXpvbgpOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wMjggaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBDYXNjYWRlIEluZHVzdHJpYWwgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwMjcKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo",
+            "size": 1538
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.attachments.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the external attachment from the matched email and Used the independently confirmed 2026-02-21 readiness input for forecast_all_asset_rows, then separately derived its 2026-02-24 operating outcome under generate only due rows inside the bounded horizon instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_05",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fields": "files(id,name,mimeType,modifiedTime,md5Checksum)",
+            "pageSize": 50,
+            "q": "name contains 'CASE-027' and trashed = false"
+          },
+          "expected_result_contains": {
+            "files": [
+              {
+                "id": "drive-027"
+              },
+              {
+                "id": "drive-approval-027"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Enumerated the case-scoped Drive records for CASE-027 and used their immutable file IDs to distinguish the effective specification, approval, and option workbook.",
+      "id": "investigation_06",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-027-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-027-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-027-11",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-027-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-027-11"
+          },
+          "expected_result_contains": {
+            "id": "drive-027-11"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the raw operating-window calendar and Applied shutdown calendar availability to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_07",
+      "milestone_id": "investigation.constraints",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-027-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-027-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-027-04",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-027-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-027-04"
+          },
+          "expected_result_contains": {
+            "id": "drive-027-04"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped source-input workbook and Applied revision R7 and established 14 ASSETS for eligible active compressors in the forecast horizon, with control date 2026-01-14.",
+      "id": "investigation_08",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-027-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-027-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-027-12",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-027-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-027-12"
+          },
+          "expected_result_contains": {
+            "id": "drive-027-12"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the effective control specification and Applied revision R7 and established 14 ASSETS for eligible active compressors in the forecast horizon, with control date 2026-01-14.",
+      "id": "investigation_09",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "fileId": "drive-approval-027"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-027"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.download"
+        },
+        {
+          "arguments": {
+            "fileId": "drive-approval-027",
+            "mimeType": "text/plain"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-027"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.export"
+        },
+        {
+          "arguments": {
+            "fields": "id,name,mimeType,modifiedTime,md5Checksum,description",
+            "fileId": "drive-approval-027"
+          },
+          "expected_result_contains": {
+            "id": "drive-approval-027"
+          },
+          "match": "result_contains",
+          "tool": "google_drive.files.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Opened the task-scoped signed approval record and Applied AP-0027 only to generate_bounded_forecast, NS-000027, and the supported 10 ASSETS; kept broader scope and defer_entire_quarter outside current authority.",
+      "id": "investigation_10",
+      "milestone_id": "investigation.authority",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100027,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100027
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_resources.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance resources record: Applied shutdown calendar availability to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_11",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "ItemNumber='NS-COMP-027' and OrganizationCode='SEA'"
+          },
+          "expected_result_contains": {
+            "InventoryItemId": 1400027
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.inventory_onhand_balances.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle inventory onhand balances record: Reconciled 14 observed less 4 excluded to 10 supported ASSETS for assets with approved quarterly pattern and no existing forecast.",
+      "id": "investigation_12",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "MaintenanceProgramId": 500027
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500027
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "MaintenanceProgramCode='PM-0027'"
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500027
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance programs record: Located NS-000027 for quarterly compressor program using immutable IDs and preserved effective revision R7.",
+      "id": "investigation_13",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "WorkOrderId": 100027
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100027
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "WorkOrderNumber='MWO-0027'"
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100027
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_work_orders.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle maintenance work orders record: Located NS-000027 for quarterly compressor program using immutable IDs and preserved effective revision R7.",
+      "id": "investigation_14",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    }
+  ],
+  "post_write_verifications": [
+    {
+      "after_tool": "oracle_fusion.maintenance_programs.generate_forecasts",
+      "any_of": [
+        {
+          "arguments": {
+            "MaintenanceProgramId": 500027
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500027
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "MaintenanceProgramCode='PM-0027'"
+          },
+          "expected_result_contains": {
+            "MaintenanceProgramId": 500027
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.maintenance_programs.list"
+        }
+      ],
+      "description": "Read NS-000027 back through the documented Oracle maintenance programs.get operation after the mutation and confirmed the resource-specific changed fields ['ForecastEndDate', 'ForecastStartDate', 'LastUpdateDate', 'MaintenanceProgramCode'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
+      "expected_result_contains": {
+        "ForecastEndDate": "2026-04-12",
+        "ForecastStartDate": "2026-01-12",
+        "LastUpdateDate": "2026-01-14T16:00:00-08:00",
+        "MaintenanceProgramCode": "PM-0027"
+      },
+      "id": "verify_primary_oracle_state",
+      "materializes_new_record": false,
+      "milestone_id": "verification.readback",
+      "target_identity": {
+        "MaintenanceProgramId": 500027
+      },
+      "weight": 2.0
+    }
+  ]
+}

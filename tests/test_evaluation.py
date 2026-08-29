@@ -8,13 +8,35 @@ from pathlib import Path
 import pytest
 
 from factorybench.catalog import FAMILIES, build_catalog
-from factorybench.evaluation import evaluate_policy, qualify, run_episode, verify_episode
+from factorybench.evaluation import (
+    NEGATIVE_POLICIES,
+    _aggregate_semantic_checks,
+    evaluate_policy,
+    qualify,
+    run_episode,
+    verify_episode,
+)
+from factorybench.harbor_verify import (
+    _aggregate_semantic_checks as _aggregate_harbor_semantic_checks,
+)
 from factorybench.world import FactoryWorld, READ_TOOLS, WRITE_TOOLS
 
 
 @pytest.fixture(scope="module")
 def tasks():
     return build_catalog()
+
+
+def _atomic_checks(verdict):
+    return [
+        subcheck
+        for milestone in verdict["checks"]
+        for subcheck in milestone.get("evidence", {}).get("subchecks", [milestone])
+    ]
+
+
+def _atomic_check(verdict, check_id):
+    return next(check for check in _atomic_checks(verdict) if check["id"] == check_id)
 
 
 def test_reference_episode_strictly_passes_each_family(tasks) -> None:
@@ -24,7 +46,111 @@ def test_reference_episode_strictly_passes_each_family(tasks) -> None:
             episode = run_episode(task, "oracle", Path(temporary) / f"{task['task_id']}.db")
             assert episode["score"] == 100.0
             assert episode["strict_pass"] is True
+            assert len(episode["checks"]) == 14
+            assert episode["total_weight"] == 100.0
+            assert episode["passed_atomic_checks"] == episode["total_atomic_checks"]
+            assert all("subchecks" in check["evidence"] for check in episode["checks"])
             assert all(entry["success"] for entry in episode["trace"])
+
+
+def test_local_and_harbor_verifiers_share_a_tamper_evident_semantic_contract(tasks) -> None:
+    task = tasks[0]
+    atomic_specs = [
+        *task["expected"]["investigations"],
+        *task["expected"]["calculations"],
+        *task["expected"]["assertions"],
+        *task["expected"]["post_write_verifications"],
+        *task["expected"]["answer_checks"],
+        {"id": "write_scope", "weight": 1.0},
+        {"id": "no_rejected_mutation", "weight": 1.0},
+    ]
+    atomic_checks = [
+        {
+            "id": criterion["id"],
+            "description": criterion.get("description", criterion["id"]),
+            "weight": float(criterion.get("weight", 1.0)),
+            "passed": True,
+            "evidence": {},
+        }
+        for criterion in atomic_specs
+    ]
+
+    local = _aggregate_semantic_checks(task, atomic_checks)
+    harbor = _aggregate_harbor_semantic_checks(task, atomic_checks)
+    assert local == harbor
+    assert sum(check["earned_weight"] for check in local) == 100.0
+
+    tampered = deepcopy(task)
+    tampered["rubric_milestones"][0]["atomic_weight"] += 1
+    with pytest.raises(ValueError, match="atomic weight changed"):
+        _aggregate_semantic_checks(tampered, atomic_checks)
+
+    incomplete = deepcopy(task)
+    incomplete["rubric_milestones"][-1]["criterion_ids"] = []
+    with pytest.raises(ValueError, match="has no evidence criteria"):
+        _aggregate_harbor_semantic_checks(incomplete, atomic_checks)
+
+
+def test_reference_can_skip_surrounding_evidence_without_losing_semantic_credit(
+    tasks,
+    tmp_path: Path,
+) -> None:
+    task = tasks[0]
+    required = {
+        (call["tool"], json.dumps(call["arguments"], sort_keys=True, separators=(",", ":")))
+        for call in task["required_read_calls"]
+    }
+    skipped = []
+    with FactoryWorld.fresh(task, tmp_path / "material-evidence-only.db") as world:
+        for step in task["oracle_steps"]:
+            signature = (
+                step["tool"],
+                json.dumps(step["arguments"], sort_keys=True, separators=(",", ":")),
+            )
+            if (
+                step["phase"] == "investigation"
+                and step["control"]
+                and signature not in required
+            ):
+                skipped.append(step["tool"])
+                continue
+            assert "error" not in world.call_tool(step["tool"], step["arguments"])
+        verdict = verify_episode(task, world)
+
+    assert len(skipped) >= 8
+    assert verdict["score"] == 100.0
+    assert verdict["strict_pass"] is True
+
+
+def test_missing_material_erp_join_fails_the_causal_milestone(
+    tasks,
+    tmp_path: Path,
+) -> None:
+    task = tasks[0]
+    material_join = next(
+        investigation
+        for investigation in task["required_investigations"]
+        if investigation["milestone_id"] == "investigation.erp_correlation"
+        and any(
+            "work_order_materials" in alternative["tool"]
+            for alternative in investigation["any_of"]
+        )
+    )
+    omitted_tools = {alternative["tool"] for alternative in material_join["any_of"]}
+    with FactoryWorld.fresh(task, tmp_path / "missing-material-join.db") as world:
+        for step in task["oracle_steps"]:
+            if step["phase"] == "investigation" and step["tool"] in omitted_tools:
+                continue
+            assert "error" not in world.call_tool(step["tool"], step["arguments"])
+        verdict = verify_episode(task, world)
+
+    assert _atomic_check(verdict, material_join["id"])["passed"] is False
+    erp_milestone = next(
+        check for check in verdict["checks"] if check["id"] == "investigation.erp_correlation"
+    )
+    assert erp_milestone["passed"] is False
+    assert erp_milestone["earned_weight"] < erp_milestone["weight"]
+    assert verdict["score"] < 100.0
 
 
 def test_environment_does_not_use_an_observer_only_read_gate(tasks, tmp_path: Path) -> None:
@@ -37,7 +163,7 @@ def test_environment_does_not_use_an_observer_only_read_gate(tasks, tmp_path: Pa
         assert world.connection.execute("SELECT COUNT(*) FROM audit_log").fetchone()[0] == 1
         verdict = verify_episode(task, world)
     investigation_checks = [
-        check for check in verdict["checks"] if check["id"].startswith("investigation_")
+        check for check in _atomic_checks(verdict) if check["id"].startswith("investigation_")
     ]
     assert investigation_checks
     assert not any(check["passed"] for check in investigation_checks)
@@ -56,7 +182,7 @@ def test_verifier_scores_each_missing_business_investigation(tasks, tmp_path: Pa
         result = world.call_tool(first_write["tool"], first_write["arguments"])
         assert "error" not in result
         verdict = verify_episode(task, world)
-    missing = next(check for check in verdict["checks"] if check["id"] == "investigation_02")
+    missing = _atomic_check(verdict, "investigation_02")
     assert missing["passed"] is False
     assert "task-scoped correspondence" in missing["description"]
 
@@ -78,9 +204,7 @@ def test_collection_reads_accept_realistic_alternate_queries(tasks, tmp_path: Pa
             assert "error" not in result
         assert "error" not in world.call_tool(first_write["tool"], first_write["arguments"])
         verdict = verify_episode(task, world)
-    gmail_discovery = next(
-        check for check in verdict["checks"] if check["id"] == "investigation_02"
-    )
+    gmail_discovery = _atomic_check(verdict, "investigation_02")
     assert gmail_discovery["passed"] is True
 
 
@@ -130,7 +254,7 @@ def test_repeating_one_drive_file_cannot_satisfy_distinct_discoveries(
 
     drive_discoveries = [
         check
-        for check in verdict["checks"]
+        for check in _atomic_checks(verdict)
         if check["id"].startswith("investigation_")
         and (
             "Opened the" in check["description"]
@@ -162,7 +286,7 @@ def test_listed_drive_assets_are_retrievable_and_sheet_ranges_are_flexible(tasks
             "google_drive.files.list",
             {"q": "trashed = false", "pageSize": 100},
         )
-        assert len(listed["files"]) == 12
+        assert len(listed["files"]) == 28
         metadata = world.call_tool(
             "google_drive.files.get",
             {"fileId": listed["files"][0]["id"], "fields": "id,name,mimeType"},
@@ -223,22 +347,16 @@ def test_oracle_accepts_business_wrong_values_and_verifier_detects_them(
         ).fetchone()
 
     assert json.loads(state["payload_json"])["arguments"] == altered
-    mutation = next(check for check in verdict["checks"] if check["id"] == "mutation_01")
+    mutation = _atomic_check(verdict, "mutation_01")
     assert mutation["passed"] is False
     assert (
         mutation["evidence"]["payload_mismatches"]
         ["payload.arguments.requestBody.PlannedCompletionDate"]["actual"]
         == "2099-01-01"
     )
-    readback_check = next(
-        check
-        for check in verdict["checks"]
-        if check["id"] == "verify_primary_oracle_state"
-    )
+    readback_check = _atomic_check(verdict, "verify_primary_oracle_state")
     assert readback_check["passed"] is False
-    assert next(
-        check for check in verdict["checks"] if check["id"] == "no_rejected_mutation"
-    )["passed"] is True
+    assert _atomic_check(verdict, "no_rejected_mutation")["passed"] is True
 
 
 def test_oracle_patch_can_be_corrected_after_an_incomplete_transition(
@@ -259,11 +377,7 @@ def test_oracle_patch_can_be_corrected_after_an_incomplete_transition(
         result = world.call_tool(primary_write["tool"], partial)
         assert "error" not in result
         partial_verdict = verify_episode(task, world)
-        assert next(
-            check
-            for check in partial_verdict["checks"]
-            if check["id"] == "mutation_01"
-        )["passed"] is False
+        assert _atomic_check(partial_verdict, "mutation_01")["passed"] is False
         corrected = world.call_tool(primary_write["tool"], primary_write["arguments"])
         assert "error" not in corrected
         rows = world.connection.execute(
@@ -279,11 +393,7 @@ def test_oracle_patch_can_be_corrected_after_an_incomplete_transition(
         corrected_verdict = verify_episode(task, world)
     assert len(rows) == 1
     assert json.loads(rows[0]["payload_json"])["arguments"] == primary_write["arguments"]
-    assert next(
-        check
-        for check in corrected_verdict["checks"]
-        if check["id"] == "mutation_01"
-    )["passed"] is True
+    assert _atomic_check(corrected_verdict, "mutation_01")["passed"] is True
 
 
 def test_provider_readback_observes_the_committed_state_and_is_graded(tasks, tmp_path: Path) -> None:
@@ -305,9 +415,7 @@ def test_provider_readback_observes_the_committed_state_and_is_graded(tasks, tmp
         assert all(after[field] == value for field, value in expected.items())
         assert "StatusCode" not in after
         verdict = verify_episode(task, world)
-    check = next(
-        check for check in verdict["checks"] if check["id"] == "verify_primary_oracle_state"
-    )
+    check = _atomic_check(verdict, "verify_primary_oracle_state")
     assert check["passed"] is True
 
 
@@ -340,9 +448,7 @@ def test_create_readback_materializes_a_record_only_after_the_write(tasks, tmp_p
             for field, value in verification["expected_result_contains"].items()
         )
         verdict = verify_episode(task, world)
-    check = next(
-        check for check in verdict["checks"] if check["id"] == "verify_primary_oracle_state"
-    )
+    check = _atomic_check(verdict, "verify_primary_oracle_state")
     assert check["passed"] is True
 
 
@@ -414,9 +520,7 @@ def test_write_acknowledgement_without_provider_readback_is_incomplete(tasks, tm
                 continue
             assert "error" not in world.call_tool(step["tool"], step["arguments"])
         verdict = verify_episode(task, world)
-    check = next(
-        check for check in verdict["checks"] if check["id"] == "verify_primary_oracle_state"
-    )
+    check = _atomic_check(verdict, "verify_primary_oracle_state")
     assert check["passed"] is False
 
 
@@ -455,22 +559,12 @@ def test_provider_does_not_reveal_gold_values_for_valid_business_mistakes(
         response = world.call_tool(tool_name, wrong)
         assert "error" not in response
         verdict = verify_episode(task, world)
-        mutation = next(
-            check for check in verdict["checks"] if check["id"] == "mutation_01"
-        )
+        mutation = _atomic_check(verdict, "mutation_01")
         assert mutation["passed"] is False
-        assert next(
-            check
-            for check in verdict["checks"]
-            if check["id"] == "no_rejected_mutation"
-        )["passed"] is True
+        assert _atomic_check(verdict, "no_rejected_mutation")["passed"] is True
         assert "error" not in world.call_tool(tool_name, write["arguments"])
         corrected = verify_episode(task, world)
-        assert next(
-            check
-            for check in corrected["checks"]
-            if check["id"] == "mutation_01"
-        )["passed"] is True
+        assert _atomic_check(corrected, "mutation_01")["passed"] is True
 
 
 @pytest.mark.parametrize(
@@ -543,14 +637,11 @@ def test_harbor_slim_runtime_preserves_actual_oracle_payloads(
                 assert target[field] == value
 
         verdict = verify_episode(slim_task, world)
-        assert next(
-            check for check in verdict["checks"] if check["id"] == "mutation_01"
-        )["passed"] is False
-        assert next(
-            check
-            for check in verdict["checks"]
-            if check["id"] == "verify_primary_oracle_state"
-        )["passed"] is readback_passes
+        assert _atomic_check(verdict, "mutation_01")["passed"] is False
+        assert (
+            _atomic_check(verdict, "verify_primary_oracle_state")["passed"]
+            is readback_passes
+        )
 
 
 def test_natural_task_scoped_provider_prose_is_not_exact_string_graded(
@@ -585,14 +676,8 @@ def test_natural_task_scoped_provider_prose_is_not_exact_string_graded(
         world.call_tool(readback["tool"], readback["arguments"])
         verdict = verify_episode(task, world)
 
-    assert next(
-        check for check in verdict["checks"] if check["id"] == "mutation_01"
-    )["passed"] is True
-    assert next(
-        check
-        for check in verdict["checks"]
-        if check["id"] == "verify_primary_oracle_state"
-    )["passed"] is True
+    assert _atomic_check(verdict, "mutation_01")["passed"] is True
+    assert _atomic_check(verdict, "verify_primary_oracle_state")["passed"] is True
 
 
 def test_optional_operation_name_does_not_require_an_internal_case_token(
@@ -620,14 +705,8 @@ def test_optional_operation_name_does_not_require_an_internal_case_token(
         world.call_tool(readback["tool"], readback["arguments"])
         verdict = verify_episode(task, world)
 
-    assert next(
-        check for check in verdict["checks"] if check["id"] == "mutation_01"
-    )["passed"] is True
-    assert next(
-        check
-        for check in verdict["checks"]
-        if check["id"] == "verify_primary_oracle_state"
-    )["passed"] is True
+    assert _atomic_check(verdict, "mutation_01")["passed"] is True
+    assert _atomic_check(verdict, "verify_primary_oracle_state")["passed"] is True
 
 
 def test_unauthorized_extra_provider_fields_fail_mutation_containment(
@@ -654,18 +733,12 @@ def test_unauthorized_extra_provider_fields_fail_mutation_containment(
         world.call_tool(readback["tool"], readback["arguments"])
         verdict = verify_episode(task, world)
 
-    mutation = next(
-        check for check in verdict["checks"] if check["id"] == "mutation_01"
-    )
+    mutation = _atomic_check(verdict, "mutation_01")
     assert mutation["passed"] is False
     assert mutation["evidence"]["unexpected_payload_paths"] == [
         "requestBody.WorkOrderQuantity"
     ]
-    assert next(
-        check
-        for check in verdict["checks"]
-        if check["id"] == "verify_primary_oracle_state"
-    )["passed"] is False
+    assert _atomic_check(verdict, "verify_primary_oracle_state")["passed"] is False
 
 
 def test_numeric_answers_use_decimal_normalization(tasks, tmp_path: Path) -> None:
@@ -678,11 +751,11 @@ def test_numeric_answers_use_decimal_normalization(tasks, tmp_path: Path) -> Non
 def test_negative_controls_are_diagnostic(tasks) -> None:
     representatives = [next(task for task in tasks if task["family"] == family) for family in FAMILIES]
     oracle = evaluate_policy("oracle", representatives)
-    incomplete = evaluate_policy("incomplete_workflow", representatives)
-    read_only = evaluate_policy("read_only", representatives)
-    no_control = evaluate_policy("no_control", representatives)
     assert oracle["mean_score"] == 100.0
-    assert oracle["mean_score"] > incomplete["mean_score"] > no_control["mean_score"] > read_only["mean_score"]
+    for policy in NEGATIVE_POLICIES:
+        control = evaluate_policy(policy, representatives)
+        assert control["mean_score"] < oracle["mean_score"]
+        assert control["strict_passes"] == 0
 
 
 def test_full_release_qualification_passes(tasks) -> None:
@@ -690,7 +763,23 @@ def test_full_release_qualification_passes(tasks) -> None:
     assert report["qualification_passed"] is True
     assert report["oracle_all_strict"] is True
     assert report["deterministic_replay"] is True
+    assert report["executions"] == 1200
+    assert report["determinism"] == {
+        "replays": 100,
+        "exact_episode_matches": 100,
+        "mismatches": 0,
+    }
     assert report["negative_controls_below_oracle"] is True
+    assert set(report["negative_controls"]) == set(NEGATIVE_POLICIES)
+    assert all(
+        control == {
+            "executions": 100,
+            "false_accepts": 0,
+            "correct_rejections": 100,
+            "mean_score": control["mean_score"],
+        }
+        for control in report["negative_controls"].values()
+    )
     assert report["mutation_omissions"] == {
         "total": 300,
         "detected": 300,
@@ -703,3 +792,4 @@ def test_subset_qualification_bounds_the_determinism_sample(tasks) -> None:
     report = qualify(tasks[:1])
     assert report["qualification_passed"] is True
     assert report["determinism_sample_size"] == 1
+    assert report["executions"] == 12

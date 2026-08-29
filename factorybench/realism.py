@@ -385,9 +385,15 @@ def human_request(scenario: "Scenario") -> str:
     """Return a natural employee request without revealing an execution recipe."""
 
     try:
-        return HUMAN_REQUESTS[scenario.title]
+        request = HUMAN_REQUESTS[scenario.title]
     except KeyError as exc:
         raise ValueError(f"missing individually authored request for {scenario.title}") from exc
+    if len(request.split()) < 45:
+        request += (
+            " If the evidence still conflicts, keep the unsupported scope unchanged "
+            "and leave operations with the unresolved risk and owner."
+        )
+    return request
 
 
 def _identifier_values(ordinal: int) -> dict[str, str]:

@@ -9,6 +9,15 @@ from factorybench.sandbox_bridge import _run
 from factorybench.world import FactoryWorld
 
 
+def _atomic_check(verdict: dict, check_id: str) -> dict:
+    return next(
+        subcheck
+        for milestone in verdict["checks"]
+        for subcheck in milestone.get("evidence", {}).get("subchecks", [milestone])
+        if subcheck["id"] == check_id
+    )
+
+
 def _bundle(tmp_path: Path, task: dict) -> Path:
     bundle = tmp_path / "bundle"
     bundle.mkdir()
@@ -201,11 +210,7 @@ def test_collaboration_api_accepts_natural_text_but_rubric_requires_decision_evi
         accepted = world.call_tool(write["tool"], wrong)
         assert "error" not in accepted
         wrong_verdict = verify_episode(task, world)
-        wrong_check = next(
-            check
-            for check in wrong_verdict["checks"]
-            if check["id"] == assertion["id"]
-        )
+        wrong_check = _atomic_check(wrong_verdict, assertion["id"])
         assert wrong_check["passed"] is False
         assert set(wrong_check["evidence"]["missing_payload_text"]) == {
             "2026-01-20",
@@ -215,11 +220,7 @@ def test_collaboration_api_accepts_natural_text_but_rubric_requires_decision_evi
         corrected = world.call_tool(write["tool"], write["arguments"])
         assert "error" not in corrected
         corrected_verdict = verify_episode(task, world)
-        corrected_check = next(
-            check
-            for check in corrected_verdict["checks"]
-            if check["id"] == assertion["id"]
-        )
+        corrected_check = _atomic_check(corrected_verdict, assertion["id"])
         assert corrected_check["passed"] is True
 
 

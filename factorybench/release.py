@@ -24,7 +24,7 @@ from .catalog import (
     catalog_quality_report,
     task_fingerprint,
 )
-from .evaluation import POLICIES, policy_steps, qualify, run_episode
+from .evaluation import NEGATIVE_POLICIES, policy_steps, qualify, run_episode
 from .scenarios import FAMILY_DESCRIPTIONS, FAMILY_LABELS
 from .server import tool_definitions
 from .world import READ_TOOLS
@@ -38,6 +38,13 @@ HARBOR_URL = "https://hub.harborframework.com/datasets/blobfishai/factorybench-1
 PAGE_URL = "https://blobfish.ai/benchmarks/factorybench-100"
 HARBOR_PYTHON_IMAGE = "python:3.12-slim@sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17"
 MCP_CONFIG_PATH = "environment/mcp.json"
+LEADERBOARD_POLICIES = (
+    "oracle",
+    "shortcut",
+    "state_only",
+    "wrong_evidence",
+    "wrong_decision",
+)
 
 def _write_text(path: Path, value: str, *, executable: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -305,31 +312,14 @@ def _harbor_dataset_manifest(tasks_root: Path) -> str:
 
 
 def _rubric_criteria(task: dict[str, Any]) -> list[dict[str, Any]]:
-    criteria = [
-        *task["expected"]["investigations"],
-        *task["expected"].get("post_write_verifications", []),
-        *task["expected"]["calculations"],
-        *task["expected"]["assertions"],
-        *task["expected"]["answer_checks"],
-    ]
     return [
         {
-            "id": criterion["id"],
-            "description": criterion["description"],
-            "weight": float(criterion.get("weight", 1.0)),
+            "id": milestone["id"],
+            "category": milestone["category"],
+            "description": milestone["description"],
+            "weight": float(milestone["weight"]),
         }
-        for criterion in criteria
-    ] + [
-        {
-            "id": "write_scope",
-            "description": f"Keep every successful write inside {task['task_id']}'s declared Oracle, collaboration, answer, and audit state.",
-            "weight": 1.0,
-        },
-        {
-            "id": "no_rejected_mutation",
-            "description": "Complete without a rejected state-changing call; failed exploratory reads do not erase a correct business outcome.",
-            "weight": 1.0,
-        },
+        for milestone in task["rubric_milestones"]
     ]
 
 
@@ -344,12 +334,15 @@ def _public_task(task: dict[str, Any]) -> dict[str, Any]:
         "family": task["family"],
         "level": task["level"],
         "as_of": task["as_of"],
-        "context_files": [f"assets/{task['task_id']}/{asset['path']}" for asset in task["assets"]]
-        + [f"assets/{task['task_id']}/starting-state.json"],
+        "context_files": [
+            f"assets/{task['task_id']}/{asset['path']}"
+            for asset in task["assets"]
+        ],
         "reference_tools": [step["tool"] for step in task["oracle_steps"]],
-        "call_order_policy": "No exact sequence is graded; each prerequisite investigation must complete before the first mutation.",
+        "call_order_policy": "The reference trajectory is illustrative, not graded. Material identity, authority, constraint, and ERP discoveries must precede the dependent mutation; their order and valid query shapes are otherwise open.",
         "required_reads": task["required_reads"],
         "required_read_calls": task["required_read_calls"],
+        "reference_read_calls": task["reference_read_calls"],
         "post_write_verifications": task.get("post_write_verifications", []),
         "answer_schema": task["answer_schema"],
         "allowed_write_tables": task["allowed_write_tables"],
@@ -395,15 +388,17 @@ def _website_data(
     result_by_policy = {result["policy"]: result for result in qualification["results"]}
     names = {
         "oracle": "Reference oracle",
-        "incomplete_workflow": "Incomplete-workflow control",
-        "read_only": "Read-only control",
-        "no_control": "No-control ablation",
+        "shortcut": "Shortcut control",
+        "state_only": "State-only control",
+        "wrong_evidence": "Wrong-evidence control",
+        "wrong_decision": "Wrong-decision control",
     }
     notes = {
         "oracle": "Measured solvability ceiling from replaying the checked-in reference workflow; not a model submission.",
-        "incomplete_workflow": "Measured ablation that omits the final ERP mutation while still submitting the oracle answer.",
-        "read_only": "Measured control that performs the required reads but makes no ERP changes or answer submission.",
-        "no_control": "Measured ablation that attempts the reference mutations and answer without the required source investigation.",
+        "shortcut": "Measured control that submits a plausible answer and one late write without doing the investigation.",
+        "state_only": "Measured control that reaches the reference provider state but omits the employee handoff.",
+        "wrong_evidence": "Measured control that substitutes a valid but stale or irrelevant source for one required current record.",
+        "wrong_decision": "Measured control that reaches the reference provider state but chooses a rejected operating alternative.",
     }
     leaderboard = []
     ranked_runs = sorted(
@@ -434,7 +429,7 @@ def _website_data(
                 or f"{SOURCE_URL}/blob/main/model_runs/{run['run_slug']}.json",
             }
         )
-    for rank, policy in enumerate(POLICIES, start=1):
+    for rank, policy in enumerate(LEADERBOARD_POLICIES, start=1):
         result = result_by_policy[policy]
         call_counts = [len(policy_steps(task, policy)) for task in tasks]
         leaderboard.append(
@@ -457,9 +452,6 @@ def _website_data(
     samples: dict[str, Any] = {}
     for ordinal, task in enumerate(tasks, start=1):
         task_id = task["task_id"]
-        populated_tables = {table: rows for table, rows in task["seed_tables"].items() if rows}
-        state_path = Path("assets") / task_id / "starting-state.json"
-        checks_path = Path("assets") / task_id / "expected-checks.json"
         summaries.append(
             {
                 "id": task_id,
@@ -469,7 +461,7 @@ def _website_data(
                 "organization": "Northstar Controls Manufacturing",
                 "asOf": task["as_of"],
                 "summary": task["instruction"],
-                "documents": len(task["assets"]) + 2,
+                "documents": len(task["assets"]),
                 "referenceToolCalls": len(task["oracle_steps"]),
                 "sample": True,
                 "datasetUrl": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/tasks/{task_id}.json",
@@ -503,28 +495,6 @@ def _website_data(
                     "mediaType": asset["media_type"],
                 }
                 for asset in task["assets"]
-            ]
-            + [
-                {
-                    "path": state_path.as_posix(),
-                    "url": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/{state_path.as_posix()}",
-                    "name": "starting-state.json",
-                    "format": "JSON",
-                    "bytes": (release_root / state_path).stat().st_size,
-                    "preview": f"{sum(len(rows) for rows in populated_tables.values())} seeded records across {len(populated_tables)} multi-system state tables.",
-                    "role": "primary",
-                    "note": "Exact synthetic records and API fixtures used to seed the isolated SQLite world.",
-                },
-                {
-                    "path": checks_path.as_posix(),
-                    "url": f"{SOURCE_URL}/blob/main/benchmark/factorybench100/{checks_path.as_posix()}",
-                    "name": "expected-checks.json",
-                    "format": "JSON",
-                    "bytes": (release_root / checks_path).stat().st_size,
-                    "preview": f"{len(_rubric_criteria(task))} weighted, task-specific deterministic criteria spanning discovery, calculation, alternatives, state, and answer insights.",
-                    "role": "verifier",
-                    "note": "Public check contract; no LLM judge participates in scoring.",
-                },
             ],
             "scoringWeights": [
                 {
@@ -722,11 +692,11 @@ def _website_data(
             },
             {
                 "title": "Facts are scattered, not preassembled",
-                "body": "Oracle resources, email, Drive documents, spreadsheets, Slack, vendor PDFs, specifications, inventory eligibility, finite-capacity slots, and approval limits each contribute only part of the decision. No read returns an approved payload, operation name, or assembled answer. The clean-room company and all records are synthetic.",
+                "body": "Each task mounts 28 retrievable, task-specific sources across Oracle resources, email, Drive, spreadsheets, Slack, vendor PDFs, specifications, inventory eligibility, finite-capacity slots, revisions, and approval limits. Current, superseded, other-case, and other-plant records must be correlated by immutable identity. No read returns an approved payload, operation name, or assembled answer. The clean-room company and all records are synthetic.",
             },
             {
                 "title": "Qualification before publication",
-                "body": f"The release replays every reference workflow, replays a deterministic sample twice, runs three negative controls, and removes every reference mutation one at a time. Qualification passed: {qualification['results'][0]['strict_passes']}/100 reference strict passes; {qualification['mutation_omissions']['detected']}/{qualification['mutation_omissions']['total']} mutation omissions were detected; impaired controls remain below the oracle.",
+                "body": f"The release executes {qualification['executions']} canonical trials: 100 reference workflows, 100 exact replays, and 1,000 adversarial runs across {len(NEGATIVE_POLICIES)} controls. It also removes every reference mutation one at a time as a supplemental verifier test. Qualification passed: {qualification['oracle']['passes']}/100 oracle strict passes, {qualification['determinism']['exact_episode_matches']}/100 exact replay matches, and {sum(row['correct_rejections'] for row in qualification['negative_controls'].values())}/1,000 negative-control rejections.",
             },
             {
                 "title": "Public inspirations and design boundary",
@@ -785,7 +755,9 @@ def _harbor_task(root: Path, task: dict[str, Any]) -> None:
             "seed_tables": task["seed_tables"],
             "required_reads": task["required_reads"],
             "required_read_calls": task["required_read_calls"],
+            "reference_read_calls": task["reference_read_calls"],
             "required_investigations": task["required_investigations"],
+            "rubric_milestones": task["rubric_milestones"],
             "post_write_verifications": task.get("post_write_verifications", []),
             "answer_schema": task["answer_schema"],
             "allowed_write_tables": task["allowed_write_tables"],
@@ -906,7 +878,9 @@ synthetic = true
             "task_id": task["task_id"],
             "required_reads": task["required_reads"],
             "required_read_calls": task["required_read_calls"],
+            "reference_read_calls": task["reference_read_calls"],
             "required_investigations": task["required_investigations"],
+            "rubric_milestones": task["rubric_milestones"],
             "post_write_verifications": task.get("post_write_verifications", []),
             "answer_schema": task["answer_schema"],
             "allowed_write_tables": task["allowed_write_tables"],
@@ -1025,11 +999,10 @@ reported only as supporting evidence.
 
 ## Qualification
 
-- Reference oracle: {qualification['results'][0]['mean_score']:.2f} FactoryScore, {qualification['results'][0]['strict_passes']}/{len(tasks)} strict passes
-- Incomplete-workflow control: {qualification['results'][1]['mean_score']:.2f}
-- Read-only control: {qualification['results'][2]['mean_score']:.2f}
-- No-control ablation: {qualification['results'][3]['mean_score']:.2f}
-- Deterministic replay sample: {qualification['determinism_sample_size']}/{qualification['determinism_sample_size']} matched
+- Canonical executions: {qualification['executions']} (100 oracle + 100 exact replay + 1,000 adversarial controls)
+- Reference oracle: {qualification['oracle']['mean_score']:.2f} FactoryScore, {qualification['oracle']['passes']}/{len(tasks)} strict passes
+- Exact deterministic replay: {qualification['determinism']['exact_episode_matches']}/{qualification['determinism']['replays']} matched
+- Negative controls: {sum(row['correct_rejections'] for row in qualification['negative_controls'].values())}/{sum(row['executions'] for row in qualification['negative_controls'].values())} correctly rejected across {len(NEGATIVE_POLICIES)} failure modes
 - Single-mutation omission checks: {qualification['mutation_omissions']['detected']}/{qualification['mutation_omissions']['total']} detected
 
 These rows are measured controls, not claims about frontier models.
@@ -1045,10 +1018,12 @@ Coverage is part of the result. A stratified subset is not presented as a
 ## Fields
 
 Each JSONL row includes the natural-language prompt, role, workflow family,
-12 heterogeneous context files, reference tools, prerequisite investigation
+28 heterogeneous context files, reference tools, prerequisite investigation
 groups, allowed write tables, weighted human-readable rubric, and metric
-contract. Executable worlds, oracle traces,
-exact verifier specifications, and Harbor tasks live in the source repository.
+contract. Context files are the only agent-visible artifacts. Exact starting
+state and verifier contracts are published separately under `evaluation/` for
+audit and are not mounted into the agent's asset room. Executable worlds, oracle
+traces, and Harbor tasks live in the source repository.
 
 ## Links
 
@@ -1080,7 +1055,7 @@ def _release_readme(
 
 FactoryBench-100 contains 100 distinct executable employee decisions across 20
 manufacturing and ERP domains. Every task includes a high-level human request,
-12 synthetic evidence artifacts, a multi-system starting state, endpoint-pinned
+28 synthetic evidence artifacts, a multi-system starting state, endpoint-pinned
 tool contracts, a hidden investigation and calculation graph, three realistic
 options, task-specific weighted criteria, an oracle replay, a Harbor 1.4 task,
 and a Hugging Face row.
@@ -1095,9 +1070,11 @@ or gold state.
 |---|---:|---:|
 {rows}
 
-The oracle is a solvability reference, not a model result. Negative controls are
-deliberately impaired and demonstrate that the evaluator distinguishes complete,
-partially complete, read-only, and control-skipping behavior.
+The oracle is a solvability reference, not a model result. The ten negative
+controls cover no-op and shortcut behavior, missing handoff or evidence,
+write-before-read, missing readback, unauthorized mutation, incorrect values,
+incorrect operating choice, and substitution of stale or irrelevant evidence.
+All {sum(row['correct_rejections'] for row in qualification['negative_controls'].values())} adversarial executions are rejected.
 
 Release qualification also removes every reference mutation individually. All
 {qualification['mutation_omissions']['detected']} of {qualification['mutation_omissions']['total']} omissions reduce the score and fail strict completion.
@@ -1111,11 +1088,12 @@ Subset coverage is explicit and is never extrapolated to all 100 tasks.
 ## Layout
 
 - `tasks/`: full public task specifications
-- `assets/`: policy, email, Slack, PDFs, Excel workbooks, specifications, starting state, and expected checks
+- `assets/`: the 28 agent-visible policy, email, Slack, PDF, Excel, CSV, JSON, log, and specification sources per task
+- `state/`: exact evaluator starting state, kept outside the agent-visible asset room
 - `environment/`: schema and MCP-style tool contracts
 - `trajectories/oracle/`: real replayed tool traces and state diffs
 - `model-runs/`: pinned model manifests and task-level traces
-- `verifiers/`: per-task criterion results from release qualification
+- `verifiers/contracts/`: exact sealed verifier contracts; `verifiers/*.json` contains measured oracle criterion results
 - `reports/`: build and qualification evidence
 - `huggingface/`: upload-ready dataset mirror
 - `harbor/`: 100 portable Harbor task packages
@@ -1182,8 +1160,14 @@ def build_release(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
             public_rows.append(public)
             for asset in task["assets"]:
                 _write_asset(output / "assets" / task_id / asset["path"], asset)
-            _write_json(output / "assets" / task_id / "starting-state.json", task["seed_tables"])
-            _write_json(output / "assets" / task_id / "expected-checks.json", task["expected"])
+            _write_json(
+                output / "state" / task_id / "starting-state.json",
+                task["seed_tables"],
+            )
+            _write_json(
+                output / "verifiers" / "contracts" / f"{task_id}.json",
+                task["expected"],
+            )
             episode = run_episode(task, "oracle", scratch / f"{task_id}.db")
             _write_json(output / "trajectories" / "oracle" / f"{task_id}.json", episode)
             _write_json(output / "verifiers" / f"{task_id}.json", {key: value for key, value in episode.items() if key not in {"trace", "state_diff"}})
@@ -1214,6 +1198,15 @@ shell commands, package installation, or arbitrary paths.
     _write_json(output / "huggingface" / "contracts" / "tool-contracts.json", {"servers": grouped_tools})
     shutil.copy2(output / MCP_CONFIG_PATH, output / "huggingface" / "contracts" / "mcp.json")
     shutil.copytree(output / "assets", output / "huggingface" / "assets")
+    shutil.copytree(output / "state", output / "huggingface" / "evaluation" / "state")
+    shutil.copytree(
+        output / "verifiers" / "contracts",
+        output / "huggingface" / "evaluation" / "verifier-contracts",
+    )
+    shutil.copytree(
+        output / "trajectories" / "oracle",
+        output / "huggingface" / "evaluation" / "oracle-trajectories",
+    )
     _copy_model_run_artifacts(model_runs, output / "model-runs")
     _copy_model_run_artifacts(model_runs, output / "huggingface" / "model-runs")
     _write_text(output / "huggingface" / ".gitattributes", "*.jsonl filter=lfs diff=lfs merge=lfs -text\n")

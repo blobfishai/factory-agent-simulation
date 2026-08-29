@@ -2,7 +2,7 @@
 
 FactoryBench-100 contains 100 distinct executable employee decisions across 20
 manufacturing and ERP domains. Every task includes a high-level human request,
-12 synthetic evidence artifacts, a multi-system starting state, endpoint-pinned
+28 synthetic evidence artifacts, a multi-system starting state, endpoint-pinned
 tool contracts, a hidden investigation and calculation graph, three realistic
 options, task-specific weighted criteria, an oracle replay, a Harbor 1.4 task,
 and a Hugging Face row.
@@ -16,33 +16,41 @@ or gold state.
 | Control | FactoryScore | Strict passes |
 |---|---:|---:|
 | Oracle | 100.00 | 100/100 |
-| Incomplete Workflow | 97.25 | 0/100 |
-| Read Only | 34.96 | 0/100 |
-| No Control | 68.71 | 0/100 |
+| Noop | 6.00 | 0/100 |
+| Shortcut | 43.00 | 0/100 |
+| State Only | 66.00 | 0/100 |
+| Incomplete Read | 94.07 | 0/100 |
+| Write Before Read | 67.40 | 0/100 |
+| Missing Readback | 94.00 | 0/100 |
+| Unauthorized Write | 98.00 | 0/100 |
+| Wrong Value | 98.01 | 0/100 |
+| Wrong Decision | 94.02 | 0/100 |
+| Wrong Evidence | 97.54 | 0/100 |
 
-The oracle is a solvability reference, not a model result. Negative controls are
-deliberately impaired and demonstrate that the evaluator distinguishes complete,
-partially complete, read-only, and control-skipping behavior.
+The oracle is a solvability reference, not a model result. The ten negative
+controls cover no-op and shortcut behavior, missing handoff or evidence,
+write-before-read, missing readback, unauthorized mutation, incorrect values,
+incorrect operating choice, and substitution of stale or irrelevant evidence.
+All 1000 adversarial executions are rejected.
 
 Release qualification also removes every reference mutation individually. All
 300 of 300 omissions reduce the score and fail strict completion.
 
 ## Pinned model runs
 
-| Model | Harness | Coverage | FactoryScore | Strict passes | Selection |
-|---|---|---:|---:|---:|---|
-| [gpt-5.6-luna](model-runs/gpt-5.6-luna-full-100.json) | Harbor 0.21.0 / codex 0.150.1 / max | 100/100 | 89.21 | 4/100 | Full FactoryBench-100 v3.0.0 suite (100/100 tasks); high-level human requests, multi-source investigation, and task-specific deterministic scoring. Runtime overlay changed only the agent image to preinstall Codex 0.150.1; all semantic task and verifier files matched the released tree. |
+No version-pinned model run is published for this release.
 
 Subset coverage is explicit and is never extrapolated to all 100 tasks.
 
 ## Layout
 
 - `tasks/`: full public task specifications
-- `assets/`: policy, email, Slack, PDFs, Excel workbooks, specifications, starting state, and expected checks
+- `assets/`: the 28 agent-visible policy, email, Slack, PDF, Excel, CSV, JSON, log, and specification sources per task
+- `state/`: exact evaluator starting state, kept outside the agent-visible asset room
 - `environment/`: schema and MCP-style tool contracts
 - `trajectories/oracle/`: real replayed tool traces and state diffs
 - `model-runs/`: pinned model manifests and task-level traces
-- `verifiers/`: per-task criterion results from release qualification
+- `verifiers/contracts/`: exact sealed verifier contracts; `verifiers/*.json` contains measured oracle criterion results
 - `reports/`: build and qualification evidence
 - `huggingface/`: upload-ready dataset mirror
 - `harbor/`: 100 portable Harbor task packages

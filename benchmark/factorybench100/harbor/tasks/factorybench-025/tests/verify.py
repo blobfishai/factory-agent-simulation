@@ -322,6 +322,84 @@ def _matching_rows(
     ]
 
 
+def _aggregate_semantic_checks(
+    task: dict[str, Any],
+    atomic_checks: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Aggregate executable evidence without grading a reference trajectory."""
+
+    milestones = task.get("rubric_milestones", [])
+    if not milestones:
+        return [
+            {
+                **check,
+                "earned_weight": float(check["weight"]) if check["passed"] else 0.0,
+            }
+            for check in atomic_checks
+        ]
+
+    by_id: dict[str, dict[str, Any]] = {}
+    for check in atomic_checks:
+        check_id = str(check["id"])
+        if check_id in by_id:
+            raise ValueError(f"duplicate atomic check id: {check_id}")
+        by_id[check_id] = check
+
+    assigned: set[str] = set()
+    aggregated: list[dict[str, Any]] = []
+    for milestone in milestones:
+        criterion_ids = [str(value) for value in milestone["criterion_ids"]]
+        if not criterion_ids:
+            raise ValueError(f"semantic milestone {milestone['id']} has no evidence criteria")
+        duplicates = sorted({value for value in criterion_ids if criterion_ids.count(value) > 1})
+        if duplicates:
+            raise ValueError(
+                f"semantic milestone {milestone['id']} repeats criteria: {duplicates}"
+            )
+        reused = sorted(set(criterion_ids) & assigned)
+        if reused:
+            raise ValueError(f"atomic checks assigned to multiple milestones: {reused}")
+        missing = sorted(set(criterion_ids) - set(by_id))
+        if missing:
+            raise ValueError(
+                f"semantic milestone {milestone['id']} references missing checks: {missing}"
+            )
+        assigned.update(criterion_ids)
+        subchecks = [by_id[criterion_id] for criterion_id in criterion_ids]
+        atomic_weight = sum(float(check["weight"]) for check in subchecks)
+        expected_atomic_weight = float(milestone.get("atomic_weight", atomic_weight))
+        if abs(atomic_weight - expected_atomic_weight) > 1e-6:
+            raise ValueError(
+                f"semantic milestone {milestone['id']} atomic weight changed: "
+                f"expected {expected_atomic_weight}, observed {atomic_weight}"
+            )
+        passed_atomic_weight = sum(
+            float(check["weight"]) for check in subchecks if check["passed"]
+        )
+        milestone_weight = float(milestone["weight"])
+        earned_weight = milestone_weight * passed_atomic_weight / atomic_weight
+        aggregated.append(
+            {
+                "id": milestone["id"],
+                "category": milestone["category"],
+                "description": milestone["description"],
+                "weight": milestone_weight,
+                "earned_weight": round(earned_weight, 6),
+                "passed": all(check["passed"] for check in subchecks),
+                "evidence": {
+                    "passed_criteria": sum(check["passed"] for check in subchecks),
+                    "total_criteria": len(subchecks),
+                    "subchecks": subchecks,
+                },
+            }
+        )
+
+    unassigned = sorted(set(by_id) - assigned)
+    if unassigned:
+        raise ValueError(f"atomic checks omitted from semantic rubric: {unassigned}")
+    return aggregated
+
+
 def _write_verdict(verdict: dict[str, Any]) -> None:
     logdir = Path(os.environ.get("VERIFIER_LOG_DIR", "/logs/verifier"))
     logdir.mkdir(parents=True, exist_ok=True)
@@ -500,9 +578,11 @@ def main() -> None:
             "evidence": {"errors": errors},
         }
     )
+    atomic_checks = checks
+    checks = _aggregate_semantic_checks(task, atomic_checks)
     passed = sum(1 for check in checks if check["passed"])
-    passed_weight = sum(check["weight"] for check in checks if check["passed"])
-    total_weight = sum(check["weight"] for check in checks)
+    passed_weight = sum(float(check["earned_weight"]) for check in checks)
+    total_weight = sum(float(check["weight"]) for check in checks)
     score = passed_weight / total_weight
     verdict = {
         "task_id": task["task_id"],
@@ -511,6 +591,8 @@ def main() -> None:
         "passed_weight": round(passed_weight, 2),
         "total_weight": round(total_weight, 2),
         "strict_pass": passed == len(checks),
+        "passed_atomic_checks": sum(check["passed"] for check in atomic_checks),
+        "total_atomic_checks": len(atomic_checks),
         "checks": checks,
     }
     _write_trace(task["task_id"], trace)

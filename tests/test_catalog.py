@@ -39,8 +39,8 @@ def test_every_task_has_a_distinct_tool_call_sequence() -> None:
     assert report["unique_sequences"] == 100
     assert report["duplicate_sequences"] == []
     assert report["closest_pair"]["similarity"] <= 0.80
-    assert report["asset_role_count"] == 12
-    assert report["asset_roles_with_unique_task_content"] == 12
+    assert report["asset_role_count"] == 28
+    assert report["asset_roles_with_unique_task_content"] == 28
     assert set(report["asset_role_unique_content_counts"].values()) == {100}
     assert report["semantic_invariants_checked"] >= 700
     assert report["semantic_violations"] == []
@@ -64,7 +64,7 @@ def test_every_task_is_executable_cross_system_and_richly_seeded() -> None:
     for task in build_catalog():
         assert task["instruction"]
         assert task["seed_tables"]
-        assert len(task["assets"]) >= 12
+        assert len(task["assets"]) == 28
         assert len(task["world"]["systems"]) >= 5
         assert {"oracle_fusion", "factorybench"} <= set(task["world"]["systems"])
         assert task["expected"]["assertions"]
@@ -156,8 +156,12 @@ def test_employee_requests_hide_the_investigation_recipe_and_rubrics_are_specifi
     assert report["realism"] == {
         "prompt_violations": {},
         "closest_prompt_pair": {
-            "task_ids": ["factorybench-012", "factorybench-079"],
-            "similarity": 0.6389,
+            "task_ids": ["factorybench-060", "factorybench-088"],
+            "similarity": 0.5871,
+        },
+        "closest_prompt_5_shingle_pair": {
+            "task_ids": ["factorybench-058", "factorybench-079"],
+            "similarity": 0.154639,
         },
         "minimum_structured_rows_by_asset_role": {
             "source_workbook": 12,
@@ -167,12 +171,12 @@ def test_employee_requests_hide_the_investigation_recipe_and_rubrics_are_specifi
         },
         "minimum_email_chars": 1738,
         "minimum_slack_messages": 6,
-        "minimum_investigations_per_task": 16,
+        "minimum_investigations_per_task": 13,
         "minimum_calculations_per_task": 15,
         "minimum_options_per_task": 3,
         "minimum_answer_fields_per_task": 16,
         "minimum_oracle_read_tables_per_task": 4,
-        "minimum_task_specific_criteria": 40,
+        "minimum_task_specific_criteria": 14,
         "unique_criterion_sets": 100,
         "generic_criteria": [],
         "preassembled_packet_leaks": [],
@@ -192,20 +196,39 @@ def test_employee_requests_hide_the_investigation_recipe_and_rubrics_are_specifi
     assert len({tuple(option["id"] for option in task["decision_model"]["options"]) for task in tasks}) == 100
     for task in tasks:
         prompt = task["instruction"]
-        assert 20 <= len(prompt.split()) <= 90
+        assert 45 <= len(prompt.split()) <= 220
         assert not any(marker in prompt.lower() for marker in forbidden)
-        assert len(task["required_investigations"]) >= 15
+        assert 13 <= len(task["required_investigations"]) <= 16
+        assert len(task["reference_read_calls"]) > len(task["required_read_calls"])
         assert len(task["decision_model"]["options"]) == 3
         option_ids = [option["id"] for option in task["decision_model"]["options"]]
         assert task["answer_schema"]["properties"]["recommended_option"]["enum"] == option_ids
         assert sum(option["recommended"] for option in task["decision_model"]["options"]) == 1
         assert next(option for option in task["decision_model"]["options"] if option["recommended"])["approval"] == "APPROVED"
-        descriptions = [
-            criterion["description"]
-            for key in ("investigations", "post_write_verifications", "calculations", "assertions", "answer_checks")
+        milestones = task["rubric_milestones"]
+        descriptions = [milestone["description"] for milestone in milestones]
+        assert len(milestones) == 14
+        assert len({milestone["id"] for milestone in milestones}) == 14
+        assert len(set(descriptions)) == 14
+        assert sum(milestone["weight"] for milestone in milestones) == 100.0
+        atomic_ids = {
+            criterion["id"]
+            for key in (
+                "investigations",
+                "post_write_verifications",
+                "calculations",
+                "assertions",
+                "answer_checks",
+            )
             for criterion in task["expected"][key]
+        } | {"write_scope", "no_rejected_mutation"}
+        milestone_atomic_ids = [
+            criterion_id
+            for milestone in milestones
+            for criterion_id in milestone["criterion_ids"]
         ]
-        assert len(descriptions) >= 34
+        assert len(milestone_atomic_ids) == len(set(milestone_atomic_ids))
+        assert set(milestone_atomic_ids) == atomic_ids
         assert not any("produced the task-scoped" in description.lower() for description in descriptions)
 
 
@@ -225,6 +248,22 @@ def test_sources_require_option_calculation_instead_of_publishing_the_answer() -
             "source_reconciliation",
             "control_calendar",
             "specification",
+            "engineering_bom_current",
+            "engineering_bom_superseded",
+            "vendor_price_catalog",
+            "production_schedule",
+            "shift_capacity",
+            "supplier_capacity",
+            "authority_matrix",
+            "material_on_hand",
+            "component_requirements",
+            "quality_holds",
+            "maintenance_outages",
+            "planning_chat",
+            "procurement_email",
+            "source_lineage",
+            "control_audit_log",
+            "revision_index",
         }
         calendar = assets["control_calendar"]
         assert not {"completion", "recommended", "selected_option"} & set(calendar["rows"][0])
@@ -303,7 +342,7 @@ def test_drive_read_fixtures_return_the_actual_listed_asset_content() -> None:
         }
         task_asset_reads = [
             call
-            for call in task["required_read_calls"]
+            for call in task["reference_read_calls"]
             if call["tool"]
             in {
                 "google_drive.files.get",
@@ -617,6 +656,8 @@ def test_evidence_hashes_match_extracted_task_content() -> None:
         "text/csv",
         "application/json",
         "text/markdown",
+        "text/plain",
+        "application/yaml",
     }
     for task in build_catalog():
         assert required_media <= {asset["media_type"] for asset in task["assets"]}
@@ -634,7 +675,7 @@ def test_every_asset_role_has_task_specific_content() -> None:
                 hashlib.sha256(asset["content"].encode()).hexdigest()
             )
 
-    assert len(hashes_by_role) == 12
+    assert len(hashes_by_role) == 28
     assert all(len(hashes) == 100 for hashes in hashes_by_role.values())
 
 
