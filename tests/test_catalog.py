@@ -547,6 +547,14 @@ def test_oracle_tools_are_documented_operations_not_business_verb_shortcuts() ->
     assert not names & forbidden
     oracle = [tool for tool in definitions if tool["name"].startswith("oracle_fusion.")]
     assert len(oracle) == 67
+    operation_bindings = set()
+    operation_sources = set()
+    source_override = {
+        (
+            "POST",
+            "/fscmRestApi/resources/11.13.18.05/receivingReceiptRequests",
+        ): "op-receivingreceipttransactionrequests-post.html",
+    }
     for tool in oracle:
         upstream = tool["_meta"]["factorybench"]["upstream"]
         assert upstream["method"] in {"GET", "POST", "PATCH", "DELETE"}
@@ -554,61 +562,78 @@ def test_oracle_tools_are_documented_operations_not_business_verb_shortcuts() ->
         assert upstream["source"].startswith("https://docs.oracle.com/")
         assert "/26a/" in upstream["source"]
         assert not upstream["source"].endswith("/toc.htm")
+        resource_path = upstream["path"].removeprefix(
+            "/fscmRestApi/resources/11.13.18.05/"
+        )
+        expected_page = source_override.get(
+            (upstream["method"], upstream["path"]),
+            "op-"
+            + "-".join(
+                segment.strip("{}").lower()
+                for segment in resource_path.split("/")
+            )
+            + f"-{upstream['method'].lower()}.html",
+        )
+        assert upstream["source"].rsplit("/", 1)[1] == expected_page
         path_parameters = set(re.findall(r"\{([^{}]+)\}", upstream["path"]))
         assert path_parameters <= set(tool["inputSchema"]["required"])
         assert_every_object_is_closed(tool["inputSchema"])
+        operation_bindings.add((upstream["method"], upstream["path"]))
+        operation_sources.add(upstream["source"])
+    assert len(operation_bindings) == 67
+    assert len(operation_sources) == 67
 
     by_name = {tool["name"]: tool for tool in oracle}
     exact_operations = {
         "oracle_fusion.work_order_operations.list": (
             "GET",
             "/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderOperation",
-            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/api-manufacturing-discrete-work-orders-active-operations-work-orders.html",
+            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-workorders-workorderid-child-workorderoperation-get.html",
         ),
         "oracle_fusion.work_order_materials.list": (
             "GET",
             "/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderMaterial",
-            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/api-manufacturing-discrete-work-orders-work-order-materials.html",
+            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-workorders-workorderid-child-workordermaterial-get.html",
         ),
         "oracle_fusion.work_order_resources.list": (
             "GET",
             "/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderResource",
-            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/api-manufacturing-discrete-work-orders-resources-operations.html",
+            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-workorders-workorderid-child-workorderresource-get.html",
         ),
         "oracle_fusion.work_order_operations.update": (
             "PATCH",
             "/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderOperation/{WorkOrderOperationId}",
-            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/api-manufacturing-discrete-work-orders-active-operations-work-orders.html",
+            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-workorders-workorderid-child-workorderoperation-workorderoperationid-patch.html",
         ),
         "oracle_fusion.work_order_materials.update": (
             "PATCH",
             "/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderOperation/{WorkOrderOperationId2}/child/WorkOrderOperationMaterial/{WorkOrderOperationMaterialId}",
-            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/api-manufacturing-discrete-work-orders-active-operations-work-orders-work-order-materials.html",
+            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-workorders-workorderid-child-workorderoperation-workorderoperationid2-child-workorderoperationmaterial-workorderoperationmaterialid-patch.html",
         ),
         "oracle_fusion.work_order_resources.update": (
             "PATCH",
             "/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderOperation/{WorkOrderOperationId}/child/WorkOrderOperationResource/{WorkOrderOperationResourceId}",
-            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/api-manufacturing-discrete-work-orders-active-operations-work-orders-resources-operations.html",
+            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-workorders-workorderid-child-workorderoperation-workorderoperationid-child-workorderoperationresource-workorderoperationresourceid-patch.html",
         ),
         "oracle_fusion.maintenance_materials.list": (
             "GET",
             "/fscmRestApi/resources/11.13.18.05/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderOperation/{WoOperationId}/child/WorkOrderOperationMaterial",
-            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/api-maintenance-maintenance-work-orders-operations-materials.html",
+            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-maintenanceworkorders-workorderid-child-workorderoperation-wooperationid-child-workorderoperationmaterial-get.html",
         ),
         "oracle_fusion.maintenance_resources.list": (
             "GET",
             "/fscmRestApi/resources/11.13.18.05/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderOperation/{WoOperationId}/child/WorkOrderOperationResource",
-            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/api-maintenance-maintenance-work-orders-operations-resources.html",
+            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-maintenanceworkorders-workorderid-child-workorderoperation-wooperationid-child-workorderoperationresource-get.html",
         ),
         "oracle_fusion.receiving_receipt_transactions.list": (
             "GET",
             "/fscmRestApi/resources/11.13.18.05/receivingReceiptRequests/{HeaderInterfaceId}/child/lines",
-            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/api-inventory-management-receiving-receipt-requests-requests-receiving-transactions.html",
+            "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/op-receivingreceiptrequests-headerinterfaceid-child-lines-get.html",
         ),
         "oracle_fusion.purchase_order_lines.list": (
             "GET",
             "/fscmRestApi/resources/11.13.18.05/purchaseOrders/{purchaseOrdersUniqID}/child/lines",
-            "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/api-purchase-orders-lines.html",
+            "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/op-purchaseorders-purchaseordersuniqid-child-lines-get.html",
         ),
     }
     for name, (method, path, source) in exact_operations.items():
@@ -673,6 +698,23 @@ def test_oracle_tools_are_documented_operations_not_business_verb_shortcuts() ->
         "Supplier",
         "InvoiceNumber",
     ]
+    sales_order = by_name["oracle_fusion.sales_orders.get"]
+    assert sales_order["_meta"]["factorybench"]["upstream"]["path"].endswith(
+        "/salesOrdersForOrderHub/{OrderKey}"
+    )
+    assert sales_order["inputSchema"]["required"] == ["OrderKey"]
+    assert sales_order["inputSchema"]["properties"]["OrderKey"] == {"type": "string"}
+    inspection_update = by_name["oracle_fusion.quality_inspection_results.update"]
+    assert inspection_update["_meta"]["factorybench"]["upstream"]["path"].endswith(
+        "/inspectionResults/{InspectionEventId}"
+    )
+    assert inspection_update["inputSchema"]["required"] == [
+        "InspectionEventId",
+        "requestBody",
+    ]
+    assert inspection_update["inputSchema"]["properties"]["InspectionEventId"] == {
+        "type": "string"
+    }
 
 
 def test_oracle_read_fixtures_keep_resource_specific_shapes_and_queries() -> None:
@@ -689,7 +731,7 @@ def test_oracle_read_fixtures_keep_resource_specific_shapes_and_queries() -> Non
         "POLineId",
         "InvoiceId",
         "SupplierId",
-        "InspectionId",
+        "InspectionEventId",
         "InspectionPlanId",
         "InventoryItemId",
         "HeaderInterfaceId",
@@ -700,12 +742,12 @@ def test_oracle_read_fixtures_keep_resource_specific_shapes_and_queries() -> Non
         "CycleCountEntryId",
         "CycleCountHeaderId",
         "EntryHistoryId",
-        "salesOrdersForOrderHubUniqID",
+        "OrderKey",
         "purchaseOrdersUniqID",
     }
     allowed = {
         "work_orders": {"WorkOrderId"},
-        "sales_orders": {"HeaderId"},
+        "sales_orders": {"OrderKey", "HeaderId"},
         "work_order_operations": {"WorkOrderId", "WorkOrderOperationId"},
         "work_order_materials": {
             "WorkOrderId",
@@ -744,7 +786,7 @@ def test_oracle_read_fixtures_keep_resource_specific_shapes_and_queries() -> Non
             "HeaderInterfaceId",
             "InterfaceTransactionId",
         },
-        "quality_inspection_results": {"InspectionId", "InspectionPlanId"},
+        "quality_inspection_results": {"InspectionEventId", "InspectionPlanId"},
         "inspection_plans": {"InspectionPlanId"},
         "suppliers": {"SupplierId"},
         "purchase_orders": {"POHeaderId", "SupplierId"},

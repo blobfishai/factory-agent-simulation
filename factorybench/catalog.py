@@ -23,7 +23,7 @@ from .scenarios import FAMILIES, FAMILY_DESCRIPTIONS, SCENARIOS, Scenario
 
 
 BENCHMARK_NAME = "FactoryBench-100"
-BENCHMARK_VERSION = "3.3.3"
+BENCHMARK_VERSION = "3.3.4"
 MINIMUM_PROVIDER_READ_CALLS = 26
 AS_OF_DATE = date(2026, 1, 12)
 WORLD_ID = "northstar-enterprise-fusion-v3"
@@ -184,6 +184,11 @@ def _base64_message(scenario: Scenario, ordinal: int, *, sent: bool) -> str:
 
 
 def _path_value(name: str, ordinal: int) -> Any:
+    if name == "OrderKey":
+        # Oracle Order Management accepts HeaderId as an OrderKey string.
+        return str(12_000_000 + ordinal)
+    if name == "InspectionEventId":
+        return f"IE-{1_100_000 + ordinal}"
     if name in {
         "WorkOrderId",
         "WorkOrderOperationId",
@@ -199,7 +204,6 @@ def _path_value(name: str, ordinal: int) -> Any:
         "InterfaceTransactionId",
         "InvoiceId",
         "HoldId",
-        "InspectionId",
     }:
         offsets = {
             "WorkOrderId": 100_000,
@@ -216,7 +220,6 @@ def _path_value(name: str, ordinal: int) -> Any:
             "InterfaceTransactionId": 800_000,
             "InvoiceId": 900_000,
             "HoldId": 1_000_000,
-            "InspectionId": 1_100_000,
         }
         return offsets[name] + ordinal
     return f"{name}-{ordinal:04d}"
@@ -791,11 +794,12 @@ _ORACLE_IDENTITY_FIELDS = (
     "POLineId",
     "InvoiceId",
     "SupplierId",
-    "InspectionId",
+    "InspectionEventId",
     "InspectionPlanId",
     "InventoryItemId",
     "HeaderInterfaceId",
     "InterfaceTransactionId",
+    "OrderKey",
     "HeaderId",
     "SupplyRequestId",
     "DocumentId",
@@ -881,6 +885,7 @@ def _oracle_record(
             "PlannedCompletionDate": (AS_OF_DATE + timedelta(days=1)).isoformat(),
         },
         "sales_orders": {
+            "OrderKey": _path_value("OrderKey", ordinal),
             "HeaderId": 12_000_000 + ordinal,
             "OrderNumber": decision["identifiers"]["order_number"],
             "SourceTransactionNumber": case,
@@ -1081,7 +1086,7 @@ def _oracle_record(
             "Comments": case,
         },
         "quality_inspection_results": {
-            "InspectionId": _path_value("InspectionId", ordinal),
+            "InspectionEventId": _path_value("InspectionEventId", ordinal),
             "OrganizationCode": "SEA",
             "InspectionPlanId": 1_200_000 + ordinal,
             "InspectionPlanName": f"PLAN-{1 + ordinal % 12:02d}",

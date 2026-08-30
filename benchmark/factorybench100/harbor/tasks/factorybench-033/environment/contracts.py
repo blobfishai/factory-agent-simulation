@@ -21,6 +21,42 @@ DRIVE = "https://developers.google.com/workspace/drive/api/reference/rest/v3"
 SHEETS = "https://developers.google.com/workspace/sheets/api/reference/rest/v4/spreadsheets"
 SLACK = "https://api.slack.com/methods"
 
+_ORACLE_RESOURCE_PREFIX = "/fscmRestApi/resources/11.13.18.05/"
+_ORACLE_OPERATION_PAGE_OVERRIDES = {
+    (
+        "POST",
+        f"{_ORACLE_RESOURCE_PREFIX}receivingReceiptRequests",
+    ): "op-receivingreceipttransactionrequests-post.html",
+}
+
+
+def _oracle_operation_page(method: str, path: str) -> str:
+    """Resolve an Oracle 26A operation page from its exact method and path."""
+
+    if not path.startswith(_ORACLE_RESOURCE_PREFIX):
+        raise ValueError(f"unsupported Oracle REST path: {path}")
+    binding = (method.upper(), path)
+    if binding in _ORACLE_OPERATION_PAGE_OVERRIDES:
+        return _ORACLE_OPERATION_PAGE_OVERRIDES[binding]
+    resource_path = path.removeprefix(_ORACLE_RESOURCE_PREFIX)
+    segments = (segment.strip("{}").lower() for segment in resource_path.split("/"))
+    return f"op-{'-'.join(segments)}-{method.lower()}.html"
+
+
+def _oracle_operation_source(
+    base: str,
+    method: str,
+    path: str,
+    declared_page: str,
+) -> str:
+    page = _oracle_operation_page(method, path)
+    if declared_page.startswith("op-") and declared_page != page:
+        raise ValueError(
+            f"Oracle operation-page drift for {method} {path}: "
+            f"declared {declared_page}, expected {page}"
+        )
+    return f"{base}{page}"
+
 
 def _object(properties: Json | None = None, required: list[str] | None = None) -> Json:
     return {
@@ -119,12 +155,15 @@ def _oracle_list(
     financials: bool = False,
     source_base: str | None = None,
 ) -> Json:
+    method = "GET"
+    path = f"{_ORACLE_RESOURCE_PREFIX}{resource}"
+    base = source_base or (ORACLE_FINANCIALS if financials else ORACLE_SCM)
     return _contract(
         name,
         server="oracle_fusion",
-        method="GET",
-        path=f"/fscmRestApi/resources/11.13.18.05/{resource}",
-        source=f"{source_base or (ORACLE_FINANCIALS if financials else ORACLE_SCM)}{source_page}",
+        method=method,
+        path=path,
+        source=_oracle_operation_source(base, method, path, source_page),
         description=description,
         input_schema=deepcopy(LIST_SCHEMA),
         read_only=True,
@@ -141,6 +180,8 @@ def _oracle_get(
     financials: bool = False,
     source_base: str | None = None,
 ) -> Json:
+    method = "GET"
+    base = source_base or (ORACLE_FINANCIALS if financials else ORACLE_SCM)
     properties = {
         parameter: _string() if "Id" not in parameter or parameter.endswith("UniqID") else _integer(),
         "fields": _string(),
@@ -150,9 +191,9 @@ def _oracle_get(
     return _contract(
         name,
         server="oracle_fusion",
-        method="GET",
+        method=method,
         path=path,
-        source=f"{source_base or (ORACLE_FINANCIALS if financials else ORACLE_SCM)}{source_page}",
+        source=_oracle_operation_source(base, method, path, source_page),
         description=description,
         input_schema=_object(properties, [parameter]),
         read_only=True,
@@ -173,6 +214,7 @@ def _oracle_write(
     financials: bool = False,
     source_base: str | None = None,
 ) -> Json:
+    base = source_base or (ORACLE_FINANCIALS if financials else ORACLE_SCM)
     properties = dict(path_properties or {})
     properties["requestBody"] = _body_schema(body_properties, body_required)
     return _contract(
@@ -180,7 +222,7 @@ def _oracle_write(
         server="oracle_fusion",
         method=method,
         path=path,
-        source=f"{source_base or (ORACLE_FINANCIALS if financials else ORACLE_SCM)}{source_page}",
+        source=_oracle_operation_source(base, method, path, source_page),
         description=description,
         input_schema=_object(properties, [*(path_required or []), "requestBody"]),
         read_only=False,
@@ -289,7 +331,7 @@ def _collection_contracts() -> list[Json]:
             _oracle_get("oracle_fusion.maintenance_programs.get", "/fscmRestApi/resources/11.13.18.05/maintenancePrograms/{MaintenanceProgramId}", "api-maintenance-maintenance-programs.html", "MaintenanceProgramId", "Get one maintenance program."),
             _oracle_get("oracle_fusion.purchase_orders.get", "/fscmRestApi/resources/11.13.18.05/purchaseOrders/{purchaseOrdersUniqID}", "api-purchase-orders.html", "purchaseOrdersUniqID", "Get one purchase order.", source_base=ORACLE_PROCUREMENT),
             _oracle_get("oracle_fusion.suppliers.get", "/fscmRestApi/resources/11.13.18.05/suppliers/{SupplierId}", "api-suppliers.html", "SupplierId", "Get one supplier.", source_base=ORACLE_PROCUREMENT),
-            _oracle_get("oracle_fusion.sales_orders.get", "/fscmRestApi/resources/11.13.18.05/salesOrdersForOrderHub/{salesOrdersForOrderHubUniqID}", "api-order-management-sales-orders-for-order-hub.html", "salesOrdersForOrderHubUniqID", "Get one sales order."),
+            _oracle_get("oracle_fusion.sales_orders.get", "/fscmRestApi/resources/11.13.18.05/salesOrdersForOrderHub/{OrderKey}", "op-salesordersfororderhub-orderkey-get.html", "OrderKey", "Get one sales order."),
             _oracle_get("oracle_fusion.invoices.get", "/fscmRestApi/resources/11.13.18.05/invoices/{invoicesUniqID}", "op-invoices-invoicesuniqid-get.html", "invoicesUniqID", "Get one Payables invoice.", financials=True),
         ]
     )
@@ -327,7 +369,7 @@ def _collection_contracts() -> list[Json]:
                 "oracle_fusion.quality_inspection_results.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/inspectionResults", source_page="api-quality-inspection-results.html", body_properties={"OrganizationCode": _string(), "InspectionPlanName": _string(), "InspectionPlanId": _integer(), "DocumentType": _string(), "DocumentNumber": _string(), "ItemNumber": _string(), "Quantity": _number(), "LotNumber": _string(), "InspectionStatus": _string(), "samples": _array(inspection_sample)}, body_required=["OrganizationCode", "InspectionPlanName", "DocumentType", "DocumentNumber"], description="Create one quality inspection result."
             ),
             _oracle_write(
-                "oracle_fusion.quality_inspection_results.update", method="PATCH", path="/fscmRestApi/resources/11.13.18.05/inspectionResults/{InspectionId}", source_page="api-quality-inspection-results.html", path_properties={"InspectionId": _integer()}, path_required=["InspectionId"], body_properties={"InspectionStatus": _string(), "InspectionResult": _string(), "QuantityAccepted": _number(), "QuantityRejected": _number(), "samples": _array(inspection_sample)}, body_required=[], description="Update one quality inspection result."
+                "oracle_fusion.quality_inspection_results.update", method="PATCH", path="/fscmRestApi/resources/11.13.18.05/inspectionResults/{InspectionEventId}", source_page="op-inspectionresults-inspectioneventid-patch.html", path_properties={"InspectionEventId": _string()}, path_required=["InspectionEventId"], body_properties={"InspectionStatus": _string(), "InspectionResult": _string(), "QuantityAccepted": _number(), "QuantityRejected": _number(), "samples": _array(inspection_sample)}, body_required=[], description="Update one quality inspection result."
             ),
         ]
     )
@@ -421,6 +463,8 @@ def _child_and_transaction_contracts() -> list[Json]:
         ("oracle_fusion.purchase_order_lines.list", "/purchaseOrders/{purchaseOrdersUniqID}/child/lines", {"purchaseOrdersUniqID": _string()}, "api-purchase-orders-lines.html", ORACLE_PROCUREMENT, "Get purchase-order lines."),
     )
     for name, suffix, path_properties, source_page, source_base, description in child_specs:
+        method = "GET"
+        path = f"{_ORACLE_RESOURCE_PREFIX.removesuffix('/')}{suffix}"
         schema = deepcopy(LIST_SCHEMA)
         schema["properties"].update(path_properties)
         schema["required"] = list(path_properties)
@@ -428,9 +472,14 @@ def _child_and_transaction_contracts() -> list[Json]:
             _contract(
                 name,
                 server="oracle_fusion",
-                method="GET",
-                path=f"/fscmRestApi/resources/11.13.18.05{suffix}",
-                source=f"{source_base}{source_page}",
+                method=method,
+                path=path,
+                source=_oracle_operation_source(
+                    source_base,
+                    method,
+                    path,
+                    source_page,
+                ),
                 description=description,
                 input_schema=schema,
                 read_only=True,
