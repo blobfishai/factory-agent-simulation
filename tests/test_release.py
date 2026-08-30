@@ -196,7 +196,7 @@ def test_mcp_initialize_and_tool_list(tmp_path: Path) -> None:
     with FactoryWorld.fresh(task, tmp_path / "world.db") as world:
         initialized = handle_request(world, {"jsonrpc": "2.0", "id": 1, "method": "initialize"})
         listed = handle_request(world, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
-    assert initialized["result"]["serverInfo"] == {"name": "factorybench", "version": "3.3.3"}
+    assert initialized["result"]["serverInfo"] == {"name": "factorybench", "version": "3.3.4"}
     assert len(listed["result"]["tools"]) == len(tool_definitions())
     submit = next(tool for tool in listed["result"]["tools"] if tool["name"] == "factorybench.submit_answer")
     assert submit["inputSchema"] == task["answer_schema"]
