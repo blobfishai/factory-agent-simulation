@@ -503,23 +503,53 @@
     },
     {
       "category": "investigation",
-      "description": "Correlate NS-000018 by immutable IDs across the material Oracle records (purchase order lines, work order operations, work order resources, work orders) and preserve the effective R5 state.",
+      "description": "Correlate NS-000018 by immutable IDs across the material Oracle records (purchase order lines, suppliers, work order operations, work order resources, work orders) and preserve the effective R5 state.",
       "earned_weight": 10.0,
       "evidence": {
-        "passed_criteria": 4,
+        "passed_criteria": 5,
         "subchecks": [
+          {
+            "description": "Correlated the Oracle work order operations record: Applied downstream cure and assembly slots to derive the three option outcomes without using excluded or protected scope.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 21,
+                  "tool": "oracle_fusion.work_order_operations.list"
+                }
+              ]
+            },
+            "id": "investigation_12",
+            "passed": true,
+            "weight": 1.0
+          },
           {
             "description": "Correlated the Oracle purchase order lines record: Applied revision R5 and established 60 EA for coating quantity due before assembly, with control date 2026-01-19.",
             "evidence": {
               "missing": [],
               "satisfied_by": [
                 {
-                  "index": 21,
+                  "index": 22,
                   "tool": "oracle_fusion.purchase_order_lines.list"
                 }
               ]
             },
-            "id": "investigation_12",
+            "id": "investigation_13",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Correlated the Oracle suppliers record: Used the independently confirmed 2026-01-17 readiness input for reroute_to_approved_coater, then separately derived its 2026-01-19 operating outcome under alternate source, PO line, process spec, and ship window must match instead of treating an external promise as authorization or a completion date.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 23,
+                  "tool": "oracle_fusion.suppliers.list"
+                }
+              ]
+            },
+            "id": "investigation_14",
             "passed": true,
             "weight": 1.0
           },
@@ -529,12 +559,12 @@
               "missing": [],
               "satisfied_by": [
                 {
-                  "index": 22,
+                  "index": 24,
                   "tool": "oracle_fusion.work_orders.get"
                 }
               ]
             },
-            "id": "investigation_13",
+            "id": "investigation_15",
             "passed": true,
             "weight": 1.0
           },
@@ -544,32 +574,17 @@
               "missing": [],
               "satisfied_by": [
                 {
-                  "index": 23,
+                  "index": 25,
                   "tool": "oracle_fusion.work_order_resources.list"
                 }
               ]
             },
-            "id": "investigation_14",
-            "passed": true,
-            "weight": 1.0
-          },
-          {
-            "description": "Correlated the Oracle work order operations record: Applied downstream cure and assembly slots to derive the three option outcomes without using excluded or protected scope.",
-            "evidence": {
-              "missing": [],
-              "satisfied_by": [
-                {
-                  "index": 24,
-                  "tool": "oracle_fusion.work_order_operations.list"
-                }
-              ]
-            },
-            "id": "investigation_15",
+            "id": "investigation_16",
             "passed": true,
             "weight": 1.0
           }
         ],
-        "total_criteria": 4
+        "total_criteria": 5
       },
       "id": "investigation.erp_correlation",
       "passed": true,
@@ -812,7 +827,7 @@
         "passed_criteria": 1,
         "subchecks": [
           {
-            "description": "Required immutable record NS-000018 to reach business outcome 'Supplier operation rerouted' through oracle_fusion.work_order_resources.update with exact provider-critical values WorkOrderId=100018, WoOperationResourceId=400018, requestBody.ResourceCode='RES-ALT-018', requestBody.UsageRate=1.0, requestBody.AssignedUnits=1. The audited transition binds selected option reroute_to_approved_coater, revision R5, approval AP-0018, and constraint alternate source, PO line, process spec, and ship window must match; WIP already at the closed supplier or outside alternate capacity = 4 EA; uncovered or unsupported scope = 17.0 EA; no other provider record satisfies this state criterion.",
+            "description": "Required immutable record NS-000018 to reach business outcome 'Supplier operation rerouted' through oracle_fusion.work_order_resources.create with exact provider-critical values WorkOrderId=100018, WorkOrderOperationId=200018, requestBody.ResourceCode='RES-ALT-018', requestBody.UsageRate=1.0, requestBody.AssignedUnits=1, requestBody.BasisType='VARIABLE'. The audited transition binds selected option reroute_to_approved_coater, revision R5, approval AP-0018, and constraint alternate source, PO line, process spec, and ship window must match; WIP already at the closed supplier or outside alternate capacity = 4 EA; uncovered or unsupported scope = 17.0 EA; no other provider record satisfies this state criterion.",
             "evidence": {
               "matching_rows": 1,
               "mismatches": {}
@@ -875,11 +890,11 @@
               "missing": [],
               "satisfied_by": [
                 {
-                  "index": 23,
+                  "index": 25,
                   "tool": "oracle_fusion.work_order_resources.list"
                 },
                 {
-                  "index": 26,
+                  "index": 27,
                   "tool": "oracle_fusion.work_order_resources.list"
                 }
               ]
@@ -1016,14 +1031,14 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 43,
+  "passed_atomic_checks": 44,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
   "score": 100.0,
   "strict_pass": true,
   "task_id": "factorybench-018",
-  "total_atomic_checks": 43,
+  "total_atomic_checks": 44,
   "total_checks": 14,
   "total_weight": 100.0
 }

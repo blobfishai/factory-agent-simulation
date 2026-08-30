@@ -23,7 +23,7 @@ from .scenarios import FAMILIES, FAMILY_DESCRIPTIONS, SCENARIOS, Scenario
 
 
 BENCHMARK_NAME = "FactoryBench-100"
-BENCHMARK_VERSION = "3.3.0"
+BENCHMARK_VERSION = "3.3.1"
 AS_OF_DATE = date(2026, 1, 12)
 WORLD_ID = "northstar-enterprise-fusion-v3"
 
@@ -183,9 +183,29 @@ def _base64_message(scenario: Scenario, ordinal: int, *, sent: bool) -> str:
 
 
 def _path_value(name: str, ordinal: int) -> Any:
-    if name in {"WorkOrderId", "WoOperationId", "WoOperationMaterialId", "WoOperationResourceId", "MaintenanceProgramId", "SupplierId", "HeaderInterfaceId", "InterfaceTransactionId", "InvoiceId", "HoldId", "InspectionId"}:
+    if name in {
+        "WorkOrderId",
+        "WorkOrderOperationId",
+        "WorkOrderOperationId2",
+        "WorkOrderOperationMaterialId",
+        "WorkOrderOperationResourceId",
+        "WoOperationId",
+        "WoOperationMaterialId",
+        "WoOperationResourceId",
+        "MaintenanceProgramId",
+        "SupplierId",
+        "HeaderInterfaceId",
+        "InterfaceTransactionId",
+        "InvoiceId",
+        "HoldId",
+        "InspectionId",
+    }:
         offsets = {
             "WorkOrderId": 100_000,
+            "WorkOrderOperationId": 200_000,
+            "WorkOrderOperationId2": 200_000,
+            "WorkOrderOperationMaterialId": 300_000,
+            "WorkOrderOperationResourceId": 400_000,
             "WoOperationId": 200_000,
             "WoOperationMaterialId": 300_000,
             "WoOperationResourceId": 400_000,
@@ -280,12 +300,12 @@ def _oracle_body(tool: str, ordinal: int, scenario: Scenario) -> dict[str, Any]:
         "oracle_fusion.quality_inspection_results.update": {"InspectionStatus": "COMPLETE", "InspectionResult": "ACCEPT", "QuantityAccepted": quantity, "QuantityRejected": 0, "samples": [{"SampleNumber": 1, "Result": "PASS"}]},
         "oracle_fusion.work_order_operations.create": {"OperationSequenceNumber": 30 + ordinal % 10, "OperationName": f"Approved rework {case}", "WorkCenterCode": "WC-REWORK", "PlannedStartDate": effective.isoformat(), "PlannedCompletionDate": completion.isoformat()},
         "oracle_fusion.work_order_operations.update": {"WorkCenterCode": f"WC-ALT-{1 + ordinal % 3}", "PlannedStartDate": effective.isoformat(), "PlannedCompletionDate": completion.isoformat(), "OperationName": f"Controlled operation {case}"},
-        "oracle_fusion.work_order_materials.update": {"Quantity": quantity, "SupplySubinventory": "STORES", "ItemNumber": item},
+        "oracle_fusion.work_order_materials.update": {"QuantityPERProduct": decision["per_unit"], "SupplySubinventory": "STORES"},
         "oracle_fusion.work_order_resources.create": {"ResourceCode": f"RES-CERT-{ordinal:03d}", "UsageRate": 1.0, "AssignedUnits": 1, "BasisType": "VARIABLE"},
-        "oracle_fusion.work_order_resources.update": {"ResourceCode": f"RES-ALT-{ordinal:03d}", "UsageRate": 1.0, "AssignedUnits": 1},
+        "oracle_fusion.work_order_resources.update": {"UsageRate": 1.0, "AssignedUnits": 1},
         "oracle_fusion.maintenance_operations.update": {"WorkCenterCode": f"MAINT-{1 + ordinal % 3}", "OperationName": f"Corrective action {case}", "PlannedStartDate": effective.isoformat()},
         "oracle_fusion.receiving_receipt_transactions.update": {"TransactionType": "CORRECT", "Quantity": quantity, "InspectionQualityCode": "ACCEPT", "Comments": case},
-        "oracle_fusion.work_order_materials.replace_with_substitute": {"SubstituteItemNumber": f"NS-SUB-{ordinal:03d}", "SubstituteQuantity": quantity},
+        "oracle_fusion.work_order_materials.replace_with_substitute": {"substituteItemNumber": f"NS-SUB-{ordinal:03d}"},
         "oracle_fusion.material_transactions.create": {"SourceSystemCode": "FUSION_MOBILE", "SourceSystemType": "EXTERNAL", "MaterialTransactionDetail": [{"OrganizationCode": "SEA", "WorkOrderNumber": f"WO-{ordinal:04d}", "InventoryItemNumber": item, "TransactionTypeCode": "MATERIAL_ISSUE", "TransactionQuantity": quantity, "TransactionUnitOfMeasure": transaction_unit, "SubinventoryCode": "STORES", "LotNumber": f"LOT-{ordinal:04d}"}]},
         "oracle_fusion.operation_transactions.create": {"SourceSystemCode": "FUSION_MOBILE", "SourceSystemType": "EXTERNAL", "OperationTransactionDetail": [{"OrganizationCode": "SEA", "WorkOrderNumber": f"WO-{ordinal:04d}", "WoOperationSequenceNumber": 10, "FromDispatchState": "READY", "ToDispatchState": "COMPLETE", "TransactionQuantity": quantity, "TransactionUnitOfMeasure": transaction_unit}]},
         "oracle_fusion.resource_transactions.create": {"SourceSystemCode": "FUSION_MOBILE", "ResourceTransactionDetail": [{"OrganizationCode": "SEA", "WorkOrderNumber": f"WO-{ordinal:04d}", "WoOperationSequenceNumber": 10, "ResourceCode": f"RES-{ordinal:03d}", "TransactionQuantity": quantity, "TransactionUnitOfMeasure": transaction_unit}]},
@@ -314,6 +334,11 @@ def _oracle_body(tool: str, ordinal: int, scenario: Scenario) -> dict[str, Any]:
                 "samples": [{"SampleNumber": 1, "Result": "FAIL"}],
             }
         )
+    if tool == "oracle_fusion.work_order_resources.create" and scenario.title in {
+        "Recover output after a certified welder absence",
+        "Move outsourced coating around a supplier outage",
+    }:
+        body["ResourceCode"] = f"RES-ALT-{ordinal:03d}"
     if tool == "oracle_fusion.material_transactions.create" and scenario.title in {
         "Return unused copper from a canceled operation",
         "Reverse a duplicated copper issue",
@@ -480,8 +505,7 @@ def _post_write_state_patch(
     if primary_write == "oracle_fusion.work_order_materials.replace_with_substitute":
         patch.update(
             {
-                "ItemNumber": body["SubstituteItemNumber"],
-                "RequiredQuantity": body["SubstituteQuantity"],
+                "ItemNumber": body["substituteItemNumber"],
             }
         )
     elif primary_write == "oracle_fusion.material_transactions.create":
@@ -755,6 +779,9 @@ def _partition_response_measure(value: float | int, count: int) -> list[float | 
 
 _ORACLE_IDENTITY_FIELDS = (
     "WorkOrderId",
+    "WorkOrderOperationId",
+    "WorkOrderOperationMaterialId",
+    "WorkOrderOperationResourceId",
     "WoOperationId",
     "WoOperationMaterialId",
     "WoOperationResourceId",
@@ -865,7 +892,7 @@ def _oracle_record(
         },
         "work_order_operations": {
             "WorkOrderId": _path_value("WorkOrderId", ordinal),
-            "WoOperationId": _path_value("WoOperationId", ordinal),
+            "WorkOrderOperationId": _path_value("WorkOrderOperationId", ordinal),
             "OperationSequenceNumber": 10,
             "OperationName": f"Controlled operation for {case}",
             "WorkCenterCode": f"WC-{1 + ordinal % 4}",
@@ -877,8 +904,8 @@ def _oracle_record(
         },
         "work_order_materials": {
             "WorkOrderId": _path_value("WorkOrderId", ordinal),
-            "WoOperationId": _path_value("WoOperationId", ordinal),
-            "WoOperationMaterialId": _path_value("WoOperationMaterialId", ordinal),
+            "WorkOrderOperationId": _path_value("WorkOrderOperationId", ordinal),
+            "WorkOrderOperationMaterialId": _path_value("WorkOrderOperationMaterialId", ordinal),
             "OperationSequenceNumber": 10,
             "MaterialSequenceNumber": 10,
             "ItemNumber": decision["item"],
@@ -890,8 +917,8 @@ def _oracle_record(
         },
         "work_order_resources": {
             "WorkOrderId": _path_value("WorkOrderId", ordinal),
-            "WoOperationId": _path_value("WoOperationId", ordinal),
-            "WoOperationResourceId": _path_value("WoOperationResourceId", ordinal),
+            "WorkOrderOperationId": _path_value("WorkOrderOperationId", ordinal),
+            "WorkOrderOperationResourceId": _path_value("WorkOrderOperationResourceId", ordinal),
             "OperationSequenceNumber": 10,
             "ResourceCode": f"RES-CERT-{ordinal:03d}",
             "UsageRate": 1.0,
@@ -1242,7 +1269,7 @@ def _candidate_provider_arguments(
             code_prefixes = {
                 "WorkCenterCode": "WC",
                 "ResourceCode": "RES",
-                "SubstituteItemNumber": "NS-SUB",
+                "substituteItemNumber": "NS-SUB",
                 "Supplier": "SUPPLIER",
                 "SupplierSite": "SITE",
                 "InspectionPlanName": "PLAN",

@@ -1332,6 +1332,14 @@ def _mode_answer_bundle(
             if "work_order_operations.update" in primary_write
             else f"RES-ALT-{ordinal:03d}"
             if "work_order_resources.update" in primary_write
+            or (
+                "work_order_resources.create" in primary_write
+                and scenario_title
+                in {
+                    "Recover output after a certified welder absence",
+                    "Move outsourced coating around a supplier outage",
+                }
+            )
             else f"RES-CERT-{ordinal:03d}"
             if "work_order_resources.create" in primary_write
             else f"MAINT-{1 + ordinal % 3}"

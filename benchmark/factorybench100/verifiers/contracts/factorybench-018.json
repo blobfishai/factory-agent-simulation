@@ -58,27 +58,29 @@
   ],
   "assertions": [
     {
-      "description": "Required immutable record NS-000018 to reach business outcome 'Supplier operation rerouted' through oracle_fusion.work_order_resources.update with exact provider-critical values WorkOrderId=100018, WoOperationResourceId=400018, requestBody.ResourceCode='RES-ALT-018', requestBody.UsageRate=1.0, requestBody.AssignedUnits=1. The audited transition binds selected option reroute_to_approved_coater, revision R5, approval AP-0018, and constraint alternate source, PO line, process spec, and ship window must match; WIP already at the closed supplier or outside alternate capacity = 4 EA; uncovered or unsupported scope = 17.0 EA; no other provider record satisfies this state criterion.",
+      "description": "Required immutable record NS-000018 to reach business outcome 'Supplier operation rerouted' through oracle_fusion.work_order_resources.create with exact provider-critical values WorkOrderId=100018, WorkOrderOperationId=200018, requestBody.ResourceCode='RES-ALT-018', requestBody.UsageRate=1.0, requestBody.AssignedUnits=1, requestBody.BasisType='VARIABLE'. The audited transition binds selected option reroute_to_approved_coater, revision R5, approval AP-0018, and constraint alternate source, PO line, process spec, and ship window must match; WIP already at the closed supplier or outside alternate capacity = 4 EA; uncovered or unsupported scope = 17.0 EA; no other provider record satisfies this state criterion.",
       "id": "mutation_01",
       "milestone_id": "state.primary",
       "payload_allowed_argument_paths": [
-        "WoOperationResourceId",
         "WorkOrderId",
+        "WorkOrderOperationId",
         "requestBody.AssignedUnits",
+        "requestBody.BasisType",
         "requestBody.ResourceCode",
         "requestBody.UsageRate"
       ],
       "payload_contains": {
         "arguments": {
-          "WoOperationResourceId": 400018,
           "WorkOrderId": 100018,
+          "WorkOrderOperationId": 200018,
           "requestBody": {
             "AssignedUnits": 1,
+            "BasisType": "VARIABLE",
             "ResourceCode": "RES-ALT-018",
             "UsageRate": 1.0
           }
         },
-        "tool": "oracle_fusion.work_order_resources.update"
+        "tool": "oracle_fusion.work_order_resources.create"
       },
       "table": "resource_state",
       "values": {
@@ -684,6 +686,27 @@
       "any_of": [
         {
           "arguments": {
+            "WorkOrderId": 100018,
+            "limit": 50,
+            "onlyData": true
+          },
+          "expected_result_contains": {
+            "WorkOrderId": 100018
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.work_order_operations.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle work order operations record: Applied downstream cure and assembly slots to derive the three option outcomes without using excluded or protected scope.",
+      "id": "investigation_12",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
             "limit": 50,
             "onlyData": true,
             "purchaseOrdersUniqID": "purchaseOrdersUniqID-0018"
@@ -697,7 +720,38 @@
       ],
       "before_primary_mutation": true,
       "description": "Correlated the Oracle purchase order lines record: Applied revision R5 and established 60 EA for coating quantity due before assembly, with control date 2026-01-19.",
-      "id": "investigation_12",
+      "id": "investigation_13",
+      "milestone_id": "investigation.erp_correlation",
+      "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "SupplierId": 600018
+          },
+          "expected_result_contains": {
+            "SupplierId": 600018
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.suppliers.get"
+        },
+        {
+          "arguments": {
+            "limit": 50,
+            "onlyData": true,
+            "q": "SupplierNumber='SUP-00018'"
+          },
+          "expected_result_contains": {
+            "SupplierId": 600018
+          },
+          "match": "result_contains",
+          "tool": "oracle_fusion.suppliers.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Correlated the Oracle suppliers record: Used the independently confirmed 2026-01-17 readiness input for reroute_to_approved_coater, then separately derived its 2026-01-19 operating outcome under alternate source, PO line, process spec, and ship window must match instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_14",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
     },
@@ -728,7 +782,7 @@
       ],
       "before_primary_mutation": true,
       "description": "Correlated the Oracle work orders record: Located NS-000018 for outside-coating operation using immutable IDs and preserved effective revision R5.",
-      "id": "investigation_13",
+      "id": "investigation_15",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
     },
@@ -741,7 +795,7 @@
             "onlyData": true
           },
           "expected_result_contains": {
-            "WorkOrderId": 100018
+            "WorkOrderId": 800018
           },
           "match": "result_contains",
           "tool": "oracle_fusion.work_order_resources.list"
@@ -749,35 +803,14 @@
       ],
       "before_primary_mutation": true,
       "description": "Correlated the Oracle work order resources record: Applied downstream cure and assembly slots to derive the three option outcomes without using excluded or protected scope.",
-      "id": "investigation_14",
-      "milestone_id": "investigation.erp_correlation",
-      "weight": 1.0
-    },
-    {
-      "any_of": [
-        {
-          "arguments": {
-            "WorkOrderId": 100018,
-            "limit": 50,
-            "onlyData": true
-          },
-          "expected_result_contains": {
-            "WorkOrderId": 100018
-          },
-          "match": "result_contains",
-          "tool": "oracle_fusion.work_order_operations.list"
-        }
-      ],
-      "before_primary_mutation": true,
-      "description": "Correlated the Oracle work order operations record: Applied downstream cure and assembly slots to derive the three option outcomes without using excluded or protected scope.",
-      "id": "investigation_15",
+      "id": "investigation_16",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
     }
   ],
   "post_write_verifications": [
     {
-      "after_tool": "oracle_fusion.work_order_resources.update",
+      "after_tool": "oracle_fusion.work_order_resources.create",
       "any_of": [
         {
           "arguments": {
@@ -800,7 +833,7 @@
         "UsageRate": 1.0
       },
       "id": "verify_primary_oracle_state",
-      "materializes_new_record": false,
+      "materializes_new_record": true,
       "milestone_id": "verification.readback",
       "target_identity": {
         "WorkOrderId": 100018

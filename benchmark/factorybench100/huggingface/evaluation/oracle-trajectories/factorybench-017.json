@@ -503,7 +503,7 @@
     },
     {
       "category": "investigation",
-      "description": "Correlate NS-000017 by immutable IDs across the material Oracle records (purchase order lines, work order operations, work order resources, work orders) and preserve the effective R4 state.",
+      "description": "Correlate NS-000017 by immutable IDs across the material Oracle records (suppliers, work order operations, work order resources, work orders) and preserve the effective R4 state.",
       "earned_weight": 10.0,
       "evidence": {
         "passed_criteria": 4,
@@ -554,13 +554,13 @@
             "weight": 1.0
           },
           {
-            "description": "Correlated the Oracle purchase order lines record: Applied revision R4 and established 53 HR for certified welding hours required, with control date 2026-01-18.",
+            "description": "Correlated the Oracle suppliers record: Used the independently confirmed 2026-01-15 readiness input for assign_qualified_alternate_welder, then separately derived its 2026-01-18 operating outcome under process certification and shift availability must overlap instead of treating an external promise as authorization or a completion date.",
             "evidence": {
               "missing": [],
               "satisfied_by": [
                 {
                   "index": 24,
-                  "tool": "oracle_fusion.purchase_order_lines.list"
+                  "tool": "oracle_fusion.suppliers.list"
                 }
               ]
             },
@@ -812,7 +812,7 @@
         "passed_criteria": 1,
         "subchecks": [
           {
-            "description": "Required immutable record NS-000017 to reach business outcome 'Labor capacity recovered' through oracle_fusion.work_order_resources.update with exact provider-critical values WorkOrderId=100017, WoOperationResourceId=400017, requestBody.ResourceCode='RES-ALT-017', requestBody.UsageRate=1.0, requestBody.AssignedUnits=1. The audited transition binds selected option assign_qualified_alternate_welder, revision R4, approval AP-0017, and constraint process certification and shift availability must overlap; uncertified or already assigned labor-hours = 12 HR; uncovered or unsupported scope = 24.0 HR; no other provider record satisfies this state criterion.",
+            "description": "Required immutable record NS-000017 to reach business outcome 'Labor capacity recovered' through oracle_fusion.work_order_resources.create with exact provider-critical values WorkOrderId=100017, WorkOrderOperationId=200017, requestBody.ResourceCode='RES-ALT-017', requestBody.UsageRate=1.0, requestBody.AssignedUnits=1, requestBody.BasisType='VARIABLE'. The audited transition binds selected option assign_qualified_alternate_welder, revision R4, approval AP-0017, and constraint process certification and shift availability must overlap; uncertified or already assigned labor-hours = 12 HR; uncovered or unsupported scope = 24.0 HR; no other provider record satisfies this state criterion.",
             "evidence": {
               "matching_rows": 1,
               "mismatches": {}
@@ -1124,11 +1124,11 @@
         {
           "action": "upsert",
           "audit_id": 1,
-          "payload": "{\"effective_at\": \"2026-01-18\", \"payload_json\": \"{\\\"arguments\\\":{\\\"WoOperationResourceId\\\":400017,\\\"WorkOrderId\\\":100017,\\\"requestBody\\\":{\\\"AssignedUnits\\\":1,\\\"ResourceCode\\\":\\\"RES-ALT-017\\\",\\\"UsageRate\\\":1.0}},\\\"tool\\\":\\\"oracle_fusion.work_order_resources.update\\\"}\", \"resource_id\": \"factorybench-017-mutation-01\", \"resource_type\": \"oracle_fusion.work_order_resources\", \"revision\": 1, \"status\": \"Labor capacity recovered\", \"system\": \"oracle_fusion\", \"task_id\": \"factorybench-017\"}",
+          "payload": "{\"effective_at\": \"2026-01-18\", \"payload_json\": \"{\\\"arguments\\\":{\\\"WorkOrderId\\\":100017,\\\"WorkOrderOperationId\\\":200017,\\\"requestBody\\\":{\\\"AssignedUnits\\\":1,\\\"BasisType\\\":\\\"VARIABLE\\\",\\\"ResourceCode\\\":\\\"RES-ALT-017\\\",\\\"UsageRate\\\":1.0}},\\\"tool\\\":\\\"oracle_fusion.work_order_resources.create\\\"}\", \"resource_id\": \"factorybench-017-mutation-01\", \"resource_type\": \"oracle_fusion.work_order_resources\", \"revision\": 1, \"status\": \"Labor capacity recovered\", \"system\": \"oracle_fusion\", \"task_id\": \"factorybench-017\"}",
           "record_id": "factorybench-017-mutation-01",
           "table_name": "resource_state",
           "task_id": "factorybench-017",
-          "tool": "oracle_fusion.work_order_resources.update"
+          "tool": "oracle_fusion.work_order_resources.create"
         },
         {
           "action": "upsert",
@@ -1186,7 +1186,7 @@
         },
         {
           "effective_at": "2026-01-18",
-          "payload_json": "{\"arguments\":{\"WoOperationResourceId\":400017,\"WorkOrderId\":100017,\"requestBody\":{\"AssignedUnits\":1,\"ResourceCode\":\"RES-ALT-017\",\"UsageRate\":1.0}},\"tool\":\"oracle_fusion.work_order_resources.update\"}",
+          "payload_json": "{\"arguments\":{\"WorkOrderId\":100017,\"WorkOrderOperationId\":200017,\"requestBody\":{\"AssignedUnits\":1,\"BasisType\":\"VARIABLE\",\"ResourceCode\":\"RES-ALT-017\",\"UsageRate\":1.0}},\"tool\":\"oracle_fusion.work_order_resources.create\"}",
           "resource_id": "factorybench-017-mutation-01",
           "resource_type": "oracle_fusion.work_order_resources",
           "revision": 1,
@@ -1399,7 +1399,7 @@
             "kind": "erp_export",
             "media_type": "application/json",
             "path": "oracle-starting-record.json",
-            "sha256": "77d7cb21fce16388fb171453766ee7feddc281a5a732993a49606548b8be209c",
+            "sha256": "339ad76167e5a373b39031da2417cbc538113f780603f1715c85eff33b0f1e6c",
             "source": "oracle_fusion",
             "title": "Oracle starting-record export"
           },
@@ -1532,9 +1532,9 @@
             "case_reference": "CASE-017",
             "only_data": true,
             "record_handles": {
-              "WoOperationResourceId": 400017,
+              "SupplierId": 600017,
               "WorkOrderId": 100017,
-              "purchaseOrdersUniqID": "purchaseOrdersUniqID-0017"
+              "WorkOrderOperationId": 200017
             }
           },
           "slack": {
@@ -2236,11 +2236,11 @@
       },
       "index": 11,
       "result": {
-        "content": "{\n  \"case\": \"CASE-017\",\n  \"itemOrResource\": \"NS-COMP-017\",\n  \"lastUpdateDate\": \"2026-01-12T08:00:00-08:00\",\n  \"organizationCode\": \"SEA\",\n  \"providerSetupCrosswalk\": {\n    \"candidates\": [\n      {\n        \"candidateReference\": \"SETUP-0017-PDX\",\n        \"controlStatus\": \"OTHER_ORGANIZATION\",\n        \"immutableRecord\": \"NS-000018\",\n        \"organizationCode\": \"PDX\",\n        \"sourceRevision\": \"R4\",\n        \"targetAndProviderValues\": {\n          \"WoOperationResourceId\": 2500017,\n          \"WorkOrderId\": 2200017,\n          \"requestBody\": {\n            \"AssignedUnits\": 1,\n            \"ResourceCode\": \"RES-CAND-017-3\",\n            \"UsageRate\": 1.0\n          }\n        }\n      },\n      {\n        \"candidateReference\": \"SETUP-0017-CURRENT\",\n        \"controlStatus\": \"ACTIVE_APPLICABLE\",\n        \"immutableRecord\": \"NS-000017\",\n        \"organizationCode\": \"SEA\",\n        \"sourceRevision\": \"R4\",\n        \"targetAndProviderValues\": {\n          \"WoOperationResourceId\": 400017,\n          \"WorkOrderId\": 100017,\n          \"requestBody\": {\n            \"AssignedUnits\": 1,\n            \"ResourceCode\": \"RES-ALT-017\",\n            \"UsageRate\": 1.0\n          }\n        }\n      },\n      {\n        \"candidateReference\": \"SETUP-0017-ARCHIVE\",\n        \"controlStatus\": \"SUPERSEDED\",\n        \"immutableRecord\": \"NS-000017\",\n        \"organizationCode\": \"SEA\",\n        \"sourceRevision\": \"R10\",\n        \"targetAndProviderValues\": {\n          \"WoOperationResourceId\": 1800017,\n          \"WorkOrderId\": 1500017,\n          \"requestBody\": {\n            \"AssignedUnits\": 1,\n            \"ResourceCode\": \"RES-CAND-017-2\",\n            \"UsageRate\": 1.0\n          }\n        }\n      }\n    ],\n    \"instruction\": \"Correlate immutable record, effective revision, organization, and control status before using provider identifiers or controlled values. This setup export does not determine the business decision, and row order does not indicate applicability.\",\n    \"narrativeControl\": \"Free-text names, descriptions, notes, and reasons may use natural wording but must remain scoped to this case or immutable record.\",\n    \"providerOperation\": \"oracle_fusion.work_order_resources.update\",\n    \"source\": \"Oracle setup and transaction-control export\"\n  },\n  \"recordId\": \"NS-000017\",\n  \"recordType\": \"oracle_fusion.work_order_resources\",\n  \"revision\": \"R4\",\n  \"source\": \"Oracle Fusion Cloud 26a-shaped synthetic export\",\n  \"sourceMeasure\": 53,\n  \"status\": \"Open\",\n  \"unit\": \"HR\"\n}\n",
+        "content": "{\n  \"case\": \"CASE-017\",\n  \"itemOrResource\": \"NS-COMP-017\",\n  \"lastUpdateDate\": \"2026-01-12T08:00:00-08:00\",\n  \"organizationCode\": \"SEA\",\n  \"providerSetupCrosswalk\": {\n    \"candidates\": [\n      {\n        \"candidateReference\": \"SETUP-0017-PDX\",\n        \"controlStatus\": \"OTHER_ORGANIZATION\",\n        \"immutableRecord\": \"NS-000018\",\n        \"organizationCode\": \"PDX\",\n        \"sourceRevision\": \"R4\",\n        \"targetAndProviderValues\": {\n          \"WorkOrderId\": 2200017,\n          \"WorkOrderOperationId\": 2300017,\n          \"requestBody\": {\n            \"AssignedUnits\": 1,\n            \"BasisType\": \"VARIABLE\",\n            \"ResourceCode\": \"RES-CAND-017-3\",\n            \"UsageRate\": 1.0\n          }\n        }\n      },\n      {\n        \"candidateReference\": \"SETUP-0017-CURRENT\",\n        \"controlStatus\": \"ACTIVE_APPLICABLE\",\n        \"immutableRecord\": \"NS-000017\",\n        \"organizationCode\": \"SEA\",\n        \"sourceRevision\": \"R4\",\n        \"targetAndProviderValues\": {\n          \"WorkOrderId\": 100017,\n          \"WorkOrderOperationId\": 200017,\n          \"requestBody\": {\n            \"AssignedUnits\": 1,\n            \"BasisType\": \"VARIABLE\",\n            \"ResourceCode\": \"RES-ALT-017\",\n            \"UsageRate\": 1.0\n          }\n        }\n      },\n      {\n        \"candidateReference\": \"SETUP-0017-ARCHIVE\",\n        \"controlStatus\": \"SUPERSEDED\",\n        \"immutableRecord\": \"NS-000017\",\n        \"organizationCode\": \"SEA\",\n        \"sourceRevision\": \"R10\",\n        \"targetAndProviderValues\": {\n          \"WorkOrderId\": 1500017,\n          \"WorkOrderOperationId\": 1600017,\n          \"requestBody\": {\n            \"AssignedUnits\": 1,\n            \"BasisType\": \"VARIABLE\",\n            \"ResourceCode\": \"RES-CAND-017-2\",\n            \"UsageRate\": 1.0\n          }\n        }\n      }\n    ],\n    \"instruction\": \"Correlate immutable record, effective revision, organization, and control status before using provider identifiers or controlled values. This setup export does not determine the business decision, and row order does not indicate applicability.\",\n    \"narrativeControl\": \"Free-text names, descriptions, notes, and reasons may use natural wording but must remain scoped to this case or immutable record.\",\n    \"providerOperation\": \"oracle_fusion.work_order_resources.create\",\n    \"source\": \"Oracle setup and transaction-control export\"\n  },\n  \"recordId\": \"NS-000017\",\n  \"recordType\": \"oracle_fusion.work_order_resources\",\n  \"revision\": \"R4\",\n  \"source\": \"Oracle Fusion Cloud 26a-shaped synthetic export\",\n  \"sourceMeasure\": 53,\n  \"status\": \"Open\",\n  \"unit\": \"HR\"\n}\n",
         "description": "Oracle starting-record export",
         "id": "drive-017-09",
         "kind": "drive#file",
-        "md5Checksum": "77d7cb21fce16388fb171453766ee7feddc281a5a732993a49606548b8be209c",
+        "md5Checksum": "339ad76167e5a373b39031da2417cbc538113f780603f1715c85eff33b0f1e6c",
         "mimeType": "application/json",
         "modifiedTime": "2026-01-12T09:00:00Z",
         "name": "oracle-starting-record.json"
@@ -2433,7 +2433,7 @@
       },
       "index": 21,
       "result": {
-        "count": 4,
+        "count": 3,
         "hasMore": false,
         "items": [
           {
@@ -2444,9 +2444,9 @@
             "OperationSequenceNumber": 10,
             "ResourceCode": "RES-CERT-017",
             "UsageRate": 1.0,
-            "WoOperationId": 200017,
-            "WoOperationResourceId": 400017,
-            "WorkOrderId": 800017
+            "WorkOrderId": 800017,
+            "WorkOrderOperationId": 200017,
+            "WorkOrderOperationResourceId": 400017
           },
           {
             "AssignedUnits": 1,
@@ -2456,9 +2456,9 @@
             "OperationSequenceNumber": 10,
             "ResourceCode": "RES-CERT-017",
             "UsageRate": 1.0,
-            "WoOperationId": 200017,
-            "WoOperationResourceId": 400017,
-            "WorkOrderId": 100017
+            "WorkOrderId": 900017,
+            "WorkOrderOperationId": 200017,
+            "WorkOrderOperationResourceId": 400017
           },
           {
             "AssignedUnits": 1,
@@ -2468,21 +2468,9 @@
             "OperationSequenceNumber": 10,
             "ResourceCode": "RES-CERT-017",
             "UsageRate": 1.0,
-            "WoOperationId": 200017,
-            "WoOperationResourceId": 400017,
-            "WorkOrderId": 900017
-          },
-          {
-            "AssignedUnits": 1,
-            "ChargedQuantity": 0,
-            "LastUpdateDate": "2026-01-12T08:00:00-08:00",
-            "LastUpdatedBy": "FACTORY.PLANNER",
-            "OperationSequenceNumber": 10,
-            "ResourceCode": "RES-CERT-017",
-            "UsageRate": 1.0,
-            "WoOperationId": 200017,
-            "WoOperationResourceId": 400017,
-            "WorkOrderId": 1000017
+            "WorkOrderId": 1000017,
+            "WorkOrderOperationId": 200017,
+            "WorkOrderOperationResourceId": 400017
           }
         ],
         "limit": 50,
@@ -2513,9 +2501,9 @@
             "PlannedCompletionDate": "2026-01-13",
             "PlannedStartDate": "2026-01-12",
             "RejectedQuantity": 0,
-            "WoOperationId": 200017,
             "WorkCenterCode": "WC-2",
-            "WorkOrderId": 800017
+            "WorkOrderId": 800017,
+            "WorkOrderOperationId": 200017
           },
           {
             "CompletedQuantity": 0,
@@ -2527,9 +2515,9 @@
             "PlannedCompletionDate": "2026-01-13",
             "PlannedStartDate": "2026-01-12",
             "RejectedQuantity": 0,
-            "WoOperationId": 200017,
             "WorkCenterCode": "WC-2",
-            "WorkOrderId": 100017
+            "WorkOrderId": 100017,
+            "WorkOrderOperationId": 200017
           },
           {
             "CompletedQuantity": 0,
@@ -2541,9 +2529,9 @@
             "PlannedCompletionDate": "2026-01-13",
             "PlannedStartDate": "2026-01-12",
             "RejectedQuantity": 0,
-            "WoOperationId": 200017,
             "WorkCenterCode": "WC-2",
-            "WorkOrderId": 900017
+            "WorkOrderId": 900017,
+            "WorkOrderOperationId": 200017
           },
           {
             "CompletedQuantity": 0,
@@ -2555,9 +2543,9 @@
             "PlannedCompletionDate": "2026-01-13",
             "PlannedStartDate": "2026-01-12",
             "RejectedQuantity": 0,
-            "WoOperationId": 200017,
             "WorkCenterCode": "WC-2",
-            "WorkOrderId": 1000017
+            "WorkOrderId": 1000017,
+            "WorkOrderOperationId": 200017
           }
         ],
         "limit": 50,
@@ -2594,7 +2582,7 @@
       "arguments": {
         "limit": 50,
         "onlyData": true,
-        "purchaseOrdersUniqID": "purchaseOrdersUniqID-0017"
+        "q": "SupplierNumber='SUP-00017'"
       },
       "index": 24,
       "result": {
@@ -2602,60 +2590,44 @@
         "hasMore": false,
         "items": [
           {
-            "Item": "NS-COMP-017",
-            "ItemDescription": "CASE-017: Recover output after a certified welder absence",
+            "BusinessRelationship": "SPEND_AUTHORIZED",
             "LastUpdateDate": "2025-12-18T16:20:00-08:00",
             "LastUpdatedBy": "FACTORY.PLANNER",
-            "LineNumber": 1,
-            "LineStatus": "SUPERSEDED",
-            "POHeaderId": 2700017,
-            "POLineId": 2100017,
-            "Price": 29.0,
-            "Quantity": 53,
-            "ScheduleDate": "2026-01-18",
-            "UOM": "HR"
+            "Status": "SUPERSEDED",
+            "Supplier": "Olympic Metrology",
+            "SupplierId": 1300017,
+            "SupplierNumber": "SUP-00017",
+            "TaxOrganizationType": "CORPORATION"
           },
           {
-            "Item": "NS-COMP-017",
-            "ItemDescription": "CASE-017: Recover output after a certified welder absence",
+            "BusinessRelationship": "SPEND_AUTHORIZED",
             "LastUpdateDate": "2026-01-12T08:00:00-08:00",
             "LastUpdatedBy": "FACTORY.PLANNER",
-            "LineNumber": 1,
-            "LineStatus": "OPEN",
-            "POHeaderId": 2000017,
-            "POLineId": 2100017,
-            "Price": 29.0,
-            "Quantity": 53,
-            "ScheduleDate": "2026-01-18",
-            "UOM": "HR"
+            "Status": "ACTIVE",
+            "Supplier": "Olympic Metrology",
+            "SupplierId": 600017,
+            "SupplierNumber": "SUP-00017",
+            "TaxOrganizationType": "CORPORATION"
           },
           {
-            "Item": "NS-COMP-017",
-            "ItemDescription": "CASE-017: Recover output after a certified welder absence",
+            "BusinessRelationship": "SPEND_AUTHORIZED",
             "LastUpdateDate": "2026-01-12T08:00:00-08:00",
             "LastUpdatedBy": "FACTORY.PLANNER",
-            "LineNumber": 1,
-            "LineStatus": "OPEN",
-            "POHeaderId": 2800017,
-            "POLineId": 2100017,
-            "Price": 29.0,
-            "Quantity": 53,
-            "ScheduleDate": "2026-01-18",
-            "UOM": "HR"
+            "Status": "ACTIVE",
+            "Supplier": "Olympic Metrology",
+            "SupplierId": 1400017,
+            "SupplierNumber": "SUP-00017",
+            "TaxOrganizationType": "CORPORATION"
           },
           {
-            "Item": "NS-COMP-017",
-            "ItemDescription": "CASE-017: Recover output after a certified welder absence",
+            "BusinessRelationship": "SPEND_AUTHORIZED",
             "LastUpdateDate": "2026-01-12T08:00:00-08:00",
             "LastUpdatedBy": "FACTORY.PLANNER",
-            "LineNumber": 1,
-            "LineStatus": "DRAFT",
-            "POHeaderId": 2900017,
-            "POLineId": 2100017,
-            "Price": 29.0,
-            "Quantity": 53,
-            "ScheduleDate": "2026-01-18",
-            "UOM": "HR"
+            "Status": "DRAFT",
+            "Supplier": "Olympic Metrology",
+            "SupplierId": 1500017,
+            "SupplierNumber": "SUP-00017",
+            "TaxOrganizationType": "CORPORATION"
           }
         ],
         "limit": 50,
@@ -2663,14 +2635,15 @@
         "offset": 0
       },
       "success": true,
-      "tool": "oracle_fusion.purchase_order_lines.list"
+      "tool": "oracle_fusion.suppliers.list"
     },
     {
       "arguments": {
-        "WoOperationResourceId": 400017,
         "WorkOrderId": 100017,
+        "WorkOrderOperationId": 200017,
         "requestBody": {
           "AssignedUnits": 1,
+          "BasisType": "VARIABLE",
           "ResourceCode": "RES-ALT-017",
           "UsageRate": 1.0
         }
@@ -2678,19 +2651,20 @@
       "index": 25,
       "result": {
         "AssignedUnits": 1,
+        "BasisType": "VARIABLE",
         "ChargedQuantity": 0,
         "LastUpdateDate": "2026-01-12T08:00:00-08:00",
         "LastUpdatedBy": "FACTORY.PLANNER",
         "OperationSequenceNumber": 10,
         "ResourceCode": "RES-ALT-017",
         "UsageRate": 1.0,
-        "WoOperationId": 200017,
-        "WoOperationResourceId": 400017,
         "WorkOrderId": 100017,
+        "WorkOrderOperationId": 200017,
+        "WorkOrderOperationResourceId": 400017,
         "links": []
       },
       "success": true,
-      "tool": "oracle_fusion.work_order_resources.update"
+      "tool": "oracle_fusion.work_order_resources.create"
     },
     {
       "arguments": {
@@ -2711,9 +2685,9 @@
             "OperationSequenceNumber": 10,
             "ResourceCode": "RES-CERT-017",
             "UsageRate": 1.0,
-            "WoOperationId": 200017,
-            "WoOperationResourceId": 400017,
-            "WorkOrderId": 800017
+            "WorkOrderId": 800017,
+            "WorkOrderOperationId": 200017,
+            "WorkOrderOperationResourceId": 400017
           },
           {
             "AssignedUnits": 1,
@@ -2723,9 +2697,9 @@
             "OperationSequenceNumber": 10,
             "ResourceCode": "RES-ALT-017",
             "UsageRate": 1.0,
-            "WoOperationId": 200017,
-            "WoOperationResourceId": 400017,
-            "WorkOrderId": 100017
+            "WorkOrderId": 100017,
+            "WorkOrderOperationId": 200017,
+            "WorkOrderOperationResourceId": 400017
           },
           {
             "AssignedUnits": 1,
@@ -2735,9 +2709,9 @@
             "OperationSequenceNumber": 10,
             "ResourceCode": "RES-CERT-017",
             "UsageRate": 1.0,
-            "WoOperationId": 200017,
-            "WoOperationResourceId": 400017,
-            "WorkOrderId": 900017
+            "WorkOrderId": 900017,
+            "WorkOrderOperationId": 200017,
+            "WorkOrderOperationResourceId": 400017
           },
           {
             "AssignedUnits": 1,
@@ -2747,9 +2721,9 @@
             "OperationSequenceNumber": 10,
             "ResourceCode": "RES-CERT-017",
             "UsageRate": 1.0,
-            "WoOperationId": 200017,
-            "WoOperationResourceId": 400017,
-            "WorkOrderId": 1000017
+            "WorkOrderId": 1000017,
+            "WorkOrderOperationId": 200017,
+            "WorkOrderOperationResourceId": 400017
           }
         ],
         "limit": 50,
