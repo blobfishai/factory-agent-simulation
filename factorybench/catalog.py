@@ -23,7 +23,7 @@ from .scenarios import FAMILIES, FAMILY_DESCRIPTIONS, SCENARIOS, Scenario
 
 
 BENCHMARK_NAME = "FactoryBench-100"
-BENCHMARK_VERSION = "3.2.0"
+BENCHMARK_VERSION = "3.3.0"
 AS_OF_DATE = date(2026, 1, 12)
 WORLD_ID = "northstar-enterprise-fusion-v3"
 
