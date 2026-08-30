@@ -23,7 +23,8 @@ from .scenarios import FAMILIES, FAMILY_DESCRIPTIONS, SCENARIOS, Scenario
 
 
 BENCHMARK_NAME = "FactoryBench-100"
-BENCHMARK_VERSION = "3.3.1"
+BENCHMARK_VERSION = "3.3.2"
+MINIMUM_PROVIDER_READ_CALLS = 26
 AS_OF_DATE = date(2026, 1, 12)
 WORLD_ID = "northstar-enterprise-fusion-v3"
 
@@ -2500,6 +2501,42 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
         read_specs.append({"tool": tool, "arguments": _arguments(tool, ordinal, scenario)})
         if tool == "google_drive.files.list":
             read_specs.extend(_required_asset_read_calls(ordinal, scenario, decision))
+    # A real planner does not stop after opening the minimum set of decisive
+    # records. Corroborate the case through additional populated provider
+    # surfaces. These task-scoped reads become part of the executed oracle
+    # investigation, not decorative release metadata.
+    preferred_corroboration = (
+        "gmail.messages.list",
+        "gmail.messages.get",
+        "gmail.threads.get",
+        "slack.search_messages",
+        "slack.conversations_history",
+        "slack.conversations_replies",
+        "google_sheets.spreadsheets.get",
+        "google_sheets.spreadsheets.values.batchGet",
+        "google_sheets.spreadsheets.values.get",
+        "google_drive.files.list",
+        "google_drive.files.get",
+        "google_drive.files.download",
+        "google_drive.files.export",
+    )
+    observed_reference_selectors = {
+        (spec["tool"], _canonical(spec["arguments"])) for spec in read_specs
+    }
+    for tool in preferred_corroboration:
+        if 1 + len(read_specs) >= MINIMUM_PROVIDER_READ_CALLS:
+            break
+        arguments = _arguments(tool, ordinal, scenario)
+        selector = (tool, _canonical(arguments))
+        if selector in observed_reference_selectors:
+            continue
+        read_specs.append({"tool": tool, "arguments": arguments})
+        observed_reference_selectors.add(selector)
+    if 1 + len(read_specs) < MINIMUM_PROVIDER_READ_CALLS:
+        raise ValueError(
+            f"{task_id} has only {1 + len(read_specs)} provider reads; "
+            f"expected at least {MINIMUM_PROVIDER_READ_CALLS}"
+        )
     step_specs = [
         {"tool": "factorybench.context.get", "arguments": {}, "phase": "investigation"},
         *read_specs,
@@ -3264,6 +3301,7 @@ def catalog_quality_report(tasks: list[dict[str, Any]]) -> dict[str, Any]:
         for task in tasks
     )
     minimum_investigations = min(len(task["expected"]["investigations"]) for task in tasks)
+    minimum_provider_reads = min(len(task["reference_read_calls"]) for task in tasks)
     minimum_calculations = min(len(task["expected"]["calculations"]) for task in tasks)
     minimum_options = min(len(task["decision_model"]["options"]) for task in tasks)
     minimum_answer_fields = min(len(task["expected"]["answer"]) for task in tasks)
@@ -3337,6 +3375,7 @@ def catalog_quality_report(tasks: list[dict[str, Any]]) -> dict[str, Any]:
         "minimum_email_chars": minimum_email_chars,
         "minimum_slack_messages": minimum_slack_messages,
         "minimum_investigations_per_task": minimum_investigations,
+        "minimum_provider_reads_per_task": minimum_provider_reads,
         "minimum_calculations_per_task": minimum_calculations,
         "minimum_options_per_task": minimum_options,
         "minimum_answer_fields_per_task": minimum_answer_fields,

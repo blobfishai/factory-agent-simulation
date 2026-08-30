@@ -8,6 +8,7 @@ from collections import Counter
 
 from factorybench.catalog import (
     FAMILIES,
+    MINIMUM_PROVIDER_READ_CALLS,
     build_catalog,
     catalog_fingerprint,
     catalog_quality_report,
@@ -74,6 +75,7 @@ def test_every_task_is_executable_cross_system_and_richly_seeded() -> None:
         assert task["expected"]["answer_checks"]
         assert task["expected"]["answer"]
         assert task["required_reads"]
+        assert len(task["reference_read_calls"]) >= MINIMUM_PROVIDER_READ_CALLS
         assert len(task["required_read_calls"]) == len(task["required_reads"])
         assert all(call["match"] == "result_contains" for call in task["required_read_calls"])
         assert all(call["expected_result_contains"] for call in task["required_read_calls"])
@@ -172,7 +174,8 @@ def test_employee_requests_hide_the_investigation_recipe_and_rubrics_are_specifi
         },
         "minimum_email_chars": 1738,
         "minimum_slack_messages": 6,
-        "minimum_investigations_per_task": 13,
+        "minimum_investigations_per_task": 14,
+        "minimum_provider_reads_per_task": 26,
         "minimum_calculations_per_task": 15,
         "minimum_options_per_task": 3,
         "minimum_answer_fields_per_task": 16,
@@ -199,7 +202,7 @@ def test_employee_requests_hide_the_investigation_recipe_and_rubrics_are_specifi
         prompt = task["instruction"]
         assert 45 <= len(prompt.split()) <= 220
         assert not any(marker in prompt.lower() for marker in forbidden)
-        assert 13 <= len(task["required_investigations"]) <= 16
+        assert 14 <= len(task["required_investigations"]) <= 16
         assert len(task["reference_read_calls"]) > len(task["required_read_calls"])
         assert len(task["decision_model"]["options"]) == 3
         option_ids = [option["id"] for option in task["decision_model"]["options"]]

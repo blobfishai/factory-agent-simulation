@@ -837,6 +837,40 @@
         "id": "investigation_15",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-058",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-058",
+              "threadId": "thread-058"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-058",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-058"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-13 readiness input for quarantine_all_housings, then separately derived its 2026-01-15 operating outcome under quality scope, location, reservations, and physical quantity must correlate instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "milestone_id": "investigation.requirements",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -1217,6 +1251,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-058",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-058",
+        "threadId": "thread-058"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -1673,6 +1720,40 @@
       "id": "investigation_15",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-058",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-058",
+            "threadId": "thread-058"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-058",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-058"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-13 readiness input for quarantine_all_housings, then separately derived its 2026-01-15 operating outcome under quality scope, location, reservations, and physical quantity must correlate instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -1873,6 +1954,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-058",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-058",
+        "threadId": "thread-058"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_reads": [
@@ -1890,7 +1984,8 @@
     "oracle_fusion.quality_inspection_results.list",
     "oracle_fusion.work_order_materials.list",
     "oracle_fusion.supply_requests.list",
-    "oracle_fusion.inventory_onhand_balances.list"
+    "oracle_fusion.inventory_onhand_balances.list",
+    "gmail.messages.get"
   ],
   "role": "inventory_control_manager",
   "rubric_milestones": [
@@ -1907,12 +2002,13 @@
       "weight": 4.0
     },
     {
-      "atomic_weight": 3.0,
+      "atomic_weight": 4.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_03",
         "investigation_08",
-        "investigation_09"
+        "investigation_09",
+        "investigation_16"
       ],
       "description": "Determine the operative R3 requirement for NS-000058, reconcile the current source material, and distinguish current evidence from superseded or merely contextual records.",
       "id": "investigation.requirements",
@@ -2282,9 +2378,18 @@
         "tool_name": "oracle_fusion.inventory_onhand_balances.list"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-058\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-058-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-058\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy01OEBub3J0aHN0YXIuZXhhbXBsZQpUbzogaW52ZW50b3J5LmNvbnRyb2wubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIHJhaW5pZXIuY29tcG9uZW50c0BzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wNThAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDU4IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIHN1c3BlY3QgaG91c2luZyBsb3QKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpBIHN1cHBsaWVyIGFsZXJ0IG1heSBhZmZlY3Qgc2V2ZXJhbCBob3VzaW5nIGxvdHMgaW4gc3RvcmVzLiBUcmFjZSB0aGUgYWxlcnQgdG8gdGhlIHF1YW50aXRpZXMgc3RpbGwgb24gaGFuZCwgc2VwYXJhdGUgdW5hZmZlY3RlZCBvciBhbHJlYWR5IGNvbnN1bWVkIG1hdGVyaWFsLCBhbmQgdGVsbCBwcm9kdWN0aW9uIHdoYXQgY292ZXJhZ2UgcmVtYWlucyBhZnRlciBjb250YWlubWVudC4gTW92ZSBvbmx5IHRoZSBzdXNwZWN0IHN0b2NrIGludG8gcXVhcmFudGluZS4gSWYgdGhlIGV2aWRlbmNlIHN0aWxsIGNvbmZsaWN0cywga2VlcCB0aGUgdW5zdXBwb3J0ZWQgc2NvcGUgdW5jaGFuZ2VkIGFuZCBsZWF2ZSBvcGVyYXRpb25zIHdpdGggdGhlIHVucmVzb2x2ZWQgcmlzayBhbmQgb3duZXIuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKaW52ZXN0aWdhdGlvbiBjb21wbGV0aW9uIGRhdGU6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBxdWFyYW50aW5lX2FsbF9ob3VzaW5ncyBvbiAyMDI2LTAxLTEzOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNSB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwNTggaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wNTggLyBSMy4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCk1hdGVyaWFsIGNvbnRyb2wgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHN1c3BlY3QgaG91c2luZyBsb3QgYnkgMjAyNi0wMS0xNDsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgcXVhbGl0eSBzY29wZSwgbG9jYXRpb24sIHJlc2VydmF0aW9ucywgYW5kIHBoeXNpY2FsIHF1YW50aXR5IG11c3QgY29ycmVsYXRlLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wNTkgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gVW5hZmZlY3RlZCBsb3RzIGFuZCBhbHJlYWR5IGlzc3VlZCBtYXRlcmlhbCBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1875},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-058 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-058\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"A supplier alert may affect several housing lots in stores. Trace the alert to the quantities still on hand, separate unaffected or already \",\"threadId\":\"thread-058\"}",
+        "task_id": "factorybench-058",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"SourceSystemCode\":\"EXTERNAL\",\"TransactionLines\":[{\"Item\":\"NS-COMP-058\",\"LotNumber\":\"LOT-0058\",\"OrganizationCode\":\"SEA\",\"Subinventory\":\"STORES\",\"TransactionQuantity\":93,\"TransactionType\":\"Subinventory Transfer\",\"TransactionUnitOfMeasure\":\"EA\",\"TransferSubinventory\":\"CONTROLLED\"}],\"TransactionMode\":\"ONLINE\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"SourceSystemCode\\\":\\\"EXTERNAL\\\",\\\"TransactionLines\\\":[{\\\"Item\\\":\\\"NS-COMP-058\\\",\\\"LotNumber\\\":\\\"LOT-0058\\\",\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"Subinventory\\\":\\\"STORES\\\",\\\"TransactionQuantity\\\":93,\\\"TransactionType\\\":\\\"Subinventory Transfer\\\",\\\"TransactionUnitOfMeasure\\\":\\\"EA\\\",\\\"TransferSubinventory\\\":\\\"CONTROLLED\\\"}],\\\"TransactionMode\\\":\\\"ONLINE\\\"}},\\\"tool\\\":\\\"oracle_fusion.inventory_transactions.create\\\"}\",\"resource_id\":\"factorybench-058-mutation-01\",\"resource_type\":\"oracle_fusion.inventory_transactions\",\"revision\":1,\"status\":\"Suspect stock quarantined\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-058\"}",
-        "fixture_id": "factorybench-058-call-25",
+        "fixture_id": "factorybench-058-call-26",
         "read_only": 0,
         "response_json": "{\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"ReturnStatus\":\"SUCCESS\",\"SourceSystemCode\":\"EXTERNAL\",\"TransactionHeaderId\":3300058,\"TransactionMode\":\"ONLINE\",\"links\":[]}",
         "task_id": "factorybench-058",
@@ -2293,7 +2398,7 @@
       {
         "arguments_json": "{\"insertDataOption\":\"INSERT_ROWS\",\"range\":\"Audit!A:G\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"2026-01-12\",\"CASE-058\",\"inventory_control_manager\",\"move_affected_stock_to_quarantine\",\"2026-01-14\",\"NS-000058\",\"AP-0058\"]]},\"spreadsheetId\":\"sheet-058\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"insertDataOption\\\":\\\"INSERT_ROWS\\\",\\\"range\\\":\\\"Audit!A:G\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"2026-01-12\\\",\\\"CASE-058\\\",\\\"inventory_control_manager\\\",\\\"move_affected_stock_to_quarantine\\\",\\\"2026-01-14\\\",\\\"NS-000058\\\",\\\"AP-0058\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-058\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.append\\\"}\",\"resource_id\":\"factorybench-058-mutation-02\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-058\"}",
-        "fixture_id": "factorybench-058-call-27",
+        "fixture_id": "factorybench-058-call-28",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-058\",\"tableRange\":\"Audit!A1:G20\",\"updates\":{\"updatedCells\":7,\"updatedRange\":\"Audit!A21:G21\",\"updatedRows\":1}}",
         "task_id": "factorybench-058",
@@ -2302,7 +2407,7 @@
       {
         "arguments_json": "{\"channel\":\"C-QUALITY\",\"name\":\"white_check_mark\",\"timestamp\":\"1768000058.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-QUALITY\\\",\\\"name\\\":\\\"white_check_mark\\\",\\\"timestamp\\\":\\\"1768000058.000100\\\"},\\\"tool\\\":\\\"slack.reactions_add\\\"}\",\"resource_id\":\"factorybench-058-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-058\"}",
-        "fixture_id": "factorybench-058-call-28",
+        "fixture_id": "factorybench-058-call-29",
         "read_only": 0,
         "response_json": "{\"ok\":true}",
         "task_id": "factorybench-058",
@@ -2316,15 +2421,6 @@
         "response_json": "{\"id\":\"draft-058\",\"message\":{\"id\":\"draft-msg-058\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-058\"}}",
         "task_id": "factorybench-058",
         "tool_name": "gmail.drafts.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-058\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-058-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-058\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy01OEBub3J0aHN0YXIuZXhhbXBsZQpUbzogaW52ZW50b3J5LmNvbnRyb2wubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIHJhaW5pZXIuY29tcG9uZW50c0BzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wNThAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDU4IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIHN1c3BlY3QgaG91c2luZyBsb3QKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpBIHN1cHBsaWVyIGFsZXJ0IG1heSBhZmZlY3Qgc2V2ZXJhbCBob3VzaW5nIGxvdHMgaW4gc3RvcmVzLiBUcmFjZSB0aGUgYWxlcnQgdG8gdGhlIHF1YW50aXRpZXMgc3RpbGwgb24gaGFuZCwgc2VwYXJhdGUgdW5hZmZlY3RlZCBvciBhbHJlYWR5IGNvbnN1bWVkIG1hdGVyaWFsLCBhbmQgdGVsbCBwcm9kdWN0aW9uIHdoYXQgY292ZXJhZ2UgcmVtYWlucyBhZnRlciBjb250YWlubWVudC4gTW92ZSBvbmx5IHRoZSBzdXNwZWN0IHN0b2NrIGludG8gcXVhcmFudGluZS4gSWYgdGhlIGV2aWRlbmNlIHN0aWxsIGNvbmZsaWN0cywga2VlcCB0aGUgdW5zdXBwb3J0ZWQgc2NvcGUgdW5jaGFuZ2VkIGFuZCBsZWF2ZSBvcGVyYXRpb25zIHdpdGggdGhlIHVucmVzb2x2ZWQgcmlzayBhbmQgb3duZXIuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKaW52ZXN0aWdhdGlvbiBjb21wbGV0aW9uIGRhdGU6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBxdWFyYW50aW5lX2FsbF9ob3VzaW5ncyBvbiAyMDI2LTAxLTEzOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNSB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwNTggaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wNTggLyBSMy4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCk1hdGVyaWFsIGNvbnRyb2wgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHN1c3BlY3QgaG91c2luZyBsb3QgYnkgMjAyNi0wMS0xNDsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgcXVhbGl0eSBzY29wZSwgbG9jYXRpb24sIHJlc2VydmF0aW9ucywgYW5kIHBoeXNpY2FsIHF1YW50aXR5IG11c3QgY29ycmVsYXRlLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wNTkgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gVW5hZmZlY3RlZCBsb3RzIGFuZCBhbHJlYWR5IGlzc3VlZCBtYXRlcmlhbCBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1875},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-058 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-058\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"A supplier alert may affect several housing lots in stores. Trace the alert to the quantities still on hand, separate unaffected or already \",\"threadId\":\"thread-058\"}",
-        "task_id": "factorybench-058",
-        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-058\",\"userId\":\"me\"}",

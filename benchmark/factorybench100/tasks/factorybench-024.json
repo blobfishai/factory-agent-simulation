@@ -1484,7 +1484,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.1",
+  "benchmark_version": "3.3.2",
   "decision_model": {
     "calculations": [
       {
@@ -2459,6 +2459,40 @@
         "id": "investigation_15",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-024",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-024",
+              "threadId": "thread-024"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-024",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-024"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-10 readiness input for attach_latest_named_report, then separately derived its 2026-01-12 operating outcome under only the immutable matching report may be linked to the open order instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "milestone_id": "investigation.requirements",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -2725,6 +2759,16 @@
       "control": true,
       "phase": "investigation",
       "tool": "oracle_fusion.quality_inspection_results.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-024",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -3128,6 +3172,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.quality_inspection_results.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-024",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-024",
+        "threadId": "thread-024"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -3621,6 +3678,40 @@
       "id": "investigation_15",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-024",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-024",
+            "threadId": "thread-024"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-024",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-024"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-10 readiness input for attach_latest_named_report, then separately derived its 2026-01-12 operating outcome under only the immutable matching report may be linked to the open order instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -3816,6 +3907,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.quality_inspection_results.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-024",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-024",
+        "threadId": "thread-024"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_reads": [
@@ -3833,7 +3937,8 @@
     "oracle_fusion.maintenance_programs.get",
     "oracle_fusion.maintenance_work_orders.list",
     "oracle_fusion.maintenance_documents.list",
-    "oracle_fusion.quality_inspection_results.list"
+    "oracle_fusion.quality_inspection_results.list",
+    "gmail.messages.get"
   ],
   "role": "maintenance_planner",
   "rubric_milestones": [
@@ -3850,12 +3955,13 @@
       "weight": 4.0
     },
     {
-      "atomic_weight": 3.0,
+      "atomic_weight": 4.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_03",
         "investigation_04",
-        "investigation_09"
+        "investigation_09",
+        "investigation_16"
       ],
       "description": "Determine the operative R4 requirement for NS-000024, reconcile the current source material, and distinguish current evidence from superseded or merely contextual records.",
       "id": "investigation.requirements",
@@ -4224,9 +4330,18 @@
         "tool_name": "oracle_fusion.quality_inspection_results.list"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-024\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-024-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-024\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0yNEBub3J0aHN0YXIuZXhhbXBsZQpUbzogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIGNhc2NhZGUuaW5kdXN0cmlhbEBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wMjRAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDI0IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIHZlbmRvciBkaWFnbm9zdGljIHJlcG9ydCBmb3IgQVNTRVQtMDI0Ck1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKVGhlIHZlbmRvciBzZW50IHNldmVyYWwgc2ltaWxhcmx5IG5hbWVkIGRpYWdub3N0aWMgcmVwb3J0cyBhbmQgdGhlIG1haW50ZW5hbmNlIHRlYW0gbmVlZHMgdGhlIG9uZSB0aGF0IGdvdmVybnMgdGhpcyBhc3NldCBmYWlsdXJlLiBJZGVudGlmeSB0aGUgcmVwb3J0IHRoYXQgdHJ1bHkgYmVsb25ncyB0byB0aGUgb3BlbiBvcmRlciwgZXhwbGFpbiB3aHkgdGhlIG90aGVyIGNhbmRpZGF0ZXMgYXJlIHVuc2FmZSB0byB1c2UsIGFuZCBkZWNpZGUgd2hldGhlciB3ZSBjYW4gcHJvY2VlZCBvciBuZWVkIGEgbmV3IHJlcG9ydC4gTGluayBvbmx5IHRoZSB2ZXJpZmllZCByZWZlcmVuY2UuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKdmVuZG9yJ3Mgc2lnbmVkIHJlcG9ydCByZXZpc2lvbjogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGF0dGFjaF9sYXRlc3RfbmFtZWRfcmVwb3J0IG9uIDIwMjYtMDEtMTA7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTEyIHdpdGggbm8gc2VwYXJhdGVseSBkb2N1bWVudGVkIHNwZW5kOyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDAyNCBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTAyNCAvIFI0LgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKUHJvZHVjdGlvbiBvcGVyYXRpb25zIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciB2ZW5kb3IgZGlhZ25vc3RpYyByZXBvcnQgZm9yIEFTU0VULTAyNCBieSAyMDI2LTAxLTE1OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBvbmx5IHRoZSBpbW11dGFibGUgbWF0Y2hpbmcgcmVwb3J0IG1heSBiZSBsaW5rZWQgdG8gdGhlIG9wZW4gb3JkZXIuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTAyNSB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBSZXBvcnRzIGZvciBzaW1pbGFyIGFzc2V0cyBvciBzdXBlcnNlZGVkIHJldmlzaW9ucyBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1854},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-024 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-024\",\"size\":1024},\"filename\":\"signed-source-record.pdf\"}]},\"snippet\":\"The vendor sent several similarly named diagnostic reports and the maintenance team needs the one that governs this asset failure. Identify \",\"threadId\":\"thread-024\"}",
+        "task_id": "factorybench-024",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"WorkOrderId\":100024,\"requestBody\":{\"Description\":\"Diagnostic reference attached: attach_matching_report; completion 2026-01-13; constraint only the immutable matching report may be linked to the open order; reports for similar assets or superseded revisions = 2 FILES; uncovered or unsupported scope = 2.0 FILES; approval AP-0024\",\"DocumentName\":\"CASE-024-technical-evidence\",\"DocumentNumber\":\"DOC-0024\",\"DocumentType\":\"URL\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"WorkOrderId\\\":100024,\\\"requestBody\\\":{\\\"Description\\\":\\\"Diagnostic reference attached: attach_matching_report; completion 2026-01-13; constraint only the immutable matching report may be linked to the open order; reports for similar assets or superseded revisions = 2 FILES; uncovered or unsupported scope = 2.0 FILES; approval AP-0024\\\",\\\"DocumentName\\\":\\\"CASE-024-technical-evidence\\\",\\\"DocumentNumber\\\":\\\"DOC-0024\\\",\\\"DocumentType\\\":\\\"URL\\\"}},\\\"tool\\\":\\\"oracle_fusion.maintenance_documents.create\\\"}\",\"resource_id\":\"factorybench-024-mutation-01\",\"resource_type\":\"oracle_fusion.maintenance_documents\",\"revision\":1,\"status\":\"Diagnostic reference attached\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-024\"}",
-        "fixture_id": "factorybench-024-call-25",
+        "fixture_id": "factorybench-024-call-26",
         "read_only": 0,
         "response_json": "{\"Description\":\"Diagnostic reference attached: attach_matching_report; completion 2026-01-13; constraint only the immutable matching report may be linked to the open order; reports for similar assets or superseded revisions = 2 FILES; uncovered or unsupported scope = 2.0 FILES; approval AP-0024\",\"DocumentId\":1300024,\"DocumentName\":\"CASE-024-technical-evidence\",\"DocumentNumber\":\"DOC-0024\",\"DocumentStatus\":\"ACTIVE\",\"DocumentType\":\"URL\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"WorkOrderId\":100024,\"links\":[]}",
         "task_id": "factorybench-024",
@@ -4235,7 +4350,7 @@
       {
         "arguments_json": "{\"message\":{\"raw\":\"RnJvbTogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHByb2R1Y3Rpb24ub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMjQg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBhdHRhY2hfbWF0Y2hpbmdfcmVwb3J0LiBDb21wbGV0aW9uOiAyMDI2LTAxLTEzLg0KQmluZGluZyBjb25zdHJhaW50OiBvbmx5IHRoZSBpbW11dGFibGUgbWF0Y2hpbmcgcmVwb3J0IG1heSBiZSBsaW5rZWQgdG8gdGhlIG9wZW4gb3JkZXI7IHJlcG9ydHMgZm9yIHNpbWlsYXIgYXNzZXRzIG9yIHN1cGVyc2VkZWQgcmV2aXNpb25zID0gMiBGSUxFUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMi4wIEZJTEVTLg0KQWx0ZXJuYXRpdmVzOiBhdHRhY2hfbWF0Y2hpbmdfcmVwb3J0OiBvdXRjb21lIDIwMjYtMDEtMTMsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgYXR0YWNoX2xhdGVzdF9uYW1lZF9yZXBvcnQ6IG91dGNvbWUgMjAyNi0wMS0xMiwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGQUlMU19DVVJSRU5UX0NPTlRST0w7IHJlcXVlc3RfbmV3X2RpYWdub3N0aWM6IG91dGNvbWUgMjAyNi0wMS0xOCwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDI0LiBBcHByb3ZhbDogQVAtMDAyNC4gQ2FzZTogQ0FTRS0wMjQuDQo\",\"threadId\":\"thread-024\"},\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHByb2R1Y3Rpb24ub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMjQg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBhdHRhY2hfbWF0Y2hpbmdfcmVwb3J0LiBDb21wbGV0aW9uOiAyMDI2LTAxLTEzLg0KQmluZGluZyBjb25zdHJhaW50OiBvbmx5IHRoZSBpbW11dGFibGUgbWF0Y2hpbmcgcmVwb3J0IG1heSBiZSBsaW5rZWQgdG8gdGhlIG9wZW4gb3JkZXI7IHJlcG9ydHMgZm9yIHNpbWlsYXIgYXNzZXRzIG9yIHN1cGVyc2VkZWQgcmV2aXNpb25zID0gMiBGSUxFUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMi4wIEZJTEVTLg0KQWx0ZXJuYXRpdmVzOiBhdHRhY2hfbWF0Y2hpbmdfcmVwb3J0OiBvdXRjb21lIDIwMjYtMDEtMTMsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgYXR0YWNoX2xhdGVzdF9uYW1lZF9yZXBvcnQ6IG91dGNvbWUgMjAyNi0wMS0xMiwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGQUlMU19DVVJSRU5UX0NPTlRST0w7IHJlcXVlc3RfbmV3X2RpYWdub3N0aWM6IG91dGNvbWUgMjAyNi0wMS0xOCwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDI0LiBBcHByb3ZhbDogQVAtMDAyNC4gQ2FzZTogQ0FTRS0wMjQuDQo\\\",\\\"threadId\\\":\\\"thread-024\\\"},\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.drafts.create\\\"}\",\"resource_id\":\"factorybench-024-mutation-02\",\"resource_type\":\"gmail.drafts\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-024\"}",
-        "fixture_id": "factorybench-024-call-27",
+        "fixture_id": "factorybench-024-call-28",
         "read_only": 0,
         "response_json": "{\"id\":\"draft-024\",\"message\":{\"id\":\"draft-msg-024\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-024\"}}",
         "task_id": "factorybench-024",
@@ -4244,7 +4359,7 @@
       {
         "arguments_json": "{\"channel\":\"C-PRODUCTION\",\"name\":\"white_check_mark\",\"timestamp\":\"1768000024.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PRODUCTION\\\",\\\"name\\\":\\\"white_check_mark\\\",\\\"timestamp\\\":\\\"1768000024.000100\\\"},\\\"tool\\\":\\\"slack.reactions_add\\\"}\",\"resource_id\":\"factorybench-024-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-024\"}",
-        "fixture_id": "factorybench-024-call-28",
+        "fixture_id": "factorybench-024-call-29",
         "read_only": 0,
         "response_json": "{\"ok\":true}",
         "task_id": "factorybench-024",
@@ -4258,15 +4373,6 @@
         "response_json": "{\"id\":\"draft-024\",\"message\":{\"id\":\"draft-msg-024\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-024\"}}",
         "task_id": "factorybench-024",
         "tool_name": "gmail.drafts.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-024\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-024-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-024\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0yNEBub3J0aHN0YXIuZXhhbXBsZQpUbzogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIGNhc2NhZGUuaW5kdXN0cmlhbEBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wMjRAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDI0IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIHZlbmRvciBkaWFnbm9zdGljIHJlcG9ydCBmb3IgQVNTRVQtMDI0Ck1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKVGhlIHZlbmRvciBzZW50IHNldmVyYWwgc2ltaWxhcmx5IG5hbWVkIGRpYWdub3N0aWMgcmVwb3J0cyBhbmQgdGhlIG1haW50ZW5hbmNlIHRlYW0gbmVlZHMgdGhlIG9uZSB0aGF0IGdvdmVybnMgdGhpcyBhc3NldCBmYWlsdXJlLiBJZGVudGlmeSB0aGUgcmVwb3J0IHRoYXQgdHJ1bHkgYmVsb25ncyB0byB0aGUgb3BlbiBvcmRlciwgZXhwbGFpbiB3aHkgdGhlIG90aGVyIGNhbmRpZGF0ZXMgYXJlIHVuc2FmZSB0byB1c2UsIGFuZCBkZWNpZGUgd2hldGhlciB3ZSBjYW4gcHJvY2VlZCBvciBuZWVkIGEgbmV3IHJlcG9ydC4gTGluayBvbmx5IHRoZSB2ZXJpZmllZCByZWZlcmVuY2UuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKdmVuZG9yJ3Mgc2lnbmVkIHJlcG9ydCByZXZpc2lvbjogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGF0dGFjaF9sYXRlc3RfbmFtZWRfcmVwb3J0IG9uIDIwMjYtMDEtMTA7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTEyIHdpdGggbm8gc2VwYXJhdGVseSBkb2N1bWVudGVkIHNwZW5kOyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDAyNCBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTAyNCAvIFI0LgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKUHJvZHVjdGlvbiBvcGVyYXRpb25zIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciB2ZW5kb3IgZGlhZ25vc3RpYyByZXBvcnQgZm9yIEFTU0VULTAyNCBieSAyMDI2LTAxLTE1OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBvbmx5IHRoZSBpbW11dGFibGUgbWF0Y2hpbmcgcmVwb3J0IG1heSBiZSBsaW5rZWQgdG8gdGhlIG9wZW4gb3JkZXIuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTAyNSB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBSZXBvcnRzIGZvciBzaW1pbGFyIGFzc2V0cyBvciBzdXBlcnNlZGVkIHJldmlzaW9ucyBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1854},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-024 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-024\",\"size\":1024},\"filename\":\"signed-source-record.pdf\"}]},\"snippet\":\"The vendor sent several similarly named diagnostic reports and the maintenance team needs the one that governs this asset failure. Identify \",\"threadId\":\"thread-024\"}",
-        "task_id": "factorybench-024",
-        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-024\",\"userId\":\"me\"}",
@@ -4709,7 +4815,7 @@
       }
     ]
   },
-  "sequence_signature": "d8fe35b13f15d1e4bcb9b05b1783df7d8cb7d87cebe364547b57b41e181ed3a1",
+  "sequence_signature": "60ae94aac065593918a116db2cf1758b3894b654624a845658305ad65906e6ac",
   "task_id": "factorybench-024",
   "title": "Attach the vendor diagnostic report to maintenance",
   "variant": null,

@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.1",
+  "benchmark_version": "3.3.2",
   "decision_model": {
     "calculations": [
       {
@@ -2461,6 +2461,31 @@
         "id": "investigation_14",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-002\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-002"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-002 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_15",
+        "milestone_id": "investigation.scope",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -2725,6 +2750,26 @@
       "control": true,
       "phase": "investigation",
       "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-002\"",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-002",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -3133,6 +3178,35 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-002\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-002"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-002",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-002",
+        "threadId": "thread-002"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -3599,6 +3673,31 @@
       "id": "investigation_14",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-002\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-002"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-002 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_15",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -3779,6 +3878,22 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-002\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-002"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     }
   ],
   "required_reads": [
@@ -3795,16 +3910,18 @@
     "oracle_fusion.sales_orders.get",
     "oracle_fusion.purchase_orders.list",
     "oracle_fusion.inventory_onhand_balances.list",
-    "oracle_fusion.supply_requests.list"
+    "oracle_fusion.supply_requests.list",
+    "gmail.messages.list"
   ],
   "role": "order_fulfillment_manager",
   "rubric_milestones": [
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 3.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_01",
-        "investigation_03"
+        "investigation_03",
+        "investigation_15"
       ],
       "description": "Establish the isolated CASE-002 scope and immutable identities across the mailbox, Drive index, and mounted systems before relying on similarly named records.",
       "id": "investigation.scope",
@@ -4177,9 +4294,27 @@
         "tool_name": "oracle_fusion.supply_requests.list"
       },
       {
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-002\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-002-call-24",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-002\",\"threadId\":\"thread-002\"},{\"id\":\"msg-002-1\",\"threadId\":\"thread-002\"},{\"id\":\"msg-002-2\",\"threadId\":\"thread-002\"},{\"id\":\"msg-002-3\",\"threadId\":\"thread-002\"}],\"resultSizeEstimate\":4}",
+        "task_id": "factorybench-002",
+        "tool_name": "gmail.messages.list"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-002\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-002-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-002\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0yQG5vcnRoc3Rhci5leGFtcGxlClRvOiBvcmRlci5mdWxmaWxsbWVudC5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgb2x5bXBpYy5tZXRyb2xvZ3lAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDAyQG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAwMiDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBkZWZlbnNlIG9yZGVyIFNPLTQ3MDAyCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKVHJhZGUgY29tcGxpYW5jZSBzYXlzIHBhcnQgb2YgdGhlIGRlZmVuc2Ugb3JkZXIgbWF5IGJlIGNsZWFyIHRvIHByb2NlZWQgd2hpbGUgdGhlIGV4cG9ydCBsaW5lIGlzIHN0aWxsIG9uIGhvbGQuIFRlbGwgdGhlIGFjY291bnQgdGVhbSB3aGF0IHdlIGNhbiBjb21taXQgbm93LCB3aGF0IG11c3Qgd2FpdCwgYW5kIHdoZXRoZXIgc3BsaXR0aW5nIHRoZSBvcmRlciBpcyBiZXR0ZXIgdGhhbiBob2xkaW5nIGV2ZXJ5dGhpbmcuIFB1dCBvbmx5IHRoZSBjbGVhcmVkIGRlbWFuZCBpbnRvIG1vdGlvbi4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpjb3Vuc2VsJ3MgZXhwb3J0LWxpY2Vuc2UgZGVjaXNpb24gZGF0ZTogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIHJlbGVhc2VfZG9tZXN0aWNfcXVhbnRpdHkgb24gMjAyNi0wMS0xODsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMjAgd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDAyIGlzIHZhbGlkIG9ubHkgZm9yIENUUkwtREVGLUVYUE9SVCAvIFIzLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKQWNjb3VudCB0ZWFtIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciBkZWZlbnNlIG9yZGVyIFNPLTQ3MDAyIGJ5IDIwMjYtMDEtMjE7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIHJlbGVhc2Ugb25seSBxdWFudGl0aWVzIHdob3NlIGRlc3RpbmF0aW9uIGFuZCBlbmQtdXNlIGFyZSBjbGVhcmVkLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wMDMgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gRXhwb3J0LWNvbnRyb2xsZWQgbGluZXMgYXdhaXRpbmcgYSBsaWNlbnNlIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1769},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-002 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-002\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"Trade compliance says part of the defense order may be clear to proceed while the export line is still on hold. Tell the account team what w\",\"threadId\":\"thread-002\"}",
+        "task_id": "factorybench-002",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0002\",\"SupplyRequestDate\":\"2026-01-19\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"CTRL-DEF-EXPORT\",\"NeedByDate\":\"2026-01-20\",\"Quantity\":52,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}}",
         "effect_json": "{\"effective_at\":\"2026-01-20\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0002\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-19\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"CTRL-DEF-EXPORT\\\",\\\"NeedByDate\\\":\\\"2026-01-20\\\",\\\"Quantity\\\":52,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"tool\\\":\\\"oracle_fusion.supply_requests.create\\\"}\",\"resource_id\":\"factorybench-002-mutation-01\",\"resource_type\":\"oracle_fusion.supply_requests\",\"revision\":1,\"status\":\"Partial supply created\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-002\"}",
-        "fixture_id": "factorybench-002-call-24",
+        "fixture_id": "factorybench-002-call-26",
         "read_only": 0,
         "response_json": "{\"Description\":\"CASE-002\",\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"CTRL-DEF-EXPORT\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"NeedByDate\":\"2026-01-21\",\"Quantity\":80,\"SupplyOrderReferenceNumber\":\"SUPPLY-0002\",\"SupplyRequestDate\":\"2026-01-19\",\"SupplyRequestId\":1500002,\"SupplyRequestStatus\":\"NEW\",\"SupplyRequestSystem\":\"EXT\",\"links\":[]}",
         "task_id": "factorybench-002",
@@ -4188,7 +4323,7 @@
       {
         "arguments_json": "{\"fileId\":\"drive-002\",\"requestBody\":{\"content\":\"CASE-002: release_domestic_quantity recorded on Oracle record NS-000002; completion 2026-01-20; constraint release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA; approval AP-0002.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-20\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-002\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-002: release_domestic_quantity recorded on Oracle record NS-000002; completion 2026-01-20; constraint release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA; approval AP-0002.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-002-mutation-02\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-002\"}",
-        "fixture_id": "factorybench-002-call-26",
+        "fixture_id": "factorybench-002-call-28",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-002: release_domestic_quantity recorded on Oracle record NS-000002; completion 2026-01-20; constraint release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA; approval AP-0002.\",\"id\":\"comment-002\",\"resolved\":false}",
         "task_id": "factorybench-002",
@@ -4197,7 +4332,7 @@
       {
         "arguments_json": "{\"channel\":\"C-QUALITY\",\"text\":\"CASE-002: Oracle record NS-000002 now reflects release_domestic_quantity with completion 2026-01-20. Binding constraint: release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA. Alternatives: wait_for_full_license: outcome 2026-02-02, economic impact USD 0, FAILS_CURRENT_CONTROL; release_domestic_quantity: outcome 2026-01-20, economic impact USD 0, SUPPORTED_AND_APPROVED; cancel_restricted_line: outcome 2026-01-14, economic impact USD 900, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0002.\",\"thread_ts\":\"1768000002.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-20\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-QUALITY\\\",\\\"text\\\":\\\"CASE-002: Oracle record NS-000002 now reflects release_domestic_quantity with completion 2026-01-20. Binding constraint: release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA. Alternatives: wait_for_full_license: outcome 2026-02-02, economic impact USD 0, FAILS_CURRENT_CONTROL; release_domestic_quantity: outcome 2026-01-20, economic impact USD 0, SUPPORTED_AND_APPROVED; cancel_restricted_line: outcome 2026-01-14, economic impact USD 900, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0002.\\\",\\\"thread_ts\\\":\\\"1768000002.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-002-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-002\"}",
-        "fixture_id": "factorybench-002-call-27",
+        "fixture_id": "factorybench-002-call-29",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-QUALITY\",\"message\":{\"text\":\"CASE-002: Oracle record NS-000002 now reflects release_domestic_quantity with completion 2026-01-20. Binding constraint: release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA. Alternatives: wait_for_full_license: outcome 2026-02-02, economic impact USD 0, FAILS_CURRENT_CONTROL; release_domestic_quantity: outcome 2026-01-20, economic impact USD 0, SUPPORTED_AND_APPROVED; cancel_restricted_line: outcome 2026-01-14, economic impact USD 900, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0002.\",\"thread_ts\":\"1768000002.000100\"},\"ok\":true,\"ts\":\"1768000002.000900\"}",
         "task_id": "factorybench-002",
@@ -4220,24 +4355,6 @@
         "response_json": "{\"data\":\"T0xZTVBJQyBNRVRST0xPR1kg4oCUIENPTlRST0xMRUQgQ09NTUVSQ0lBTCAvIFNFUlZJQ0UgUkVDT1JECkRvY3VtZW50OiBleHBvcnQtY2xhc3NpZmljYXRpb24tYW5kLWVuZC11c2UtcmVnaXN0ZXItMDAwMgpDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMDIKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogZXhwb3J0IGNsYXNzaWZpY2F0aW9uIGFuZCBlbmQtdXNlIHJlZ2lzdGVyCkltbXV0YWJsZSByZWNvcmQgb3IgaXRlbTogQ1RSTC1ERUYtRVhQT1JUCkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFIzCk1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMjggRUEKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogcmVsZWFzZV9kb21lc3RpY19xdWFudGl0eQpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0zMQpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTgKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMjAKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogY291bnNlbCdzIGV4cG9ydC1saWNlbnNlIGRlY2lzaW9uIGRhdGUKQ2FwYWNpdHkgaXMgcmVzZXJ2ZWQgb25seSBhZnRlciB0aGUgYnV5ZXIgb3IgcGxhbm5lciBzdXBwbGllcyB0aGUgbWF0Y2hpbmcgaW1tdXRhYmxlIHJlY29yZCBhbmQgY3VycmVudCBhcHByb3ZhbC4KCjMuIEVYQ0xVU0lPTlMgQU5EIEFTU1VNUFRJT05TCk5vdCBpbmNsdWRlZDogZXhwb3J0LWNvbnRyb2xsZWQgbGluZXMgYXdhaXRpbmcgYSBsaWNlbnNlCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IHJlbGVhc2Ugb25seSBxdWFudGl0aWVzIHdob3NlIGRlc3RpbmF0aW9uIGFuZCBlbmQtdXNlIGFyZSBjbGVhcmVkCk5lYXJieSBidXQgdW5yZWxhdGVkIHJlZmVyZW5jZSBDQVNFLTAwMyBpcyBleHBsaWNpdGx5IGV4Y2x1ZGVkLgpGcmVpZ2h0LCBwcmVtaXVtLCBjZXJ0aWZpY2F0aW9uLCBhbmQgbG90IHRlcm1zIGFwcGx5IG9ubHkgd2hlcmUgc3RhdGVkIGFib3ZlOyBzaWxlbmNlIGlzIG5vdCBhcHByb3ZhbC4KCjQuIEFDQ0VQVEFOQ0UKUHJlcGFyZWQgYnk6IE9seW1waWMgTWV0cm9sb2d5IG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDAyClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K\",\"size\":1551}",
         "task_id": "factorybench-002",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-002\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-002-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-002\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0yQG5vcnRoc3Rhci5leGFtcGxlClRvOiBvcmRlci5mdWxmaWxsbWVudC5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgb2x5bXBpYy5tZXRyb2xvZ3lAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDAyQG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAwMiDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBkZWZlbnNlIG9yZGVyIFNPLTQ3MDAyCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKVHJhZGUgY29tcGxpYW5jZSBzYXlzIHBhcnQgb2YgdGhlIGRlZmVuc2Ugb3JkZXIgbWF5IGJlIGNsZWFyIHRvIHByb2NlZWQgd2hpbGUgdGhlIGV4cG9ydCBsaW5lIGlzIHN0aWxsIG9uIGhvbGQuIFRlbGwgdGhlIGFjY291bnQgdGVhbSB3aGF0IHdlIGNhbiBjb21taXQgbm93LCB3aGF0IG11c3Qgd2FpdCwgYW5kIHdoZXRoZXIgc3BsaXR0aW5nIHRoZSBvcmRlciBpcyBiZXR0ZXIgdGhhbiBob2xkaW5nIGV2ZXJ5dGhpbmcuIFB1dCBvbmx5IHRoZSBjbGVhcmVkIGRlbWFuZCBpbnRvIG1vdGlvbi4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpjb3Vuc2VsJ3MgZXhwb3J0LWxpY2Vuc2UgZGVjaXNpb24gZGF0ZTogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIHJlbGVhc2VfZG9tZXN0aWNfcXVhbnRpdHkgb24gMjAyNi0wMS0xODsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMjAgd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDAyIGlzIHZhbGlkIG9ubHkgZm9yIENUUkwtREVGLUVYUE9SVCAvIFIzLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKQWNjb3VudCB0ZWFtIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciBkZWZlbnNlIG9yZGVyIFNPLTQ3MDAyIGJ5IDIwMjYtMDEtMjE7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIHJlbGVhc2Ugb25seSBxdWFudGl0aWVzIHdob3NlIGRlc3RpbmF0aW9uIGFuZCBlbmQtdXNlIGFyZSBjbGVhcmVkLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wMDMgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gRXhwb3J0LWNvbnRyb2xsZWQgbGluZXMgYXdhaXRpbmcgYSBsaWNlbnNlIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1769},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-002 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-002\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"Trade compliance says part of the defense order may be clear to proceed while the export line is still on hold. Tell the account team what w\",\"threadId\":\"thread-002\"}",
-        "task_id": "factorybench-002",
-        "tool_name": "gmail.messages.get"
-      },
-      {
-        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-002\\\"\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-002-discovery-04",
-        "read_only": 1,
-        "response_json": "{\"messages\":[{\"id\":\"msg-002\",\"threadId\":\"thread-002\"},{\"id\":\"msg-002-1\",\"threadId\":\"thread-002\"},{\"id\":\"msg-002-2\",\"threadId\":\"thread-002\"},{\"id\":\"msg-002-3\",\"threadId\":\"thread-002\"}],\"resultSizeEstimate\":4}",
-        "task_id": "factorybench-002",
-        "tool_name": "gmail.messages.list"
       },
       {
         "arguments_json": "{\"commentId\":\"comment-002\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-002\"}",
@@ -4662,7 +4779,7 @@
       }
     ]
   },
-  "sequence_signature": "0d686e20102148dafff0533c4569820588eb5798812fee1b0c65815c74bc524e",
+  "sequence_signature": "b930c06c7398079c27b9c8619e0c3fae3b53ddff5632affec1f6e48e4971fa83",
   "task_id": "factorybench-002",
   "title": "Split a defense order around an export hold",
   "variant": null,

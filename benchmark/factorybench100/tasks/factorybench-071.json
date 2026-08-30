@@ -1527,7 +1527,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.1",
+  "benchmark_version": "3.3.2",
   "decision_model": {
     "calculations": [
       {
@@ -2527,6 +2527,31 @@
         "id": "investigation_14",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-071\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-071"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-071 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_15",
+        "milestone_id": "investigation.scope",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -2786,6 +2811,26 @@
       "control": true,
       "phase": "investigation",
       "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-071\"",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-071",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -3189,6 +3234,35 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-071\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-071"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-071",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-071",
+        "threadId": "thread-071"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -3659,6 +3733,31 @@
       "id": "investigation_14",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-071\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-071"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-071 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_15",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -3836,6 +3935,22 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-071\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-071"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     }
   ],
   "required_reads": [
@@ -3852,16 +3967,18 @@
     "oracle_fusion.work_order_resources.list",
     "oracle_fusion.purchase_order_lines.list",
     "oracle_fusion.work_orders.get",
-    "oracle_fusion.work_order_operations.list"
+    "oracle_fusion.work_order_operations.list",
+    "gmail.messages.list"
   ],
   "role": "manufacturing_cost_accountant",
   "rubric_milestones": [
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 3.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_01",
-        "investigation_03"
+        "investigation_03",
+        "investigation_15"
       ],
       "description": "Establish the isolated CASE-071 scope and immutable identities across the mailbox, Drive index, and mounted systems before relying on similarly named records.",
       "id": "investigation.scope",
@@ -4236,9 +4353,27 @@
         "tool_name": "oracle_fusion.work_order_operations.list"
       },
       {
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-071\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-071-call-24",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-071\",\"threadId\":\"thread-071\"},{\"id\":\"msg-071-1\",\"threadId\":\"thread-071\"},{\"id\":\"msg-071-2\",\"threadId\":\"thread-071\"},{\"id\":\"msg-071-3\",\"threadId\":\"thread-071\"}],\"resultSizeEstimate\":4}",
+        "task_id": "factorybench-071",
+        "tool_name": "gmail.messages.list"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-071\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-071-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-071\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy03MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogbWFudWZhY3R1cmluZy5jb3N0LmFjY291bnRhbnRAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBvbHltcGljLm1ldHJvbG9neUBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wNzFAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDcxIOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIG1pc3Npbmcgc2V0dXAgbGFib3IKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpTZXR1cCBsYWJvciBpcyBtaXNzaW5nIGZyb20gV0lQIGNvc3QsIGJ1dCB0aGUgdGltZWNhcmQgYmF0Y2ggY29udGFpbnMgZHVwbGljYXRlcyBhbmQgdW5zdXBwb3J0ZWQgaG91cnMuIERldGVybWluZSB0aGUgaG91cnMgYW5kIHJhdGUgdGhhdCBnZW51aW5lbHkgYmVsb25nIHRvIHRoaXMgb3BlcmF0aW9uIGFuZCBwZXJpb2QsIHF1YW50aWZ5IHRoZSBjb3JyZWN0aW9uLCBhbmQgZXhwbGFpbiB0aGUgcmVzaWR1YWwgZXhjZXB0aW9uLiBQb3N0IG9ubHkgdGhlIHN1cHBvcnRlZCBsYWJvciBhY3R1YWwuIElmIHRoZSBldmlkZW5jZSBzdGlsbCBjb25mbGljdHMsIGtlZXAgdGhlIHVuc3VwcG9ydGVkIHNjb3BlIHVuY2hhbmdlZCBhbmQgbGVhdmUgb3BlcmF0aW9ucyB3aXRoIHRoZSB1bnJlc29sdmVkIHJpc2sgYW5kIG93bmVyLgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnRpbWVjYXJkIGFwcHJvdmFsIHN0YXR1czogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIHBvc3RfZXN0aW1hdGVkX2hvdXJzIG9uIDIwMjYtMDEtMTU7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTE4IHdpdGggbm8gc2VwYXJhdGVseSBkb2N1bWVudGVkIHNwZW5kOyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDA3MSBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTA3MSAvIFIyLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKUGxhbnQgY29udHJvbGxlciBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgbWlzc2luZyBzZXR1cCBsYWJvciBieSAyMDI2LTAxLTE3OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBlbXBsb3llZSwgdGltZWNhcmQsIG9wZXJhdGlvbiwgcmF0ZSwgYW5kIHBlcmlvZCBtdXN0IHJlY29uY2lsZS4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDcyIHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIER1cGxpY2F0ZSwgdW5zaWduZWQsIG9yIHdyb25nLXBlcmlvZCBob3VycyBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1875},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-071 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-071\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\"Setup labor is missing from WIP cost, but the timecard batch contains duplicates and unsupported hours. Determine the hours and rate that ge\",\"threadId\":\"thread-071\"}",
+        "task_id": "factorybench-071",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"ResourceTransactionDetail\":[{\"OrganizationCode\":\"SEA\",\"ResourceCode\":\"RES-071\",\"TransactionQuantity\":12.0,\"TransactionUnitOfMeasure\":\"HR\",\"WoOperationSequenceNumber\":10,\"WorkOrderNumber\":\"WO-0071\"}],\"SourceSystemCode\":\"FUSION_MOBILE\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-071\\\",\\\"TransactionQuantity\\\":12.0,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0071\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"tool\\\":\\\"oracle_fusion.resource_transactions.create\\\"}\",\"resource_id\":\"factorybench-071-mutation-01\",\"resource_type\":\"oracle_fusion.resource_transactions\",\"revision\":1,\"status\":\"Labor cost posted\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-071\"}",
-        "fixture_id": "factorybench-071-call-24",
+        "fixture_id": "factorybench-071-call-26",
         "read_only": 0,
         "response_json": "{\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"RequestStatus\":\"PENDING\",\"ResourceTransactionHeaderId\":3200071,\"SourceSystemCode\":\"FUSION_MOBILE\",\"links\":[]}",
         "task_id": "factorybench-071",
@@ -4247,7 +4382,7 @@
       {
         "arguments_json": "{\"channel\":\"C-FINANCE\",\"text\":\"CASE-071: Oracle record NS-000071 now reflects post_supported_missing_labor with completion 2026-01-17. Binding constraint: employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD. Alternatives: post_supported_missing_labor: outcome 2026-01-17, economic impact USD 0, SUPPORTED_AND_APPROVED; post_estimated_hours: outcome 2026-01-18, economic impact USD 0, FAILS_CURRENT_CONTROL; defer_valid_current_period_cost: outcome 2026-01-19, economic impact USD 1020, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0071.\",\"thread_ts\":\"1768000071.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-FINANCE\\\",\\\"text\\\":\\\"CASE-071: Oracle record NS-000071 now reflects post_supported_missing_labor with completion 2026-01-17. Binding constraint: employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD. Alternatives: post_supported_missing_labor: outcome 2026-01-17, economic impact USD 0, SUPPORTED_AND_APPROVED; post_estimated_hours: outcome 2026-01-18, economic impact USD 0, FAILS_CURRENT_CONTROL; defer_valid_current_period_cost: outcome 2026-01-19, economic impact USD 1020, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0071.\\\",\\\"thread_ts\\\":\\\"1768000071.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-071-mutation-02\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-071\"}",
-        "fixture_id": "factorybench-071-call-26",
+        "fixture_id": "factorybench-071-call-28",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-FINANCE\",\"message\":{\"text\":\"CASE-071: Oracle record NS-000071 now reflects post_supported_missing_labor with completion 2026-01-17. Binding constraint: employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD. Alternatives: post_supported_missing_labor: outcome 2026-01-17, economic impact USD 0, SUPPORTED_AND_APPROVED; post_estimated_hours: outcome 2026-01-18, economic impact USD 0, FAILS_CURRENT_CONTROL; defer_valid_current_period_cost: outcome 2026-01-19, economic impact USD 1020, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0071.\",\"thread_ts\":\"1768000071.000100\"},\"ok\":true,\"ts\":\"1768000071.000900\"}",
         "task_id": "factorybench-071",
@@ -4256,7 +4391,7 @@
       {
         "arguments_json": "{\"fileId\":\"drive-071\",\"requestBody\":{\"content\":\"CASE-071: post_supported_missing_labor recorded on Oracle record NS-000071; completion 2026-01-17; constraint employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0071.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-071\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-071: post_supported_missing_labor recorded on Oracle record NS-000071; completion 2026-01-17; constraint employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0071.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-071-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-071\"}",
-        "fixture_id": "factorybench-071-call-27",
+        "fixture_id": "factorybench-071-call-29",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-071: post_supported_missing_labor recorded on Oracle record NS-000071; completion 2026-01-17; constraint employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0071.\",\"id\":\"comment-071\",\"resolved\":false}",
         "task_id": "factorybench-071",
@@ -4279,24 +4414,6 @@
         "response_json": "{\"data\":\"T0xZTVBJQyBNRVRST0xPR1kg4oCUIENPTlRST0xMRUQgQ09NTUVSQ0lBTCAvIFNFUlZJQ0UgUkVDT1JECkRvY3VtZW50OiB0aW1lY2FyZC10by1yZXNvdXJjZS1jb3N0LXJlY29uY2lsaWF0aW9uLTAwNzEKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDcxCklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IHRpbWVjYXJkLXRvLXJlc291cmNlLWNvc3QgcmVjb25jaWxpYXRpb24KSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTA3MQpFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSMgpNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDEyLjAgSFIKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogcG9zdF9lc3RpbWF0ZWRfaG91cnMKU3RhbmRhcmQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTQKRXhwZWRpdGVkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTE1ClJlc3VsdGluZyBvcGVyYXRpbmcgb3V0Y29tZSBzdGF0ZWQgYnkgcmVxdWVzdGVyLCBub3QgYnkgY291bnRlcnBhcnR5OiAyMDI2LTAxLTE4CkVjb25vbWljIGltcGFjdCBzdGF0ZWQgYnkgY291bnRlcnBhcnR5OiBVU0QgMApJbmRlcGVuZGVudCBjb25kaXRpb246IHRpbWVjYXJkIGFwcHJvdmFsIHN0YXR1cwpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBkdXBsaWNhdGUsIHVuc2lnbmVkLCBvciB3cm9uZy1wZXJpb2QgaG91cnMKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogZW1wbG95ZWUsIHRpbWVjYXJkLCBvcGVyYXRpb24sIHJhdGUsIGFuZCBwZXJpb2QgbXVzdCByZWNvbmNpbGUKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDcyIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogT2x5bXBpYyBNZXRyb2xvZ3kgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwNzEKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo\",\"size\":1523}",
         "task_id": "factorybench-071",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-071\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-071-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-071\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy03MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogbWFudWZhY3R1cmluZy5jb3N0LmFjY291bnRhbnRAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBvbHltcGljLm1ldHJvbG9neUBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wNzFAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDcxIOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIG1pc3Npbmcgc2V0dXAgbGFib3IKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpTZXR1cCBsYWJvciBpcyBtaXNzaW5nIGZyb20gV0lQIGNvc3QsIGJ1dCB0aGUgdGltZWNhcmQgYmF0Y2ggY29udGFpbnMgZHVwbGljYXRlcyBhbmQgdW5zdXBwb3J0ZWQgaG91cnMuIERldGVybWluZSB0aGUgaG91cnMgYW5kIHJhdGUgdGhhdCBnZW51aW5lbHkgYmVsb25nIHRvIHRoaXMgb3BlcmF0aW9uIGFuZCBwZXJpb2QsIHF1YW50aWZ5IHRoZSBjb3JyZWN0aW9uLCBhbmQgZXhwbGFpbiB0aGUgcmVzaWR1YWwgZXhjZXB0aW9uLiBQb3N0IG9ubHkgdGhlIHN1cHBvcnRlZCBsYWJvciBhY3R1YWwuIElmIHRoZSBldmlkZW5jZSBzdGlsbCBjb25mbGljdHMsIGtlZXAgdGhlIHVuc3VwcG9ydGVkIHNjb3BlIHVuY2hhbmdlZCBhbmQgbGVhdmUgb3BlcmF0aW9ucyB3aXRoIHRoZSB1bnJlc29sdmVkIHJpc2sgYW5kIG93bmVyLgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnRpbWVjYXJkIGFwcHJvdmFsIHN0YXR1czogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIHBvc3RfZXN0aW1hdGVkX2hvdXJzIG9uIDIwMjYtMDEtMTU7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTE4IHdpdGggbm8gc2VwYXJhdGVseSBkb2N1bWVudGVkIHNwZW5kOyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDA3MSBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTA3MSAvIFIyLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKUGxhbnQgY29udHJvbGxlciBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgbWlzc2luZyBzZXR1cCBsYWJvciBieSAyMDI2LTAxLTE3OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBlbXBsb3llZSwgdGltZWNhcmQsIG9wZXJhdGlvbiwgcmF0ZSwgYW5kIHBlcmlvZCBtdXN0IHJlY29uY2lsZS4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDcyIHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIER1cGxpY2F0ZSwgdW5zaWduZWQsIG9yIHdyb25nLXBlcmlvZCBob3VycyBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1875},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-071 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-071\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\"Setup labor is missing from WIP cost, but the timecard batch contains duplicates and unsupported hours. Determine the hours and rate that ge\",\"threadId\":\"thread-071\"}",
-        "task_id": "factorybench-071",
-        "tool_name": "gmail.messages.get"
-      },
-      {
-        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-071\\\"\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-071-discovery-04",
-        "read_only": 1,
-        "response_json": "{\"messages\":[{\"id\":\"msg-071\",\"threadId\":\"thread-071\"},{\"id\":\"msg-071-1\",\"threadId\":\"thread-071\"},{\"id\":\"msg-071-2\",\"threadId\":\"thread-071\"},{\"id\":\"msg-071-3\",\"threadId\":\"thread-071\"}],\"resultSizeEstimate\":4}",
-        "task_id": "factorybench-071",
-        "tool_name": "gmail.messages.list"
       },
       {
         "arguments_json": "{\"commentId\":\"comment-071\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-071\"}",
@@ -4712,7 +4829,7 @@
       }
     ]
   },
-  "sequence_signature": "77ff268be4381427f4ed62694f1684dabb0a0645c9e600d0845c9ba45647ab56",
+  "sequence_signature": "936a5d146fb6a64c230d42a30c6954f3711c604f0df36275a3442895e2f5b68b",
   "task_id": "factorybench-071",
   "title": "Post missing setup labor from signed timecards",
   "variant": null,
