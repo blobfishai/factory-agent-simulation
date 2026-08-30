@@ -15,6 +15,7 @@ Json = dict[str, Any]
 
 ORACLE_SCM = "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26a/fasrp/"
 ORACLE_FINANCIALS = "https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/"
+ORACLE_PROCUREMENT = "https://docs.oracle.com/en/cloud/saas/procurement/26a/fapra/"
 GMAIL = "https://developers.google.com/workspace/gmail/api/reference/rest/v1/users"
 DRIVE = "https://developers.google.com/workspace/drive/api/reference/rest/v3"
 SHEETS = "https://developers.google.com/workspace/sheets/api/reference/rest/v4/spreadsheets"
@@ -47,6 +48,10 @@ def _number() -> Json:
 
 def _boolean() -> Json:
     return {"type": "boolean"}
+
+
+def _array(items: Json) -> Json:
+    return {"type": "array", "items": items}
 
 
 LIST_SCHEMA = _object(
@@ -112,13 +117,14 @@ def _oracle_list(
     description: str,
     *,
     financials: bool = False,
+    source_base: str | None = None,
 ) -> Json:
     return _contract(
         name,
         server="oracle_fusion",
         method="GET",
         path=f"/fscmRestApi/resources/11.13.18.05/{resource}",
-        source=f"{ORACLE_FINANCIALS if financials else ORACLE_SCM}{source_page}",
+        source=f"{source_base or (ORACLE_FINANCIALS if financials else ORACLE_SCM)}{source_page}",
         description=description,
         input_schema=deepcopy(LIST_SCHEMA),
         read_only=True,
@@ -133,6 +139,7 @@ def _oracle_get(
     description: str,
     *,
     financials: bool = False,
+    source_base: str | None = None,
 ) -> Json:
     properties = {
         parameter: _string() if "Id" not in parameter or parameter.endswith("UniqID") else _integer(),
@@ -145,7 +152,7 @@ def _oracle_get(
         server="oracle_fusion",
         method="GET",
         path=path,
-        source=f"{ORACLE_FINANCIALS if financials else ORACLE_SCM}{source_page}",
+        source=f"{source_base or (ORACLE_FINANCIALS if financials else ORACLE_SCM)}{source_page}",
         description=description,
         input_schema=_object(properties, [parameter]),
         read_only=True,
@@ -164,6 +171,7 @@ def _oracle_write(
     path_properties: Json | None = None,
     path_required: list[str] | None = None,
     financials: bool = False,
+    source_base: str | None = None,
 ) -> Json:
     properties = dict(path_properties or {})
     properties["requestBody"] = _body_schema(body_properties, body_required)
@@ -172,7 +180,7 @@ def _oracle_write(
         server="oracle_fusion",
         method=method,
         path=path,
-        source=f"{ORACLE_FINANCIALS if financials else ORACLE_SCM}{source_page}",
+        source=f"{source_base or (ORACLE_FINANCIALS if financials else ORACLE_SCM)}{source_page}",
         description=description,
         input_schema=_object(properties, [*(path_required or []), "requestBody"]),
         read_only=False,
@@ -217,6 +225,23 @@ def _collection_contracts() -> list[Json]:
         "InvoiceCurrency": _string(),
         "PaymentTerms": _string(),
     }
+    draft_purchase_order_line = _object(
+        {
+            "LineNumber": _integer(),
+            "LineType": _string(),
+            "Item": _string(),
+            "ItemDescription": _string(),
+            "Quantity": _number(),
+            "UOM": _string(),
+            "Price": _number(),
+        }
+    )
+    inspection_sample = _object(
+        {
+            "SampleNumber": _integer(),
+            "Result": _string(),
+        }
+    )
     contracts: list[Json] = []
 
     for name, resource, page, description in (
@@ -230,9 +255,6 @@ def _collection_contracts() -> list[Json]:
         ("oracle_fusion.receiving_receipt_requests.list", "receivingReceiptRequests", "api-inventory-management-receiving-receipt-requests.html", "Get receiving receipt requests."),
         ("oracle_fusion.quality_inspection_results.list", "inspectionResults", "api-quality-inspection-results.html", "Get quality inspection results."),
         ("oracle_fusion.inspection_plans.list", "inspectionPlans", "api-quality-inspection-plans.html", "Get quality inspection plans."),
-        ("oracle_fusion.purchase_orders.list", "purchaseOrders", "api-procurement-purchase-orders.html", "Get purchase orders."),
-        ("oracle_fusion.draft_purchase_orders.list", "draftPurchaseOrders", "api-procurement-draft-purchase-orders.html", "Get draft purchase orders."),
-        ("oracle_fusion.suppliers.list", "suppliers", "api-procurement-suppliers.html", "Get suppliers."),
         ("oracle_fusion.sales_orders.list", "salesOrdersForOrderHub", "api-order-management-sales-orders-for-order-hub.html", "Get sales orders from Order Management."),
     ):
         contracts.append(_oracle_list(name, resource, page, description))
@@ -245,14 +267,28 @@ def _collection_contracts() -> list[Json]:
             financials=True,
         )
     )
+    for name, resource, page, description in (
+        ("oracle_fusion.purchase_orders.list", "purchaseOrders", "api-purchase-orders.html", "Get purchase orders."),
+        ("oracle_fusion.draft_purchase_orders.list", "draftPurchaseOrders", "api-draft-purchase-orders.html", "Get draft purchase orders."),
+        ("oracle_fusion.suppliers.list", "suppliers", "api-suppliers.html", "Get suppliers."),
+    ):
+        contracts.append(
+            _oracle_list(
+                name,
+                resource,
+                page,
+                description,
+                source_base=ORACLE_PROCUREMENT,
+            )
+        )
 
     contracts.extend(
         [
             _oracle_get("oracle_fusion.work_orders.get", "/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}", "op-workorders-workorderid-get.html", "WorkOrderId", "Get one discrete work order."),
             _oracle_get("oracle_fusion.maintenance_work_orders.get", "/fscmRestApi/resources/11.13.18.05/maintenanceWorkOrders/{WorkOrderId}", "op-maintenanceworkorders-workorderid-get.html", "WorkOrderId", "Get one maintenance work order."),
             _oracle_get("oracle_fusion.maintenance_programs.get", "/fscmRestApi/resources/11.13.18.05/maintenancePrograms/{MaintenanceProgramId}", "api-maintenance-maintenance-programs.html", "MaintenanceProgramId", "Get one maintenance program."),
-            _oracle_get("oracle_fusion.purchase_orders.get", "/fscmRestApi/resources/11.13.18.05/purchaseOrders/{purchaseOrdersUniqID}", "api-procurement-purchase-orders.html", "purchaseOrdersUniqID", "Get one purchase order."),
-            _oracle_get("oracle_fusion.suppliers.get", "/fscmRestApi/resources/11.13.18.05/suppliers/{SupplierId}", "api-procurement-suppliers.html", "SupplierId", "Get one supplier."),
+            _oracle_get("oracle_fusion.purchase_orders.get", "/fscmRestApi/resources/11.13.18.05/purchaseOrders/{purchaseOrdersUniqID}", "api-purchase-orders.html", "purchaseOrdersUniqID", "Get one purchase order.", source_base=ORACLE_PROCUREMENT),
+            _oracle_get("oracle_fusion.suppliers.get", "/fscmRestApi/resources/11.13.18.05/suppliers/{SupplierId}", "api-suppliers.html", "SupplierId", "Get one supplier.", source_base=ORACLE_PROCUREMENT),
             _oracle_get("oracle_fusion.sales_orders.get", "/fscmRestApi/resources/11.13.18.05/salesOrdersForOrderHub/{salesOrdersForOrderHubUniqID}", "api-order-management-sales-orders-for-order-hub.html", "salesOrdersForOrderHubUniqID", "Get one sales order."),
             _oracle_get("oracle_fusion.invoices.get", "/fscmRestApi/resources/11.13.18.05/invoices/{invoicesUniqID}", "op-invoices-invoicesuniqid-get.html", "invoicesUniqID", "Get one Payables invoice.", financials=True),
         ]
@@ -285,13 +321,13 @@ def _collection_contracts() -> list[Json]:
                 "oracle_fusion.invoices.update", method="PATCH", path="/fscmRestApi/resources/11.13.18.05/invoices/{invoicesUniqID}", source_page="op-invoices-invoicesuniqid-patch.html", path_properties={"invoicesUniqID": _string()}, path_required=["invoicesUniqID"], body_properties=invoice_body, body_required=[], description="Update one Payables invoice.", financials=True
             ),
             _oracle_write(
-                "oracle_fusion.draft_purchase_orders.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/draftPurchaseOrders", source_page="op-draftpurchaseorders-post.html", body_properties={"SupplierId": _integer(), "SupplierSiteId": _integer(), "ProcurementBUId": _integer(), "RequisitioningBUId": _integer(), "BuyerId": _integer(), "DocumentStyleId": _integer(), "CurrencyCode": _string(), "Description": _string(), "RequiredAcknowledgment": _string(), "lines": {"type": "array", "items": {"type": "object"}}}, body_required=["SupplierId", "ProcurementBUId", "BuyerId", "DocumentStyleId", "lines"], description="Create a draft purchase order at the documented resource."
+                "oracle_fusion.draft_purchase_orders.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/draftPurchaseOrders", source_page="op-draftpurchaseorders-post.html", source_base=ORACLE_PROCUREMENT, body_properties={"SupplierId": _integer(), "SupplierSiteId": _integer(), "ProcurementBUId": _integer(), "RequisitioningBUId": _integer(), "BuyerId": _integer(), "DocumentStyleId": _integer(), "CurrencyCode": _string(), "Description": _string(), "RequiredAcknowledgment": _string(), "lines": _array(draft_purchase_order_line)}, body_required=["SupplierId", "ProcurementBUId", "BuyerId", "DocumentStyleId", "lines"], description="Create a draft purchase order at the documented resource."
             ),
             _oracle_write(
-                "oracle_fusion.quality_inspection_results.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/inspectionResults", source_page="api-quality-inspection-results.html", body_properties={"OrganizationCode": _string(), "InspectionPlanName": _string(), "InspectionPlanId": _integer(), "DocumentType": _string(), "DocumentNumber": _string(), "ItemNumber": _string(), "Quantity": _number(), "LotNumber": _string(), "InspectionStatus": _string(), "samples": {"type": "array", "items": {"type": "object"}}}, body_required=["OrganizationCode", "InspectionPlanName", "DocumentType", "DocumentNumber"], description="Create one quality inspection result."
+                "oracle_fusion.quality_inspection_results.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/inspectionResults", source_page="api-quality-inspection-results.html", body_properties={"OrganizationCode": _string(), "InspectionPlanName": _string(), "InspectionPlanId": _integer(), "DocumentType": _string(), "DocumentNumber": _string(), "ItemNumber": _string(), "Quantity": _number(), "LotNumber": _string(), "InspectionStatus": _string(), "samples": _array(inspection_sample)}, body_required=["OrganizationCode", "InspectionPlanName", "DocumentType", "DocumentNumber"], description="Create one quality inspection result."
             ),
             _oracle_write(
-                "oracle_fusion.quality_inspection_results.update", method="PATCH", path="/fscmRestApi/resources/11.13.18.05/inspectionResults/{InspectionId}", source_page="api-quality-inspection-results.html", path_properties={"InspectionId": _integer()}, path_required=["InspectionId"], body_properties={"InspectionStatus": _string(), "InspectionResult": _string(), "QuantityAccepted": _number(), "QuantityRejected": _number(), "samples": {"type": "array", "items": {"type": "object"}}}, body_required=[], description="Update one quality inspection result."
+                "oracle_fusion.quality_inspection_results.update", method="PATCH", path="/fscmRestApi/resources/11.13.18.05/inspectionResults/{InspectionId}", source_page="api-quality-inspection-results.html", path_properties={"InspectionId": _integer()}, path_required=["InspectionId"], body_properties={"InspectionStatus": _string(), "InspectionResult": _string(), "QuantityAccepted": _number(), "QuantityRejected": _number(), "samples": _array(inspection_sample)}, body_required=[], description="Update one quality inspection result."
             ),
         ]
     )
@@ -300,29 +336,101 @@ def _collection_contracts() -> list[Json]:
 
 def _child_and_transaction_contracts() -> list[Json]:
     contracts: list[Json] = []
-    child_specs = (
-        ("oracle_fusion.work_order_operations.list", "/workOrders/{WorkOrderId}/child/WorkOrderOperation", "WorkOrderId", "Get active operations for a discrete work order."),
-        ("oracle_fusion.work_order_materials.list", "/workOrders/{WorkOrderId}/child/WorkOrderMaterial", "WorkOrderId", "Get materials for a discrete work order."),
-        ("oracle_fusion.work_order_resources.list", "/workOrders/{WorkOrderId}/child/WorkOrderResource", "WorkOrderId", "Get resources for a discrete work order."),
-        ("oracle_fusion.maintenance_operations.list", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderOperation", "WorkOrderId", "Get operations for a maintenance work order."),
-        ("oracle_fusion.maintenance_materials.list", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderMaterial", "WorkOrderId", "Get material requirements for a maintenance work order."),
-        ("oracle_fusion.maintenance_resources.list", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderResource", "WorkOrderId", "Get labor and equipment resources for a maintenance work order."),
-        ("oracle_fusion.maintenance_documents.list", "/maintenanceWorkOrders/{WorkOrderId}/child/documentReference", "WorkOrderId", "Get document references for a maintenance work order."),
-        ("oracle_fusion.cycle_count_history.list", "/cycleCountSequenceDetails/{cycleCountSequenceDetailsUniqID}/child/history", "cycleCountSequenceDetailsUniqID", "Get the independently recorded count history for one cycle-count sequence."),
-        ("oracle_fusion.receiving_receipt_transactions.list", "/receivingReceiptRequests/{HeaderInterfaceId}/child/lines", "HeaderInterfaceId", "Get receiving transaction requests."),
-        ("oracle_fusion.purchase_order_lines.list", "/purchaseOrders/{purchaseOrdersUniqID}/child/lines", "purchaseOrdersUniqID", "Get purchase-order lines."),
+    material_transaction_detail = _object(
+        {
+            "OrganizationCode": _string(),
+            "WorkOrderNumber": _string(),
+            "InventoryItemNumber": _string(),
+            "TransactionTypeCode": _string(),
+            "TransactionQuantity": _number(),
+            "TransactionUnitOfMeasure": _string(),
+            "SubinventoryCode": _string(),
+            "LotNumber": _string(),
+        }
     )
-    for name, suffix, parameter, description in child_specs:
+    operation_transaction_detail = _object(
+        {
+            "OrganizationCode": _string(),
+            "WorkOrderNumber": _string(),
+            "WoOperationSequenceNumber": _number(),
+            "FromDispatchState": _string(),
+            "ToDispatchState": _string(),
+            "TransactionQuantity": _number(),
+            "TransactionUnitOfMeasure": _string(),
+        }
+    )
+    resource_transaction_detail = _object(
+        {
+            "OrganizationCode": _string(),
+            "WorkOrderNumber": _string(),
+            "WoOperationSequenceNumber": _number(),
+            "ResourceCode": _string(),
+            "TransactionQuantity": _number(),
+            "TransactionUnitOfMeasure": _string(),
+        }
+    )
+    inventory_transaction_line = _object(
+        {
+            "OrganizationCode": _string(),
+            "Item": _string(),
+            "Subinventory": _string(),
+            "TransactionType": _string(),
+            "TransactionQuantity": _number(),
+            "TransactionUnitOfMeasure": _string(),
+            "LotNumber": _string(),
+            "TransferSubinventory": _string(),
+        }
+    )
+    supply_request_line = _object(
+        {
+            "SupplyOrderSource": _string(),
+            "SupplyType": _string(),
+            "ItemNumber": _string(),
+            "Quantity": _number(),
+            "NeedByDate": _string(),
+            "DestinationOrganizationCode": _string(),
+        }
+    )
+    receipt_request_line = _object(
+        {
+            "SourceDocumentCode": _string(),
+            "POHeaderId": _integer(),
+            "POLineId": _integer(),
+            "ItemNumber": _string(),
+            "Quantity": _number(),
+            "UnitOfMeasure": _string(),
+            "LotNumber": _string(),
+        }
+    )
+    receipt_lot = _object(
+        {
+            "LotNumber": _string(),
+            "PrimaryQuantity": _number(),
+        }
+    )
+    child_specs = (
+        ("oracle_fusion.work_order_operations.list", "/workOrders/{WorkOrderId}/child/WorkOrderOperation", {"WorkOrderId": _integer()}, "api-manufacturing-discrete-work-orders-active-operations-work-orders.html", ORACLE_SCM, "Get active operations for a discrete work order."),
+        ("oracle_fusion.work_order_materials.list", "/workOrders/{WorkOrderId}/child/WorkOrderMaterial", {"WorkOrderId": _integer()}, "api-manufacturing-discrete-work-orders-work-order-materials.html", ORACLE_SCM, "Get materials for a discrete work order."),
+        ("oracle_fusion.work_order_resources.list", "/workOrders/{WorkOrderId}/child/WorkOrderResource", {"WorkOrderId": _integer()}, "api-manufacturing-discrete-work-orders-resources-operations.html", ORACLE_SCM, "Get resources for a discrete work order."),
+        ("oracle_fusion.maintenance_operations.list", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderOperation", {"WorkOrderId": _integer()}, "api-maintenance-maintenance-work-orders-operations.html", ORACLE_SCM, "Get operations for a maintenance work order."),
+        ("oracle_fusion.maintenance_materials.list", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderOperation/{WoOperationId}/child/WorkOrderOperationMaterial", {"WorkOrderId": _integer(), "WoOperationId": _integer()}, "api-maintenance-maintenance-work-orders-operations-materials.html", ORACLE_SCM, "Get material requirements for one maintenance work-order operation."),
+        ("oracle_fusion.maintenance_resources.list", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderOperation/{WoOperationId}/child/WorkOrderOperationResource", {"WorkOrderId": _integer(), "WoOperationId": _integer()}, "api-maintenance-maintenance-work-orders-operations-resources.html", ORACLE_SCM, "Get labor and equipment resources for one maintenance work-order operation."),
+        ("oracle_fusion.maintenance_documents.list", "/maintenanceWorkOrders/{WorkOrderId}/child/documentReference", {"WorkOrderId": _integer()}, "api-maintenance-maintenance-work-orders-document-references.html", ORACLE_SCM, "Get document references for a maintenance work order."),
+        ("oracle_fusion.cycle_count_history.list", "/cycleCountSequenceDetails/{cycleCountSequenceDetailsUniqID}/child/history", {"cycleCountSequenceDetailsUniqID": _string()}, "api-inventory-management-cycle-count-sequence-details-history.html", ORACLE_SCM, "Get the independently recorded count history for one cycle-count sequence."),
+        ("oracle_fusion.receiving_receipt_transactions.list", "/receivingReceiptRequests/{HeaderInterfaceId}/child/lines", {"HeaderInterfaceId": _integer()}, "api-inventory-management-receiving-receipt-requests-requests-receiving-transactions.html", ORACLE_SCM, "Get receiving transaction requests."),
+        ("oracle_fusion.purchase_order_lines.list", "/purchaseOrders/{purchaseOrdersUniqID}/child/lines", {"purchaseOrdersUniqID": _string()}, "api-purchase-orders-lines.html", ORACLE_PROCUREMENT, "Get purchase-order lines."),
+    )
+    for name, suffix, path_properties, source_page, source_base, description in child_specs:
         schema = deepcopy(LIST_SCHEMA)
-        schema["properties"][parameter] = _string() if parameter.endswith("UniqID") else _integer()
-        schema["required"] = [parameter]
+        schema["properties"].update(path_properties)
+        schema["required"] = list(path_properties)
         contracts.append(
             _contract(
                 name,
                 server="oracle_fusion",
                 method="GET",
                 path=f"/fscmRestApi/resources/11.13.18.05{suffix}",
-                source=f"{ORACLE_SCM}toc.htm",
+                source=f"{source_base}{source_page}",
                 description=description,
                 input_schema=schema,
                 read_only=True,
@@ -330,19 +438,19 @@ def _child_and_transaction_contracts() -> list[Json]:
         )
 
     mutation_specs = (
-        ("oracle_fusion.work_order_operations.update", "PATCH", "/workOrders/{WorkOrderId}/child/WorkOrderOperation/{WoOperationId}", {"WorkOrderId": _integer(), "WoOperationId": _integer()}, {"WorkCenterCode": _string(), "PlannedStartDate": _string(), "PlannedCompletionDate": _string(), "OperationName": _string()}, "Update one active work-order operation."),
-        ("oracle_fusion.work_order_materials.update", "PATCH", "/workOrders/{WorkOrderId}/child/WorkOrderMaterial/{WoOperationMaterialId}", {"WorkOrderId": _integer(), "WoOperationMaterialId": _integer()}, {"Quantity": _number(), "SupplySubinventory": _string(), "ItemNumber": _string()}, "Update one work-order material."),
-        ("oracle_fusion.work_order_resources.update", "PATCH", "/workOrders/{WorkOrderId}/child/WorkOrderResource/{WoOperationResourceId}", {"WorkOrderId": _integer(), "WoOperationResourceId": _integer()}, {"ResourceCode": _string(), "UsageRate": _number(), "AssignedUnits": _number()}, "Update one work-order resource."),
-        ("oracle_fusion.maintenance_operations.update", "PATCH", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderOperation/{WoOperationId}", {"WorkOrderId": _integer(), "WoOperationId": _integer()}, {"WorkCenterCode": _string(), "OperationName": _string(), "PlannedStartDate": _string()}, "Update one maintenance operation."),
-        ("oracle_fusion.receiving_receipt_transactions.update", "PATCH", "/receivingReceiptRequests/{HeaderInterfaceId}/child/lines/{InterfaceTransactionId}", {"HeaderInterfaceId": _integer(), "InterfaceTransactionId": _integer()}, {"TransactionType": _string(), "Quantity": _number(), "InspectionQualityCode": _string(), "Comments": _string()}, "Update one receiving transaction request."),
+        ("oracle_fusion.work_order_operations.update", "PATCH", "/workOrders/{WorkOrderId}/child/WorkOrderOperation/{WorkOrderOperationId}", {"WorkOrderId": _integer(), "WorkOrderOperationId": _integer()}, {"WorkCenterCode": _string(), "PlannedStartDate": _string(), "PlannedCompletionDate": _string(), "OperationName": _string()}, "api-manufacturing-discrete-work-orders-active-operations-work-orders.html", "Update one active work-order operation."),
+        ("oracle_fusion.work_order_materials.update", "PATCH", "/workOrders/{WorkOrderId}/child/WorkOrderOperation/{WorkOrderOperationId2}/child/WorkOrderOperationMaterial/{WorkOrderOperationMaterialId}", {"WorkOrderId": _integer(), "WorkOrderOperationId2": _integer(), "WorkOrderOperationMaterialId": _integer()}, {"BasisType": _string(), "ContributeToYieldFlag": _boolean(), "EnforceIntRequirements": _string(), "ExtendedQuantity": _number(), "IncludeInPlanningFlag": _boolean(), "InverseQuantity": _number(), "QuantityPERProduct": _number(), "RequiredDate": _string(), "SupplyLocator": _string(), "SupplyLocatorId": _integer(), "SupplySubinventory": _string(), "SupplyType": _string(), "WdOperationMaterialId": _integer(), "YieldFactor": _number()}, "api-manufacturing-discrete-work-orders-active-operations-work-orders-work-order-materials.html", "Update one work-order operation material."),
+        ("oracle_fusion.work_order_resources.update", "PATCH", "/workOrders/{WorkOrderId}/child/WorkOrderOperation/{WorkOrderOperationId}/child/WorkOrderOperationResource/{WorkOrderOperationResourceId}", {"WorkOrderId": _integer(), "WorkOrderOperationId": _integer(), "WorkOrderOperationResourceId": _integer()}, {"AssignedUnits": _number(), "BasisType": _string(), "ChargeType": _string(), "EquipmentProfileCode": _string(), "EquipmentProfileId": _integer(), "InverseRequiredUsage": _number(), "PlannedCompletionDate": _string(), "PlannedStartDate": _string(), "PrincipalFlag": _boolean(), "ProfileCode": _string(), "ProfileId": _integer(), "RequiredUsage": _number(), "ResourceActivityCode": _string(), "ResourceSequenceNumber": _number(), "ScheduledIndicator": _string(), "UnsetPrincipalFlag": _boolean(), "UsageRate": _number()}, "api-manufacturing-discrete-work-orders-active-operations-work-orders-resources-operations.html", "Update one work-order operation resource without changing its immutable resource identity."),
+        ("oracle_fusion.maintenance_operations.update", "PATCH", "/maintenanceWorkOrders/{WorkOrderId}/child/WorkOrderOperation/{WoOperationId}", {"WorkOrderId": _integer(), "WoOperationId": _integer()}, {"WorkCenterCode": _string(), "OperationName": _string(), "PlannedStartDate": _string()}, "api-maintenance-maintenance-work-orders-operations.html", "Update one maintenance operation."),
+        ("oracle_fusion.receiving_receipt_transactions.update", "PATCH", "/receivingReceiptRequests/{HeaderInterfaceId}/child/lines/{InterfaceTransactionId}", {"HeaderInterfaceId": _integer(), "InterfaceTransactionId": _integer()}, {"TransactionType": _string(), "Quantity": _number(), "InspectionQualityCode": _string(), "Comments": _string()}, "api-inventory-management-receiving-receipt-requests-requests-receiving-transactions.html", "Update one receiving transaction request."),
     )
-    for name, method, suffix, path_props, body_props, description in mutation_specs:
+    for name, method, suffix, path_props, body_props, source_page, description in mutation_specs:
         contracts.append(
             _oracle_write(
                 name,
                 method=method,
                 path=f"/fscmRestApi/resources/11.13.18.05{suffix}",
-                source_page="toc.htm",
+                source_page=source_page,
                 path_properties=path_props,
                 path_required=list(path_props),
                 body_properties=body_props,
@@ -354,34 +462,34 @@ def _child_and_transaction_contracts() -> list[Json]:
     contracts.extend(
         [
             _oracle_write(
-                "oracle_fusion.work_order_operations.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderOperation", source_page="api-manufacturing-discrete-work-orders-active-operations.html", path_properties={"WorkOrderId": _integer()}, path_required=["WorkOrderId"], body_properties={"OperationSequenceNumber": _integer(), "OperationName": _string(), "WorkCenterCode": _string(), "PlannedStartDate": _string(), "PlannedCompletionDate": _string()}, body_required=["OperationSequenceNumber", "OperationName", "WorkCenterCode"], description="Create an active operation for a discrete work order."
+                "oracle_fusion.work_order_operations.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderOperation", source_page="api-manufacturing-discrete-work-orders-active-operations-work-orders.html", path_properties={"WorkOrderId": _integer()}, path_required=["WorkOrderId"], body_properties={"OperationSequenceNumber": _integer(), "OperationName": _string(), "WorkCenterCode": _string(), "PlannedStartDate": _string(), "PlannedCompletionDate": _string()}, body_required=["OperationSequenceNumber", "OperationName", "WorkCenterCode"], description="Create an active operation for a discrete work order."
             ),
             _oracle_write(
-                "oracle_fusion.work_order_resources.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderOperation/{WoOperationId}/child/WorkOrderOperationResource", source_page="api-manufacturing-discrete-work-orders-active-operations-resources.html", path_properties={"WorkOrderId": _integer(), "WoOperationId": _integer()}, path_required=["WorkOrderId", "WoOperationId"], body_properties={"ResourceCode": _string(), "UsageRate": _number(), "AssignedUnits": _number(), "BasisType": _string()}, body_required=["ResourceCode"], description="Create a resource requirement for a work-order operation."
+                "oracle_fusion.work_order_resources.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderOperation/{WorkOrderOperationId}/child/WorkOrderOperationResource", source_page="api-manufacturing-discrete-work-orders-active-operations-work-orders-resources-operations.html", path_properties={"WorkOrderId": _integer(), "WorkOrderOperationId": _integer()}, path_required=["WorkOrderId", "WorkOrderOperationId"], body_properties={"ResourceCode": _string(), "UsageRate": _number(), "AssignedUnits": _number(), "BasisType": _string()}, body_required=["ResourceCode"], description="Create a resource requirement for a work-order operation."
             ),
             _oracle_write(
-                "oracle_fusion.work_order_materials.replace_with_substitute", method="POST", path="/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderOperation/{WoOperationId}/child/WorkOrderOperationMaterial/{WoOperationMaterialId}/action/replaceWithSubstitute", source_page="api-manufacturing-discrete-work-orders-active-operations-work-order-materials.html", path_properties={"WorkOrderId": _integer(), "WoOperationId": _integer(), "WoOperationMaterialId": _integer()}, path_required=["WorkOrderId", "WoOperationId", "WoOperationMaterialId"], body_properties={"SubstituteItemNumber": _string(), "SubstituteQuantity": _number()}, body_required=["SubstituteItemNumber"], description="Replace a work-order material with a documented substitute."
+                "oracle_fusion.work_order_materials.replace_with_substitute", method="POST", path="/fscmRestApi/resources/11.13.18.05/workOrders/{WorkOrderId}/child/WorkOrderMaterial/{WorkOrderOperationMaterialId}/action/replaceWithSubstitute", source_page="api-manufacturing-discrete-work-orders-work-order-materials.html", path_properties={"WorkOrderId": _integer(), "WorkOrderOperationMaterialId": _integer()}, path_required=["WorkOrderId", "WorkOrderOperationMaterialId"], body_properties={"substituteItemId": _number(), "substituteItemNumber": _string()}, body_required=[], description="Replace a work-order material with a documented substitute item identifier or item number."
             ),
             _oracle_write(
-                "oracle_fusion.material_transactions.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/materialTransactions", source_page="op-materialtransactions-post.html", body_properties={"SourceSystemCode": _string(), "SourceSystemType": _string(), "MaterialTransactionDetail": {"type": "array", "items": {"type": "object"}}}, body_required=["SourceSystemCode", "MaterialTransactionDetail"], description="Create work-order material transactions."
+                "oracle_fusion.material_transactions.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/materialTransactions", source_page="op-materialtransactions-post.html", body_properties={"SourceSystemCode": _string(), "SourceSystemType": _string(), "MaterialTransactionDetail": _array(material_transaction_detail)}, body_required=["SourceSystemCode", "MaterialTransactionDetail"], description="Create work-order material transactions."
             ),
             _oracle_write(
-                "oracle_fusion.operation_transactions.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/operationTransactions", source_page="op-operationtransactions-post.html", body_properties={"SourceSystemCode": _string(), "SourceSystemType": _string(), "OperationTransactionDetail": {"type": "array", "items": {"type": "object"}}}, body_required=["SourceSystemCode", "OperationTransactionDetail"], description="Create work-order operation transactions."
+                "oracle_fusion.operation_transactions.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/operationTransactions", source_page="op-operationtransactions-post.html", body_properties={"SourceSystemCode": _string(), "SourceSystemType": _string(), "OperationTransactionDetail": _array(operation_transaction_detail)}, body_required=["SourceSystemCode", "OperationTransactionDetail"], description="Create work-order operation transactions."
             ),
             _oracle_write(
-                "oracle_fusion.resource_transactions.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/resourceTransactions", source_page="api-manufacturing-work-order-resource-transactions.html", body_properties={"SourceSystemCode": _string(), "ResourceTransactionDetail": {"type": "array", "items": {"type": "object"}}}, body_required=["SourceSystemCode", "ResourceTransactionDetail"], description="Create work-order resource transactions."
+                "oracle_fusion.resource_transactions.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/resourceTransactions", source_page="api-manufacturing-work-order-resource-transactions.html", body_properties={"SourceSystemCode": _string(), "ResourceTransactionDetail": _array(resource_transaction_detail)}, body_required=["SourceSystemCode", "ResourceTransactionDetail"], description="Create work-order resource transactions."
             ),
             _oracle_write(
-                "oracle_fusion.inventory_transactions.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/inventoryTransactions", source_page="op-inventorytransactions-post.html", body_properties={"SourceSystemCode": _string(), "TransactionLines": {"type": "array", "items": {"type": "object"}}, "TransactionMode": _string()}, body_required=["SourceSystemCode", "TransactionLines"], description="Create inventory transactions."
+                "oracle_fusion.inventory_transactions.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/inventoryTransactions", source_page="op-inventorytransactions-post.html", body_properties={"SourceSystemCode": _string(), "TransactionLines": _array(inventory_transaction_line), "TransactionMode": _string()}, body_required=["SourceSystemCode", "TransactionLines"], description="Create inventory transactions."
             ),
             _oracle_write(
-                "oracle_fusion.supply_requests.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/supplyRequests", source_page="api-inventory-management-supply-requests.html", body_properties={"SupplyOrderReferenceNumber": _string(), "SupplyRequestSystem": _string(), "SupplyRequestDate": _string(), "supplyRequestLines": {"type": "array", "items": {"type": "object"}}}, body_required=["SupplyOrderReferenceNumber", "SupplyRequestSystem", "SupplyRequestDate", "supplyRequestLines"], description="Create one supply request."
+                "oracle_fusion.supply_requests.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/supplyRequests", source_page="api-inventory-management-supply-requests.html", body_properties={"SupplyOrderReferenceNumber": _string(), "SupplyRequestSystem": _string(), "SupplyRequestDate": _string(), "supplyRequestLines": _array(supply_request_line)}, body_required=["SupplyOrderReferenceNumber", "SupplyRequestSystem", "SupplyRequestDate", "supplyRequestLines"], description="Create one supply request."
             ),
             _oracle_write(
-                "oracle_fusion.receiving_receipt_requests.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/receivingReceiptRequests", source_page="op-receivingreceipttransactionrequests-post.html", body_properties={"ReceiptSourceCode": _string(), "OrganizationCode": _string(), "VendorName": _string(), "EmployeeId": _integer(), "lines": {"type": "array", "items": {"type": "object"}}}, body_required=["ReceiptSourceCode", "OrganizationCode", "lines"], description="Create a receiving receipt request."
+                "oracle_fusion.receiving_receipt_requests.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/receivingReceiptRequests", source_page="op-receivingreceipttransactionrequests-post.html", body_properties={"ReceiptSourceCode": _string(), "OrganizationCode": _string(), "VendorName": _string(), "EmployeeId": _integer(), "lines": _array(receipt_request_line)}, body_required=["ReceiptSourceCode", "OrganizationCode", "lines"], description="Create a receiving receipt request."
             ),
             _oracle_write(
-                "oracle_fusion.receiving_receipt_transactions.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/receivingReceiptRequests/{HeaderInterfaceId}/child/lines", source_page="api-inventory-management-receiving-receipt-requests-requests-receiving-transactions.html", path_properties={"HeaderInterfaceId": _integer()}, path_required=["HeaderInterfaceId"], body_properties={"TransactionType": _string(), "Quantity": _number(), "ItemNumber": _string(), "InspectionQualityCode": _string(), "lotItemLots": {"type": "array", "items": {"type": "object"}}}, body_required=["TransactionType", "Quantity"], description="Create a receiving transaction request."
+                "oracle_fusion.receiving_receipt_transactions.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/receivingReceiptRequests/{HeaderInterfaceId}/child/lines", source_page="api-inventory-management-receiving-receipt-requests-requests-receiving-transactions.html", path_properties={"HeaderInterfaceId": _integer()}, path_required=["HeaderInterfaceId"], body_properties={"TransactionType": _string(), "Quantity": _number(), "ItemNumber": _string(), "InspectionQualityCode": _string(), "lotItemLots": _array(receipt_lot)}, body_required=["TransactionType", "Quantity"], description="Create a receiving transaction request."
             ),
             _oracle_write(
                 "oracle_fusion.maintenance_documents.create", method="POST", path="/fscmRestApi/resources/11.13.18.05/maintenanceWorkOrders/{WorkOrderId}/child/documentReference", source_page="api-maintenance-maintenance-work-orders-document-references.html", path_properties={"WorkOrderId": _integer()}, path_required=["WorkOrderId"], body_properties={"DocumentName": _string(), "DocumentNumber": _string(), "DocumentType": _string(), "Description": _string()}, body_required=["DocumentName", "DocumentType"], description="Create a maintenance work-order document reference."
@@ -403,13 +511,13 @@ def _action_contracts() -> list[Json]:
             "oracle_fusion.invoice_holds.update", method="PATCH", path="/fscmRestApi/resources/11.13.18.05/invoiceHolds/{HoldId}", source_page="api-invoice-holds.html", financials=True, path_properties={"HoldId": _integer()}, path_required=["HoldId"], body_properties={"ReleaseName": _string(), "ReleaseReason": _string()}, body_required=["ReleaseName"], description="Update one Payables invoice hold, including release details."
         ),
         _oracle_write(
-            "oracle_fusion.purchase_orders.acknowledge", method="POST", path="/fscmRestApi/resources/11.13.18.05/purchaseOrders/{purchaseOrdersUniqID}/action/acknowledge", source_page="api-procurement-purchase-orders.html", path_properties={"purchaseOrdersUniqID": _string()}, path_required=["purchaseOrdersUniqID"], body_properties={"supplierOrder": _string(), "acknowledgementNote": _string()}, body_required=[], description="Record supplier acknowledgment for a purchase order."
+            "oracle_fusion.purchase_orders.acknowledge", method="POST", path="/fscmRestApi/resources/11.13.18.05/purchaseOrders/{purchaseOrdersUniqID}/action/acknowledge", source_page="op-purchaseorders-purchaseordersuniqid-action-acknowledge-post.html", source_base=ORACLE_PROCUREMENT, path_properties={"purchaseOrdersUniqID": _string()}, path_required=["purchaseOrdersUniqID"], body_properties={"supplierOrder": _string(), "acknowledgementNote": _string()}, body_required=[], description="Record supplier acknowledgment for a purchase order."
         ),
         _oracle_write(
-            "oracle_fusion.purchase_orders.close", method="POST", path="/fscmRestApi/resources/11.13.18.05/purchaseOrders/{purchaseOrdersUniqID}/action/close", source_page="api-procurement-purchase-orders.html", path_properties={"purchaseOrdersUniqID": _string()}, path_required=["purchaseOrdersUniqID"], body_properties={"closeAction": {"type": "string", "enum": ["closeForReceiving", "closeForInvoicing", "close", "finallyClose"]}, "closeReason": _string()}, body_required=["closeAction"], description="Close a purchase order using a documented close action."
+            "oracle_fusion.purchase_orders.close", method="POST", path="/fscmRestApi/resources/11.13.18.05/purchaseOrders/{purchaseOrdersUniqID}/action/close", source_page="op-purchaseorders-purchaseordersuniqid-action-close-post.html", source_base=ORACLE_PROCUREMENT, path_properties={"purchaseOrdersUniqID": _string()}, path_required=["purchaseOrdersUniqID"], body_properties={"closeAction": {"type": "string", "enum": ["closeForReceiving", "closeForInvoicing", "close", "finallyClose"]}, "closeReason": _string()}, body_required=[], description="Close a purchase order using a documented close action."
         ),
         _oracle_write(
-            "oracle_fusion.purchase_orders.cancel", method="POST", path="/fscmRestApi/resources/11.13.18.05/purchaseOrders/{purchaseOrdersUniqID}/action/cancel", source_page="api-procurement-purchase-orders.html", path_properties={"purchaseOrdersUniqID": _string()}, path_required=["purchaseOrdersUniqID"], body_properties={"cancellationReason": _string(), "cancelUnfulfilledDemandFlag": _boolean(), "initiatingParty": {"type": "string", "enum": ["buyer", "requester", "supplier"]}}, body_required=["cancellationReason"], description="Cancel a purchase order."
+            "oracle_fusion.purchase_orders.cancel", method="POST", path="/fscmRestApi/resources/11.13.18.05/purchaseOrders/{purchaseOrdersUniqID}/action/cancel", source_page="op-purchaseorders-purchaseordersuniqid-action-cancel-post.html", source_base=ORACLE_PROCUREMENT, path_properties={"purchaseOrdersUniqID": _string()}, path_required=["purchaseOrdersUniqID"], body_properties={"acknowledgeWithinDays": _number(), "BCCEmail": _string(), "cancellationReason": _string(), "cancelUnfulfilledDemandFlag": _boolean(), "CCEmail": _string(), "communicationMethod": _string(), "email": _string(), "fax": _string(), "initiatingParty": {"type": "string", "enum": ["buyer", "requester", "supplier"]}, "requiredAcknowledgment": _string()}, body_required=[], description="Cancel a purchase order."
         ),
         _oracle_write(
             "oracle_fusion.maintenance_programs.generate_forecasts", method="POST", path="/fscmRestApi/resources/11.13.18.05/maintenancePrograms/action/generateProgramForecasts", source_page="api-maintenance-maintenance-programs.html", body_properties={"MaintenanceProgramCode": _string(), "ForecastStartDate": _string(), "ForecastEndDate": _string()}, body_required=["MaintenanceProgramCode"], description="Generate maintenance-program forecasts."
