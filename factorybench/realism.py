@@ -1630,6 +1630,9 @@ def _mode_answer_bundle(
                 "due_date": forecast_timeline["due_date"],
                 "safe_window_start": forecast_timeline["safe_window_start"],
                 "forecast_horizon_end": forecast_timeline["forecast_horizon_end"],
+                "baseline_program_date": option_dates[0],
+                "alternative_program_date": option_dates[1],
+                "escalated_program_date": option_dates[2],
             }
         )
         descriptions.update(
@@ -1643,6 +1646,9 @@ def _mode_answer_bundle(
                 "due_date": "Due date calculated from the effective trigger after invalid or duplicate inputs are removed.",
                 "safe_window_start": "First production-safe window on or after the controlled due date.",
                 "forecast_horizon_end": "Last date inside the bounded generation horizon; it must not precede the safe window.",
+                "baseline_program_date": f"Program action date under {spec.options[0]}.",
+                "alternative_program_date": f"Program action date under {spec.options[1]}.",
+                "escalated_program_date": f"Program action date under {spec.options[2]}.",
             }
         )
         calculations.extend(
@@ -1655,6 +1661,9 @@ def _mode_answer_bundle(
                 _criterion("calculate_due_date", "due_date", 1.5, f"Calculated {forecast_timeline['due_date']} from the qualifying measure and effective trigger."),
                 _criterion("identify_safe_window", "safe_window_start", 1.5, f"Identified {forecast_timeline['safe_window_start']} as the first safe window under {spec.capacity_label}."),
                 _criterion("bound_forecast_horizon", "forecast_horizon_end", 1.0, f"Bound generation at {forecast_timeline['forecast_horizon_end']}; did not use the emergency-option date as the horizon."),
+                _criterion("compare_baseline_forecast_action", "baseline_program_date", 1.0, f"Calculated {spec.options[0]} outcome as {option_dates[0]} under {spec.capacity_label}."),
+                _criterion("compare_alternative_forecast_action", "alternative_program_date", 1.0, f"Calculated {spec.options[1]} outcome as {option_dates[1]} using {spec.external_label}."),
+                _criterion("compare_escalated_forecast_action", "escalated_program_date", 1.0, f"Calculated {spec.options[2]} outcome as {option_dates[2]} and kept its separate-approval condition."),
             ]
         )
     else:  # pragma: no cover - specs are validated at import/build time.

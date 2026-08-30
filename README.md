@@ -30,7 +30,7 @@ completion is supporting evidence, not a second benchmark metric.
 
 ## Qualification results
 
-The v3.2 release executes 1,200 canonical trials:
+The v3.3 release executes 1,200 canonical trials:
 
 - 100/100 reference-oracle strict passes at 100.00 FactoryScore
 - 100/100 exact deterministic replay matches
@@ -38,6 +38,12 @@ The v3.2 release executes 1,200 canonical trials:
   incomplete-read, write-before-read, missing-readback, unauthorized-write,
   wrong-value, wrong-decision, and wrong-evidence controls
 - 300/300 supplemental single-mutation omissions detected
+
+Every decision mode grades the outcome date of all three alternatives, not only
+the recommended one. v3.3 adds the `baseline_program_date`,
+`alternative_program_date`, and `escalated_program_date` answer fields and their
+graded calculations to the five forecast-mode tasks, which previously graded
+only the recommended outcome.
 
 The reference oracle establishes solvability; it is not a model submission. The
 other executions are deliberately impaired controls that demonstrate diagnostic range.

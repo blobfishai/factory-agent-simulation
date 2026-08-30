@@ -7,6 +7,14 @@
   "answer_schema": {
     "additionalProperties": false,
     "properties": {
+      "alternative_program_date": {
+        "description": "Program action date under forecast_all_asset_rows.",
+        "type": "string"
+      },
+      "baseline_program_date": {
+        "description": "Program action date under generate_bounded_forecast.",
+        "type": "string"
+      },
       "business_need_date": {
         "description": "Documented business or control date that the decision must protect.",
         "type": "string"
@@ -21,6 +29,10 @@
       },
       "due_date": {
         "description": "Due date calculated from the effective trigger after invalid or duplicate inputs are removed.",
+        "type": "string"
+      },
+      "escalated_program_date": {
+        "description": "Program action date under defer_entire_quarter.",
         "type": "string"
       },
       "escalation_approval_required": {
@@ -82,9 +94,12 @@
       }
     },
     "required": [
+      "alternative_program_date",
+      "baseline_program_date",
       "business_need_date",
       "decision_timing_status",
       "due_date",
+      "escalated_program_date",
       "escalation_approval_required",
       "excluded_measure",
       "forecast_horizon_end",
@@ -104,9 +119,12 @@
   "as_of": "2026-01-12",
   "expected": {
     "answer": {
+      "alternative_program_date": "2026-02-24",
+      "baseline_program_date": "2026-01-14",
       "business_need_date": "2026-01-14",
       "decision_timing_status": "ON_TIME",
       "due_date": "2026-01-25",
+      "escalated_program_date": "2026-01-15",
       "escalation_approval_required": 1,
       "excluded_measure": 4,
       "forecast_horizon_end": "2026-05-28",
@@ -306,6 +324,27 @@
         "description": "Bound generation at 2026-05-28; did not use the emergency-option date as the horizon.",
         "field": "forecast_horizon_end",
         "id": "bound_forecast_horizon",
+        "milestone_id": "analysis.timeline",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated generate_bounded_forecast outcome as 2026-01-14 under shutdown calendar availability.",
+        "field": "baseline_program_date",
+        "id": "compare_baseline_forecast_action",
+        "milestone_id": "analysis.timeline",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated forecast_all_asset_rows outcome as 2026-02-24 using contractor coverage by month.",
+        "field": "alternative_program_date",
+        "id": "compare_alternative_forecast_action",
+        "milestone_id": "analysis.timeline",
+        "weight": 1.0
+      },
+      {
+        "description": "Calculated defer_entire_quarter outcome as 2026-01-15 and kept its separate-approval condition.",
+        "field": "escalated_program_date",
+        "id": "compare_escalated_forecast_action",
         "milestone_id": "analysis.timeline",
         "weight": 1.0
       },
@@ -1898,13 +1937,16 @@
       "weight": 8.0
     },
     {
-      "atomic_weight": 9.5,
+      "atomic_weight": 12.5,
       "category": "analysis",
       "criterion_ids": [
         "identify_business_date",
         "calculate_due_date",
         "identify_safe_window",
         "bound_forecast_horizon",
+        "compare_baseline_forecast_action",
+        "compare_alternative_forecast_action",
+        "compare_escalated_forecast_action",
         "calculate_recommended_outcome",
         "calculate_outcome_variance",
         "state_honest_timing_status"
