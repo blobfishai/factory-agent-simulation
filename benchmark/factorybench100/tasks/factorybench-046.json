@@ -1484,7 +1484,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1812,6 +1812,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "procurement.leadership@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-046",
@@ -1821,7 +1827,8 @@
         ],
         "payload_text_contains": [
           "2026-01-13",
-          "enable_conditional_source"
+          "enable_conditional_source",
+          "procurement.leadership@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -1845,6 +1852,11 @@
             "fileId": "drive-046"
           },
           "tool": "google_drive.comments.create"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2521,6 +2533,66 @@
           "SupplyRequestId": 1500046
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-046",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-046",
+              "threadId": "thread-046"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-046",
+          "threadId": "thread-046"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-046",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-046"
+            },
+            "expected_result_contains": {
+              "id": "comment-046",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-046",
+          "resolved": false
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
       }
     ]
   },
@@ -2810,6 +2882,16 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "sent-046",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.messages.get"
+    },
+    {
+      "arguments": {
         "fileId": "drive-046",
         "requestBody": {
           "content": "CASE-046: enable_conditional_source recorded on Oracle record NS-000046; completion 2026-01-13; constraint conditional use is limited by item, quantity, duration, and approval; expired, failed, or unapproved sites = 3 SITES; uncovered or unsupported scope = 3.0 SITES; approval AP-0046."
@@ -2818,6 +2900,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "commentId": "comment-046",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-046"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
     },
     {
       "arguments": {
@@ -2879,6 +2971,66 @@
         "SupplyRequestId": 1500046
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-046",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-046",
+            "threadId": "thread-046"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-046",
+        "threadId": "thread-046"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-046",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-046"
+          },
+          "expected_result_contains": {
+            "id": "comment-046",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-046",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4058,10 +4210,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000046 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4348,13 +4502,31 @@
         "tool_name": "gmail.messages.send"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"sent-046\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-046\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy00NkBub3J0aHN0YXIuZXhhbXBsZQpUbzogc3VwcGxpZXIucXVhbGl0eS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgcmFpbmllci5jb21wb25lbnRzQHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTA0NkBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wNDYg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3IgY29uZGl0aW9uYWwgbW9sZGVkLXBhcnRzIHNvdXJjZQpNSU1FLVZlcnNpb246IDEuMApDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgKClRoZSBpbmN1bWJlbnQgbW9sZGVkLXBhcnRzIHNvdXJjZSBpcyBjb25zdHJhaW5lZCBhbmQgcHJvY3VyZW1lbnQgd2FudHMgdG8gdXNlIGFuIGFsdGVybmF0ZSB1bmRlciBjb25kaXRpb25zLiBEZWNpZGUgd2hldGhlciB0aGUgYWx0ZXJuYXRlIGhhcyBjbGVhcmVkIHRoZSBuZWNlc3NhcnkgcmlzayBhbmQgcXVhbGl0eSBldmlkZW5jZSwgaG93IG11Y2ggZGVtYW5kIHRoZSB0cmlhbCBhcHByb3ZhbCBjYW4gY292ZXIsIGFuZCB3aGF0IHJlbWFpbnMgZXhwb3NlZCBpZiBpdCBpcyBub3QgdXNlZC4gQ3JlYXRlIG9ubHkgdGhlIHN1cHBseSBhbGxvd2VkIGJ5IHRoZSBjb25kaXRpb25hbCBhcHByb3ZhbC4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwp0cmlhbC1sb3QgYW5kIGluc3VyYW5jZSB2YWxpZGl0eTogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGFwcHJvdmVfc3VwcGxpZXJfZ2xvYmFsbHkgb24gMjAyNi0wMS0xMDsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTIgd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDQ2IGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDQ2IC8gUjUuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpQcm9jdXJlbWVudCBsZWFkZXJzaGlwIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciBjb25kaXRpb25hbCBtb2xkZWQtcGFydHMgc291cmNlIGJ5IDIwMjYtMDEtMTY7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIGNvbmRpdGlvbmFsIHVzZSBpcyBsaW1pdGVkIGJ5IGl0ZW0sIHF1YW50aXR5LCBkdXJhdGlvbiwgYW5kIGFwcHJvdmFsLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wNDcgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gRXhwaXJlZCwgZmFpbGVkLCBvciB1bmFwcHJvdmVkIHNpdGVzIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1844},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-046 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-046\",\"size\":1024},\"filename\":\"signed-source-record.pdf\"}]},\"snippet\":\"The incumbent molded-parts source is constrained and procurement wants to use an alternate under conditions. Decide whether the alternate ha\",\"threadId\":\"thread-046\"}",
+        "task_id": "factorybench-046",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"fileId\":\"drive-046\",\"requestBody\":{\"content\":\"CASE-046: enable_conditional_source recorded on Oracle record NS-000046; completion 2026-01-13; constraint conditional use is limited by item, quantity, duration, and approval; expired, failed, or unapproved sites = 3 SITES; uncovered or unsupported scope = 3.0 SITES; approval AP-0046.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-046\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-046: enable_conditional_source recorded on Oracle record NS-000046; completion 2026-01-13; constraint conditional use is limited by item, quantity, duration, and approval; expired, failed, or unapproved sites = 3 SITES; uncovered or unsupported scope = 3.0 SITES; approval AP-0046.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-046-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-046\"}",
-        "fixture_id": "factorybench-046-call-29",
+        "fixture_id": "factorybench-046-call-30",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-046: enable_conditional_source recorded on Oracle record NS-000046; completion 2026-01-13; constraint conditional use is limited by item, quantity, duration, and approval; expired, failed, or unapproved sites = 3 SITES; uncovered or unsupported scope = 3.0 SITES; approval AP-0046.\",\"id\":\"comment-046\",\"resolved\":false}",
         "task_id": "factorybench-046",
         "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"commentId\":\"comment-046\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-046\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-046-call-31",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-046\",\"resolved\":false}",
+        "task_id": "factorybench-046",
+        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-046\",\"userId\":\"me\"}",
@@ -4366,15 +4538,6 @@
         "tool_name": "gmail.drafts.get"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-046\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-046-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-046\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy00NkBub3J0aHN0YXIuZXhhbXBsZQpUbzogc3VwcGxpZXIucXVhbGl0eS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgcmFpbmllci5jb21wb25lbnRzQHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTA0NkBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wNDYg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3IgY29uZGl0aW9uYWwgbW9sZGVkLXBhcnRzIHNvdXJjZQpNSU1FLVZlcnNpb246IDEuMApDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgKClRoZSBpbmN1bWJlbnQgbW9sZGVkLXBhcnRzIHNvdXJjZSBpcyBjb25zdHJhaW5lZCBhbmQgcHJvY3VyZW1lbnQgd2FudHMgdG8gdXNlIGFuIGFsdGVybmF0ZSB1bmRlciBjb25kaXRpb25zLiBEZWNpZGUgd2hldGhlciB0aGUgYWx0ZXJuYXRlIGhhcyBjbGVhcmVkIHRoZSBuZWNlc3NhcnkgcmlzayBhbmQgcXVhbGl0eSBldmlkZW5jZSwgaG93IG11Y2ggZGVtYW5kIHRoZSB0cmlhbCBhcHByb3ZhbCBjYW4gY292ZXIsIGFuZCB3aGF0IHJlbWFpbnMgZXhwb3NlZCBpZiBpdCBpcyBub3QgdXNlZC4gQ3JlYXRlIG9ubHkgdGhlIHN1cHBseSBhbGxvd2VkIGJ5IHRoZSBjb25kaXRpb25hbCBhcHByb3ZhbC4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwp0cmlhbC1sb3QgYW5kIGluc3VyYW5jZSB2YWxpZGl0eTogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGFwcHJvdmVfc3VwcGxpZXJfZ2xvYmFsbHkgb24gMjAyNi0wMS0xMDsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTIgd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDQ2IGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDQ2IC8gUjUuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpQcm9jdXJlbWVudCBsZWFkZXJzaGlwIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciBjb25kaXRpb25hbCBtb2xkZWQtcGFydHMgc291cmNlIGJ5IDIwMjYtMDEtMTY7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIGNvbmRpdGlvbmFsIHVzZSBpcyBsaW1pdGVkIGJ5IGl0ZW0sIHF1YW50aXR5LCBkdXJhdGlvbiwgYW5kIGFwcHJvdmFsLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wNDcgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gRXhwaXJlZCwgZmFpbGVkLCBvciB1bmFwcHJvdmVkIHNpdGVzIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1844},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-046 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-046\",\"size\":1024},\"filename\":\"signed-source-record.pdf\"}]},\"snippet\":\"The incumbent molded-parts source is constrained and procurement wants to use an alternate under conditions. Decide whether the alternate ha\",\"threadId\":\"thread-046\"}",
-        "task_id": "factorybench-046",
-        "tool_name": "gmail.messages.get"
-      },
-      {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-046\",\"userId\":\"me\"}",
         "effect_json": null,
         "fixture_id": "factorybench-046-discovery-05",
@@ -4382,15 +4545,6 @@
         "response_json": "{\"historyId\":\"900046\",\"id\":\"thread-046\",\"messages\":[{\"id\":\"msg-046\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy00NkBub3J0aHN0YXIuZXhhbXBsZQpUbzogc3VwcGxpZXIucXVhbGl0eS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgcmFpbmllci5jb21wb25lbnRzQHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTA0NkBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wNDYg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3IgY29uZGl0aW9uYWwgbW9sZGVkLXBhcnRzIHNvdXJjZQpNSU1FLVZlcnNpb246IDEuMApDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgKClRoZSBpbmN1bWJlbnQgbW9sZGVkLXBhcnRzIHNvdXJjZSBpcyBjb25zdHJhaW5lZCBhbmQgcHJvY3VyZW1lbnQgd2FudHMgdG8gdXNlIGFuIGFsdGVybmF0ZSB1bmRlciBjb25kaXRpb25zLiBEZWNpZGUgd2hldGhlciB0aGUgYWx0ZXJuYXRlIGhhcyBjbGVhcmVkIHRoZSBuZWNlc3NhcnkgcmlzayBhbmQgcXVhbGl0eSBldmlkZW5jZSwgaG93IG11Y2ggZGVtYW5kIHRoZSB0cmlhbCBhcHByb3ZhbCBjYW4gY292ZXIsIGFuZCB3aGF0IHJlbWFpbnMgZXhwb3NlZCBpZiBpdCBpcyBub3QgdXNlZC4gQ3JlYXRlIG9ubHkgdGhlIHN1cHBseSBhbGxvd2VkIGJ5IHRoZSBjb25kaXRpb25hbCBhcHByb3ZhbC4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgo\",\"size\":804},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-046 \\u2014 operating request and source reply\"}]},\"snippet\":\"From: operations-46@northstar.example\\nTo: supplier.quality.manager@northstar.example\\nCc: controls@northstar.example, rainier.components@supp\",\"threadId\":\"thread-046\"},{\"id\":\"msg-046-1\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnRyaWFsLWxvdCBhbmQgaW5zdXJhbmNlIHZhbGlkaXR5OiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgYXBwcm92ZV9zdXBwbGllcl9nbG9iYWxseSBvbiAyMDI2LTAxLTEwOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xMiB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwNDYgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wNDYgLyBSNS4KCg\",\"size\":427},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-046 \\u2014 operating request and source reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-046\",\"size\":1024},\"filename\":\"signed-source-record.pdf\"}]},\"snippet\":\" external operations desk ---\\nDate: 2026-01-12 11:25 Pacific\\ntrial-lot and insurance validity: the independent source confirms readiness for\",\"threadId\":\"thread-046\"},{\"id\":\"msg-046-2\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClByb2N1cmVtZW50IGxlYWRlcnNoaXAgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIGNvbmRpdGlvbmFsIG1vbGRlZC1wYXJ0cyBzb3VyY2UgYnkgMjAyNi0wMS0xNjsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgY29uZGl0aW9uYWwgdXNlIGlzIGxpbWl0ZWQgYnkgaXRlbSwgcXVhbnRpdHksIGR1cmF0aW9uLCBhbmQgYXBwcm92YWwuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA0NyB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgo\",\"size\":353},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-046 \\u2014 operating request and source reply\"}]},\"snippet\":\" operations lead ---\\nDate: 2026-01-12 09:10 Pacific\\nProcurement leadership needs one defensible decision for conditional molded-parts source\",\"threadId\":\"thread-046\"},{\"id\":\"msg-046-3\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIEV4cGlyZWQsIGZhaWxlZCwgb3IgdW5hcHByb3ZlZCBzaXRlcyBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":200},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-046 \\u2014 operating request and source reply\"}]},\"snippet\":\" controller ---\\nDate: 2026-01-11 16:40 Pacific\\nReconcile the raw rows before acting. Expired, failed, or unapproved sites must remain outsid\",\"threadId\":\"thread-046\"}]}",
         "task_id": "factorybench-046",
         "tool_name": "gmail.threads.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-046\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-046\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-046-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-046\",\"resolved\":false}",
-        "task_id": "factorybench-046",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-046\",\"pageSize\":100}",
@@ -4824,7 +4978,7 @@
       }
     ]
   },
-  "sequence_signature": "e10f80f7787dffcaf03769896e3a2b223bb599f94b9e9764febb06f78e7845e0",
+  "sequence_signature": "976d3c0e1433733e026c6721e66d0dbf18d02df6bf776cc8c7d13e2326080192",
   "task_id": "factorybench-046",
   "title": "Approve a conditional alternate for molded parts",
   "variant": null,

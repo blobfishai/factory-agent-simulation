@@ -99,6 +99,11 @@
         },
         "tool": "slack.chat_postMessage"
       },
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
+      },
       "payload_text_any_of": [
         [
           "CASE-009",
@@ -129,8 +134,18 @@
       "milestone_id": "state.collaboration",
       "payload_contains": {
         "arguments": {
+          "includeValuesInResponse": true,
           "range": "Control!H11",
-          "spreadsheetId": "sheet-009"
+          "requestBody": {
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "CASE-009 | apply_approved_relay_substitute | 2026-01-13 | NS-000009 | substitute effectivity, conversion ratio, and available lot status; original relays already issued or substitute lots outside effectivity = 8 EA; uncovered or unsupported scope = 14.0 EA | AP-0009"
+              ]
+            ]
+          },
+          "spreadsheetId": "sheet-009",
+          "valueInputOption": "RAW"
         },
         "tool": "google_sheets.spreadsheets.values.update"
       },
@@ -769,6 +784,65 @@
         "WorkOrderId": 100009
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000009.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H11",
+            "spreadsheetId": "sheet-009",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H11"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H11"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
     }
   ]
 }

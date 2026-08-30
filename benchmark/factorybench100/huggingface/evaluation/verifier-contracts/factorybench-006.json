@@ -112,6 +112,12 @@
         },
         "tool": "gmail.drafts.create"
       },
+      "payload_email_to": "cell.lead@northstar.example",
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
+      },
       "payload_text_any_of": [
         [
           "CASE-006",
@@ -121,7 +127,8 @@
       ],
       "payload_text_contains": [
         "2026-01-21",
-        "release_complete_build"
+        "release_complete_build",
+        "cell.lead@northstar.example"
       ],
       "table": "resource_state",
       "values": {
@@ -146,6 +153,11 @@
           "thread_ts": "1768000006.000100"
         },
         "tool": "slack.chat_postMessage"
+      },
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
       },
       "payload_text_any_of": [
         [
@@ -846,6 +858,70 @@
         "WorkOrderId": 100006
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-006",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-006",
+            "message": {
+              "id": "draft-msg-006",
+              "threadId": "thread-006"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-006",
+        "message": {
+          "id": "draft-msg-006",
+          "threadId": "thread-006"
+        }
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000006.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
     }
   ]
 }

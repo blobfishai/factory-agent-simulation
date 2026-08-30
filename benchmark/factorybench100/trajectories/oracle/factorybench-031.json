@@ -926,7 +926,7 @@
       "description": "Read NS-000031 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000031 back through the documented Oracle draft purchase orders.list operation after the mutation and confirmed the resource-specific changed fields ['CurrencyCode', 'LastUpdateDate', 'SupplierId'], including the effective update at 2026-01-17, rather than relying on the write acknowledgement.",
@@ -946,9 +946,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "slack.conversations_replies"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "gmail.drafts.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1075,7 +1105,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 48,
+  "passed_atomic_checks": 50,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1307,7 +1337,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-031",
-  "total_atomic_checks": 48,
+  "total_atomic_checks": 50,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -2932,13 +2962,79 @@
     },
     {
       "arguments": {
+        "channel": "C-FINANCE",
+        "limit": 100,
+        "ts": "1768000031.000100"
+      },
+      "index": 29,
+      "result": {
+        "has_more": false,
+        "messages": [
+          {
+            "reactions": [
+              {
+                "count": 1,
+                "name": "white_check_mark",
+                "users": [
+                  "U-FACTORY-AGENT"
+                ]
+              }
+            ],
+            "text": "Requesting planner needs one defensible decision for enclosure tooling sourcing event by 2026-01-17; a faster or broader action has value only if it remains inside technical score, landed cost, supplier status, launch capacity, and sourcing authority.",
+            "ts": "1768000031.000100",
+            "user": "U-OPS-LEAD"
+          },
+          {
+            "text": "I found 11754.75 USD on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.",
+            "ts": "1768000031.000150",
+            "user": "U-PLANNER"
+          },
+          {
+            "files": [
+              {
+                "id": "F-000031",
+                "mimetype": "application/pdf",
+                "name": "approval-and-impact-note.pdf",
+                "title": "CASE-031 approval and impact note"
+              }
+            ],
+            "text": "Approval AP-0031 permits one control-compliant action on NS-000031 up to 1 LOT, provided technical score, landed cost, supplier status, launch capacity, and sourcing authority. It does not select an option in advance and does not authorize broader records or split_unapproved_award.",
+            "ts": "1768000031.000200",
+            "user": "U-APPROVER"
+          },
+          {
+            "text": "Protected load remains non-displaceable. The calendar for milestone capacity against launch need is the source for internal windows; the supplier response covers only its stated alternative.",
+            "ts": "1768000031.000240",
+            "user": "U-SCHEDULER"
+          },
+          {
+            "text": "Revision R9 and the CASE-032 record are visible in search but are not applicable to CASE-031.",
+            "ts": "1768000031.000270",
+            "user": "U-QUALITY"
+          },
+          {
+            "text": "Required closeout records: mark the existing operations thread complete with the approved check reaction; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.",
+            "ts": "1768000031.000300",
+            "user": "U-CONTROLLER"
+          }
+        ],
+        "ok": true,
+        "response_metadata": {
+          "next_cursor": ""
+        }
+      },
+      "success": true,
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "message": {
           "raw": "RnJvbTogYnV5ZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZXF1ZXN0aW5nLnBsYW5uZXJAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDMxIOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogYXdhcmRfYmVzdF92YWx1ZV9iaWQuIENvbXBsZXRpb246IDIwMjYtMDEtMTcuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHRlY2huaWNhbCBzY29yZSwgbGFuZGVkIGNvc3QsIHN1cHBsaWVyIHN0YXR1cywgbGF1bmNoIGNhcGFjaXR5LCBhbmQgc291cmNpbmcgYXV0aG9yaXR5OyB1bmFwcHJvdmVkIG9wdGlvbnMgYW5kIHVuc3VwcG9ydGVkIGZlZXMgb24gdGhlIHNlbGVjdGVkIGJpZCA9IDM1Mi42NCBVU0Q7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDM1Mi42NCBVU0QuDQpBbHRlcm5hdGl2ZXM6IGF3YXJkX2Jlc3RfdmFsdWVfYmlkOiBvdXRjb21lIDIwMjYtMDEtMTcsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgYXdhcmRfbG93ZXN0X3N0aWNrZXJfcHJpY2U6IG91dGNvbWUgMjAyNi0wMS0xOCwgZWNvbm9taWMgaW1wYWN0IFVTRCA0ODAsIEZBSUxTX0NVUlJFTlRfQ09OVFJPTDsgc3BsaXRfdW5hcHByb3ZlZF9hd2FyZDogb3V0Y29tZSAyMDI2LTAxLTE5LCBlY29ub21pYyBpbXBhY3QgVVNEIDEyMDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwMzEuIEFwcHJvdmFsOiBBUC0wMDMxLiBDYXNlOiBDQVNFLTAzMS4NCg",
           "threadId": "thread-031"
         },
         "userId": "me"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "id": "draft-031",
         "message": {
@@ -2951,6 +3047,34 @@
       },
       "success": true,
       "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "draft-031",
+        "userId": "me"
+      },
+      "index": 31,
+      "result": {
+        "id": "draft-031",
+        "message": {
+          "id": "draft-msg-031",
+          "labelIds": [
+            "DRAFT"
+          ],
+          "payload": {
+            "body": {
+              "data": "RnJvbTogYnV5ZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZXF1ZXN0aW5nLnBsYW5uZXJAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDMxIOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogYXdhcmRfYmVzdF92YWx1ZV9iaWQuIENvbXBsZXRpb246IDIwMjYtMDEtMTcuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHRlY2huaWNhbCBzY29yZSwgbGFuZGVkIGNvc3QsIHN1cHBsaWVyIHN0YXR1cywgbGF1bmNoIGNhcGFjaXR5LCBhbmQgc291cmNpbmcgYXV0aG9yaXR5OyB1bmFwcHJvdmVkIG9wdGlvbnMgYW5kIHVuc3VwcG9ydGVkIGZlZXMgb24gdGhlIHNlbGVjdGVkIGJpZCA9IDM1Mi42NCBVU0Q7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDM1Mi42NCBVU0QuDQpBbHRlcm5hdGl2ZXM6IGF3YXJkX2Jlc3RfdmFsdWVfYmlkOiBvdXRjb21lIDIwMjYtMDEtMTcsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgYXdhcmRfbG93ZXN0X3N0aWNrZXJfcHJpY2U6IG91dGNvbWUgMjAyNi0wMS0xOCwgZWNvbm9taWMgaW1wYWN0IFVTRCA0ODAsIEZBSUxTX0NVUlJFTlRfQ09OVFJPTDsgc3BsaXRfdW5hcHByb3ZlZF9hd2FyZDogb3V0Y29tZSAyMDI2LTAxLTE5LCBlY29ub21pYyBpbXBhY3QgVVNEIDEyMDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwMzEuIEFwcHJvdmFsOiBBUC0wMDMxLiBDYXNlOiBDQVNFLTAzMS4NCg",
+              "size": 1106
+            }
+          },
+          "raw": "RnJvbTogYnV5ZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZXF1ZXN0aW5nLnBsYW5uZXJAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDMxIOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogYXdhcmRfYmVzdF92YWx1ZV9iaWQuIENvbXBsZXRpb246IDIwMjYtMDEtMTcuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHRlY2huaWNhbCBzY29yZSwgbGFuZGVkIGNvc3QsIHN1cHBsaWVyIHN0YXR1cywgbGF1bmNoIGNhcGFjaXR5LCBhbmQgc291cmNpbmcgYXV0aG9yaXR5OyB1bmFwcHJvdmVkIG9wdGlvbnMgYW5kIHVuc3VwcG9ydGVkIGZlZXMgb24gdGhlIHNlbGVjdGVkIGJpZCA9IDM1Mi42NCBVU0Q7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDM1Mi42NCBVU0QuDQpBbHRlcm5hdGl2ZXM6IGF3YXJkX2Jlc3RfdmFsdWVfYmlkOiBvdXRjb21lIDIwMjYtMDEtMTcsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgYXdhcmRfbG93ZXN0X3N0aWNrZXJfcHJpY2U6IG91dGNvbWUgMjAyNi0wMS0xOCwgZWNvbm9taWMgaW1wYWN0IFVTRCA0ODAsIEZBSUxTX0NVUlJFTlRfQ09OVFJPTDsgc3BsaXRfdW5hcHByb3ZlZF9hd2FyZDogb3V0Y29tZSAyMDI2LTAxLTE5LCBlY29ub21pYyBpbXBhY3QgVVNEIDEyMDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwMzEuIEFwcHJvdmFsOiBBUC0wMDMxLiBDYXNlOiBDQVNFLTAzMS4NCg",
+          "sizeEstimate": 1106,
+          "threadId": "thread-031"
+        }
+      },
+      "success": true,
+      "tool": "gmail.drafts.get"
     },
     {
       "arguments": {
@@ -2978,7 +3102,7 @@
         "supported_amount_usd": 11402.11,
         "technically_acceptable_bid_count": 2
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

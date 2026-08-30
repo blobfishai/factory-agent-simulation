@@ -237,8 +237,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H23",
-            "spreadsheetId": "sheet-061"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-061 | create_net_shortage_supply | 2026-01-19 | NS-000061 | net only the incremental demand and avoid double coverage; reserved, late, or unfirm coverage = 6 KG; uncovered or unsupported scope = 15.0 KG | AP-0061"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-061",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -269,6 +279,11 @@
             "thread_ts": "1768000061.000100"
           },
           "tool": "slack.chat_postMessage"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -950,6 +965,65 @@
           "SupplyRequestId": 1500061
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H23",
+              "spreadsheetId": "sheet-061",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H23"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H23"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PROCUREMENT",
+              "limit": 100,
+              "ts": "1768000061.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
       }
     ]
   },
@@ -992,6 +1066,65 @@
         "SupplyRequestId": 1500061
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H23",
+            "spreadsheetId": "sheet-061",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H23"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H23"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000061.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2144,10 +2277,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000061 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2434,13 +2569,31 @@
         "tool_name": "google_sheets.spreadsheets.values.update"
       },
       {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H23\",\"spreadsheetId\":\"sheet-061\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-061-call-29",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H23\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-061\",\"OBS-0061-1\",12,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable on-hand and firm supply before need\"],[\"CASE-061\",\"OBS-0061-2\",12,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable on-hand and firm supply before need\"],[\"CASE-061\",\"OBS-0061-3\",11,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable on-hand and firm supply before need\"],[\"CASE-061\",\"OBS-0061-4\",11,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable on-hand and firm supply before need\"],[\"CASE-061\",\"EXCL-0061-1\",\"\",3,\"KG\",\"R6\",\"SEA\",\"EXCLUDE\",\"reserved, late, or unfirm coverage\"],[\"CASE-061\",\"EXCL-0061-2\",\"\",3,\"KG\",\"R6\",\"SEA\",\"EXCLUDE\",\"reserved, late, or unfirm coverage\"],[\"CASE-062\",\"DISTRACTOR-CASE\",18,\"\",\"KG\",\"R6\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-061\",\"DISTRACTOR-REVISION\",13,\"\",\"KG\",\"R9\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-061\",\"DISTRACTOR-PLANT\",11,\"\",\"KG\",\"R6\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
+        "task_id": "factorybench-061",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"text\":\"CASE-061: Oracle record NS-000061 now reflects create_net_shortage_supply with completion 2026-01-19. Binding constraint: net only the incremental demand and avoid double coverage; reserved, late, or unfirm coverage = 6 KG; uncovered or unsupported scope = 15.0 KG. Alternatives: create_net_shortage_supply: outcome 2026-01-19, economic impact USD 0, SUPPORTED_AND_APPROVED; buy_gross_revised_demand: outcome 2026-01-17, economic impact USD 1387, FEASIBLE_WITH_INFERIOR_TRADEOFF; defer_unplanned_demand: outcome 2026-01-16, economic impact USD 2991, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0061.\",\"thread_ts\":\"1768000061.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-19\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PROCUREMENT\\\",\\\"text\\\":\\\"CASE-061: Oracle record NS-000061 now reflects create_net_shortage_supply with completion 2026-01-19. Binding constraint: net only the incremental demand and avoid double coverage; reserved, late, or unfirm coverage = 6 KG; uncovered or unsupported scope = 15.0 KG. Alternatives: create_net_shortage_supply: outcome 2026-01-19, economic impact USD 0, SUPPORTED_AND_APPROVED; buy_gross_revised_demand: outcome 2026-01-17, economic impact USD 1387, FEASIBLE_WITH_INFERIOR_TRADEOFF; defer_unplanned_demand: outcome 2026-01-16, economic impact USD 2991, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0061.\\\",\\\"thread_ts\\\":\\\"1768000061.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-061-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-061\"}",
-        "fixture_id": "factorybench-061-call-29",
+        "fixture_id": "factorybench-061-call-30",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-PROCUREMENT\",\"message\":{\"text\":\"CASE-061: Oracle record NS-000061 now reflects create_net_shortage_supply with completion 2026-01-19. Binding constraint: net only the incremental demand and avoid double coverage; reserved, late, or unfirm coverage = 6 KG; uncovered or unsupported scope = 15.0 KG. Alternatives: create_net_shortage_supply: outcome 2026-01-19, economic impact USD 0, SUPPORTED_AND_APPROVED; buy_gross_revised_demand: outcome 2026-01-17, economic impact USD 1387, FEASIBLE_WITH_INFERIOR_TRADEOFF; defer_unplanned_demand: outcome 2026-01-16, economic impact USD 2991, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0061.\",\"thread_ts\":\"1768000061.000100\"},\"ok\":true,\"ts\":\"1768000061.000900\"}",
         "task_id": "factorybench-061",
         "tool_name": "slack.chat_postMessage"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"limit\":100,\"ts\":\"1768000061.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-061-call-31",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Supply planning needs one defensible decision for copper demand spike by 2026-01-20; a faster or broader action has value only if it remains inside net only the incremental demand and avoid double coverage.\",\"ts\":\"1768000061.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 55 KG on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000061.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000061\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-061 approval and impact note\"}],\"text\":\"Approval AP-0061 permits one control-compliant action on NS-000061 up to 15.0 KG, provided net only the incremental demand and avoid double coverage. It does not select an option in advance and does not authorize broader records or defer_unplanned_demand.\",\"ts\":\"1768000061.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for qualified production need date is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000061.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R9 and the CASE-062 record are visible in search but are not applicable to CASE-061.\",\"ts\":\"1768000061.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000061.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-061",
+        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-061\",\"userId\":\"me\"}",
@@ -2488,15 +2641,6 @@
         "tool_name": "google_sheets.spreadsheets.get"
       },
       {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-061\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-061-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-061\",\"OBS-0061-1\",12,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable on-hand and firm supply before need\"],[\"CASE-061\",\"OBS-0061-2\",12,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable on-hand and firm supply before need\"],[\"CASE-061\",\"OBS-0061-3\",11,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable on-hand and firm supply before need\"],[\"CASE-061\",\"OBS-0061-4\",11,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable on-hand and firm supply before need\"],[\"CASE-061\",\"EXCL-0061-1\",\"\",3,\"KG\",\"R6\",\"SEA\",\"EXCLUDE\",\"reserved, late, or unfirm coverage\"],[\"CASE-061\",\"EXCL-0061-2\",\"\",3,\"KG\",\"R6\",\"SEA\",\"EXCLUDE\",\"reserved, late, or unfirm coverage\"],[\"CASE-062\",\"DISTRACTOR-CASE\",18,\"\",\"KG\",\"R6\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-061\",\"DISTRACTOR-REVISION\",13,\"\",\"KG\",\"R9\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-061\",\"DISTRACTOR-PLANT\",11,\"\",\"KG\",\"R6\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-061",
-        "tool_name": "google_sheets.spreadsheets.values.get"
-      },
-      {
         "arguments_json": "{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0061\"}",
         "effect_json": null,
         "fixture_id": "factorybench-061-discovery-16",
@@ -2522,15 +2666,6 @@
         "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Supply planning needs one defensible decision for copper demand spike by 2026-01-20; a faster or broader action has value only if it remains inside net only the incremental demand and avoid double coverage.\",\"ts\":\"1768000061.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 55 KG on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000061.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000061\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-061 approval and impact note\"}],\"text\":\"Approval AP-0061 permits one control-compliant action on NS-000061 up to 15.0 KG, provided net only the incremental demand and avoid double coverage. It does not select an option in advance and does not authorize broader records or defer_unplanned_demand.\",\"ts\":\"1768000061.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for qualified production need date is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000061.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R9 and the CASE-062 record are visible in search but are not applicable to CASE-061.\",\"ts\":\"1768000061.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000061.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
         "task_id": "factorybench-061",
         "tool_name": "slack.conversations_history"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"limit\":100,\"ts\":\"1768000061.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-061-discovery-22",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Supply planning needs one defensible decision for copper demand spike by 2026-01-20; a faster or broader action has value only if it remains inside net only the incremental demand and avoid double coverage.\",\"ts\":\"1768000061.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 55 KG on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000061.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000061\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-061 approval and impact note\"}],\"text\":\"Approval AP-0061 permits one control-compliant action on NS-000061 up to 15.0 KG, provided net only the incremental demand and avoid double coverage. It does not select an option in advance and does not authorize broader records or defer_unplanned_demand.\",\"ts\":\"1768000061.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for qualified production need date is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000061.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R9 and the CASE-062 record are visible in search but are not applicable to CASE-061.\",\"ts\":\"1768000061.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000061.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-061",
-        "tool_name": "slack.conversations_replies"
       }
     ],
     "evidence_files": [

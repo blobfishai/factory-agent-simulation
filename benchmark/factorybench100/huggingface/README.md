@@ -54,10 +54,10 @@ reported only as supporting evidence.
 
 ## Qualification
 
-- Canonical executions: 1200 (100 oracle + 100 exact replay + 1,000 adversarial controls)
+- Canonical executions: 1400 (100 oracle + 100 exact replay + 1,200 adversarial controls)
 - Reference oracle: 100.00 FactoryScore, 100/100 strict passes
 - Exact deterministic replay: 100/100 matched
-- Negative controls: 1000/1000 correctly rejected across 10 failure modes
+- Negative controls: 1200/1200 correctly rejected across 12 failure modes
 - Single-mutation omission checks: 300/300 detected
 
 These rows are measured controls, not claims about frontier models.

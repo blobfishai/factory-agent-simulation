@@ -840,7 +840,7 @@
       "description": "Read NS-000009 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000009 back through the documented Oracle work order materials.list operation after the mutation and confirmed the resource-specific changed fields ['ItemNumber', 'LastUpdateDate'], including the effective update at 2026-01-13, rather than relying on the write acknowledgement.",
@@ -860,9 +860,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "slack.conversations_replies"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "google_sheets.spreadsheets.values.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -989,7 +1019,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 42,
+  "passed_atomic_checks": 44,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1191,7 +1221,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-009",
-  "total_atomic_checks": 42,
+  "total_atomic_checks": 44,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -3033,6 +3063,70 @@
     },
     {
       "arguments": {
+        "channel": "C-PROCUREMENT",
+        "limit": 100,
+        "ts": "1768000009.000100"
+      },
+      "index": 29,
+      "result": {
+        "has_more": false,
+        "messages": [
+          {
+            "text": "Cell lead needs one defensible decision for relay material line on WO-0009 by 2026-01-13; a faster or broader action has value only if it remains inside substitute effectivity, conversion ratio, and available lot status.",
+            "ts": "1768000009.000100",
+            "user": "U-OPS-LEAD"
+          },
+          {
+            "text": "I found 64 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.",
+            "ts": "1768000009.000150",
+            "user": "U-PLANNER"
+          },
+          {
+            "files": [
+              {
+                "id": "F-000009",
+                "mimetype": "application/pdf",
+                "name": "approval-and-impact-note.pdf",
+                "title": "CASE-009 approval and impact note"
+              }
+            ],
+            "text": "Approval AP-0009 permits one control-compliant action on NS-000009 up to 50 EA, provided substitute effectivity, conversion ratio, and available lot status. It does not select an option in advance and does not authorize broader records or reduce_build_quantity.",
+            "ts": "1768000009.000200",
+            "user": "U-APPROVER"
+          },
+          {
+            "text": "Protected load remains non-displaceable. The calendar for remaining install-window capacity is the source for internal windows; the supplier response covers only its stated alternative.",
+            "ts": "1768000009.000240",
+            "user": "U-SCHEDULER"
+          },
+          {
+            "text": "Revision R8 and the CASE-010 record are visible in search but are not applicable to CASE-009.",
+            "ts": "1768000009.000270",
+            "user": "U-QUALITY"
+          },
+          {
+            "text": "Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell. Verify the persisted record after the Oracle call.",
+            "ts": "1768000009.000300",
+            "user": "U-CONTROLLER"
+          },
+          {
+            "text": "CASE-009: Oracle record NS-000009 now reflects apply_approved_relay_substitute with completion 2026-01-13. Binding constraint: substitute effectivity, conversion ratio, and available lot status; original relays already issued or substitute lots outside effectivity = 8 EA; uncovered or unsupported scope = 14.0 EA. Alternatives: wait_for_original_relay: outcome 2026-01-15, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_approved_relay_substitute: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; reduce_build_quantity: outcome 2026-01-14, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0009.",
+            "thread_ts": "1768000009.000100",
+            "ts": "1768000009.000901",
+            "type": "message",
+            "user": "U-FACTORY-AGENT"
+          }
+        ],
+        "ok": true,
+        "response_metadata": {
+          "next_cursor": ""
+        }
+      },
+      "success": true,
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "includeValuesInResponse": true,
         "range": "Control!H11",
         "requestBody": {
@@ -3046,7 +3140,7 @@
         "spreadsheetId": "sheet-009",
         "valueInputOption": "RAW"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "spreadsheetId": "sheet-009",
         "updatedCells": 1,
@@ -3068,6 +3162,26 @@
     },
     {
       "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!H11",
+        "spreadsheetId": "sheet-009",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "index": 31,
+      "result": {
+        "majorDimension": "ROWS",
+        "range": "Control!H11",
+        "values": [
+          [
+            "CASE-009 | apply_approved_relay_substitute | 2026-01-13 | NS-000009 | substitute effectivity, conversion ratio, and available lot status; original relays already issued or substitute lots outside effectivity = 8 EA; uncovered or unsupported scope = 14.0 EA | AP-0009"
+          ]
+        ]
+      },
+      "success": true,
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
         "baseline_resolution_date": "2026-01-15",
         "business_need_date": "2026-01-13",
         "controlled_item_or_record": "NS-COMP-009",
@@ -3086,7 +3200,7 @@
         "supported_quantity": 50,
         "transaction_quantity": 50
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

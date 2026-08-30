@@ -228,6 +228,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "receiving.and.quality.teams@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-036",
@@ -237,7 +243,8 @@
         ],
         "payload_text_contains": [
           "2026-01-13",
-          "receive_supported_lot_quantity"
+          "receive_supported_lot_quantity",
+          "receiving.and.quality.teams@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -258,8 +265,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H38",
-            "spreadsheetId": "sheet-036"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-036 | receive_supported_lot_quantity | 2026-01-13 | NS-000036 | PO line, receipt organization, lot, certificate, and dock count must reconcile; overage, wrong lot, or uncertified units = 16 EA; uncovered or unsupported scope = 7.0 EA | AP-0036"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-036",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -901,6 +918,67 @@
           "HeaderInterfaceId": 700036
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-036",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-036",
+              "threadId": "thread-036"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-036",
+          "threadId": "thread-036"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H38",
+              "spreadsheetId": "sheet-036",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H38"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H38"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
       }
     ]
   },
@@ -939,6 +1017,67 @@
         "HeaderInterfaceId": 700036
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-036",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-036",
+            "threadId": "thread-036"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-036",
+        "threadId": "thread-036"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H38",
+            "spreadsheetId": "sheet-036",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H38"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H38"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2059,10 +2198,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000036 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2349,13 +2490,31 @@
         "tool_name": "gmail.messages.send"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"sent-036\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-036-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-036\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0zNkBub3J0aHN0YXIuZXhhbXBsZQpUbzogcmVjZWl2aW5nLnNwZWNpYWxpc3RAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBjYXNjYWRlLmluZHVzdHJpYWxAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDM2QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAzNiDigJQgZGVjaXNpb24gbmVlZGVkIGZvciByZWxheSBzaGlwbWVudCBhZ2FpbnN0IFBPLTAwMzYKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpBIHJlbGF5IHNoaXBtZW50IGlzIGF0IHRoZSBkb2NrLCBidXQgdGhlIHBhY2tpbmcgc2xpcCwgUE8sIGNlcnRpZmljYXRlLCBhbmQgcGh5c2ljYWwgY291bnQgZG8gbm90IG9idmlvdXNseSBhZ3JlZS4gRGVjaWRlIHdoYXQgcXVhbnRpdHkgYW5kIGxvdCBjYW4gZW50ZXIgcmVjZWl2aW5nIHRvZGF5LCB3aGF0IG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHJlY2VpcHQsIGFuZCB0aGUgcHJvZHVjdGlvbiBpbXBhY3Qgb2YgaG9sZGluZyB0aGUgZGlzY3JlcGFuY3kuIENyZWF0ZSBvbmx5IHRoZSBzdXBwb3J0ZWQgcmVjZWlwdCByZXF1ZXN0LgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnN1cHBsaWVyIGNlcnRpZmljYXRlIGFuZCBwYWNraW5nIHNsaXA6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciByZWNlaXZlX3BhY2tpbmdfc2xpcF90b3RhbCBvbiAyMDI2LTAxLTEyOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMzYgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMzYgLyBSMi4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClJlY2VpdmluZyBhbmQgcXVhbGl0eSB0ZWFtcyBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgcmVsYXkgc2hpcG1lbnQgYWdhaW5zdCBQTy0wMDM2IGJ5IDIwMjYtMDEtMTM7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIFBPIGxpbmUsIHJlY2VpcHQgb3JnYW5pemF0aW9uLCBsb3QsIGNlcnRpZmljYXRlLCBhbmQgZG9jayBjb3VudCBtdXN0IHJlY29uY2lsZS4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDM3IHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIE92ZXJhZ2UsIHdyb25nIGxvdCwgb3IgdW5jZXJ0aWZpZWQgdW5pdHMgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1828},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-036 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-036\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"A relay shipment is at the dock, but the packing slip, PO, certificate, and physical count do not obviously agree. Decide what quantity and \",\"threadId\":\"thread-036\"}",
+        "task_id": "factorybench-036",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"includeValuesInResponse\":true,\"range\":\"Control!H38\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"CASE-036 | receive_supported_lot_quantity | 2026-01-13 | NS-000036 | PO line, receipt organization, lot, certificate, and dock count must reconcile; overage, wrong lot, or uncertified units = 16 EA; uncovered or unsupported scope = 7.0 EA | AP-0036\"]]},\"spreadsheetId\":\"sheet-036\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"includeValuesInResponse\\\":true,\\\"range\\\":\\\"Control!H38\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"CASE-036 | receive_supported_lot_quantity | 2026-01-13 | NS-000036 | PO line, receipt organization, lot, certificate, and dock count must reconcile; overage, wrong lot, or uncertified units = 16 EA; uncovered or unsupported scope = 7.0 EA | AP-0036\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-036\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.update\\\"}\",\"resource_id\":\"factorybench-036-mutation-03\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-036\"}",
-        "fixture_id": "factorybench-036-call-29",
+        "fixture_id": "factorybench-036-call-30",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-036\",\"updatedCells\":1,\"updatedColumns\":1,\"updatedRange\":\"Control!H38\",\"updatedRows\":1}",
         "task_id": "factorybench-036",
         "tool_name": "google_sheets.spreadsheets.values.update"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H38\",\"spreadsheetId\":\"sheet-036\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-036-call-31",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H38\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-036\",\"OBS-0036-1\",31,\"\",\"EA\",\"R2\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"physically counted relays with matching supplier lot and certificate\"],[\"CASE-036\",\"OBS-0036-2\",30,\"\",\"EA\",\"R2\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"physically counted relays with matching supplier lot and certificate\"],[\"CASE-036\",\"OBS-0036-3\",30,\"\",\"EA\",\"R2\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"physically counted relays with matching supplier lot and certificate\"],[\"CASE-036\",\"OBS-0036-4\",30,\"\",\"EA\",\"R2\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"physically counted relays with matching supplier lot and certificate\"],[\"CASE-036\",\"EXCL-0036-1\",\"\",8,\"EA\",\"R2\",\"SEA\",\"EXCLUDE\",\"overage, wrong lot, or uncertified units\"],[\"CASE-036\",\"EXCL-0036-2\",\"\",8,\"EA\",\"R2\",\"SEA\",\"EXCLUDE\",\"overage, wrong lot, or uncertified units\"],[\"CASE-037\",\"DISTRACTOR-CASE\",37,\"\",\"EA\",\"R2\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-036\",\"DISTRACTOR-REVISION\",28,\"\",\"EA\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-036\",\"DISTRACTOR-PLANT\",22,\"\",\"EA\",\"R2\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
+        "task_id": "factorybench-036",
+        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-036\",\"userId\":\"me\"}",

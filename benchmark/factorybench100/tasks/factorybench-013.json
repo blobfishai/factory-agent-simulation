@@ -1484,7 +1484,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1816,6 +1816,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "shift.supervisor@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-013",
@@ -1825,7 +1831,8 @@
         ],
         "payload_text_contains": [
           "2026-01-13",
-          "reverse_and_post_verified_lot"
+          "reverse_and_post_verified_lot",
+          "shift.supervisor@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -1850,6 +1857,11 @@
             "thread_ts": "1768000013.000100"
           },
           "tool": "slack.chat_postMessage"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2531,6 +2543,70 @@
           "InventoryItemId": 1400013
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-013",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-013",
+              "message": {
+                "id": "draft-msg-013",
+                "threadId": "thread-013"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-013",
+          "message": {
+            "id": "draft-msg-013",
+            "threadId": "thread-013"
+          }
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PROCUREMENT",
+              "limit": 100,
+              "ts": "1768000013.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
       }
     ]
   },
@@ -2827,6 +2903,16 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "draft-013",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.drafts.get"
+    },
+    {
+      "arguments": {
         "channel": "C-PROCUREMENT",
         "text": "CASE-013: Oracle record NS-000013 now reflects reverse_and_post_verified_lot with completion 2026-01-13. Binding constraint: reverse the erroneous lot movement before posting the verified lot; similar scans from other lots or operations = 3 RECORDS; uncovered or unsupported scope = 3.0 RECORDS. Alternatives: reverse_and_post_verified_lot: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; edit_lot_master: outcome 2026-01-12, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; leave_scan_for_period_end: outcome 2026-01-19, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0013.",
         "thread_ts": "1768000013.000100"
@@ -2834,6 +2920,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "slack.chat_postMessage"
+    },
+    {
+      "arguments": {
+        "channel": "C-PROCUREMENT",
+        "limit": 100,
+        "ts": "1768000013.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
@@ -2891,6 +2987,70 @@
         "InventoryItemId": 1400013
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-013",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-013",
+            "message": {
+              "id": "draft-msg-013",
+              "threadId": "thread-013"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-013",
+        "message": {
+          "id": "draft-msg-013",
+          "threadId": "thread-013"
+        }
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000013.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4082,10 +4242,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000013 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4372,22 +4534,31 @@
         "tool_name": "gmail.drafts.create"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-013\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-013-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"draft-013\",\"message\":{\"id\":\"draft-msg-013\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-013\"}}",
+        "task_id": "factorybench-013",
+        "tool_name": "gmail.drafts.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"text\":\"CASE-013: Oracle record NS-000013 now reflects reverse_and_post_verified_lot with completion 2026-01-13. Binding constraint: reverse the erroneous lot movement before posting the verified lot; similar scans from other lots or operations = 3 RECORDS; uncovered or unsupported scope = 3.0 RECORDS. Alternatives: reverse_and_post_verified_lot: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; edit_lot_master: outcome 2026-01-12, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; leave_scan_for_period_end: outcome 2026-01-19, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0013.\",\"thread_ts\":\"1768000013.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PROCUREMENT\\\",\\\"text\\\":\\\"CASE-013: Oracle record NS-000013 now reflects reverse_and_post_verified_lot with completion 2026-01-13. Binding constraint: reverse the erroneous lot movement before posting the verified lot; similar scans from other lots or operations = 3 RECORDS; uncovered or unsupported scope = 3.0 RECORDS. Alternatives: reverse_and_post_verified_lot: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; edit_lot_master: outcome 2026-01-12, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; leave_scan_for_period_end: outcome 2026-01-19, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0013.\\\",\\\"thread_ts\\\":\\\"1768000013.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-013-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-013\"}",
-        "fixture_id": "factorybench-013-call-29",
+        "fixture_id": "factorybench-013-call-30",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-PROCUREMENT\",\"message\":{\"text\":\"CASE-013: Oracle record NS-000013 now reflects reverse_and_post_verified_lot with completion 2026-01-13. Binding constraint: reverse the erroneous lot movement before posting the verified lot; similar scans from other lots or operations = 3 RECORDS; uncovered or unsupported scope = 3.0 RECORDS. Alternatives: reverse_and_post_verified_lot: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; edit_lot_master: outcome 2026-01-12, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; leave_scan_for_period_end: outcome 2026-01-19, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0013.\",\"thread_ts\":\"1768000013.000100\"},\"ok\":true,\"ts\":\"1768000013.000900\"}",
         "task_id": "factorybench-013",
         "tool_name": "slack.chat_postMessage"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-013\",\"userId\":\"me\"}",
+        "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"limit\":100,\"ts\":\"1768000013.000100\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-013-discovery-01",
+        "fixture_id": "factorybench-013-call-31",
         "read_only": 1,
-        "response_json": "{\"id\":\"draft-013\",\"message\":{\"id\":\"draft-msg-013\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-013\"}}",
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Shift supervisor needs one defensible decision for wrong-lot inventory scan by 2026-01-16; a faster or broader action has value only if it remains inside reverse the erroneous lot movement before posting the verified lot.\",\"ts\":\"1768000013.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 4 RECORDS on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000013.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000013\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-013 approval and impact note\"}],\"text\":\"Approval AP-0013 permits one control-compliant action on NS-000013 up to 1 RECORDS, provided reverse the erroneous lot movement before posting the verified lot. It does not select an option in advance and does not authorize broader records or leave_scan_for_period_end.\",\"ts\":\"1768000013.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for transaction interface cutoff is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000013.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R9 and the CASE-014 record are visible in search but are not applicable to CASE-013.\",\"ts\":\"1768000013.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000013.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
         "task_id": "factorybench-013",
-        "tool_name": "gmail.drafts.get"
+        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"id\":\"att-013\",\"messageId\":\"msg-013-1\",\"userId\":\"me\"}",
@@ -4451,15 +4622,6 @@
         "response_json": "{\"count\":4,\"hasMore\":false,\"items\":[{\"ItemNumber\":\"NS-COMP-013\",\"ItemRevision\":\"R9\",\"LastUpdateDate\":\"2025-12-18T16:20:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":4,\"SourceHeaderReference\":\"CASE-013\",\"WorkOrderDescription\":\"CASE-013: Correct a wrong-lot scan before consumption\",\"WorkOrderId\":800013,\"WorkOrderNumber\":\"WO-0013\",\"WorkOrderStatusCode\":\"SUPERSEDED\"},{\"ItemNumber\":\"NS-COMP-013\",\"ItemRevision\":\"R7\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":4,\"SourceHeaderReference\":\"CASE-013\",\"WorkOrderDescription\":\"CASE-013: Correct a wrong-lot scan before consumption\",\"WorkOrderId\":100013,\"WorkOrderNumber\":\"WO-0013\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"},{\"ItemNumber\":\"NS-COMP-013-PDX\",\"ItemRevision\":\"R7\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"PDX\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":4,\"SourceHeaderReference\":\"CASE-013\",\"WorkOrderDescription\":\"CASE-013: Correct a wrong-lot scan before consumption\",\"WorkOrderId\":900013,\"WorkOrderNumber\":\"WO-0013\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"},{\"ItemNumber\":\"NS-COMP-013-ALT\",\"ItemRevision\":\"R7\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":4,\"SourceHeaderReference\":\"CASE-013\",\"WorkOrderDescription\":\"CASE-013: Correct a wrong-lot scan before consumption\",\"WorkOrderId\":1000013,\"WorkOrderNumber\":\"WO-0013\",\"WorkOrderStatusCode\":\"DRAFT\"}],\"limit\":50,\"links\":[],\"offset\":0}",
         "task_id": "factorybench-013",
         "tool_name": "oracle_fusion.work_orders.list"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"limit\":100,\"ts\":\"1768000013.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-013-discovery-22",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Shift supervisor needs one defensible decision for wrong-lot inventory scan by 2026-01-16; a faster or broader action has value only if it remains inside reverse the erroneous lot movement before posting the verified lot.\",\"ts\":\"1768000013.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 4 RECORDS on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000013.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000013\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-013 approval and impact note\"}],\"text\":\"Approval AP-0013 permits one control-compliant action on NS-000013 up to 1 RECORDS, provided reverse the erroneous lot movement before posting the verified lot. It does not select an option in advance and does not authorize broader records or leave_scan_for_period_end.\",\"ts\":\"1768000013.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for transaction interface cutoff is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000013.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R9 and the CASE-014 record are visible in search but are not applicable to CASE-013.\",\"ts\":\"1768000013.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000013.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-013",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000013\"}",
@@ -4830,7 +4992,7 @@
       }
     ]
   },
-  "sequence_signature": "53252ab76a505aa0b5d6bfd8b9c59c51345d69e16c4d4c747a6e63e7c31155ce",
+  "sequence_signature": "e7dab689c64b4a3b6f0b48bd87d669e9800a46de4494e72bfd942bc4a0813e60",
   "task_id": "factorybench-013",
   "title": "Correct a wrong-lot scan before consumption",
   "variant": null,

@@ -871,7 +871,7 @@
       "description": "Read NS-000014 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000014 back through the documented Oracle work order operations.list operation after the mutation and confirmed the resource-specific changed fields ['CompletedQuantity', 'DispatchStatus', 'LastUpdateDate'], including the effective update at 2026-01-15, rather than relying on the write acknowledgement.",
@@ -891,9 +891,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "google_sheets.spreadsheets.values.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "google_drive.comments.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1020,7 +1050,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 43,
+  "passed_atomic_checks": 45,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1222,7 +1252,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-014",
-  "total_atomic_checks": 43,
+  "total_atomic_checks": 45,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -2943,12 +2973,38 @@
     },
     {
       "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "spreadsheetId": "sheet-014",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "index": 29,
+      "result": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-014",
+            "shop_floor_controller",
+            "complete_eligible_serials",
+            "2026-01-15",
+            "NS-000014",
+            "AP-0014"
+          ]
+        ]
+      },
+      "success": true,
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
         "fileId": "drive-014",
         "requestBody": {
           "content": "CASE-014: complete_eligible_serials recorded on Oracle record NS-000014; completion 2026-01-15; constraint completed quantity must equal the distinct eligible serial set; missing-signature, duplicate, or failed-test serials = 13 SERIALS; uncovered or unsupported scope = 19.0 SERIALS; approval AP-0014."
         }
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "content": "CASE-014: complete_eligible_serials recorded on Oracle record NS-000014; completion 2026-01-15; constraint completed quantity must equal the distinct eligible serial set; missing-signature, duplicate, or failed-test serials = 13 SERIALS; uncovered or unsupported scope = 19.0 SERIALS; approval AP-0014.",
         "id": "comment-014",
@@ -2956,6 +3012,22 @@
       },
       "success": true,
       "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "commentId": "comment-014",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-014"
+      },
+      "index": 31,
+      "result": {
+        "content": "CASE-014: complete_eligible_serials recorded on Oracle record NS-000014; completion 2026-01-15; constraint completed quantity must equal the distinct eligible serial set; missing-signature, duplicate, or failed-test serials = 13 SERIALS; uncovered or unsupported scope = 19.0 SERIALS; approval AP-0014.",
+        "createdTime": "2026-01-12T16:00:00Z",
+        "id": "comment-014",
+        "resolved": false
+      },
+      "success": true,
+      "tool": "google_drive.comments.get"
     },
     {
       "arguments": {
@@ -2977,7 +3049,7 @@
         "supported_quantity": 100,
         "transaction_quantity": 100
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

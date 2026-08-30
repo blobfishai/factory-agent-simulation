@@ -1499,7 +1499,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1831,6 +1831,11 @@
           },
           "tool": "google_drive.comments.create"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-028",
@@ -1868,6 +1873,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "reliability.operations@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-028",
@@ -1877,7 +1888,8 @@
         ],
         "payload_text_contains": [
           "2026-01-15",
-          "generate_due_work_only"
+          "generate_due_work_only",
+          "reliability.operations@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -2511,6 +2523,72 @@
           "WorkOrderId": 100028
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-028",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-028"
+            },
+            "expected_result_contains": {
+              "id": "comment-028",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-028",
+          "resolved": false
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-028",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-028",
+              "message": {
+                "id": "draft-msg-028",
+                "threadId": "thread-028"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-028",
+          "message": {
+            "id": "draft-msg-028",
+            "threadId": "thread-028"
+          }
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
       }
     ]
   },
@@ -2799,6 +2877,16 @@
     },
     {
       "arguments": {
+        "commentId": "comment-028",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-028"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
+    },
+    {
+      "arguments": {
         "message": {
           "raw": "RnJvbTogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZWxpYWJpbGl0eS5vcGVyYXRpb25zQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAyOCDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGdlbmVyYXRlX2R1ZV93b3JrX29ubHkuIENvbXBsZXRpb246IDIwMjYtMDEtMTUuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IG9uZSB3b3JrIG9yZGVyIHBlciBlbGlnaWJsZSBmb3JlY2FzdCByb3cgd2l0aG91dCBkdXBsaWNhdGlvbjsgYWxyZWFkeSBnZW5lcmF0ZWQsIGluYWN0aXZlLCBvciBibGFja291dC13aW5kb3cgcm93cyA9IDMgV09SS19PUkRFUlM7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDMuMCBXT1JLX09SREVSUy4NCkFsdGVybmF0aXZlczogZ2VuZXJhdGVfZHVlX3dvcmtfb25seTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGdlbmVyYXRlX2Z1bGxfeWVhcl93b3JrOiBvdXRjb21lIDIwMjYtMDItMjUsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBkZWZlcl90b19uZXh0X3NodXRkb3duOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAyOC4gQXBwcm92YWw6IEFQLTAwMjguIENhc2U6IENBU0UtMDI4Lg0K",
           "threadId": "thread-028"
@@ -2808,6 +2896,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "draft-028",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.drafts.get"
     },
     {
       "arguments": {
@@ -2878,6 +2976,72 @@
         "WorkOrderId": 100028
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-028",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-028"
+          },
+          "expected_result_contains": {
+            "id": "comment-028",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-028",
+        "resolved": false
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-028",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-028",
+            "message": {
+              "id": "draft-msg-028",
+              "threadId": "thread-028"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-028",
+        "message": {
+          "id": "draft-msg-028",
+          "threadId": "thread-028"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -3991,10 +4155,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000028 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4281,9 +4447,18 @@
         "tool_name": "google_drive.comments.create"
       },
       {
+        "arguments_json": "{\"commentId\":\"comment-028\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-028\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-028-call-29",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-028\",\"resolved\":false}",
+        "task_id": "factorybench-028",
+        "tool_name": "google_drive.comments.get"
+      },
+      {
         "arguments_json": "{\"message\":{\"raw\":\"RnJvbTogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZWxpYWJpbGl0eS5vcGVyYXRpb25zQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAyOCDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGdlbmVyYXRlX2R1ZV93b3JrX29ubHkuIENvbXBsZXRpb246IDIwMjYtMDEtMTUuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IG9uZSB3b3JrIG9yZGVyIHBlciBlbGlnaWJsZSBmb3JlY2FzdCByb3cgd2l0aG91dCBkdXBsaWNhdGlvbjsgYWxyZWFkeSBnZW5lcmF0ZWQsIGluYWN0aXZlLCBvciBibGFja291dC13aW5kb3cgcm93cyA9IDMgV09SS19PUkRFUlM7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDMuMCBXT1JLX09SREVSUy4NCkFsdGVybmF0aXZlczogZ2VuZXJhdGVfZHVlX3dvcmtfb25seTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGdlbmVyYXRlX2Z1bGxfeWVhcl93b3JrOiBvdXRjb21lIDIwMjYtMDItMjUsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBkZWZlcl90b19uZXh0X3NodXRkb3duOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAyOC4gQXBwcm92YWw6IEFQLTAwMjguIENhc2U6IENBU0UtMDI4Lg0K\",\"threadId\":\"thread-028\"},\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-15\",\"payload_json\":\"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZWxpYWJpbGl0eS5vcGVyYXRpb25zQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAyOCDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGdlbmVyYXRlX2R1ZV93b3JrX29ubHkuIENvbXBsZXRpb246IDIwMjYtMDEtMTUuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IG9uZSB3b3JrIG9yZGVyIHBlciBlbGlnaWJsZSBmb3JlY2FzdCByb3cgd2l0aG91dCBkdXBsaWNhdGlvbjsgYWxyZWFkeSBnZW5lcmF0ZWQsIGluYWN0aXZlLCBvciBibGFja291dC13aW5kb3cgcm93cyA9IDMgV09SS19PUkRFUlM7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDMuMCBXT1JLX09SREVSUy4NCkFsdGVybmF0aXZlczogZ2VuZXJhdGVfZHVlX3dvcmtfb25seTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGdlbmVyYXRlX2Z1bGxfeWVhcl93b3JrOiBvdXRjb21lIDIwMjYtMDItMjUsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBkZWZlcl90b19uZXh0X3NodXRkb3duOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAyOC4gQXBwcm92YWw6IEFQLTAwMjguIENhc2U6IENBU0UtMDI4Lg0K\\\",\\\"threadId\\\":\\\"thread-028\\\"},\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.drafts.create\\\"}\",\"resource_id\":\"factorybench-028-mutation-03\",\"resource_type\":\"gmail.drafts\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-028\"}",
-        "fixture_id": "factorybench-028-call-29",
+        "fixture_id": "factorybench-028-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"draft-028\",\"message\":{\"id\":\"draft-msg-028\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-028\"}}",
         "task_id": "factorybench-028",
@@ -4292,7 +4467,7 @@
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-028\",\"userId\":\"me\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-028-discovery-01",
+        "fixture_id": "factorybench-028-call-31",
         "read_only": 1,
         "response_json": "{\"id\":\"draft-028\",\"message\":{\"id\":\"draft-msg-028\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-028\"}}",
         "task_id": "factorybench-028",
@@ -4306,15 +4481,6 @@
         "response_json": "{\"data\":\"UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogaW5zcGVjdGlvbi1mb3JlY2FzdC1hbmQtc2h1dGRvd24tcmVjb25jaWxpYXRpb24tMDAyOApDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMjgKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogaW5zcGVjdGlvbiBmb3JlY2FzdCBhbmQgc2h1dGRvd24gcmVjb25jaWxpYXRpb24KSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTAyOApFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSMQpNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDMgV09SS19PUkRFUlMKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogZ2VuZXJhdGVfZnVsbF95ZWFyX3dvcmsKU3RhbmRhcmQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTMKRXhwZWRpdGVkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAyLTIzClJlc3VsdGluZyBvcGVyYXRpbmcgb3V0Y29tZSBzdGF0ZWQgYnkgcmVxdWVzdGVyLCBub3QgYnkgY291bnRlcnBhcnR5OiAyMDI2LTAyLTI1CkVjb25vbWljIGltcGFjdCBzdGF0ZWQgYnkgY291bnRlcnBhcnR5OiBVU0QgMApJbmRlcGVuZGVudCBjb25kaXRpb246IGd1YXJkLWluc3BlY3Rpb24ga2l0IHJlYWRpbmVzcwpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBhbHJlYWR5IGdlbmVyYXRlZCwgaW5hY3RpdmUsIG9yIGJsYWNrb3V0LXdpbmRvdyByb3dzCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IG9uZSB3b3JrIG9yZGVyIHBlciBlbGlnaWJsZSBmb3JlY2FzdCByb3cgd2l0aG91dCBkdXBsaWNhdGlvbgpOZWFyYnkgYnV0IHVucmVsYXRlZCByZWZlcmVuY2UgQ0FTRS0wMjkgaXMgZXhwbGljaXRseSBleGNsdWRlZC4KRnJlaWdodCwgcHJlbWl1bSwgY2VydGlmaWNhdGlvbiwgYW5kIGxvdCB0ZXJtcyBhcHBseSBvbmx5IHdoZXJlIHN0YXRlZCBhYm92ZTsgc2lsZW5jZSBpcyBub3QgYXBwcm92YWwuCgo0LiBBQ0NFUFRBTkNFClByZXBhcmVkIGJ5OiBSYWluaWVyIENvbXBvbmVudHMgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwMjgKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo\",\"size\":1562}",
         "task_id": "factorybench-028",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-028\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-028\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-028-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-028\",\"resolved\":false}",
-        "task_id": "factorybench-028",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-028\",\"pageSize\":100}",
@@ -4730,7 +4896,7 @@
       }
     ]
   },
-  "sequence_signature": "0de85a3a4d95ee527c0b59e3939692c0b6e16a55e7ec2c391b8ec2f76ca80b56",
+  "sequence_signature": "be5390856444224aa3bd1f06b9eea6253f7c524e64a8c8d20fa0e9830216c737",
   "task_id": "factorybench-028",
   "title": "Create due work for guarded saw inspections",
   "variant": null,

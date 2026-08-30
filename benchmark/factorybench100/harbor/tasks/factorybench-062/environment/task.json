@@ -218,6 +218,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "supply.planning@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-062",
@@ -227,7 +233,8 @@
         ],
         "payload_text_contains": [
           "2026-01-18",
-          "pull_in_confirmed_supply"
+          "pull_in_confirmed_supply",
+          "supply.planning@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -944,6 +951,70 @@
           "WorkOrderId": 100062
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-062",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-062",
+              "message": {
+                "id": "draft-msg-062",
+                "threadId": "thread-062"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-062",
+          "message": {
+            "id": "draft-msg-062",
+            "threadId": "thread-062"
+          }
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
+      },
+      {
+        "after_tool": "slack.reactions_add",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000062.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "name"
+        ]
       }
     ]
   },
@@ -991,6 +1062,70 @@
         "WorkOrderId": 100062
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-062",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-062",
+            "message": {
+              "id": "draft-msg-062",
+              "threadId": "thread-062"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-062",
+        "message": {
+          "id": "draft-msg-062",
+          "threadId": "thread-062"
+        }
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
+    },
+    {
+      "after_tool": "slack.reactions_add",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000062.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "name"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2177,10 +2312,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000062 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2467,22 +2604,31 @@
         "tool_name": "gmail.drafts.create"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-062\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-062-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"draft-062\",\"message\":{\"id\":\"draft-msg-062\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-062\"}}",
+        "task_id": "factorybench-062",
+        "tool_name": "gmail.drafts.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-QUALITY\",\"name\":\"white_check_mark\",\"timestamp\":\"1768000062.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-18\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-QUALITY\\\",\\\"name\\\":\\\"white_check_mark\\\",\\\"timestamp\\\":\\\"1768000062.000100\\\"},\\\"tool\\\":\\\"slack.reactions_add\\\"}\",\"resource_id\":\"factorybench-062-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-062\"}",
-        "fixture_id": "factorybench-062-call-29",
+        "fixture_id": "factorybench-062-call-30",
         "read_only": 0,
         "response_json": "{\"ok\":true}",
         "task_id": "factorybench-062",
         "tool_name": "slack.reactions_add"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-062\",\"userId\":\"me\"}",
+        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000062.000100\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-062-discovery-01",
+        "fixture_id": "factorybench-062-call-31",
         "read_only": 1,
-        "response_json": "{\"id\":\"draft-062\",\"message\":{\"id\":\"draft-msg-062\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-062\"}}",
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Supply planning needs one defensible decision for forecast-consumption jump by 2026-01-18; a faster or broader action has value only if it remains inside sales-order consumption, pegging, supplier promise, and finite dates.\",\"ts\":\"1768000062.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 74 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000062.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000062\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-062 approval and impact note\"}],\"text\":\"Approval AP-0062 permits one control-compliant action on NS-000062 up to 44 EA, provided sales-order consumption, pegging, supplier promise, and finite dates. It does not select an option in advance and does not authorize broader records or expedite_unconfirmed_quantity.\",\"ts\":\"1768000062.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for receiving and production window is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000062.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R10 and the CASE-063 record are visible in search but are not applicable to CASE-062.\",\"ts\":\"1768000062.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and mark the existing operations thread complete with the approved check reaction. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000062.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
         "task_id": "factorybench-062",
-        "tool_name": "gmail.drafts.get"
+        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"msg-062\",\"userId\":\"me\"}",
@@ -2555,15 +2701,6 @@
         "response_json": "{\"count\":4,\"hasMore\":false,\"items\":[{\"ItemNumber\":\"NS-COMP-062\",\"ItemRevision\":\"R10\",\"LastUpdateDate\":\"2025-12-18T16:20:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":74,\"SourceHeaderReference\":\"CASE-062\",\"WorkOrderDescription\":\"CASE-062: Pull in supply after a forecast-consumption jump\",\"WorkOrderId\":800062,\"WorkOrderNumber\":\"WO-0062\",\"WorkOrderStatusCode\":\"SUPERSEDED\"},{\"ItemNumber\":\"NS-COMP-062-PDX\",\"ItemRevision\":\"R7\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"PDX\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":74,\"SourceHeaderReference\":\"CASE-062\",\"WorkOrderDescription\":\"CASE-062: Pull in supply after a forecast-consumption jump\",\"WorkOrderId\":900062,\"WorkOrderNumber\":\"WO-0062\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"},{\"ItemNumber\":\"NS-COMP-062\",\"ItemRevision\":\"R7\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":74,\"SourceHeaderReference\":\"CASE-062\",\"WorkOrderDescription\":\"CASE-062: Pull in supply after a forecast-consumption jump\",\"WorkOrderId\":100062,\"WorkOrderNumber\":\"WO-0062\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"},{\"ItemNumber\":\"NS-COMP-062-ALT\",\"ItemRevision\":\"R7\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":74,\"SourceHeaderReference\":\"CASE-062\",\"WorkOrderDescription\":\"CASE-062: Pull in supply after a forecast-consumption jump\",\"WorkOrderId\":1000062,\"WorkOrderNumber\":\"WO-0062\",\"WorkOrderStatusCode\":\"DRAFT\"}],\"limit\":50,\"links\":[],\"offset\":0}",
         "task_id": "factorybench-062",
         "tool_name": "oracle_fusion.work_orders.list"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000062.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-062-discovery-23",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Supply planning needs one defensible decision for forecast-consumption jump by 2026-01-18; a faster or broader action has value only if it remains inside sales-order consumption, pegging, supplier promise, and finite dates.\",\"ts\":\"1768000062.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 74 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000062.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000062\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-062 approval and impact note\"}],\"text\":\"Approval AP-0062 permits one control-compliant action on NS-000062 up to 44 EA, provided sales-order consumption, pegging, supplier promise, and finite dates. It does not select an option in advance and does not authorize broader records or expedite_unconfirmed_quantity.\",\"ts\":\"1768000062.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for receiving and production window is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000062.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R10 and the CASE-063 record are visible in search but are not applicable to CASE-062.\",\"ts\":\"1768000062.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and mark the existing operations thread complete with the approved check reaction. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000062.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-062",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000062\"}",

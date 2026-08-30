@@ -95,8 +95,18 @@
       "milestone_id": "state.collaboration",
       "payload_contains": {
         "arguments": {
+          "includeValuesInResponse": true,
           "range": "Control!H40",
-          "spreadsheetId": "sheet-078"
+          "requestBody": {
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "CASE-078 | apply_approved_project_task | 2026-01-13 | NS-000078 | project ID, task ID, contract line, open work order, and effective date; similar project names and closed tasks = 2 RECORDS; uncovered or unsupported scope = 2.0 RECORDS | AP-0078"
+              ]
+            ]
+          },
+          "spreadsheetId": "sheet-078",
+          "valueInputOption": "RAW"
         },
         "tool": "google_sheets.spreadsheets.values.update"
       },
@@ -127,6 +137,11 @@
           "thread_ts": "1768000078.000100"
         },
         "tool": "slack.chat_postMessage"
+      },
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
       },
       "payload_text_any_of": [
         [
@@ -775,6 +790,65 @@
         "WorkOrderId": 100078
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H40",
+            "spreadsheetId": "sheet-078",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H40"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H40"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000078.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
     }
   ]
 }

@@ -112,8 +112,18 @@
       "milestone_id": "state.collaboration",
       "payload_contains": {
         "arguments": {
+          "includeValuesInResponse": true,
           "range": "Control!H14",
-          "spreadsheetId": "sheet-012"
+          "requestBody": {
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "CASE-012 | return_verified_excess | 2026-01-13 | NS-000012 | return cannot exceed issued less consumed and must preserve project ownership; scrap, consumed, or unverified copper = 13 KG; uncovered or unsupported scope = 17.0 KG | AP-0012"
+              ]
+            ]
+          },
+          "spreadsheetId": "sheet-012",
+          "valueInputOption": "RAW"
         },
         "tool": "google_sheets.spreadsheets.values.update"
       },
@@ -145,6 +155,12 @@
         },
         "tool": "gmail.messages.send"
       },
+      "payload_email_to": "shift.supervisor@northstar.example",
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
+      },
       "payload_text_any_of": [
         [
           "CASE-012",
@@ -154,7 +170,8 @@
       ],
       "payload_text_contains": [
         "2026-01-13",
-        "return_verified_excess"
+        "return_verified_excess",
+        "shift.supervisor@northstar.example"
       ],
       "table": "resource_state",
       "values": {
@@ -788,6 +805,67 @@
         "WorkOrderId": 100012
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H14",
+            "spreadsheetId": "sheet-012",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H14"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H14"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-012",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-012",
+            "threadId": "thread-012"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-012",
+        "threadId": "thread-012"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
     }
   ]
 }

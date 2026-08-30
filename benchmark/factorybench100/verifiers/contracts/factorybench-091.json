@@ -97,6 +97,12 @@
         },
         "tool": "gmail.messages.send"
       },
+      "payload_email_to": "plant.controller@northstar.example",
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
+      },
       "payload_text_any_of": [
         [
           "CASE-091",
@@ -106,7 +112,8 @@
       ],
       "payload_text_contains": [
         "2026-01-17",
-        "close_fully_settled_po"
+        "close_fully_settled_po",
+        "plant.controller@northstar.example"
       ],
       "table": "resource_state",
       "values": {
@@ -130,6 +137,11 @@
           "fileId": "drive-091"
         },
         "tool": "google_drive.comments.create"
+      },
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
       },
       "payload_text_any_of": [
         [
@@ -812,6 +824,66 @@
         "POHeaderId": 2000091
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-091",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-091",
+            "threadId": "thread-091"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-091",
+        "threadId": "thread-091"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-091",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-091"
+          },
+          "expected_result_contains": {
+            "id": "comment-091",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-091",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ]
 }

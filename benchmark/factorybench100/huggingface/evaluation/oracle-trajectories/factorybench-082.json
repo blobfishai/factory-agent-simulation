@@ -871,7 +871,7 @@
       "description": "Read NS-000082 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000082 back through the documented Oracle inventory onhand balances.list operation after the mutation and confirmed the resource-specific changed fields ['AvailableToTransact', 'LastUpdateDate', 'LotNumber', 'PrimaryQuantity', 'SubinventoryCode'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
@@ -891,9 +891,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "slack.conversations_replies"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "gmail.drafts.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1020,7 +1050,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 43,
+  "passed_atomic_checks": 45,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1222,7 +1252,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-082",
-  "total_atomic_checks": 43,
+  "total_atomic_checks": 45,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -3002,13 +3032,77 @@
     },
     {
       "arguments": {
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000082.000100"
+      },
+      "index": 29,
+      "result": {
+        "has_more": false,
+        "messages": [
+          {
+            "text": "Service dispatch needs one defensible decision for returned field controller by 2026-01-14; a faster or broader action has value only if it remains inside RMA, serial, ownership, failure code, and quarantine location.",
+            "ts": "1768000082.000100",
+            "user": "U-OPS-LEAD"
+          },
+          {
+            "text": "I found 120 SERIALS on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.",
+            "ts": "1768000082.000150",
+            "user": "U-PLANNER"
+          },
+          {
+            "files": [
+              {
+                "id": "F-000082",
+                "mimetype": "application/pdf",
+                "name": "approval-and-impact-note.pdf",
+                "title": "CASE-082 approval and impact note"
+              }
+            ],
+            "text": "Approval AP-0082 permits one control-compliant action on NS-000082 up to 101 SERIALS, provided RMA, serial, ownership, failure code, and quarantine location. It does not select an option in advance and does not authorize broader records or quarantine_all_customer_returns.",
+            "ts": "1768000082.000200",
+            "user": "U-APPROVER"
+          },
+          {
+            "text": "Protected load remains non-displaceable. The calendar for secure quarantine capacity is the source for internal windows; the supplier response covers only its stated alternative.",
+            "ts": "1768000082.000240",
+            "user": "U-SCHEDULER"
+          },
+          {
+            "text": "Revision R9 and the CASE-083 record are visible in search but are not applicable to CASE-082.",
+            "ts": "1768000082.000270",
+            "user": "U-QUALITY"
+          },
+          {
+            "text": "Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.",
+            "ts": "1768000082.000300",
+            "user": "U-CONTROLLER"
+          },
+          {
+            "text": "CASE-082: Oracle record NS-000082 now reflects quarantine_matching_return with completion 2026-01-14. Binding constraint: RMA, serial, ownership, failure code, and quarantine location; different serials, accessories, and advance replacement = 13 SERIALS; uncovered or unsupported scope = 19.0 SERIALS. Alternatives: quarantine_matching_return: outcome 2026-01-14, economic impact USD 0, SUPPORTED_AND_APPROVED; return_to_available_stock: outcome 2026-01-15, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; quarantine_all_customer_returns: outcome 2026-01-16, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0082.",
+            "thread_ts": "1768000082.000100",
+            "ts": "1768000082.000901",
+            "type": "message",
+            "user": "U-FACTORY-AGENT"
+          }
+        ],
+        "ok": true,
+        "response_metadata": {
+          "next_cursor": ""
+        }
+      },
+      "success": true,
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "message": {
           "raw": "RnJvbTogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBzZXJ2aWNlLmRpc3BhdGNoQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA4MiDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IHF1YXJhbnRpbmVfbWF0Y2hpbmdfcmV0dXJuLiBDb21wbGV0aW9uOiAyMDI2LTAxLTE0Lg0KQmluZGluZyBjb25zdHJhaW50OiBSTUEsIHNlcmlhbCwgb3duZXJzaGlwLCBmYWlsdXJlIGNvZGUsIGFuZCBxdWFyYW50aW5lIGxvY2F0aW9uOyBkaWZmZXJlbnQgc2VyaWFscywgYWNjZXNzb3JpZXMsIGFuZCBhZHZhbmNlIHJlcGxhY2VtZW50ID0gMTMgU0VSSUFMUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTkuMCBTRVJJQUxTLg0KQWx0ZXJuYXRpdmVzOiBxdWFyYW50aW5lX21hdGNoaW5nX3JldHVybjogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHJldHVybl90b19hdmFpbGFibGVfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBxdWFyYW50aW5lX2FsbF9jdXN0b21lcl9yZXR1cm5zOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA4Mi4gQXBwcm92YWw6IEFQLTAwODIuIENhc2U6IENBU0UtMDgyLg0K",
           "threadId": "thread-082"
         },
         "userId": "me"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "id": "draft-082",
         "message": {
@@ -3021,6 +3115,34 @@
       },
       "success": true,
       "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "draft-082",
+        "userId": "me"
+      },
+      "index": 31,
+      "result": {
+        "id": "draft-082",
+        "message": {
+          "id": "draft-msg-082",
+          "labelIds": [
+            "DRAFT"
+          ],
+          "payload": {
+            "body": {
+              "data": "RnJvbTogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBzZXJ2aWNlLmRpc3BhdGNoQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA4MiDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IHF1YXJhbnRpbmVfbWF0Y2hpbmdfcmV0dXJuLiBDb21wbGV0aW9uOiAyMDI2LTAxLTE0Lg0KQmluZGluZyBjb25zdHJhaW50OiBSTUEsIHNlcmlhbCwgb3duZXJzaGlwLCBmYWlsdXJlIGNvZGUsIGFuZCBxdWFyYW50aW5lIGxvY2F0aW9uOyBkaWZmZXJlbnQgc2VyaWFscywgYWNjZXNzb3JpZXMsIGFuZCBhZHZhbmNlIHJlcGxhY2VtZW50ID0gMTMgU0VSSUFMUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTkuMCBTRVJJQUxTLg0KQWx0ZXJuYXRpdmVzOiBxdWFyYW50aW5lX21hdGNoaW5nX3JldHVybjogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHJldHVybl90b19hdmFpbGFibGVfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBxdWFyYW50aW5lX2FsbF9jdXN0b21lcl9yZXR1cm5zOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA4Mi4gQXBwcm92YWw6IEFQLTAwODIuIENhc2U6IENBU0UtMDgyLg0K",
+              "size": 1128
+            }
+          },
+          "raw": "RnJvbTogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBzZXJ2aWNlLmRpc3BhdGNoQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA4MiDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IHF1YXJhbnRpbmVfbWF0Y2hpbmdfcmV0dXJuLiBDb21wbGV0aW9uOiAyMDI2LTAxLTE0Lg0KQmluZGluZyBjb25zdHJhaW50OiBSTUEsIHNlcmlhbCwgb3duZXJzaGlwLCBmYWlsdXJlIGNvZGUsIGFuZCBxdWFyYW50aW5lIGxvY2F0aW9uOyBkaWZmZXJlbnQgc2VyaWFscywgYWNjZXNzb3JpZXMsIGFuZCBhZHZhbmNlIHJlcGxhY2VtZW50ID0gMTMgU0VSSUFMUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTkuMCBTRVJJQUxTLg0KQWx0ZXJuYXRpdmVzOiBxdWFyYW50aW5lX21hdGNoaW5nX3JldHVybjogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHJldHVybl90b19hdmFpbGFibGVfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBxdWFyYW50aW5lX2FsbF9jdXN0b21lcl9yZXR1cm5zOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA4Mi4gQXBwcm92YWw6IEFQLTAwODIuIENhc2U6IENBU0UtMDgyLg0K",
+          "sizeEstimate": 1128,
+          "threadId": "thread-082"
+        }
+      },
+      "success": true,
+      "tool": "gmail.drafts.get"
     },
     {
       "arguments": {
@@ -3042,7 +3164,7 @@
         "supported_quantity": 101,
         "transaction_quantity": 101
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

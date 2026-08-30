@@ -1494,7 +1494,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1820,8 +1820,24 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "insertDataOption": "INSERT_ROWS",
             "range": "Audit!A:G",
-            "spreadsheetId": "sheet-007"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "2026-01-12",
+                  "CASE-007",
+                  "production_planner",
+                  "move_burn_in_forward",
+                  "2026-01-18",
+                  "NS-000007",
+                  "AP-0007"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-007",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.append"
         },
@@ -1851,6 +1867,11 @@
             "fileId": "drive-007"
           },
           "tool": "google_drive.comments.create"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2503,6 +2524,67 @@
           "WorkOrderId": 100007
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.append",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Audit!A:G",
+              "spreadsheetId": "sheet-007",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Audit!A:G"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Audit!A:G"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-007",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-007"
+            },
+            "expected_result_contains": {
+              "id": "comment-007",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-007",
+          "resolved": false
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
       }
     ]
   },
@@ -2802,6 +2884,17 @@
     },
     {
       "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "spreadsheetId": "sheet-007",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
         "fileId": "drive-007",
         "requestBody": {
           "content": "CASE-007: move_burn_in_forward recorded on Oracle record NS-000007; completion 2026-01-18; constraint precedence, cure time, and completed quantities cannot be violated; protected qualification runs = 11 HR; uncovered or unsupported scope = 26.0 HR; approval AP-0007."
@@ -2810,6 +2903,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "commentId": "comment-007",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-007"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
     },
     {
       "arguments": {
@@ -2868,6 +2971,67 @@
         "WorkOrderId": 100007
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.append",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G",
+            "spreadsheetId": "sheet-007",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-007",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-007"
+          },
+          "expected_result_contains": {
+            "id": "comment-007",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-007",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4008,10 +4172,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000007 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4298,13 +4464,31 @@
         "tool_name": "google_sheets.spreadsheets.values.append"
       },
       {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:G\",\"spreadsheetId\":\"sheet-007\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-007-call-29",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:G\",\"values\":[[\"event_date\",\"case\",\"role\",\"decision_option\",\"outcome_date\",\"record\",\"approval_id\"],[\"2026-01-10\",\"CASE-008\",\"operations_planner\",\"unrelated_completed_decision\",\"2026-01-11\",\"NS-000008\",\"AP-0008\"]]}",
+        "task_id": "factorybench-007",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
         "arguments_json": "{\"fileId\":\"drive-007\",\"requestBody\":{\"content\":\"CASE-007: move_burn_in_forward recorded on Oracle record NS-000007; completion 2026-01-18; constraint precedence, cure time, and completed quantities cannot be violated; protected qualification runs = 11 HR; uncovered or unsupported scope = 26.0 HR; approval AP-0007.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-18\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-007\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-007: move_burn_in_forward recorded on Oracle record NS-000007; completion 2026-01-18; constraint precedence, cure time, and completed quantities cannot be violated; protected qualification runs = 11 HR; uncovered or unsupported scope = 26.0 HR; approval AP-0007.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-007-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-007\"}",
-        "fixture_id": "factorybench-007-call-29",
+        "fixture_id": "factorybench-007-call-30",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-007: move_burn_in_forward recorded on Oracle record NS-000007; completion 2026-01-18; constraint precedence, cure time, and completed quantities cannot be violated; protected qualification runs = 11 HR; uncovered or unsupported scope = 26.0 HR; approval AP-0007.\",\"id\":\"comment-007\",\"resolved\":false}",
         "task_id": "factorybench-007",
         "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"commentId\":\"comment-007\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-007\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-007-call-31",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-007\",\"resolved\":false}",
+        "task_id": "factorybench-007",
+        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-007\",\"userId\":\"me\"}",
@@ -4325,15 +4509,6 @@
         "tool_name": "gmail.messages.attachments.get"
       },
       {
-        "arguments_json": "{\"commentId\":\"comment-007\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-007\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-007-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-007\",\"resolved\":false}",
-        "task_id": "factorybench-007",
-        "tool_name": "google_drive.comments.get"
-      },
-      {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-007\",\"pageSize\":100}",
         "effect_json": null,
         "fixture_id": "factorybench-007-discovery-07",
@@ -4350,15 +4525,6 @@
         "response_json": "{\"spreadsheetId\":\"sheet-007\",\"valueRanges\":[{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-007\",\"OBS-0007-1\",5,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"open certified chamber-hours before final assembly\"],[\"CASE-007\",\"OBS-0007-2\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"open certified chamber-hours before final assembly\"],[\"CASE-007\",\"OBS-0007-3\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"open certified chamber-hours before final assembly\"],[\"CASE-007\",\"OBS-0007-4\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"open certified chamber-hours before final assembly\"],[\"CASE-007\",\"EXCL-0007-1\",\"\",6,\"HR\",\"R1\",\"SEA\",\"EXCLUDE\",\"protected qualification runs\"],[\"CASE-007\",\"EXCL-0007-2\",\"\",5,\"HR\",\"R1\",\"SEA\",\"EXCLUDE\",\"protected qualification runs\"],[\"CASE-008\",\"DISTRACTOR-CASE\",10,\"\",\"HR\",\"R1\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-007\",\"DISTRACTOR-REVISION\",8,\"\",\"HR\",\"R9\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-007\",\"DISTRACTOR-PLANT\",6,\"\",\"HR\",\"R1\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]},{\"majorDimension\":\"ROWS\",\"range\":\"Approvals!A1:G20\",\"values\":[[\"case\",\"approval_id\",\"decision_option\",\"approval_status\",\"authorized_measure\",\"outcome_date\",\"source_revision\"],[\"CASE-007\",\"AP-0007\",\"move_burn_in_forward\",\"APPROVED\",6,\"2026-01-18\",\"R1\"],[\"CASE-007\",\"AP-0007-EXCEPTION\",\"broader_or_exception_scope\",\"NOT_GRANTED\",\"\",\"\",\"R1\"],[\"CASE-008\",\"AP-0008\",\"unrelated_case_option\",\"APPROVED\",32,\"2026-01-18\",\"R1\"]]}]}",
         "task_id": "factorybench-007",
         "tool_name": "google_sheets.spreadsheets.values.batchGet"
-      },
-      {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-007\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-007-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-007\",\"OBS-0007-1\",5,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"open certified chamber-hours before final assembly\"],[\"CASE-007\",\"OBS-0007-2\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"open certified chamber-hours before final assembly\"],[\"CASE-007\",\"OBS-0007-3\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"open certified chamber-hours before final assembly\"],[\"CASE-007\",\"OBS-0007-4\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"open certified chamber-hours before final assembly\"],[\"CASE-007\",\"EXCL-0007-1\",\"\",6,\"HR\",\"R1\",\"SEA\",\"EXCLUDE\",\"protected qualification runs\"],[\"CASE-007\",\"EXCL-0007-2\",\"\",5,\"HR\",\"R1\",\"SEA\",\"EXCLUDE\",\"protected qualification runs\"],[\"CASE-008\",\"DISTRACTOR-CASE\",10,\"\",\"HR\",\"R1\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-007\",\"DISTRACTOR-REVISION\",8,\"\",\"HR\",\"R9\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-007\",\"DISTRACTOR-PLANT\",6,\"\",\"HR\",\"R1\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-007",
-        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"WorkOrderNumber='MWO-0007'\"}",
@@ -4756,7 +4922,7 @@
       }
     ]
   },
-  "sequence_signature": "6f505be0a3d748e4def626e948e28008ef15c21ae3c58aabc205e42c26215dc8",
+  "sequence_signature": "701da44eeb8035c3ec6e9188428a69540b24d41e20b287a86fda6180e2e8fcd1",
   "task_id": "factorybench-007",
   "title": "Resequence burn-in ahead of final assembly",
   "variant": null,

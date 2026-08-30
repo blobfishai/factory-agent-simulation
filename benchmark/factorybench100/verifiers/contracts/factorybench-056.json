@@ -112,8 +112,18 @@
       "milestone_id": "state.collaboration",
       "payload_contains": {
         "arguments": {
+          "includeValuesInResponse": true,
           "range": "Control!H18",
-          "spreadsheetId": "sheet-056"
+          "requestBody": {
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "CASE-056 | transfer_supported_quantity | 2026-01-15 | NS-000056 | lot, ownership, transit, and destination reservation must remain valid; quarantined, project-owned, or safety-stock quantity = 11 EA; uncovered or unsupported scope = 10.0 EA | AP-0056"
+              ]
+            ]
+          },
+          "spreadsheetId": "sheet-056",
+          "valueInputOption": "RAW"
         },
         "tool": "google_sheets.spreadsheets.values.update"
       },
@@ -147,6 +157,12 @@
         },
         "tool": "gmail.drafts.create"
       },
+      "payload_email_to": "material.control@northstar.example",
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
+      },
       "payload_text_any_of": [
         [
           "CASE-056",
@@ -156,7 +172,8 @@
       ],
       "payload_text_contains": [
         "2026-01-15",
-        "transfer_supported_quantity"
+        "transfer_supported_quantity",
+        "material.control@northstar.example"
       ],
       "table": "resource_state",
       "values": {
@@ -803,6 +820,73 @@
         "InventoryItemId": 1400056
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H18",
+            "spreadsheetId": "sheet-056",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H18"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H18"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-056",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-056",
+            "message": {
+              "id": "draft-msg-056",
+              "threadId": "thread-056"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-056",
+        "message": {
+          "id": "draft-msg-056",
+          "threadId": "thread-056"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ]
 }

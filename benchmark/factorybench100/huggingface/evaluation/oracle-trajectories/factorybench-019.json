@@ -851,7 +851,7 @@
       "description": "Read NS-000019 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000019 back through the documented Oracle work order operations.list operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkCenterCode'], including the effective update at 2026-01-20, rather than relying on the write acknowledgement.",
@@ -871,9 +871,43 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "google_drive.comments.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 3,
+                  "tool": "slack.conversations_replies"
+                },
+                {
+                  "index": 31,
+                  "tool": "slack.conversations_replies"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1000,7 +1034,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 43,
+  "passed_atomic_checks": 45,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1207,7 +1241,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-019",
-  "total_atomic_checks": 43,
+  "total_atomic_checks": 45,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -2894,11 +2928,27 @@
     },
     {
       "arguments": {
+        "commentId": "comment-019",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-019"
+      },
+      "index": 29,
+      "result": {
+        "content": "CASE-019: apply_approved_weekend_overtime recorded on Oracle record NS-000019; completion 2026-01-20; constraint only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR; approval AP-0019.",
+        "createdTime": "2026-01-12T16:00:00Z",
+        "id": "comment-019",
+        "resolved": false
+      },
+      "success": true,
+      "tool": "google_drive.comments.get"
+    },
+    {
+      "arguments": {
         "channel": "C-FINANCE",
         "text": "CASE-019: Oracle record NS-000019 now reflects apply_approved_weekend_overtime with completion 2026-01-20. Binding constraint: only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR. Alternatives: keep_weekday_sequence: outcome 2026-01-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_approved_weekend_overtime: outcome 2026-01-20, economic impact USD 673, SUPPORTED_AND_APPROVED; add_second_unapproved_shift: outcome 2026-01-19, economic impact USD 1689, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0019.",
         "thread_ts": "1768000019.000100"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "channel": "C-FINANCE",
         "message": {
@@ -2910,6 +2960,70 @@
       },
       "success": true,
       "tool": "slack.chat_postMessage"
+    },
+    {
+      "arguments": {
+        "channel": "C-FINANCE",
+        "limit": 100,
+        "ts": "1768000019.000100"
+      },
+      "index": 31,
+      "result": {
+        "has_more": false,
+        "messages": [
+          {
+            "text": "Operations control needs one defensible decision for weekend backlog recovery by 2026-01-20; a faster or broader action has value only if it remains inside only listed orders and cost center may use the overtime window.",
+            "ts": "1768000019.000100",
+            "user": "U-OPS-LEAD"
+          },
+          {
+            "text": "I found 67 HR on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.",
+            "ts": "1768000019.000150",
+            "user": "U-PLANNER"
+          },
+          {
+            "files": [
+              {
+                "id": "F-000019",
+                "mimetype": "application/pdf",
+                "name": "approval-and-impact-note.pdf",
+                "title": "CASE-019 approval and impact note"
+              }
+            ],
+            "text": "Approval AP-0019 permits one control-compliant action on NS-000019 up to 48 HR, provided only listed orders and cost center may use the overtime window. It does not select an option in advance and does not authorize broader records or add_second_unapproved_shift.",
+            "ts": "1768000019.000200",
+            "user": "U-APPROVER"
+          },
+          {
+            "text": "Protected load remains non-displaceable. The calendar for weekend workcenter and inspection coverage is the source for internal windows; the supplier response covers only its stated alternative.",
+            "ts": "1768000019.000240",
+            "user": "U-SCHEDULER"
+          },
+          {
+            "text": "Revision R9 and the CASE-020 record are visible in search but are not applicable to CASE-019.",
+            "ts": "1768000019.000270",
+            "user": "U-QUALITY"
+          },
+          {
+            "text": "Required closeout records: add the resulting Oracle reference, option, date, and constraint as a comment on the existing case file; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.",
+            "ts": "1768000019.000300",
+            "user": "U-CONTROLLER"
+          },
+          {
+            "text": "CASE-019: Oracle record NS-000019 now reflects apply_approved_weekend_overtime with completion 2026-01-20. Binding constraint: only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR. Alternatives: keep_weekday_sequence: outcome 2026-01-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_approved_weekend_overtime: outcome 2026-01-20, economic impact USD 673, SUPPORTED_AND_APPROVED; add_second_unapproved_shift: outcome 2026-01-19, economic impact USD 1689, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0019.",
+            "thread_ts": "1768000019.000100",
+            "ts": "1768000019.000901",
+            "type": "message",
+            "user": "U-FACTORY-AGENT"
+          }
+        ],
+        "ok": true,
+        "response_metadata": {
+          "next_cursor": ""
+        }
+      },
+      "success": true,
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
@@ -2932,7 +3046,7 @@
         "selected_resource_or_control": "WC-ALT-2",
         "unavailable_or_protected_capacity": 5
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

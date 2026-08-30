@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1825,6 +1825,11 @@
           },
           "tool": "google_drive.comments.create"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-039",
@@ -1860,6 +1865,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "receiving.and.quality.teams@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-039",
@@ -1869,7 +1880,8 @@
         ],
         "payload_text_contains": [
           "2026-01-13",
-          "deliver_project_accepted_quantity"
+          "deliver_project_accepted_quantity",
+          "receiving.and.quality.teams@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -2508,6 +2520,66 @@
           "InventoryItemId": 1400039
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-039",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-039"
+            },
+            "expected_result_contains": {
+              "id": "comment-039",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-039",
+          "resolved": false
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-039",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-039",
+              "threadId": "thread-039"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-039",
+          "threadId": "thread-039"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
       }
     ]
   },
@@ -2801,6 +2873,16 @@
     },
     {
       "arguments": {
+        "commentId": "comment-039",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-039"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
+    },
+    {
+      "arguments": {
         "raw": "RnJvbTogcmVjZWl2aW5nLnNwZWNpYWxpc3RAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZWNlaXZpbmcuYW5kLnF1YWxpdHkudGVhbXNAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDM5IOKAlCBDb21wbGV0ZWQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGRlbGl2ZXJfcHJvamVjdF9hY2NlcHRlZF9xdWFudGl0eS4gQ29tcGxldGlvbjogMjAyNi0wMS0xMy4NCkJpbmRpbmcgY29uc3RyYWludDogZGVsaXZlcnkgbXVzdCBwcmVzZXJ2ZSBwcm9qZWN0LCB0YXNrLCBsb3QsIGFuZCBhY2NlcHRlZCBzdGF0dXM7IHJlamVjdGVkIG9yIGNvbW1vbi1vd25lZCBxdWFudGl0eSA9IDYgS0c7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDEwLjAgS0cuDQpBbHRlcm5hdGl2ZXM6IGRlbGl2ZXJfcHJvamVjdF9hY2NlcHRlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGRlbGl2ZXJfZnVsbF9yZWNlaXB0OiBvdXRjb21lIDIwMjYtMDEtMTQsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBtb3ZlX3RvX2NvbW1vbl9zdG9yZXM6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDM5LiBBcHByb3ZhbDogQVAtMDAzOS4gQ2FzZTogQ0FTRS0wMzkuDQo",
         "threadId": "thread-039",
         "userId": "me"
@@ -2808,6 +2890,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "gmail.messages.send"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "sent-039",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -2866,6 +2958,66 @@
         "InventoryItemId": 1400039
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-039",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-039"
+          },
+          "expected_result_contains": {
+            "id": "comment-039",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-039",
+        "resolved": false
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-039",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-039",
+            "threadId": "thread-039"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-039",
+        "threadId": "thread-039"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4020,10 +4172,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000039 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4310,13 +4464,31 @@
         "tool_name": "google_drive.comments.create"
       },
       {
+        "arguments_json": "{\"commentId\":\"comment-039\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-039\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-039-call-29",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-039\",\"resolved\":false}",
+        "task_id": "factorybench-039",
+        "tool_name": "google_drive.comments.get"
+      },
+      {
         "arguments_json": "{\"raw\":\"RnJvbTogcmVjZWl2aW5nLnNwZWNpYWxpc3RAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZWNlaXZpbmcuYW5kLnF1YWxpdHkudGVhbXNAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDM5IOKAlCBDb21wbGV0ZWQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGRlbGl2ZXJfcHJvamVjdF9hY2NlcHRlZF9xdWFudGl0eS4gQ29tcGxldGlvbjogMjAyNi0wMS0xMy4NCkJpbmRpbmcgY29uc3RyYWludDogZGVsaXZlcnkgbXVzdCBwcmVzZXJ2ZSBwcm9qZWN0LCB0YXNrLCBsb3QsIGFuZCBhY2NlcHRlZCBzdGF0dXM7IHJlamVjdGVkIG9yIGNvbW1vbi1vd25lZCBxdWFudGl0eSA9IDYgS0c7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDEwLjAgS0cuDQpBbHRlcm5hdGl2ZXM6IGRlbGl2ZXJfcHJvamVjdF9hY2NlcHRlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGRlbGl2ZXJfZnVsbF9yZWNlaXB0OiBvdXRjb21lIDIwMjYtMDEtMTQsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBtb3ZlX3RvX2NvbW1vbl9zdG9yZXM6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDM5LiBBcHByb3ZhbDogQVAtMDAzOS4gQ2FzZTogQ0FTRS0wMzkuDQo\",\"threadId\":\"thread-039\",\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogcmVjZWl2aW5nLnNwZWNpYWxpc3RAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZWNlaXZpbmcuYW5kLnF1YWxpdHkudGVhbXNAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDM5IOKAlCBDb21wbGV0ZWQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGRlbGl2ZXJfcHJvamVjdF9hY2NlcHRlZF9xdWFudGl0eS4gQ29tcGxldGlvbjogMjAyNi0wMS0xMy4NCkJpbmRpbmcgY29uc3RyYWludDogZGVsaXZlcnkgbXVzdCBwcmVzZXJ2ZSBwcm9qZWN0LCB0YXNrLCBsb3QsIGFuZCBhY2NlcHRlZCBzdGF0dXM7IHJlamVjdGVkIG9yIGNvbW1vbi1vd25lZCBxdWFudGl0eSA9IDYgS0c7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDEwLjAgS0cuDQpBbHRlcm5hdGl2ZXM6IGRlbGl2ZXJfcHJvamVjdF9hY2NlcHRlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGRlbGl2ZXJfZnVsbF9yZWNlaXB0OiBvdXRjb21lIDIwMjYtMDEtMTQsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBtb3ZlX3RvX2NvbW1vbl9zdG9yZXM6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDM5LiBBcHByb3ZhbDogQVAtMDAzOS4gQ2FzZTogQ0FTRS0wMzkuDQo\\\",\\\"threadId\\\":\\\"thread-039\\\",\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-039-mutation-03\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-039\"}",
-        "fixture_id": "factorybench-039-call-29",
+        "fixture_id": "factorybench-039-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"sent-039\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-039\"}",
         "task_id": "factorybench-039",
         "tool_name": "gmail.messages.send"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"sent-039\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-039-call-31",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-039\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0zOUBub3J0aHN0YXIuZXhhbXBsZQpUbzogcmVjZWl2aW5nLnNwZWNpYWxpc3RAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBjYXNjYWRlLmluZHVzdHJpYWxAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDM5QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAzOSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBhY2NlcHRlZCBwcm9qZWN0IGNvcHBlciByZWNlaXB0Ck1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQ29wcGVyIGZvciBhIHByb2plY3Qgb3JkZXIgaGFzIHBhc3NlZCByZWNlaXZpbmcsIGJ1dCBub3QgYWxsIG9mIHRoZSBoZWFkZXIgcXVhbnRpdHkgaXMgZWxpZ2libGUgZm9yIHByb2plY3Qgc3RvcmVzLiBXb3JrIG91dCB0aGUgcXVhbnRpdHkgdGhhdCBwcmVzZXJ2ZXMgdGhlIHJpZ2h0IHByb2plY3QsIHRhc2ssIGxvdCwgYW5kIGFjY2VwdGFuY2Ugc3RhdHVzLCBleHBsYWluIHRoZSBjb25zZXF1ZW5jZSBvZiBob2xkaW5nIHRoZSBiYWxhbmNlLCBhbmQgcG9zdCBvbmx5IHRoZSBzdXBwb3J0ZWQgZGVsaXZlcnkuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKc3VwcGxpZXIgcmVwbGFjZW1lbnQgZm9yIHJlamVjdGVkIGNvcHBlcjogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGRlbGl2ZXJfZnVsbF9yZWNlaXB0IG9uIDIwMjYtMDEtMTE7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTE0IHdpdGggbm8gc2VwYXJhdGVseSBkb2N1bWVudGVkIHNwZW5kOyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDAzOSBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTAzOSAvIFI1LgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKUmVjZWl2aW5nIGFuZCBxdWFsaXR5IHRlYW1zIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciBhY2NlcHRlZCBwcm9qZWN0IGNvcHBlciByZWNlaXB0IGJ5IDIwMjYtMDEtMTM7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIGRlbGl2ZXJ5IG11c3QgcHJlc2VydmUgcHJvamVjdCwgdGFzaywgbG90LCBhbmQgYWNjZXB0ZWQgc3RhdHVzLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wNDAgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gUmVqZWN0ZWQgb3IgY29tbW9uLW93bmVkIHF1YW50aXR5IG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1790},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-039 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-039\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"Copper for a project order has passed receiving, but not all of the header quantity is eligible for project stores. Work out the quantity th\",\"threadId\":\"thread-039\"}",
+        "task_id": "factorybench-039",
+        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-039\",\"userId\":\"me\"}",
@@ -4328,15 +4500,6 @@
         "tool_name": "gmail.drafts.get"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-039\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-039-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-039\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0zOUBub3J0aHN0YXIuZXhhbXBsZQpUbzogcmVjZWl2aW5nLnNwZWNpYWxpc3RAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBjYXNjYWRlLmluZHVzdHJpYWxAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDM5QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAzOSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBhY2NlcHRlZCBwcm9qZWN0IGNvcHBlciByZWNlaXB0Ck1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQ29wcGVyIGZvciBhIHByb2plY3Qgb3JkZXIgaGFzIHBhc3NlZCByZWNlaXZpbmcsIGJ1dCBub3QgYWxsIG9mIHRoZSBoZWFkZXIgcXVhbnRpdHkgaXMgZWxpZ2libGUgZm9yIHByb2plY3Qgc3RvcmVzLiBXb3JrIG91dCB0aGUgcXVhbnRpdHkgdGhhdCBwcmVzZXJ2ZXMgdGhlIHJpZ2h0IHByb2plY3QsIHRhc2ssIGxvdCwgYW5kIGFjY2VwdGFuY2Ugc3RhdHVzLCBleHBsYWluIHRoZSBjb25zZXF1ZW5jZSBvZiBob2xkaW5nIHRoZSBiYWxhbmNlLCBhbmQgcG9zdCBvbmx5IHRoZSBzdXBwb3J0ZWQgZGVsaXZlcnkuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKc3VwcGxpZXIgcmVwbGFjZW1lbnQgZm9yIHJlamVjdGVkIGNvcHBlcjogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGRlbGl2ZXJfZnVsbF9yZWNlaXB0IG9uIDIwMjYtMDEtMTE7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTE0IHdpdGggbm8gc2VwYXJhdGVseSBkb2N1bWVudGVkIHNwZW5kOyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDAzOSBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTAzOSAvIFI1LgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKUmVjZWl2aW5nIGFuZCBxdWFsaXR5IHRlYW1zIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciBhY2NlcHRlZCBwcm9qZWN0IGNvcHBlciByZWNlaXB0IGJ5IDIwMjYtMDEtMTM7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIGRlbGl2ZXJ5IG11c3QgcHJlc2VydmUgcHJvamVjdCwgdGFzaywgbG90LCBhbmQgYWNjZXB0ZWQgc3RhdHVzLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wNDAgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gUmVqZWN0ZWQgb3IgY29tbW9uLW93bmVkIHF1YW50aXR5IG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1790},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-039 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-039\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"Copper for a project order has passed receiving, but not all of the header quantity is eligible for project stores. Work out the quantity th\",\"threadId\":\"thread-039\"}",
-        "task_id": "factorybench-039",
-        "tool_name": "gmail.messages.get"
-      },
-      {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-039\",\"userId\":\"me\"}",
         "effect_json": null,
         "fixture_id": "factorybench-039-discovery-05",
@@ -4344,15 +4507,6 @@
         "response_json": "{\"historyId\":\"900039\",\"id\":\"thread-039\",\"messages\":[{\"id\":\"msg-039\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0zOUBub3J0aHN0YXIuZXhhbXBsZQpUbzogcmVjZWl2aW5nLnNwZWNpYWxpc3RAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBjYXNjYWRlLmluZHVzdHJpYWxAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDM5QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAzOSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBhY2NlcHRlZCBwcm9qZWN0IGNvcHBlciByZWNlaXB0Ck1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQ29wcGVyIGZvciBhIHByb2plY3Qgb3JkZXIgaGFzIHBhc3NlZCByZWNlaXZpbmcsIGJ1dCBub3QgYWxsIG9mIHRoZSBoZWFkZXIgcXVhbnRpdHkgaXMgZWxpZ2libGUgZm9yIHByb2plY3Qgc3RvcmVzLiBXb3JrIG91dCB0aGUgcXVhbnRpdHkgdGhhdCBwcmVzZXJ2ZXMgdGhlIHJpZ2h0IHByb2plY3QsIHRhc2ssIGxvdCwgYW5kIGFjY2VwdGFuY2Ugc3RhdHVzLCBleHBsYWluIHRoZSBjb25zZXF1ZW5jZSBvZiBob2xkaW5nIHRoZSBiYWxhbmNlLCBhbmQgcG9zdCBvbmx5IHRoZSBzdXBwb3J0ZWQgZGVsaXZlcnkuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoK\",\"size\":751},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-039 \\u2014 operating request and source reply\"}]},\"snippet\":\"From: operations-39@northstar.example\\nTo: receiving.specialist@northstar.example\\nCc: controls@northstar.example, cascade.industrial@supplier\",\"threadId\":\"thread-039\"},{\"id\":\"msg-039-1\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnN1cHBsaWVyIHJlcGxhY2VtZW50IGZvciByZWplY3RlZCBjb3BwZXI6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBkZWxpdmVyX2Z1bGxfcmVjZWlwdCBvbiAyMDI2LTAxLTExOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMzkgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMzkgLyBSNS4KCg\",\"size\":430},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-039 \\u2014 operating request and source reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-039\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\" external operations desk ---\\nDate: 2026-01-12 11:25 Pacific\\nsupplier replacement for rejected copper: the independent source confirms readi\",\"threadId\":\"thread-039\"},{\"id\":\"msg-039-2\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClJlY2VpdmluZyBhbmQgcXVhbGl0eSB0ZWFtcyBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgYWNjZXB0ZWQgcHJvamVjdCBjb3BwZXIgcmVjZWlwdCBieSAyMDI2LTAxLTEzOyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBkZWxpdmVyeSBtdXN0IHByZXNlcnZlIHByb2plY3QsIHRhc2ssIGxvdCwgYW5kIGFjY2VwdGVkIHN0YXR1cy4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDQwIHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCg\",\"size\":352},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-039 \\u2014 operating request and source reply\"}]},\"snippet\":\" operations lead ---\\nDate: 2026-01-12 09:10 Pacific\\nReceiving and quality teams needs one defensible decision for accepted project copper re\",\"threadId\":\"thread-039\"},{\"id\":\"msg-039-3\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIFJlamVjdGVkIG9yIGNvbW1vbi1vd25lZCBxdWFudGl0eSBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":197},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-039 \\u2014 operating request and source reply\"}]},\"snippet\":\" controller ---\\nDate: 2026-01-11 16:40 Pacific\\nReconcile the raw rows before acting. Rejected or common-owned quantity must remain outside t\",\"threadId\":\"thread-039\"}]}",
         "task_id": "factorybench-039",
         "tool_name": "gmail.threads.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-039\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-039\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-039-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-039\",\"resolved\":false}",
-        "task_id": "factorybench-039",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-039\",\"pageSize\":100}",
@@ -4759,7 +4913,7 @@
       }
     ]
   },
-  "sequence_signature": "2b7156bfab21f99867ca9620a15110561cc2a77e360b60e5ec0675718a2d5457",
+  "sequence_signature": "de32923e34244c59daf7fef64c67420405a61adcef00c471f64e1a8a78e7a726",
   "task_id": "factorybench-039",
   "title": "Deliver inspected copper to project stores",
   "variant": null,

@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1826,6 +1826,11 @@
           },
           "tool": "slack.chat_postMessage"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-054",
@@ -1856,8 +1861,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H16",
-            "spreadsheetId": "sheet-054"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-054 | quarantine_expired_lot | 2026-01-13 | NS-000054 | expiry, lot, location, and open reservations define containment scope; other lots and quantity already consumed = 6 KG; uncovered or unsupported scope = 8.0 KG | AP-0054"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-054",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -2510,6 +2525,65 @@
           "InventoryItemId": 1400054
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000054.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H16",
+              "spreadsheetId": "sheet-054",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H16"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H16"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
       }
     ]
   },
@@ -2804,6 +2878,16 @@
     },
     {
       "arguments": {
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000054.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "includeValuesInResponse": true,
         "range": "Control!H16",
         "requestBody": {
@@ -2820,6 +2904,17 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_sheets.spreadsheets.values.update"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!H16",
+        "spreadsheetId": "sheet-054",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
@@ -2878,6 +2973,65 @@
         "InventoryItemId": 1400054
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000054.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H16",
+            "spreadsheetId": "sheet-054",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H16"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H16"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4034,10 +4188,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000054 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4324,13 +4480,31 @@
         "tool_name": "slack.chat_postMessage"
       },
       {
+        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000054.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-054-call-29",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Quality and production teams needs one defensible decision for expired chemical lot by 2026-01-13; a faster or broader action has value only if it remains inside expiry, lot, location, and open reservations define containment scope.\",\"ts\":\"1768000054.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 61 KG on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000054.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000054\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-054 approval and impact note\"}],\"text\":\"Approval AP-0054 permits one control-compliant action on NS-000054 up to 53 KG, provided expiry, lot, location, and open reservations define containment scope. It does not select an option in advance and does not authorize broader records or extend_expiry_without_waiver.\",\"ts\":\"1768000054.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for quarantine-location capacity is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000054.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-055 record are visible in search but are not applicable to CASE-054.\",\"ts\":\"1768000054.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000054.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-054",
+        "tool_name": "slack.conversations_replies"
+      },
+      {
         "arguments_json": "{\"includeValuesInResponse\":true,\"range\":\"Control!H16\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"CASE-054 | quarantine_expired_lot | 2026-01-13 | NS-000054 | expiry, lot, location, and open reservations define containment scope; other lots and quantity already consumed = 6 KG; uncovered or unsupported scope = 8.0 KG | AP-0054\"]]},\"spreadsheetId\":\"sheet-054\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"includeValuesInResponse\\\":true,\\\"range\\\":\\\"Control!H16\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"CASE-054 | quarantine_expired_lot | 2026-01-13 | NS-000054 | expiry, lot, location, and open reservations define containment scope; other lots and quantity already consumed = 6 KG; uncovered or unsupported scope = 8.0 KG | AP-0054\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-054\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.update\\\"}\",\"resource_id\":\"factorybench-054-mutation-03\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-054\"}",
-        "fixture_id": "factorybench-054-call-29",
+        "fixture_id": "factorybench-054-call-30",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-054\",\"updatedCells\":1,\"updatedColumns\":1,\"updatedRange\":\"Control!H16\",\"updatedRows\":1}",
         "task_id": "factorybench-054",
         "tool_name": "google_sheets.spreadsheets.values.update"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H16\",\"spreadsheetId\":\"sheet-054\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-054-call-31",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H16\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-054\",\"OBS-0054-1\",15,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"quantity physically present and traceable to the expired lot\"],[\"CASE-054\",\"OBS-0054-2\",15,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"quantity physically present and traceable to the expired lot\"],[\"CASE-054\",\"OBS-0054-3\",15,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"quantity physically present and traceable to the expired lot\"],[\"CASE-054\",\"OBS-0054-4\",14,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"quantity physically present and traceable to the expired lot\"],[\"CASE-054\",\"EXCL-0054-1\",\"\",3,\"KG\",\"R6\",\"SEA\",\"EXCLUDE\",\"other lots and quantity already consumed\"],[\"CASE-054\",\"EXCL-0054-2\",\"\",3,\"KG\",\"R6\",\"SEA\",\"EXCLUDE\",\"other lots and quantity already consumed\"],[\"CASE-055\",\"DISTRACTOR-CASE\",20,\"\",\"KG\",\"R6\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-054\",\"DISTRACTOR-REVISION\",15,\"\",\"KG\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-054\",\"DISTRACTOR-PLANT\",12,\"\",\"KG\",\"R6\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
+        "task_id": "factorybench-054",
+        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-054\",\"userId\":\"me\"}",
@@ -4378,15 +4552,6 @@
         "tool_name": "google_sheets.spreadsheets.get"
       },
       {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-054\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-054-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-054\",\"OBS-0054-1\",15,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"quantity physically present and traceable to the expired lot\"],[\"CASE-054\",\"OBS-0054-2\",15,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"quantity physically present and traceable to the expired lot\"],[\"CASE-054\",\"OBS-0054-3\",15,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"quantity physically present and traceable to the expired lot\"],[\"CASE-054\",\"OBS-0054-4\",14,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"quantity physically present and traceable to the expired lot\"],[\"CASE-054\",\"EXCL-0054-1\",\"\",3,\"KG\",\"R6\",\"SEA\",\"EXCLUDE\",\"other lots and quantity already consumed\"],[\"CASE-054\",\"EXCL-0054-2\",\"\",3,\"KG\",\"R6\",\"SEA\",\"EXCLUDE\",\"other lots and quantity already consumed\"],[\"CASE-055\",\"DISTRACTOR-CASE\",20,\"\",\"KG\",\"R6\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-054\",\"DISTRACTOR-REVISION\",15,\"\",\"KG\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-054\",\"DISTRACTOR-PLANT\",12,\"\",\"KG\",\"R6\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-054",
-        "tool_name": "google_sheets.spreadsheets.values.get"
-      },
-      {
         "arguments_json": "{\"channel\":\"C-QUALITY\",\"inclusive\":true,\"limit\":100,\"oldest\":\"1768000000.000000\"}",
         "effect_json": null,
         "fixture_id": "factorybench-054-discovery-20",
@@ -4394,15 +4559,6 @@
         "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Quality and production teams needs one defensible decision for expired chemical lot by 2026-01-13; a faster or broader action has value only if it remains inside expiry, lot, location, and open reservations define containment scope.\",\"ts\":\"1768000054.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 61 KG on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000054.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000054\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-054 approval and impact note\"}],\"text\":\"Approval AP-0054 permits one control-compliant action on NS-000054 up to 53 KG, provided expiry, lot, location, and open reservations define containment scope. It does not select an option in advance and does not authorize broader records or extend_expiry_without_waiver.\",\"ts\":\"1768000054.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for quarantine-location capacity is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000054.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-055 record are visible in search but are not applicable to CASE-054.\",\"ts\":\"1768000054.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000054.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
         "task_id": "factorybench-054",
         "tool_name": "slack.conversations_history"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000054.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-054-discovery-21",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Quality and production teams needs one defensible decision for expired chemical lot by 2026-01-13; a faster or broader action has value only if it remains inside expiry, lot, location, and open reservations define containment scope.\",\"ts\":\"1768000054.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 61 KG on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000054.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000054\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-054 approval and impact note\"}],\"text\":\"Approval AP-0054 permits one control-compliant action on NS-000054 up to 53 KG, provided expiry, lot, location, and open reservations define containment scope. It does not select an option in advance and does not authorize broader records or extend_expiry_without_waiver.\",\"ts\":\"1768000054.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for quarantine-location capacity is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000054.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-055 record are visible in search but are not applicable to CASE-054.\",\"ts\":\"1768000054.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000054.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-054",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"count\":50,\"query\":\"\\\"CASE-054\\\"\",\"sort\":\"timestamp\",\"sort_dir\":\"asc\"}",
@@ -4764,7 +4920,7 @@
       }
     ]
   },
-  "sequence_signature": "36863bdaf0a4f6b5da49b1bba51ad49d8214d8bfa8637b518be3255a92d355a0",
+  "sequence_signature": "0e1e995c03db35adfc569f05c9d7fde3f8955ee19d5e3d1dd4ce92f7bc62b42b",
   "task_id": "factorybench-054",
   "title": "Quarantine an expired chemical lot",
   "variant": null,

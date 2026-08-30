@@ -1484,7 +1484,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1801,6 +1801,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "cell.lead@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-008",
@@ -1810,7 +1816,8 @@
         ],
         "payload_text_contains": [
           "2026-01-14",
-          "insert_approved_rework"
+          "insert_approved_rework",
+          "cell.lead@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -1834,6 +1841,11 @@
             "fileId": "drive-008"
           },
           "tool": "google_drive.comments.create"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2499,6 +2511,66 @@
           "WorkOrderId": 100008
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-008",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-008",
+              "threadId": "thread-008"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-008",
+          "threadId": "thread-008"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-008",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-008"
+            },
+            "expected_result_contains": {
+              "id": "comment-008",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-008",
+          "resolved": false
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
       }
     ]
   },
@@ -2783,6 +2855,16 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "sent-008",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.messages.get"
+    },
+    {
+      "arguments": {
         "fileId": "drive-008",
         "requestBody": {
           "content": "CASE-008: insert_approved_rework recorded on Oracle record NS-000008; completion 2026-01-14; constraint quality disposition and routing revision must name the same lot and operation; scrapped or already accepted units = 4 EA; uncovered or unsupported scope = 4.0 EA; approval AP-0008."
@@ -2791,6 +2873,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "commentId": "comment-008",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-008"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
     },
     {
       "arguments": {
@@ -2848,6 +2940,66 @@
         "WorkOrderId": 100008
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-008",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-008",
+            "threadId": "thread-008"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-008",
+        "threadId": "thread-008"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-008",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-008"
+          },
+          "expected_result_contains": {
+            "id": "comment-008",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-008",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4026,10 +4178,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000008 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4316,13 +4470,31 @@
         "tool_name": "gmail.messages.send"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"sent-008\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-008-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-008\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy04QG5vcnRoc3Rhci5leGFtcGxlClRvOiBwcm9kdWN0aW9uLnBsYW5uZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBvbHltcGljLm1ldHJvbG9neUBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wMDhAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDA4IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIGZhaWxlZCBpbnNwZWN0aW9uIG9uIFdPLTAwMDgKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpRdWFsaXR5IGhhcyBpc3N1ZWQgYSBkaXNwb3NpdGlvbiBmb3IgZmFpbGVkIHVuaXRzIG9uIHRoZSBhY3RpdmUgb3JkZXIsIGJ1dCB3ZSBtdXN0IG5vdCByZXdvcmsgdW5pdHMgYWxyZWFkeSBhY2NlcHRlZCBvciBzY3JhcHBlZC4gRGVjaWRlIGV4YWN0bHkgd2hpY2ggbWF0ZXJpYWwgdGhlIGRpc3Bvc2l0aW9uIGNvdmVycywgd2hldGhlciByZXdvcmsgaXMgcHJlZmVyYWJsZSB0byBzY3JhcCBvciBhIHVzZS1hcy1pcyByZXF1ZXN0LCBhbmQgd2hlbiB0aGUgd29yayBjYW4gZmluaXNoLiBBZGQgdGhlIHJld29yayBzdGVwIG9ubHkgaWYgdGhlIHJlbGVhc2VkIGRpc3Bvc2l0aW9uIHN1cHBvcnRzIGl0LgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnJld29yayBpbnN0cnVjdGlvbiByZWxlYXNlOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgaW5zZXJ0X2FwcHJvdmVkX3Jld29yayBvbiAyMDI2LTAxLTEyOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMDggaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMDggLyBSMi4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCkNlbGwgbGVhZCBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgZmFpbGVkIGluc3BlY3Rpb24gb24gV08tMDAwOCBieSAyMDI2LTAxLTE3OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBxdWFsaXR5IGRpc3Bvc2l0aW9uIGFuZCByb3V0aW5nIHJldmlzaW9uIG11c3QgbmFtZSB0aGUgc2FtZSBsb3QgYW5kIG9wZXJhdGlvbi4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDA5IHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIFNjcmFwcGVkIG9yIGFscmVhZHkgYWNjZXB0ZWQgdW5pdHMgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1816},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-008 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-008\",\"size\":1024},\"filename\":\"signed-source-record.pdf\"}]},\"snippet\":\"Quality has issued a disposition for failed units on the active order, but we must not rework units already accepted or scrapped. Decide exa\",\"threadId\":\"thread-008\"}",
+        "task_id": "factorybench-008",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"fileId\":\"drive-008\",\"requestBody\":{\"content\":\"CASE-008: insert_approved_rework recorded on Oracle record NS-000008; completion 2026-01-14; constraint quality disposition and routing revision must name the same lot and operation; scrapped or already accepted units = 4 EA; uncovered or unsupported scope = 4.0 EA; approval AP-0008.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-008\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-008: insert_approved_rework recorded on Oracle record NS-000008; completion 2026-01-14; constraint quality disposition and routing revision must name the same lot and operation; scrapped or already accepted units = 4 EA; uncovered or unsupported scope = 4.0 EA; approval AP-0008.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-008-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-008\"}",
-        "fixture_id": "factorybench-008-call-29",
+        "fixture_id": "factorybench-008-call-30",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-008: insert_approved_rework recorded on Oracle record NS-000008; completion 2026-01-14; constraint quality disposition and routing revision must name the same lot and operation; scrapped or already accepted units = 4 EA; uncovered or unsupported scope = 4.0 EA; approval AP-0008.\",\"id\":\"comment-008\",\"resolved\":false}",
         "task_id": "factorybench-008",
         "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"commentId\":\"comment-008\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-008\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-008-call-31",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-008\",\"resolved\":false}",
+        "task_id": "factorybench-008",
+        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-008\",\"userId\":\"me\"}",
@@ -4341,15 +4513,6 @@
         "response_json": "{\"historyId\":\"900008\",\"id\":\"thread-008\",\"messages\":[{\"id\":\"msg-008\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy04QG5vcnRoc3Rhci5leGFtcGxlClRvOiBwcm9kdWN0aW9uLnBsYW5uZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBvbHltcGljLm1ldHJvbG9neUBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wMDhAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDA4IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIGZhaWxlZCBpbnNwZWN0aW9uIG9uIFdPLTAwMDgKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpRdWFsaXR5IGhhcyBpc3N1ZWQgYSBkaXNwb3NpdGlvbiBmb3IgZmFpbGVkIHVuaXRzIG9uIHRoZSBhY3RpdmUgb3JkZXIsIGJ1dCB3ZSBtdXN0IG5vdCByZXdvcmsgdW5pdHMgYWxyZWFkeSBhY2NlcHRlZCBvciBzY3JhcHBlZC4gRGVjaWRlIGV4YWN0bHkgd2hpY2ggbWF0ZXJpYWwgdGhlIGRpc3Bvc2l0aW9uIGNvdmVycywgd2hldGhlciByZXdvcmsgaXMgcHJlZmVyYWJsZSB0byBzY3JhcCBvciBhIHVzZS1hcy1pcyByZXF1ZXN0LCBhbmQgd2hlbiB0aGUgd29yayBjYW4gZmluaXNoLiBBZGQgdGhlIHJld29yayBzdGVwIG9ubHkgaWYgdGhlIHJlbGVhc2VkIGRpc3Bvc2l0aW9uIHN1cHBvcnRzIGl0LgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCg\",\"size\":794},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-008 \\u2014 operating request and source reply\"}]},\"snippet\":\"From: operations-8@northstar.example\\nTo: production.planner@northstar.example\\nCc: controls@northstar.example, olympic.metrology@supplier.exa\",\"threadId\":\"thread-008\"},{\"id\":\"msg-008-1\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnJld29yayBpbnN0cnVjdGlvbiByZWxlYXNlOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgaW5zZXJ0X2FwcHJvdmVkX3Jld29yayBvbiAyMDI2LTAxLTEyOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMDggaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMDggLyBSMi4KCg\",\"size\":418},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-008 \\u2014 operating request and source reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-008\",\"size\":1024},\"filename\":\"signed-source-record.pdf\"}]},\"snippet\":\" external operations desk ---\\nDate: 2026-01-12 11:25 Pacific\\nrework instruction release: the independent source confirms readiness for inser\",\"threadId\":\"thread-008\"},{\"id\":\"msg-008-2\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCkNlbGwgbGVhZCBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgZmFpbGVkIGluc3BlY3Rpb24gb24gV08tMDAwOCBieSAyMDI2LTAxLTE3OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBxdWFsaXR5IGRpc3Bvc2l0aW9uIGFuZCByb3V0aW5nIHJldmlzaW9uIG11c3QgbmFtZSB0aGUgc2FtZSBsb3QgYW5kIG9wZXJhdGlvbi4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDA5IHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCg\",\"size\":346},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-008 \\u2014 operating request and source reply\"}]},\"snippet\":\" operations lead ---\\nDate: 2026-01-12 09:10 Pacific\\nCell lead needs one defensible decision for failed inspection on WO-0008 by 2026-01-17; \",\"threadId\":\"thread-008\"},{\"id\":\"msg-008-3\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIFNjcmFwcGVkIG9yIGFscmVhZHkgYWNjZXB0ZWQgdW5pdHMgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":198},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-008 \\u2014 operating request and source reply\"}]},\"snippet\":\" controller ---\\nDate: 2026-01-11 16:40 Pacific\\nReconcile the raw rows before acting. Scrapped or already accepted units must remain outside \",\"threadId\":\"thread-008\"}]}",
         "task_id": "factorybench-008",
         "tool_name": "gmail.threads.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-008\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-008\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-008-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-008\",\"resolved\":false}",
-        "task_id": "factorybench-008",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-008\",\"pageSize\":100}",
@@ -4765,7 +4928,7 @@
       }
     ]
   },
-  "sequence_signature": "9e21cfe0a671e5f327607958108469604cb07b13f76ec7445053aab33306cf0e",
+  "sequence_signature": "6dd78325c38e095970f153cd29edd28a367c7268b18dc81aa88f030a54a17780",
   "task_id": "factorybench-008",
   "title": "Insert an approved rework operation",
   "variant": null,

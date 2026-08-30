@@ -241,6 +241,11 @@
           },
           "tool": "google_drive.comments.create"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-077",
@@ -276,6 +281,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "project.team@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-077",
@@ -285,7 +296,8 @@
         ],
         "payload_text_contains": [
           "2026-01-20",
-          "create_net_project_supply"
+          "create_net_project_supply",
+          "project.team@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -979,6 +991,66 @@
           "SupplyRequestId": 1500077
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-077",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-077"
+            },
+            "expected_result_contains": {
+              "id": "comment-077",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-077",
+          "resolved": false
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-077",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-077",
+              "threadId": "thread-077"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-077",
+          "threadId": "thread-077"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
       }
     ]
   },
@@ -1021,6 +1093,66 @@
         "SupplyRequestId": 1500077
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-077",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-077"
+          },
+          "expected_result_contains": {
+            "id": "comment-077",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-077",
+        "resolved": false
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-077",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-077",
+            "threadId": "thread-077"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-077",
+        "threadId": "thread-077"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2209,10 +2341,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000077 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2499,13 +2633,31 @@
         "tool_name": "google_drive.comments.create"
       },
       {
+        "arguments_json": "{\"commentId\":\"comment-077\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-077\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-077-call-29",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-077\",\"resolved\":false}",
+        "task_id": "factorybench-077",
+        "tool_name": "google_drive.comments.get"
+      },
+      {
         "arguments_json": "{\"raw\":\"RnJvbTogcHJvamVjdC5tYXRlcmlhbC5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogcHJvamVjdC50ZWFtQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA3NyDigJQgQ29tcGxldGVkIG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBjcmVhdGVfbmV0X3Byb2plY3Rfc3VwcGx5LiBDb21wbGV0aW9uOiAyMDI2LTAxLTIwLg0KQmluZGluZyBjb25zdHJhaW50OiBtaWxlc3RvbmUgYXBwcm92YWwsIHByb2plY3QsIHRhc2ssIHF1YW50aXR5LCBkZXN0aW5hdGlvbiwgYW5kIG5lZWQtYnk7IGNvbW1vbiBvciBvdGhlci1wcm9qZWN0IGNvdmVyYWdlIGFuZCBsYXRlIHJlY2VpcHRzID0gOCBFQTsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTQuMCBFQS4NCkFsdGVybmF0aXZlczogY3JlYXRlX25ldF9wcm9qZWN0X3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTIwLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHVzZV9vdGhlcl9wcm9qZWN0X2ludmVudG9yeTogb3V0Y29tZSAyMDI2LTAxLTE4LCBlY29ub21pYyBpbXBhY3QgVVNEIDE2NTksIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IG9yZGVyX2dyb3NzX21pbGVzdG9uZV9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTE3LCBlY29ub21pYyBpbXBhY3QgVVNEIDM0ODcsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwNzcuIEFwcHJvdmFsOiBBUC0wMDc3LiBDYXNlOiBDQVNFLTA3Ny4NCg\",\"threadId\":\"thread-077\",\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-20\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogcHJvamVjdC5tYXRlcmlhbC5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogcHJvamVjdC50ZWFtQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA3NyDigJQgQ29tcGxldGVkIG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBjcmVhdGVfbmV0X3Byb2plY3Rfc3VwcGx5LiBDb21wbGV0aW9uOiAyMDI2LTAxLTIwLg0KQmluZGluZyBjb25zdHJhaW50OiBtaWxlc3RvbmUgYXBwcm92YWwsIHByb2plY3QsIHRhc2ssIHF1YW50aXR5LCBkZXN0aW5hdGlvbiwgYW5kIG5lZWQtYnk7IGNvbW1vbiBvciBvdGhlci1wcm9qZWN0IGNvdmVyYWdlIGFuZCBsYXRlIHJlY2VpcHRzID0gOCBFQTsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTQuMCBFQS4NCkFsdGVybmF0aXZlczogY3JlYXRlX25ldF9wcm9qZWN0X3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTIwLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHVzZV9vdGhlcl9wcm9qZWN0X2ludmVudG9yeTogb3V0Y29tZSAyMDI2LTAxLTE4LCBlY29ub21pYyBpbXBhY3QgVVNEIDE2NTksIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IG9yZGVyX2dyb3NzX21pbGVzdG9uZV9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTE3LCBlY29ub21pYyBpbXBhY3QgVVNEIDM0ODcsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwNzcuIEFwcHJvdmFsOiBBUC0wMDc3LiBDYXNlOiBDQVNFLTA3Ny4NCg\\\",\\\"threadId\\\":\\\"thread-077\\\",\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-077-mutation-03\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-077\"}",
-        "fixture_id": "factorybench-077-call-29",
+        "fixture_id": "factorybench-077-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"sent-077\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-077\"}",
         "task_id": "factorybench-077",
         "tool_name": "gmail.messages.send"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"sent-077\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-077-call-31",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-077\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy03N0Bub3J0aHN0YXIuZXhhbXBsZQpUbzogcHJvamVjdC5tYXRlcmlhbC5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgb2x5bXBpYy5tZXRyb2xvZ3lAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDc3QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA3NyDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBwcm9qZWN0IG1pbGVzdG9uZSBzdXBwbHkKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpUaGUgcHJvamVjdCBtaWxlc3RvbmUgaXMgYXQgcmlzayBhbmQgdGhlIHRlYW0gd2FudHMgZGVkaWNhdGVkIHN1cHBseS4gQ2FsY3VsYXRlIHRoZSBuZXQgcHJvamVjdCBuZWVkIGFmdGVyIGVsaWdpYmxlIGNvdmVyYWdlLCBpZGVudGlmeSB0aGUgZmlyc3QgZGF0ZSBwcm9jdXJlbWVudCBhbmQgcHJvdG90eXBlIGNhcGFjaXR5IGNhbiBzdXBwb3J0LCBhbmQgY29tcGFyZSB0aGF0IHBsYW4gd2l0aCB1c2luZyBjb21tb24gc3RvY2sgb3IgbW92aW5nIHRoZSBtaWxlc3RvbmUuIENyZWF0ZSBvbmx5IHRoZSBhcHByb3ZlZCBwcm9qZWN0LXNjb3BlZCBzdXBwbHkuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKcHJvamVjdC1zcGVjaWZpYyBzdXBwbGllciByZWFkaW5lc3M6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciB1c2Vfb3RoZXJfcHJvamVjdF9pbnZlbnRvcnkgb24gMjAyNi0wMS0xNTsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTggd2l0aCBlY29ub21pYyBpbXBhY3QgVVNEIDE2NTk7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDc3IGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDc3IC8gUjEuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpQcm9qZWN0IHRlYW0gbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHByb2plY3QgbWlsZXN0b25lIHN1cHBseSBieSAyMDI2LTAxLTIxOyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBtaWxlc3RvbmUgYXBwcm92YWwsIHByb2plY3QsIHRhc2ssIHF1YW50aXR5LCBkZXN0aW5hdGlvbiwgYW5kIG5lZWQtYnkuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA3OCB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBDb21tb24gb3Igb3RoZXItcHJvamVjdCBjb3ZlcmFnZSBhbmQgbGF0ZSByZWNlaXB0cyBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1812},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-077 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-077\",\"size\":1024},\"filename\":\"supplier-confirmation.pdf\"}]},\"snippet\":\"The project milestone is at risk and the team wants dedicated supply. Calculate the net project need after eligible coverage, identify the f\",\"threadId\":\"thread-077\"}",
+        "task_id": "factorybench-077",
+        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-077\",\"userId\":\"me\"}",
@@ -2517,15 +2669,6 @@
         "tool_name": "gmail.drafts.get"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-077\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-077-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-077\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy03N0Bub3J0aHN0YXIuZXhhbXBsZQpUbzogcHJvamVjdC5tYXRlcmlhbC5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgb2x5bXBpYy5tZXRyb2xvZ3lAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDc3QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA3NyDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBwcm9qZWN0IG1pbGVzdG9uZSBzdXBwbHkKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpUaGUgcHJvamVjdCBtaWxlc3RvbmUgaXMgYXQgcmlzayBhbmQgdGhlIHRlYW0gd2FudHMgZGVkaWNhdGVkIHN1cHBseS4gQ2FsY3VsYXRlIHRoZSBuZXQgcHJvamVjdCBuZWVkIGFmdGVyIGVsaWdpYmxlIGNvdmVyYWdlLCBpZGVudGlmeSB0aGUgZmlyc3QgZGF0ZSBwcm9jdXJlbWVudCBhbmQgcHJvdG90eXBlIGNhcGFjaXR5IGNhbiBzdXBwb3J0LCBhbmQgY29tcGFyZSB0aGF0IHBsYW4gd2l0aCB1c2luZyBjb21tb24gc3RvY2sgb3IgbW92aW5nIHRoZSBtaWxlc3RvbmUuIENyZWF0ZSBvbmx5IHRoZSBhcHByb3ZlZCBwcm9qZWN0LXNjb3BlZCBzdXBwbHkuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKcHJvamVjdC1zcGVjaWZpYyBzdXBwbGllciByZWFkaW5lc3M6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciB1c2Vfb3RoZXJfcHJvamVjdF9pbnZlbnRvcnkgb24gMjAyNi0wMS0xNTsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTggd2l0aCBlY29ub21pYyBpbXBhY3QgVVNEIDE2NTk7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDc3IGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDc3IC8gUjEuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpQcm9qZWN0IHRlYW0gbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHByb2plY3QgbWlsZXN0b25lIHN1cHBseSBieSAyMDI2LTAxLTIxOyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBtaWxlc3RvbmUgYXBwcm92YWwsIHByb2plY3QsIHRhc2ssIHF1YW50aXR5LCBkZXN0aW5hdGlvbiwgYW5kIG5lZWQtYnkuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA3OCB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBDb21tb24gb3Igb3RoZXItcHJvamVjdCBjb3ZlcmFnZSBhbmQgbGF0ZSByZWNlaXB0cyBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1812},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-077 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-077\",\"size\":1024},\"filename\":\"supplier-confirmation.pdf\"}]},\"snippet\":\"The project milestone is at risk and the team wants dedicated supply. Calculate the net project need after eligible coverage, identify the f\",\"threadId\":\"thread-077\"}",
-        "task_id": "factorybench-077",
-        "tool_name": "gmail.messages.get"
-      },
-      {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-077\",\"userId\":\"me\"}",
         "effect_json": null,
         "fixture_id": "factorybench-077-discovery-05",
@@ -2533,15 +2676,6 @@
         "response_json": "{\"historyId\":\"900077\",\"id\":\"thread-077\",\"messages\":[{\"id\":\"msg-077\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy03N0Bub3J0aHN0YXIuZXhhbXBsZQpUbzogcHJvamVjdC5tYXRlcmlhbC5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgb2x5bXBpYy5tZXRyb2xvZ3lAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDc3QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA3NyDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBwcm9qZWN0IG1pbGVzdG9uZSBzdXBwbHkKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpUaGUgcHJvamVjdCBtaWxlc3RvbmUgaXMgYXQgcmlzayBhbmQgdGhlIHRlYW0gd2FudHMgZGVkaWNhdGVkIHN1cHBseS4gQ2FsY3VsYXRlIHRoZSBuZXQgcHJvamVjdCBuZWVkIGFmdGVyIGVsaWdpYmxlIGNvdmVyYWdlLCBpZGVudGlmeSB0aGUgZmlyc3QgZGF0ZSBwcm9jdXJlbWVudCBhbmQgcHJvdG90eXBlIGNhcGFjaXR5IGNhbiBzdXBwb3J0LCBhbmQgY29tcGFyZSB0aGF0IHBsYW4gd2l0aCB1c2luZyBjb21tb24gc3RvY2sgb3IgbW92aW5nIHRoZSBtaWxlc3RvbmUuIENyZWF0ZSBvbmx5IHRoZSBhcHByb3ZlZCBwcm9qZWN0LXNjb3BlZCBzdXBwbHkuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoK\",\"size\":775},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-077 \\u2014 operating request and source reply\"}]},\"snippet\":\"From: operations-77@northstar.example\\nTo: project.material.controller@northstar.example\\nCc: controls@northstar.example, olympic.metrology@su\",\"threadId\":\"thread-077\"},{\"id\":\"msg-077-1\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnByb2plY3Qtc3BlY2lmaWMgc3VwcGxpZXIgcmVhZGluZXNzOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgdXNlX290aGVyX3Byb2plY3RfaW52ZW50b3J5IG9uIDIwMjYtMDEtMTU7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTE4IHdpdGggZWNvbm9taWMgaW1wYWN0IFVTRCAxNjU5OyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDA3NyBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTA3NyAvIFIxLgoK\",\"size\":426},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-077 \\u2014 operating request and source reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-077\",\"size\":1024},\"filename\":\"supplier-confirmation.pdf\"}]},\"snippet\":\" external operations desk ---\\nDate: 2026-01-12 11:25 Pacific\\nproject-specific supplier readiness: the independent source confirms readiness \",\"threadId\":\"thread-077\"},{\"id\":\"msg-077-2\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClByb2plY3QgdGVhbSBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgcHJvamVjdCBtaWxlc3RvbmUgc3VwcGx5IGJ5IDIwMjYtMDEtMjE7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIG1pbGVzdG9uZSBhcHByb3ZhbCwgcHJvamVjdCwgdGFzaywgcXVhbnRpdHksIGRlc3RpbmF0aW9uLCBhbmQgbmVlZC1ieS4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDc4IHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCg\",\"size\":337},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-077 \\u2014 operating request and source reply\"}]},\"snippet\":\" operations lead ---\\nDate: 2026-01-12 09:10 Pacific\\nProject team needs one defensible decision for project milestone supply by 2026-01-21; a\",\"threadId\":\"thread-077\"},{\"id\":\"msg-077-3\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIENvbW1vbiBvciBvdGhlci1wcm9qZWN0IGNvdmVyYWdlIGFuZCBsYXRlIHJlY2VpcHRzIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":214},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-077 \\u2014 operating request and source reply\"}]},\"snippet\":\" controller ---\\nDate: 2026-01-11 16:40 Pacific\\nReconcile the raw rows before acting. Common or other-project coverage and late receipts must\",\"threadId\":\"thread-077\"}]}",
         "task_id": "factorybench-077",
         "tool_name": "gmail.threads.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-077\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-077\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-077-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-077\",\"resolved\":false}",
-        "task_id": "factorybench-077",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-077\",\"pageSize\":100}",

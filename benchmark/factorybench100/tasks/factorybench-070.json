@@ -1504,7 +1504,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1852,6 +1852,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "manufacturing.engineering@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-070",
@@ -1861,7 +1867,8 @@
         ],
         "payload_text_contains": [
           "2026-01-18",
-          "create_scoped_pilot_order"
+          "create_scoped_pilot_order",
+          "manufacturing.engineering@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -1885,6 +1892,11 @@
             "fileId": "drive-070"
           },
           "tool": "google_drive.comments.create"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2590,6 +2602,66 @@
           "WorkOrderId": 100070
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-070",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-070",
+              "threadId": "thread-070"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-070",
+          "threadId": "thread-070"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-070",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-070"
+            },
+            "expected_result_contains": {
+              "id": "comment-070",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-070",
+          "resolved": false
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
       }
     ]
   },
@@ -2876,6 +2948,16 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "sent-070",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.messages.get"
+    },
+    {
+      "arguments": {
         "fileId": "drive-070",
         "requestBody": {
           "content": "CASE-070: create_scoped_pilot_order recorded on Oracle record NS-000070; completion 2026-01-18; constraint ECO release, prototype scope, lot separation, and start approval; production stock protected for customer orders = 7 EA; uncovered or unsupported scope = 7.0 EA; approval AP-0070."
@@ -2884,6 +2966,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "commentId": "comment-070",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-070"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
     },
     {
       "arguments": {
@@ -2957,6 +3049,66 @@
         "WorkOrderId": 100070
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-070",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-070",
+            "threadId": "thread-070"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-070",
+        "threadId": "thread-070"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-070",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-070"
+          },
+          "expected_result_contains": {
+            "id": "comment-070",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-070",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4140,10 +4292,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000070 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4430,13 +4584,31 @@
         "tool_name": "gmail.messages.send"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"sent-070\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-070-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-070\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy03MEBub3J0aHN0YXIuZXhhbXBsZQpUbzogbWFudWZhY3R1cmluZy5lbmdpbmVlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIHJhaW5pZXIuY29tcG9uZW50c0BzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wNzBAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDcwIOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIHJldmlzZWQtZGVzaWduIHBpbG90IGJ1aWxkCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKRW5naW5lZXJpbmcgd2FudHMgYSBwaWxvdCBidWlsZCBvZiB0aGUgcmV2aXNlZCBkZXNpZ24gYmVmb3JlIGJyb2FkZXIgcmVsZWFzZS4gRGV0ZXJtaW5lIHRoZSBxdWFudGl0eSwgcmV2aXNpb24sIGlzb2xhdGVkIG1hdGVyaWFsLCBmaXh0dXJlIGNvdmVyYWdlLCBhbmQgZmlyc3Qgc2xvdCB0aGUgYXBwcm92YWwgY2FuIHN1cHBvcnQsIHRoZW4gY29tcGFyZSB0aGF0IHBsYW4gd2l0aCB3YWl0aW5nIG9yIHJlZHVjaW5nIHNjb3BlLiBDcmVhdGUgb25seSB0aGUgYXBwcm92ZWQgcGlsb3Qgb3JkZXIuIElmIHRoZSBldmlkZW5jZSBzdGlsbCBjb25mbGljdHMsIGtlZXAgdGhlIHVuc3VwcG9ydGVkIHNjb3BlIHVuY2hhbmdlZCBhbmQgbGVhdmUgb3BlcmF0aW9ucyB3aXRoIHRoZSB1bnJlc29sdmVkIHJpc2sgYW5kIG93bmVyLgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnByb3RvdHlwZSBjb21wb25lbnQgcmVhZGluZXNzOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgdXNlX2N1c3RvbWVyX3Byb2R1Y3Rpb25fb3JkZXIgb24gMjAyNi0wMS0xNDsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTYgd2l0aCBlY29ub21pYyBpbXBhY3QgVVNEIDE1NDA7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDcwIGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDcwIC8gUjEuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpNYW51ZmFjdHVyaW5nIGVuZ2luZWVyaW5nIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciByZXZpc2VkLWRlc2lnbiBwaWxvdCBidWlsZCBieSAyMDI2LTAxLTE5OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBFQ08gcmVsZWFzZSwgcHJvdG90eXBlIHNjb3BlLCBsb3Qgc2VwYXJhdGlvbiwgYW5kIHN0YXJ0IGFwcHJvdmFsLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wNzEgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gUHJvZHVjdGlvbiBzdG9jayBwcm90ZWN0ZWQgZm9yIGN1c3RvbWVyIG9yZGVycyBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1905},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-070 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-070\",\"size\":1024},\"filename\":\"supplier-confirmation.pdf\"}]},\"snippet\":\"Engineering wants a pilot build of the revised design before broader release. Determine the quantity, revision, isolated material, fixture c\",\"threadId\":\"thread-070\"}",
+        "task_id": "factorybench-070",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"fileId\":\"drive-070\",\"requestBody\":{\"content\":\"CASE-070: create_scoped_pilot_order recorded on Oracle record NS-000070; completion 2026-01-18; constraint ECO release, prototype scope, lot separation, and start approval; production stock protected for customer orders = 7 EA; uncovered or unsupported scope = 7.0 EA; approval AP-0070.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-18\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-070\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-070: create_scoped_pilot_order recorded on Oracle record NS-000070; completion 2026-01-18; constraint ECO release, prototype scope, lot separation, and start approval; production stock protected for customer orders = 7 EA; uncovered or unsupported scope = 7.0 EA; approval AP-0070.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-070-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-070\"}",
-        "fixture_id": "factorybench-070-call-29",
+        "fixture_id": "factorybench-070-call-30",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-070: create_scoped_pilot_order recorded on Oracle record NS-000070; completion 2026-01-18; constraint ECO release, prototype scope, lot separation, and start approval; production stock protected for customer orders = 7 EA; uncovered or unsupported scope = 7.0 EA; approval AP-0070.\",\"id\":\"comment-070\",\"resolved\":false}",
         "task_id": "factorybench-070",
         "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"commentId\":\"comment-070\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-070\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-070-call-31",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-070\",\"resolved\":false}",
+        "task_id": "factorybench-070",
+        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-070\",\"userId\":\"me\"}",
@@ -4455,15 +4627,6 @@
         "response_json": "{\"historyId\":\"900070\",\"id\":\"thread-070\",\"messages\":[{\"id\":\"msg-070\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy03MEBub3J0aHN0YXIuZXhhbXBsZQpUbzogbWFudWZhY3R1cmluZy5lbmdpbmVlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIHJhaW5pZXIuY29tcG9uZW50c0BzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wNzBAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDcwIOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIHJldmlzZWQtZGVzaWduIHBpbG90IGJ1aWxkCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKRW5naW5lZXJpbmcgd2FudHMgYSBwaWxvdCBidWlsZCBvZiB0aGUgcmV2aXNlZCBkZXNpZ24gYmVmb3JlIGJyb2FkZXIgcmVsZWFzZS4gRGV0ZXJtaW5lIHRoZSBxdWFudGl0eSwgcmV2aXNpb24sIGlzb2xhdGVkIG1hdGVyaWFsLCBmaXh0dXJlIGNvdmVyYWdlLCBhbmQgZmlyc3Qgc2xvdCB0aGUgYXBwcm92YWwgY2FuIHN1cHBvcnQsIHRoZW4gY29tcGFyZSB0aGF0IHBsYW4gd2l0aCB3YWl0aW5nIG9yIHJlZHVjaW5nIHNjb3BlLiBDcmVhdGUgb25seSB0aGUgYXBwcm92ZWQgcGlsb3Qgb3JkZXIuIElmIHRoZSBldmlkZW5jZSBzdGlsbCBjb25mbGljdHMsIGtlZXAgdGhlIHVuc3VwcG9ydGVkIHNjb3BlIHVuY2hhbmdlZCBhbmQgbGVhdmUgb3BlcmF0aW9ucyB3aXRoIHRoZSB1bnJlc29sdmVkIHJpc2sgYW5kIG93bmVyLgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCg\",\"size\":866},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-070 \\u2014 operating request and source reply\"}]},\"snippet\":\"From: operations-70@northstar.example\\nTo: manufacturing.engineer@northstar.example\\nCc: controls@northstar.example, rainier.components@suppli\",\"threadId\":\"thread-070\"},{\"id\":\"msg-070-1\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnByb3RvdHlwZSBjb21wb25lbnQgcmVhZGluZXNzOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgdXNlX2N1c3RvbWVyX3Byb2R1Y3Rpb25fb3JkZXIgb24gMjAyNi0wMS0xNDsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTYgd2l0aCBlY29ub21pYyBpbXBhY3QgVVNEIDE1NDA7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDcwIGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDcwIC8gUjEuCgo\",\"size\":422},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-070 \\u2014 operating request and source reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-070\",\"size\":1024},\"filename\":\"supplier-confirmation.pdf\"}]},\"snippet\":\" external operations desk ---\\nDate: 2026-01-12 11:25 Pacific\\nprototype component readiness: the independent source confirms readiness for us\",\"threadId\":\"thread-070\"},{\"id\":\"msg-070-2\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCk1hbnVmYWN0dXJpbmcgZW5naW5lZXJpbmcgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHJldmlzZWQtZGVzaWduIHBpbG90IGJ1aWxkIGJ5IDIwMjYtMDEtMTk7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIEVDTyByZWxlYXNlLCBwcm90b3R5cGUgc2NvcGUsIGxvdCBzZXBhcmF0aW9uLCBhbmQgc3RhcnQgYXBwcm92YWwuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA3MSB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgo\",\"size\":347},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-070 \\u2014 operating request and source reply\"}]},\"snippet\":\" operations lead ---\\nDate: 2026-01-12 09:10 Pacific\\nManufacturing engineering needs one defensible decision for revised-design pilot build b\",\"threadId\":\"thread-070\"},{\"id\":\"msg-070-3\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIFByb2R1Y3Rpb24gc3RvY2sgcHJvdGVjdGVkIGZvciBjdXN0b21lciBvcmRlcnMgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":210},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-070 \\u2014 operating request and source reply\"}]},\"snippet\":\" controller ---\\nDate: 2026-01-11 16:40 Pacific\\nReconcile the raw rows before acting. Production stock protected for customer orders must rem\",\"threadId\":\"thread-070\"}]}",
         "task_id": "factorybench-070",
         "tool_name": "gmail.threads.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-070\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-070\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-070-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-070\",\"resolved\":false}",
-        "task_id": "factorybench-070",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-070\",\"pageSize\":100}",
@@ -4888,7 +5051,7 @@
       }
     ]
   },
-  "sequence_signature": "f36cc610a4ec9540d1274079f36b08359b0f25c66395b238bab9be77a1cc5b92",
+  "sequence_signature": "004d9046f2bb30ed1ccd9606daecdab130af0204ef0d781dd8b2bdc8e7d7d980",
   "task_id": "factorybench-070",
   "title": "Create a pilot work order for the revised design",
   "variant": null,

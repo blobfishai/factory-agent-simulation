@@ -30,7 +30,7 @@ completion is supporting evidence, not a second benchmark metric.
 
 ## Qualification results
 
-The v3.3 release executes 1,200 canonical trials:
+The v3.3 release executes 1,400 canonical trials:
 
 - 100/100 reference-oracle strict passes at 100.00 FactoryScore
 - 100/100 exact deterministic replay matches

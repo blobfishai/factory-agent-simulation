@@ -221,8 +221,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H18",
-            "spreadsheetId": "sheet-056"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-056 | transfer_supported_quantity | 2026-01-15 | NS-000056 | lot, ownership, transit, and destination reservation must remain valid; quarantined, project-owned, or safety-stock quantity = 11 EA; uncovered or unsupported scope = 10.0 EA | AP-0056"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-056",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -256,6 +266,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "material.control@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-056",
@@ -265,7 +281,8 @@
         ],
         "payload_text_contains": [
           "2026-01-15",
-          "transfer_supported_quantity"
+          "transfer_supported_quantity",
+          "material.control@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -912,6 +929,73 @@
           "InventoryItemId": 1400056
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H18",
+              "spreadsheetId": "sheet-056",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H18"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H18"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-056",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-056",
+              "message": {
+                "id": "draft-msg-056",
+                "threadId": "thread-056"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-056",
+          "message": {
+            "id": "draft-msg-056",
+            "threadId": "thread-056"
+          }
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
       }
     ]
   },
@@ -950,6 +1034,73 @@
         "InventoryItemId": 1400056
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H18",
+            "spreadsheetId": "sheet-056",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H18"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H18"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-056",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-056",
+            "message": {
+              "id": "draft-msg-056",
+              "threadId": "thread-056"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-056",
+        "message": {
+          "id": "draft-msg-056",
+          "threadId": "thread-056"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2098,10 +2249,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000056 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2388,9 +2541,18 @@
         "tool_name": "google_sheets.spreadsheets.values.update"
       },
       {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H18\",\"spreadsheetId\":\"sheet-056\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-056-call-29",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H18\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-056\",\"OBS-0056-1\",21,\"\",\"EA\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"source-plant available quantity after reservations\"],[\"CASE-056\",\"OBS-0056-2\",21,\"\",\"EA\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"source-plant available quantity after reservations\"],[\"CASE-056\",\"OBS-0056-3\",21,\"\",\"EA\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"source-plant available quantity after reservations\"],[\"CASE-056\",\"OBS-0056-4\",21,\"\",\"EA\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"source-plant available quantity after reservations\"],[\"CASE-056\",\"EXCL-0056-1\",\"\",6,\"EA\",\"R1\",\"SEA\",\"EXCLUDE\",\"quarantined, project-owned, or safety-stock quantity\"],[\"CASE-056\",\"EXCL-0056-2\",\"\",5,\"EA\",\"R1\",\"SEA\",\"EXCLUDE\",\"quarantined, project-owned, or safety-stock quantity\"],[\"CASE-057\",\"DISTRACTOR-CASE\",27,\"\",\"EA\",\"R1\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-056\",\"DISTRACTOR-REVISION\",20,\"\",\"EA\",\"R10\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-056\",\"DISTRACTOR-PLANT\",16,\"\",\"EA\",\"R1\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
+        "task_id": "factorybench-056",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
         "arguments_json": "{\"message\":{\"raw\":\"RnJvbTogaW52ZW50b3J5LmNvbnRyb2wubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG1hdGVyaWFsLmNvbnRyb2xAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDU2IOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogdHJhbnNmZXJfc3VwcG9ydGVkX3F1YW50aXR5LiBDb21wbGV0aW9uOiAyMDI2LTAxLTE1Lg0KQmluZGluZyBjb25zdHJhaW50OiBsb3QsIG93bmVyc2hpcCwgdHJhbnNpdCwgYW5kIGRlc3RpbmF0aW9uIHJlc2VydmF0aW9uIG11c3QgcmVtYWluIHZhbGlkOyBxdWFyYW50aW5lZCwgcHJvamVjdC1vd25lZCwgb3Igc2FmZXR5LXN0b2NrIHF1YW50aXR5ID0gMTEgRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDEwLjAgRUEuDQpBbHRlcm5hdGl2ZXM6IHRyYW5zZmVyX3N1cHBvcnRlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGRyYWluX3NvdXJjZV9zYWZldHlfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBidXlfbmV3X3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTE3LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwNTYuIEFwcHJvdmFsOiBBUC0wMDU2LiBDYXNlOiBDQVNFLTA1Ni4NCg\",\"threadId\":\"thread-056\"},\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-15\",\"payload_json\":\"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogaW52ZW50b3J5LmNvbnRyb2wubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG1hdGVyaWFsLmNvbnRyb2xAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDU2IOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogdHJhbnNmZXJfc3VwcG9ydGVkX3F1YW50aXR5LiBDb21wbGV0aW9uOiAyMDI2LTAxLTE1Lg0KQmluZGluZyBjb25zdHJhaW50OiBsb3QsIG93bmVyc2hpcCwgdHJhbnNpdCwgYW5kIGRlc3RpbmF0aW9uIHJlc2VydmF0aW9uIG11c3QgcmVtYWluIHZhbGlkOyBxdWFyYW50aW5lZCwgcHJvamVjdC1vd25lZCwgb3Igc2FmZXR5LXN0b2NrIHF1YW50aXR5ID0gMTEgRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDEwLjAgRUEuDQpBbHRlcm5hdGl2ZXM6IHRyYW5zZmVyX3N1cHBvcnRlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGRyYWluX3NvdXJjZV9zYWZldHlfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBidXlfbmV3X3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTE3LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwNTYuIEFwcHJvdmFsOiBBUC0wMDU2LiBDYXNlOiBDQVNFLTA1Ni4NCg\\\",\\\"threadId\\\":\\\"thread-056\\\"},\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.drafts.create\\\"}\",\"resource_id\":\"factorybench-056-mutation-03\",\"resource_type\":\"gmail.drafts\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-056\"}",
-        "fixture_id": "factorybench-056-call-29",
+        "fixture_id": "factorybench-056-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"draft-056\",\"message\":{\"id\":\"draft-msg-056\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-056\"}}",
         "task_id": "factorybench-056",
@@ -2399,7 +2561,7 @@
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-056\",\"userId\":\"me\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-056-discovery-01",
+        "fixture_id": "factorybench-056-call-31",
         "read_only": 1,
         "response_json": "{\"id\":\"draft-056\",\"message\":{\"id\":\"draft-msg-056\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-056\"}}",
         "task_id": "factorybench-056",
@@ -2440,15 +2602,6 @@
         "response_json": "{\"developerMetadata\":[{\"metadataKey\":\"case\",\"metadataValue\":\"CASE-056\"},{\"metadataKey\":\"sourceRevision\",\"metadataValue\":\"R1\"}],\"namedRanges\":[{\"name\":\"EligibleCoverage\",\"namedRangeId\":\"control-056\"},{\"name\":\"DecisionApprovals\",\"namedRangeId\":\"approval-056\"},{\"name\":\"DecisionAudit\",\"namedRangeId\":\"audit-056\"}],\"properties\":{\"title\":\"CASE-056 finite-capacity and coverage workbook\"},\"sheets\":[{\"properties\":{\"sheetId\":0,\"title\":\"Control\"}},{\"properties\":{\"sheetId\":1,\"title\":\"Approvals\"}},{\"properties\":{\"sheetId\":2,\"title\":\"Audit\"}}],\"spreadsheetId\":\"sheet-056\"}",
         "task_id": "factorybench-056",
         "tool_name": "google_sheets.spreadsheets.get"
-      },
-      {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-056\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-056-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-056\",\"OBS-0056-1\",21,\"\",\"EA\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"source-plant available quantity after reservations\"],[\"CASE-056\",\"OBS-0056-2\",21,\"\",\"EA\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"source-plant available quantity after reservations\"],[\"CASE-056\",\"OBS-0056-3\",21,\"\",\"EA\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"source-plant available quantity after reservations\"],[\"CASE-056\",\"OBS-0056-4\",21,\"\",\"EA\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"source-plant available quantity after reservations\"],[\"CASE-056\",\"EXCL-0056-1\",\"\",6,\"EA\",\"R1\",\"SEA\",\"EXCLUDE\",\"quarantined, project-owned, or safety-stock quantity\"],[\"CASE-056\",\"EXCL-0056-2\",\"\",5,\"EA\",\"R1\",\"SEA\",\"EXCLUDE\",\"quarantined, project-owned, or safety-stock quantity\"],[\"CASE-057\",\"DISTRACTOR-CASE\",27,\"\",\"EA\",\"R1\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-056\",\"DISTRACTOR-REVISION\",20,\"\",\"EA\",\"R10\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-056\",\"DISTRACTOR-PLANT\",16,\"\",\"EA\",\"R1\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-056",
-        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"channel\":\"C-PRODUCTION\",\"inclusive\":true,\"limit\":100,\"oldest\":\"1768000000.000000\"}",

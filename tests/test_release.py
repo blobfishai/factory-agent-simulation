@@ -23,13 +23,13 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
     harbor_tasks = list((RELEASE / "harbor" / "tasks").glob("*/task.toml"))
     harbor_manifest = tomllib.loads((RELEASE / "harbor" / "dataset.toml").read_text())
     assert qualification["qualification_passed"] is True
-    assert qualification["executions"] == 1200
+    assert qualification["executions"] == 1400
     assert qualification["determinism"] == {
         "replays": 100,
         "exact_episode_matches": 100,
         "mismatches": 0,
     }
-    assert len(qualification["negative_controls"]) == 10
+    assert len(qualification["negative_controls"]) == 12
     assert all(
         row["executions"] == 100
         and row["false_accepts"] == 0
@@ -196,7 +196,7 @@ def test_mcp_initialize_and_tool_list(tmp_path: Path) -> None:
     with FactoryWorld.fresh(task, tmp_path / "world.db") as world:
         initialized = handle_request(world, {"jsonrpc": "2.0", "id": 1, "method": "initialize"})
         listed = handle_request(world, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
-    assert initialized["result"]["serverInfo"] == {"name": "factorybench", "version": "3.3.2"}
+    assert initialized["result"]["serverInfo"] == {"name": "factorybench", "version": "3.3.3"}
     assert len(listed["result"]["tools"]) == len(tool_definitions())
     submit = next(tool for tool in listed["result"]["tools"] if tool["name"] == "factorybench.submit_answer")
     assert submit["inputSchema"] == task["answer_schema"]

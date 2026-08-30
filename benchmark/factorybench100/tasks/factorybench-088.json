@@ -1488,7 +1488,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1799,6 +1799,11 @@
           },
           "tool": "slack.chat_postMessage"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-088",
@@ -1832,6 +1837,11 @@
             "fileId": "drive-088"
           },
           "tool": "google_drive.comments.create"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2534,6 +2544,64 @@
           "InvoiceId": 900088
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PRODUCTION",
+              "limit": 100,
+              "ts": "1768000088.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-088",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-088"
+            },
+            "expected_result_contains": {
+              "id": "comment-088",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-088",
+          "resolved": false
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
       }
     ]
   },
@@ -2810,6 +2878,16 @@
     },
     {
       "arguments": {
+        "channel": "C-PRODUCTION",
+        "limit": 100,
+        "ts": "1768000088.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "fileId": "drive-088",
         "requestBody": {
           "content": "CASE-088: place_compliance_hold recorded on Oracle record NS-000088; completion 2026-01-14; constraint policy scope, supplier, item, reporting period, and invoice lines; covered value lacking the required report = 19578.0 USD; uncovered or unsupported scope = 19578.0 USD; approval AP-0088."
@@ -2818,6 +2896,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "commentId": "comment-088",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-088"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
     },
     {
       "arguments": {
@@ -2890,6 +2978,64 @@
         "InvoiceId": 900088
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PRODUCTION",
+            "limit": 100,
+            "ts": "1768000088.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-088",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-088"
+          },
+          "expected_result_contains": {
+            "id": "comment-088",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-088",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4081,10 +4227,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000088 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4373,11 +4521,20 @@
       {
         "arguments_json": "{\"fileId\":\"drive-088\",\"requestBody\":{\"content\":\"CASE-088: place_compliance_hold recorded on Oracle record NS-000088; completion 2026-01-14; constraint policy scope, supplier, item, reporting period, and invoice lines; covered value lacking the required report = 19578.0 USD; uncovered or unsupported scope = 19578.0 USD; approval AP-0088.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-088\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-088: place_compliance_hold recorded on Oracle record NS-000088; completion 2026-01-14; constraint policy scope, supplier, item, reporting period, and invoice lines; covered value lacking the required report = 19578.0 USD; uncovered or unsupported scope = 19578.0 USD; approval AP-0088.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-088-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-088\"}",
-        "fixture_id": "factorybench-088-call-29",
+        "fixture_id": "factorybench-088-call-30",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-088: place_compliance_hold recorded on Oracle record NS-000088; completion 2026-01-14; constraint policy scope, supplier, item, reporting period, and invoice lines; covered value lacking the required report = 19578.0 USD; uncovered or unsupported scope = 19578.0 USD; approval AP-0088.\",\"id\":\"comment-088\",\"resolved\":false}",
         "task_id": "factorybench-088",
         "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"commentId\":\"comment-088\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-088\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-088-call-31",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-088\",\"resolved\":false}",
+        "task_id": "factorybench-088",
+        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-088\",\"userId\":\"me\"}",
@@ -4405,15 +4562,6 @@
         "response_json": "{\"id\":\"msg-088\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy04OEBub3J0aHN0YXIuZXhhbXBsZQpUbzogY29tcGxpYW5jZS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgcmFpbmllci5jb21wb25lbnRzQHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTA4OEBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wODgg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3IgaW52b2ljZSBtaXNzaW5nIGNvbmZsaWN0LW1pbmVyYWxzIGV2aWRlbmNlCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQW4gaW52b2ljZSBpbmNsdWRlcyBjb3ZlcmVkIG1hdGVyaWFscyBidXQgdGhlIGN1cnJlbnQgY29uZmxpY3QtbWluZXJhbHMgZXZpZGVuY2UgbWF5IGJlIGluY29tcGxldGUuIERldGVybWluZSB0aGUgdmFsdWUgZXhwb3NlZCwgd2hhdCBsaW5lcyBoYXZlIHZhbGlkIHJlcG9ydGluZyBzdXBwb3J0LCBhbmQgd2hldGhlciBhIG5hcnJvdyBob2xkLCBjb3JyZWN0aW9uLCBvciBmdWxsIHBheW1lbnQgaXMganVzdGlmaWVkLiBQcm90ZWN0IG9ubHkgdGhlIHVuc3VwcG9ydGVkIGFtb3VudCBhbmQga2VlcCB1bnJlbGF0ZWQgaW52b2ljZXMgbW92aW5nLiBJZiB0aGUgZXZpZGVuY2Ugc3RpbGwgY29uZmxpY3RzLCBrZWVwIHRoZSB1bnN1cHBvcnRlZCBzY29wZSB1bmNoYW5nZWQgYW5kIGxlYXZlIG9wZXJhdGlvbnMgd2l0aCB0aGUgdW5yZXNvbHZlZCByaXNrIGFuZCBvd25lci4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpzdXBwbGllciByZXBvcnQgZGVsaXZlcnkgZGF0ZTogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIHBheV93aXRob3V0X3JlcG9ydCBvbiAyMDI2LTAxLTEzOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNSB3aXRoIGVjb25vbWljIGltcGFjdCBVU0QgMTk1Nzg7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDg4IGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDg4IC8gUjUuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpDb21wbGlhbmNlIGFuZCBvcGVyYXRpb25zIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciBpbnZvaWNlIG1pc3NpbmcgY29uZmxpY3QtbWluZXJhbHMgZXZpZGVuY2UgYnkgMjAyNi0wMS0xNDsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgcG9saWN5IHNjb3BlLCBzdXBwbGllciwgaXRlbSwgcmVwb3J0aW5nIHBlcmlvZCwgYW5kIGludm9pY2UgbGluZXMuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA4OSB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBDb3ZlcmVkIHZhbHVlIGxhY2tpbmcgdGhlIHJlcXVpcmVkIHJlcG9ydCBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1947},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-088 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-088\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\"An invoice includes covered materials but the current conflict-minerals evidence may be incomplete. Determine the value exposed, what lines \",\"threadId\":\"thread-088\"}",
         "task_id": "factorybench-088",
         "tool_name": "gmail.messages.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-088\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-088\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-088-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-088\",\"resolved\":false}",
-        "task_id": "factorybench-088",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-088\",\"pageSize\":100}",
@@ -4838,7 +4986,7 @@
       }
     ]
   },
-  "sequence_signature": "a2f8315e2a155152a9b11bed7c8364aabac56f9a2741bd9723b6a94f78fd990e",
+  "sequence_signature": "1ba16c4e90d3ec6b285c96eaed379a60189ac96f82566f16c444b40d02c48130",
   "task_id": "factorybench-088",
   "title": "Hold payment for a missing conflict-minerals report",
   "variant": null,

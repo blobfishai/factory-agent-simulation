@@ -696,7 +696,7 @@ def _website_data(
             },
             {
                 "title": "Qualification before publication",
-                "body": f"The release executes {qualification['executions']} canonical trials: 100 reference workflows, 100 exact replays, and 1,000 adversarial runs across {len(NEGATIVE_POLICIES)} controls. It also removes every reference mutation one at a time as a supplemental verifier test. Qualification passed: {qualification['oracle']['passes']}/100 oracle strict passes, {qualification['determinism']['exact_episode_matches']}/100 exact replay matches, and {sum(row['correct_rejections'] for row in qualification['negative_controls'].values())}/1,000 negative-control rejections.",
+                "body": f"The release executes {qualification['executions']} canonical trials: 100 reference workflows, 100 exact replays, and {100 * len(NEGATIVE_POLICIES):,} adversarial runs across {len(NEGATIVE_POLICIES)} controls. It also removes every reference mutation one at a time as a supplemental verifier test. Qualification passed: {qualification['oracle']['passes']}/100 oracle strict passes, {qualification['determinism']['exact_episode_matches']}/100 exact replay matches, and {sum(row['correct_rejections'] for row in qualification['negative_controls'].values())}/{100 * len(NEGATIVE_POLICIES):,} negative-control rejections.",
             },
             {
                 "title": "Public inspirations and design boundary",
@@ -999,7 +999,7 @@ reported only as supporting evidence.
 
 ## Qualification
 
-- Canonical executions: {qualification['executions']} (100 oracle + 100 exact replay + 1,000 adversarial controls)
+- Canonical executions: {qualification['executions']} (100 oracle + 100 exact replay + {100 * len(NEGATIVE_POLICIES):,} adversarial controls)
 - Reference oracle: {qualification['oracle']['mean_score']:.2f} FactoryScore, {qualification['oracle']['passes']}/{len(tasks)} strict passes
 - Exact deterministic replay: {qualification['determinism']['exact_episode_matches']}/{qualification['determinism']['replays']} matched
 - Negative controls: {sum(row['correct_rejections'] for row in qualification['negative_controls'].values())}/{sum(row['executions'] for row in qualification['negative_controls'].values())} correctly rejected across {len(NEGATIVE_POLICIES)} failure modes
@@ -1070,10 +1070,11 @@ or gold state.
 |---|---:|---:|
 {rows}
 
-The oracle is a solvability reference, not a model result. The ten negative
+The oracle is a solvability reference, not a model result. The {len(NEGATIVE_POLICIES)} negative
 controls cover no-op and shortcut behavior, missing handoff or evidence,
 write-before-read, missing readback, unauthorized mutation, incorrect values,
-incorrect operating choice, and substitution of stale or irrelevant evidence.
+incorrect operating choice, substitution of stale or irrelevant evidence, a correct
+write made to the wrong existing destination, and keyword-only collaboration output.
 All {sum(row['correct_rejections'] for row in qualification['negative_controls'].values())} adversarial executions are rejected.
 
 Release qualification also removes every reference mutation individually. All

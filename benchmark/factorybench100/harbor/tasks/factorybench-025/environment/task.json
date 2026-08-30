@@ -220,8 +220,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H27",
-            "spreadsheetId": "sheet-025"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-025 | create_recurring_program | 2026-01-15 | NS-000025 | the third qualifying alarm plus reliability approval triggers planned work; duplicate telemetry and acknowledged nuisance events = 2 ALARMS; uncovered or unsupported scope = 2.0 ALARMS | AP-0025"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-025",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -255,6 +265,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "production.operations@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-025",
@@ -264,7 +280,8 @@
         ],
         "payload_text_contains": [
           "2026-01-15",
-          "create_recurring_program"
+          "create_recurring_program",
+          "production.operations@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -905,6 +922,73 @@
           "MaintenanceProgramId": 500025
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H27",
+              "spreadsheetId": "sheet-025",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H27"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H27"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-025",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-025",
+              "message": {
+                "id": "draft-msg-025",
+                "threadId": "thread-025"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-025",
+          "message": {
+            "id": "draft-msg-025",
+            "threadId": "thread-025"
+          }
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
       }
     ]
   },
@@ -954,6 +1038,73 @@
         "MaintenanceProgramId": 500025
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H27",
+            "spreadsheetId": "sheet-025",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H27"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H27"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-025",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-025",
+            "message": {
+              "id": "draft-msg-025",
+              "threadId": "thread-025"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-025",
+        "message": {
+          "id": "draft-msg-025",
+          "threadId": "thread-025"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2061,10 +2212,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000025 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2351,9 +2504,18 @@
         "tool_name": "google_sheets.spreadsheets.values.update"
       },
       {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H27\",\"spreadsheetId\":\"sheet-025\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-025-call-29",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H27\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-025\",\"OBS-0025-1\",2,\"\",\"ALARMS\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"distinct alarms meeting duration and severity thresholds\"],[\"CASE-025\",\"OBS-0025-2\",2,\"\",\"ALARMS\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"distinct alarms meeting duration and severity thresholds\"],[\"CASE-025\",\"OBS-0025-3\",2,\"\",\"ALARMS\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"distinct alarms meeting duration and severity thresholds\"],[\"CASE-025\",\"OBS-0025-4\",1,\"\",\"ALARMS\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"distinct alarms meeting duration and severity thresholds\"],[\"CASE-025\",\"EXCL-0025-1\",\"\",1,\"ALARMS\",\"R5\",\"SEA\",\"EXCLUDE\",\"duplicate telemetry and acknowledged nuisance events\"],[\"CASE-025\",\"EXCL-0025-2\",\"\",1,\"ALARMS\",\"R5\",\"SEA\",\"EXCLUDE\",\"duplicate telemetry and acknowledged nuisance events\"],[\"CASE-026\",\"DISTRACTOR-CASE\",2,\"\",\"ALARMS\",\"R5\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-025\",\"DISTRACTOR-REVISION\",1,\"\",\"ALARMS\",\"R9\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-025\",\"DISTRACTOR-PLANT\",1,\"\",\"ALARMS\",\"R5\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
+        "task_id": "factorybench-025",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
         "arguments_json": "{\"message\":{\"raw\":\"RnJvbTogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHByb2R1Y3Rpb24ub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMjUg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBjcmVhdGVfcmVjdXJyaW5nX3Byb2dyYW0uIENvbXBsZXRpb246IDIwMjYtMDEtMTUuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHRoZSB0aGlyZCBxdWFsaWZ5aW5nIGFsYXJtIHBsdXMgcmVsaWFiaWxpdHkgYXBwcm92YWwgdHJpZ2dlcnMgcGxhbm5lZCB3b3JrOyBkdXBsaWNhdGUgdGVsZW1ldHJ5IGFuZCBhY2tub3dsZWRnZWQgbnVpc2FuY2UgZXZlbnRzID0gMiBBTEFSTVM7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDIuMCBBTEFSTVMuDQpBbHRlcm5hdGl2ZXM6IGNyZWF0ZV9yZWN1cnJpbmdfcHJvZ3JhbTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IG9wZW5fb25lX3RpbWVfcmVwYWlyOiBvdXRjb21lIDIwMjYtMDItMjIsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkVBU0lCTEVfV0lUSF9JTkZFUklPUl9UUkFERU9GRjsgY29udGludWVfbW9uaXRvcmluZzogb3V0Y29tZSAyMDI2LTAxLTE2LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwMjUuIEFwcHJvdmFsOiBBUC0wMDI1LiBDYXNlOiBDQVNFLTAyNS4NCg\",\"threadId\":\"thread-025\"},\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-15\",\"payload_json\":\"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHByb2R1Y3Rpb24ub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMjUg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBjcmVhdGVfcmVjdXJyaW5nX3Byb2dyYW0uIENvbXBsZXRpb246IDIwMjYtMDEtMTUuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHRoZSB0aGlyZCBxdWFsaWZ5aW5nIGFsYXJtIHBsdXMgcmVsaWFiaWxpdHkgYXBwcm92YWwgdHJpZ2dlcnMgcGxhbm5lZCB3b3JrOyBkdXBsaWNhdGUgdGVsZW1ldHJ5IGFuZCBhY2tub3dsZWRnZWQgbnVpc2FuY2UgZXZlbnRzID0gMiBBTEFSTVM7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDIuMCBBTEFSTVMuDQpBbHRlcm5hdGl2ZXM6IGNyZWF0ZV9yZWN1cnJpbmdfcHJvZ3JhbTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IG9wZW5fb25lX3RpbWVfcmVwYWlyOiBvdXRjb21lIDIwMjYtMDItMjIsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkVBU0lCTEVfV0lUSF9JTkZFUklPUl9UUkFERU9GRjsgY29udGludWVfbW9uaXRvcmluZzogb3V0Y29tZSAyMDI2LTAxLTE2LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwMjUuIEFwcHJvdmFsOiBBUC0wMDI1LiBDYXNlOiBDQVNFLTAyNS4NCg\\\",\\\"threadId\\\":\\\"thread-025\\\"},\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.drafts.create\\\"}\",\"resource_id\":\"factorybench-025-mutation-03\",\"resource_type\":\"gmail.drafts\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-025\"}",
-        "fixture_id": "factorybench-025-call-29",
+        "fixture_id": "factorybench-025-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"draft-025\",\"message\":{\"id\":\"draft-msg-025\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-025\"}}",
         "task_id": "factorybench-025",
@@ -2362,7 +2524,7 @@
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-025\",\"userId\":\"me\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-025-discovery-01",
+        "fixture_id": "factorybench-025-call-31",
         "read_only": 1,
         "response_json": "{\"id\":\"draft-025\",\"message\":{\"id\":\"draft-msg-025\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-025\"}}",
         "task_id": "factorybench-025",
@@ -2403,15 +2565,6 @@
         "response_json": "{\"developerMetadata\":[{\"metadataKey\":\"case\",\"metadataValue\":\"CASE-025\"},{\"metadataKey\":\"sourceRevision\",\"metadataValue\":\"R5\"}],\"namedRanges\":[{\"name\":\"EligibleCoverage\",\"namedRangeId\":\"control-025\"},{\"name\":\"DecisionApprovals\",\"namedRangeId\":\"approval-025\"},{\"name\":\"DecisionAudit\",\"namedRangeId\":\"audit-025\"}],\"properties\":{\"title\":\"CASE-025 finite-capacity and coverage workbook\"},\"sheets\":[{\"properties\":{\"sheetId\":0,\"title\":\"Control\"}},{\"properties\":{\"sheetId\":1,\"title\":\"Approvals\"}},{\"properties\":{\"sheetId\":2,\"title\":\"Audit\"}}],\"spreadsheetId\":\"sheet-025\"}",
         "task_id": "factorybench-025",
         "tool_name": "google_sheets.spreadsheets.get"
-      },
-      {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-025\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-025-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-025\",\"OBS-0025-1\",2,\"\",\"ALARMS\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"distinct alarms meeting duration and severity thresholds\"],[\"CASE-025\",\"OBS-0025-2\",2,\"\",\"ALARMS\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"distinct alarms meeting duration and severity thresholds\"],[\"CASE-025\",\"OBS-0025-3\",2,\"\",\"ALARMS\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"distinct alarms meeting duration and severity thresholds\"],[\"CASE-025\",\"OBS-0025-4\",1,\"\",\"ALARMS\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"distinct alarms meeting duration and severity thresholds\"],[\"CASE-025\",\"EXCL-0025-1\",\"\",1,\"ALARMS\",\"R5\",\"SEA\",\"EXCLUDE\",\"duplicate telemetry and acknowledged nuisance events\"],[\"CASE-025\",\"EXCL-0025-2\",\"\",1,\"ALARMS\",\"R5\",\"SEA\",\"EXCLUDE\",\"duplicate telemetry and acknowledged nuisance events\"],[\"CASE-026\",\"DISTRACTOR-CASE\",2,\"\",\"ALARMS\",\"R5\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-025\",\"DISTRACTOR-REVISION\",1,\"\",\"ALARMS\",\"R9\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-025\",\"DISTRACTOR-PLANT\",1,\"\",\"ALARMS\",\"R5\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-025",
-        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"MaintenanceProgramId\":500025}",

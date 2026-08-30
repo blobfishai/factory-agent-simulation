@@ -851,7 +851,7 @@
       "description": "Read NS-000090 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000090 back through the documented Oracle maintenance work orders.list operation after the mutation and confirmed the resource-specific changed fields ['AssetNumber', 'LastUpdateDate', 'OrganizationCode', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkOrderNumber', 'WorkOrderStatusCode'], including the effective update at 2026-01-16, rather than relying on the write acknowledgement.",
@@ -871,9 +871,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "google_drive.comments.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "gmail.drafts.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1000,7 +1030,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 43,
+  "passed_atomic_checks": 45,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1207,7 +1237,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-090",
-  "total_atomic_checks": 43,
+  "total_atomic_checks": 45,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -2878,13 +2908,29 @@
     },
     {
       "arguments": {
+        "commentId": "comment-090",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-090"
+      },
+      "index": 29,
+      "result": {
+        "content": "CASE-090: open_safety_corrective_work recorded on Oracle record NS-000090; completion 2026-01-16; constraint safety event, asset, control circuit, isolation, and approval; similar alarms and unrelated assets = 4 HR; uncovered or unsupported scope = 24.0 HR; approval AP-0090.",
+        "createdTime": "2026-01-12T16:00:00Z",
+        "id": "comment-090",
+        "resolved": false
+      },
+      "success": true,
+      "tool": "google_drive.comments.get"
+    },
+    {
+      "arguments": {
         "message": {
           "raw": "RnJvbTogY29tcGxpYW5jZS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogY29tcGxpYW5jZS5hbmQub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wOTAg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBvcGVuX3NhZmV0eV9jb3JyZWN0aXZlX3dvcmsuIENvbXBsZXRpb246IDIwMjYtMDEtMTYuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHNhZmV0eSBldmVudCwgYXNzZXQsIGNvbnRyb2wgY2lyY3VpdCwgaXNvbGF0aW9uLCBhbmQgYXBwcm92YWw7IHNpbWlsYXIgYWxhcm1zIGFuZCB1bnJlbGF0ZWQgYXNzZXRzID0gNCBIUjsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjQuMCBIUi4NCkFsdGVybmF0aXZlczogb3Blbl9zYWZldHlfY29ycmVjdGl2ZV93b3JrOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgcmVzZXRfYWxhcm1fd2l0aG91dF93b3JrOiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMTg4MCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBjb250aW51ZV91bmRlcl92ZXJiYWxfd2FpdmVyOiBvdXRjb21lIDIwMjYtMDEtMTQsIGVjb25vbWljIGltcGFjdCBVU0QgMzg5MCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA5MC4gQXBwcm92YWw6IEFQLTAwOTAuIENhc2U6IENBU0UtMDkwLg0K",
           "threadId": "thread-090"
         },
         "userId": "me"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "id": "draft-090",
         "message": {
@@ -2897,6 +2943,34 @@
       },
       "success": true,
       "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "draft-090",
+        "userId": "me"
+      },
+      "index": 31,
+      "result": {
+        "id": "draft-090",
+        "message": {
+          "id": "draft-msg-090",
+          "labelIds": [
+            "DRAFT"
+          ],
+          "payload": {
+            "body": {
+              "data": "RnJvbTogY29tcGxpYW5jZS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogY29tcGxpYW5jZS5hbmQub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wOTAg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBvcGVuX3NhZmV0eV9jb3JyZWN0aXZlX3dvcmsuIENvbXBsZXRpb246IDIwMjYtMDEtMTYuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHNhZmV0eSBldmVudCwgYXNzZXQsIGNvbnRyb2wgY2lyY3VpdCwgaXNvbGF0aW9uLCBhbmQgYXBwcm92YWw7IHNpbWlsYXIgYWxhcm1zIGFuZCB1bnJlbGF0ZWQgYXNzZXRzID0gNCBIUjsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjQuMCBIUi4NCkFsdGVybmF0aXZlczogb3Blbl9zYWZldHlfY29ycmVjdGl2ZV93b3JrOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgcmVzZXRfYWxhcm1fd2l0aG91dF93b3JrOiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMTg4MCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBjb250aW51ZV91bmRlcl92ZXJiYWxfd2FpdmVyOiBvdXRjb21lIDIwMjYtMDEtMTQsIGVjb25vbWljIGltcGFjdCBVU0QgMzg5MCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA5MC4gQXBwcm92YWw6IEFQLTAwOTAuIENhc2U6IENBU0UtMDkwLg0K",
+              "size": 1080
+            }
+          },
+          "raw": "RnJvbTogY29tcGxpYW5jZS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogY29tcGxpYW5jZS5hbmQub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wOTAg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBvcGVuX3NhZmV0eV9jb3JyZWN0aXZlX3dvcmsuIENvbXBsZXRpb246IDIwMjYtMDEtMTYuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHNhZmV0eSBldmVudCwgYXNzZXQsIGNvbnRyb2wgY2lyY3VpdCwgaXNvbGF0aW9uLCBhbmQgYXBwcm92YWw7IHNpbWlsYXIgYWxhcm1zIGFuZCB1bnJlbGF0ZWQgYXNzZXRzID0gNCBIUjsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjQuMCBIUi4NCkFsdGVybmF0aXZlczogb3Blbl9zYWZldHlfY29ycmVjdGl2ZV93b3JrOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgcmVzZXRfYWxhcm1fd2l0aG91dF93b3JrOiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMTg4MCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBjb250aW51ZV91bmRlcl92ZXJiYWxfd2FpdmVyOiBvdXRjb21lIDIwMjYtMDEtMTQsIGVjb25vbWljIGltcGFjdCBVU0QgMzg5MCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA5MC4gQXBwcm92YWw6IEFQLTAwOTAuIENhc2U6IENBU0UtMDkwLg0K",
+          "sizeEstimate": 1080,
+          "threadId": "thread-090"
+        }
+      },
+      "success": true,
+      "tool": "gmail.drafts.get"
     },
     {
       "arguments": {
@@ -2919,7 +2993,7 @@
         "selected_resource_or_control": "ASSET-090",
         "unavailable_or_protected_capacity": 4
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

@@ -860,7 +860,7 @@
       "description": "Read NS-000041 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000041 back through the documented Oracle invoices.get operation after the mutation and confirmed the resource-specific changed fields ['BusinessUnit', 'InvoiceNumber', 'LastUpdateDate', 'Supplier', 'ValidationStatus'], including the effective update at 2026-01-15, rather than relying on the write acknowledgement.",
@@ -880,9 +880,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "google_sheets.spreadsheets.values.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "slack.conversations_replies"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1009,7 +1039,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 42,
+  "passed_atomic_checks": 44,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1206,7 +1236,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-041",
-  "total_atomic_checks": 42,
+  "total_atomic_checks": 44,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -2640,16 +2670,108 @@
     },
     {
       "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "spreadsheetId": "sheet-041",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "index": 29,
+      "result": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-041",
+            "accounts_payable_specialist",
+            "validate_matched_invoice",
+            "2026-01-15",
+            "NS-000041",
+            "AP-0041"
+          ]
+        ]
+      },
+      "success": true,
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
         "channel": "C-PROCUREMENT",
         "name": "white_check_mark",
         "timestamp": "1768000041.000100"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "ok": true
       },
       "success": true,
       "tool": "slack.reactions_add"
+    },
+    {
+      "arguments": {
+        "channel": "C-PROCUREMENT",
+        "limit": 100,
+        "ts": "1768000041.000100"
+      },
+      "index": 31,
+      "result": {
+        "has_more": false,
+        "messages": [
+          {
+            "reactions": [
+              {
+                "count": 1,
+                "name": "white_check_mark",
+                "users": [
+                  "U-FACTORY-AGENT"
+                ]
+              }
+            ],
+            "text": "Accounts payable needs one defensible decision for supplier invoice INV-0041 by 2026-01-15; a faster or broader action has value only if it remains inside supplier, PO line, receipt, currency, tax, and tolerance must reconcile.",
+            "ts": "1768000041.000100",
+            "user": "U-OPS-LEAD"
+          },
+          {
+            "text": "I found 13127.25 USD on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.",
+            "ts": "1768000041.000150",
+            "user": "U-PLANNER"
+          },
+          {
+            "files": [
+              {
+                "id": "F-000041",
+                "mimetype": "application/pdf",
+                "name": "approval-and-impact-note.pdf",
+                "title": "CASE-041 approval and impact note"
+              }
+            ],
+            "text": "Approval AP-0041 permits one control-compliant action on NS-000041 up to 13127.25 USD, provided supplier, PO line, receipt, currency, tax, and tolerance must reconcile. It does not select an option in advance and does not authorize broader records or change_invoice_amount.",
+            "ts": "1768000041.000200",
+            "user": "U-APPROVER"
+          },
+          {
+            "text": "Protected load remains non-displaceable. The calendar for open accounting and payment cycle is the source for internal windows; the supplier response covers only its stated alternative.",
+            "ts": "1768000041.000240",
+            "user": "U-SCHEDULER"
+          },
+          {
+            "text": "Revision R10 and the CASE-042 record are visible in search but are not applicable to CASE-041.",
+            "ts": "1768000041.000270",
+            "user": "U-QUALITY"
+          },
+          {
+            "text": "Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction. Verify the persisted record after the Oracle call.",
+            "ts": "1768000041.000300",
+            "user": "U-CONTROLLER"
+          }
+        ],
+        "ok": true,
+        "response_metadata": {
+          "next_cursor": ""
+        }
+      },
+      "success": true,
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
@@ -2670,7 +2792,7 @@
         "recommended_outcome_date": "2026-01-15",
         "supported_amount_usd": 13127.25
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

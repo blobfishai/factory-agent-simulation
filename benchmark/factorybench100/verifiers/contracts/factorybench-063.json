@@ -95,8 +95,18 @@
       "milestone_id": "state.collaboration",
       "payload_contains": {
         "arguments": {
+          "includeValuesInResponse": true,
           "range": "Control!H25",
-          "spreadsheetId": "sheet-063"
+          "requestBody": {
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "CASE-063 | cancel_redundant_open_supply | 2026-01-13 | NS-000063 | demand deletion, pegging, downstream reservations, and cancellation cutoff; quantity reserved, received, or re-pegged = 7 EA; uncovered or unsupported scope = 17.0 EA | AP-0063"
+              ]
+            ]
+          },
+          "spreadsheetId": "sheet-063",
+          "valueInputOption": "RAW"
         },
         "tool": "google_sheets.spreadsheets.values.update"
       },
@@ -130,6 +140,12 @@
         },
         "tool": "gmail.drafts.create"
       },
+      "payload_email_to": "supply.planning@northstar.example",
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
+      },
       "payload_text_any_of": [
         [
           "CASE-063",
@@ -139,7 +155,8 @@
       ],
       "payload_text_contains": [
         "2026-01-13",
-        "cancel_redundant_open_supply"
+        "cancel_redundant_open_supply",
+        "supply.planning@northstar.example"
       ],
       "table": "resource_state",
       "values": {
@@ -804,6 +821,73 @@
         "POHeaderId": 2000063
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H25",
+            "spreadsheetId": "sheet-063",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H25"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H25"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-063",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-063",
+            "message": {
+              "id": "draft-msg-063",
+              "threadId": "thread-063"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-063",
+        "message": {
+          "id": "draft-msg-063",
+          "threadId": "thread-063"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ]
 }

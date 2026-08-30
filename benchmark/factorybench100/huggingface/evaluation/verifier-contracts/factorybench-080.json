@@ -105,8 +105,18 @@
       "milestone_id": "state.collaboration",
       "payload_contains": {
         "arguments": {
+          "includeValuesInResponse": true,
           "range": "Control!H2",
-          "spreadsheetId": "sheet-080"
+          "requestBody": {
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "CASE-080 | create_project_prototype_order | 2026-01-18 | NS-000080 | SOW, project/task, ECO revision, quantity, and isolated start window; customer-production stock and out-of-scope quantity = 14 EA; uncovered or unsupported scope = 17.0 EA | AP-0080"
+              ]
+            ]
+          },
+          "spreadsheetId": "sheet-080",
+          "valueInputOption": "RAW"
         },
         "tool": "google_sheets.spreadsheets.values.update"
       },
@@ -140,6 +150,12 @@
         },
         "tool": "gmail.drafts.create"
       },
+      "payload_email_to": "project.team@northstar.example",
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
+      },
       "payload_text_any_of": [
         [
           "CASE-080",
@@ -149,7 +165,8 @@
       ],
       "payload_text_contains": [
         "2026-01-18",
-        "create_project_prototype_order"
+        "create_project_prototype_order",
+        "project.team@northstar.example"
       ],
       "table": "resource_state",
       "values": {
@@ -839,6 +856,73 @@
         "WorkOrderId": 100080
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H2",
+            "spreadsheetId": "sheet-080",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H2"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H2"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-080",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-080",
+            "message": {
+              "id": "draft-msg-080",
+              "threadId": "thread-080"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-080",
+        "message": {
+          "id": "draft-msg-080",
+          "threadId": "thread-080"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ]
 }

@@ -882,7 +882,7 @@
       "description": "Read NS-000093 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000093 back through the documented Oracle invoices.get operation after the mutation and confirmed the resource-specific changed fields ['InvoiceId', 'LastUpdateDate', 'invoiceHolds'], including the effective update at 2026-01-15, rather than relying on the write acknowledgement.",
@@ -902,9 +902,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "slack.conversations_replies"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "gmail.drafts.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1031,7 +1061,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 44,
+  "passed_atomic_checks": 46,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1238,7 +1268,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-093",
-  "total_atomic_checks": 44,
+  "total_atomic_checks": 46,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -2782,13 +2812,79 @@
     },
     {
       "arguments": {
+        "channel": "C-PROCUREMENT",
+        "limit": 100,
+        "ts": "1768000093.000100"
+      },
+      "index": 29,
+      "result": {
+        "has_more": false,
+        "messages": [
+          {
+            "reactions": [
+              {
+                "count": 1,
+                "name": "white_check_mark",
+                "users": [
+                  "U-FACTORY-AGENT"
+                ]
+              }
+            ],
+            "text": "Plant controller needs one defensible decision for suspected duplicate invoice by 2026-01-15; a faster or broader action has value only if it remains inside supplier, number normalization, date, amount, PO, and attachment hash must match after legitimate tax and credit differences are removed.",
+            "ts": "1768000093.000100",
+            "user": "U-OPS-LEAD"
+          },
+          {
+            "text": "I found 20264.25 USD on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.",
+            "ts": "1768000093.000150",
+            "user": "U-PLANNER"
+          },
+          {
+            "files": [
+              {
+                "id": "F-000093",
+                "mimetype": "application/pdf",
+                "name": "approval-and-impact-note.pdf",
+                "title": "CASE-093 approval and impact note"
+              }
+            ],
+            "text": "Approval AP-0093 permits one control-compliant action on NS-000093 up to 0.0 USD, provided supplier, number normalization, date, amount, PO, and attachment hash must match after legitimate tax and credit differences are removed. It does not select an option in advance and does not authorize broader records or pay_second_invoice.",
+            "ts": "1768000093.000200",
+            "user": "U-APPROVER"
+          },
+          {
+            "text": "Protected load remains non-displaceable. The calendar for payment-run cutoff is the source for internal windows; the supplier response covers only its stated alternative.",
+            "ts": "1768000093.000240",
+            "user": "U-SCHEDULER"
+          },
+          {
+            "text": "Revision R8 and the CASE-094 record are visible in search but are not applicable to CASE-093.",
+            "ts": "1768000093.000270",
+            "user": "U-QUALITY"
+          },
+          {
+            "text": "Required closeout records: mark the existing operations thread complete with the approved check reaction; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.",
+            "ts": "1768000093.000300",
+            "user": "U-CONTROLLER"
+          }
+        ],
+        "ok": true,
+        "response_metadata": {
+          "next_cursor": ""
+        }
+      },
+      "success": true,
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "message": {
           "raw": "RnJvbTogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHBsYW50LmNvbnRyb2xsZXJAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDkzIOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogaG9sZF9jb25maXJtZWRfZHVwbGljYXRlLiBDb21wbGV0aW9uOiAyMDI2LTAxLTE1Lg0KQmluZGluZyBjb25zdHJhaW50OiBzdXBwbGllciwgbnVtYmVyIG5vcm1hbGl6YXRpb24sIGRhdGUsIGFtb3VudCwgUE8sIGFuZCBhdHRhY2htZW50IGhhc2ggbXVzdCBtYXRjaCBhZnRlciBsZWdpdGltYXRlIHRheCBhbmQgY3JlZGl0IGRpZmZlcmVuY2VzIGFyZSByZW1vdmVkOyBhbW91bnQgYWxyZWFkeSByZXByZXNlbnRlZCBieSB0aGUgb3JpZ2luYWwgaW52b2ljZSA9IDIwMjY0LjI1IFVTRDsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjAyNjQuMjUgVVNELg0KQWx0ZXJuYXRpdmVzOiBob2xkX2NvbmZpcm1lZF9kdXBsaWNhdGU6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTVVBQT1JURURfQU5EX0FQUFJPVkVEOyBob2xkX2JvdGhfaW52b2ljZXM6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCAyMDI2NCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBwYXlfc2Vjb25kX2ludm9pY2U6IG91dGNvbWUgMjAyNi0wMS0xNywgZWNvbm9taWMgaW1wYWN0IFVTRCAyMDI2NCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA5My4gQXBwcm92YWw6IEFQLTAwOTMuIENhc2U6IENBU0UtMDkzLg0K",
           "threadId": "thread-093"
         },
         "userId": "me"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "id": "draft-093",
         "message": {
@@ -2801,6 +2897,34 @@
       },
       "success": true,
       "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "draft-093",
+        "userId": "me"
+      },
+      "index": 31,
+      "result": {
+        "id": "draft-093",
+        "message": {
+          "id": "draft-msg-093",
+          "labelIds": [
+            "DRAFT"
+          ],
+          "payload": {
+            "body": {
+              "data": "RnJvbTogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHBsYW50LmNvbnRyb2xsZXJAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDkzIOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogaG9sZF9jb25maXJtZWRfZHVwbGljYXRlLiBDb21wbGV0aW9uOiAyMDI2LTAxLTE1Lg0KQmluZGluZyBjb25zdHJhaW50OiBzdXBwbGllciwgbnVtYmVyIG5vcm1hbGl6YXRpb24sIGRhdGUsIGFtb3VudCwgUE8sIGFuZCBhdHRhY2htZW50IGhhc2ggbXVzdCBtYXRjaCBhZnRlciBsZWdpdGltYXRlIHRheCBhbmQgY3JlZGl0IGRpZmZlcmVuY2VzIGFyZSByZW1vdmVkOyBhbW91bnQgYWxyZWFkeSByZXByZXNlbnRlZCBieSB0aGUgb3JpZ2luYWwgaW52b2ljZSA9IDIwMjY0LjI1IFVTRDsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjAyNjQuMjUgVVNELg0KQWx0ZXJuYXRpdmVzOiBob2xkX2NvbmZpcm1lZF9kdXBsaWNhdGU6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTVVBQT1JURURfQU5EX0FQUFJPVkVEOyBob2xkX2JvdGhfaW52b2ljZXM6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCAyMDI2NCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBwYXlfc2Vjb25kX2ludm9pY2U6IG91dGNvbWUgMjAyNi0wMS0xNywgZWNvbm9taWMgaW1wYWN0IFVTRCAyMDI2NCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA5My4gQXBwcm92YWw6IEFQLTAwOTMuIENhc2U6IENBU0UtMDkzLg0K",
+              "size": 1176
+            }
+          },
+          "raw": "RnJvbTogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHBsYW50LmNvbnRyb2xsZXJAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDkzIOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogaG9sZF9jb25maXJtZWRfZHVwbGljYXRlLiBDb21wbGV0aW9uOiAyMDI2LTAxLTE1Lg0KQmluZGluZyBjb25zdHJhaW50OiBzdXBwbGllciwgbnVtYmVyIG5vcm1hbGl6YXRpb24sIGRhdGUsIGFtb3VudCwgUE8sIGFuZCBhdHRhY2htZW50IGhhc2ggbXVzdCBtYXRjaCBhZnRlciBsZWdpdGltYXRlIHRheCBhbmQgY3JlZGl0IGRpZmZlcmVuY2VzIGFyZSByZW1vdmVkOyBhbW91bnQgYWxyZWFkeSByZXByZXNlbnRlZCBieSB0aGUgb3JpZ2luYWwgaW52b2ljZSA9IDIwMjY0LjI1IFVTRDsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjAyNjQuMjUgVVNELg0KQWx0ZXJuYXRpdmVzOiBob2xkX2NvbmZpcm1lZF9kdXBsaWNhdGU6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTVVBQT1JURURfQU5EX0FQUFJPVkVEOyBob2xkX2JvdGhfaW52b2ljZXM6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCAyMDI2NCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBwYXlfc2Vjb25kX2ludm9pY2U6IG91dGNvbWUgMjAyNi0wMS0xNywgZWNvbm9taWMgaW1wYWN0IFVTRCAyMDI2NCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA5My4gQXBwcm92YWw6IEFQLTAwOTMuIENhc2U6IENBU0UtMDkzLg0K",
+          "sizeEstimate": 1176,
+          "threadId": "thread-093"
+        }
+      },
+      "success": true,
+      "tool": "gmail.drafts.get"
     },
     {
       "arguments": {
@@ -2823,7 +2947,7 @@
         "recommended_outcome_date": "2026-01-15",
         "supported_amount_usd": 0.0
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {
