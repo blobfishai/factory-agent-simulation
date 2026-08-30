@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
+import sys
 
 from factorybench.catalog import build_catalog
 from factorybench.evaluation import verify_episode
@@ -23,6 +25,33 @@ def _bundle(tmp_path: Path, task: dict) -> Path:
     bundle.mkdir()
     (bundle / "task.json").write_text(json.dumps(task), encoding="utf-8")
     return bundle
+
+
+def test_bridge_reads_a_complete_request_larger_than_one_pipe_buffer(tmp_path: Path) -> None:
+    task = build_catalog()[0]
+    bundle = _bundle(tmp_path, task)
+    request = json.dumps({"action": "reset", "padding": "x" * 200_000}).encode()
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "factorybench.sandbox_bridge",
+            "--bundle-root",
+            str(bundle),
+            "--session-dir",
+            str(tmp_path / "large-request-session"),
+        ],
+        input=request,
+        capture_output=True,
+        check=False,
+        timeout=30,
+    )
+
+    assert completed.returncode == 0, completed.stderr.decode()
+    response = json.loads(completed.stdout)
+    assert response["ok"] is True
+    assert response["trace"] == []
 
 
 def test_sandbox_bridge_persists_a_real_isolated_episode(tmp_path: Path) -> None:

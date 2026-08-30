@@ -12,6 +12,7 @@ import fcntl
 import json
 import os
 from pathlib import Path
+import sys
 from typing import Any
 
 try:
@@ -43,7 +44,7 @@ MAX_TRACE_CALLS = 128
 
 
 def _read_request() -> dict[str, Any]:
-    raw = os.read(0, MAX_REQUEST_BYTES + 1)
+    raw = sys.stdin.buffer.read(MAX_REQUEST_BYTES + 1)
     if not raw:
         raise ValueError("request body is required")
     if len(raw) > MAX_REQUEST_BYTES:
