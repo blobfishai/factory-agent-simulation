@@ -1527,7 +1527,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.1",
+  "benchmark_version": "3.3.2",
   "decision_model": {
     "calculations": [
       {
@@ -2514,6 +2514,31 @@
         "id": "investigation_14",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-095\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-095"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-095 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_15",
+        "milestone_id": "investigation.scope",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -2775,6 +2800,26 @@
       "control": true,
       "phase": "investigation",
       "tool": "oracle_fusion.maintenance_operations.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-095\"",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-095",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -3181,6 +3226,35 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.maintenance_operations.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-095\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-095"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-095",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-095",
+        "threadId": "thread-095"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -3638,6 +3712,31 @@
       "id": "investigation_14",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-095\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-095"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-095 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_15",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -3819,6 +3918,22 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.maintenance_operations.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-095\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-095"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     }
   ],
   "required_reads": [
@@ -3835,16 +3950,18 @@
     "oracle_fusion.maintenance_resources.list",
     "oracle_fusion.purchase_order_lines.list",
     "oracle_fusion.maintenance_work_orders.get",
-    "oracle_fusion.maintenance_operations.list"
+    "oracle_fusion.maintenance_operations.list",
+    "gmail.messages.list"
   ],
   "role": "plant_controller",
   "rubric_milestones": [
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 3.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_01",
-        "investigation_02"
+        "investigation_02",
+        "investigation_15"
       ],
       "description": "Establish the isolated CASE-095 scope and immutable identities across the mailbox, Drive index, and mounted systems before relying on similarly named records.",
       "id": "investigation.scope",
@@ -4219,9 +4336,27 @@
         "tool_name": "oracle_fusion.maintenance_operations.list"
       },
       {
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-095\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-095-call-24",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-095\",\"threadId\":\"thread-095\"},{\"id\":\"msg-095-1\",\"threadId\":\"thread-095\"},{\"id\":\"msg-095-2\",\"threadId\":\"thread-095\"},{\"id\":\"msg-095-3\",\"threadId\":\"thread-095\"}],\"resultSizeEstimate\":4}",
+        "task_id": "factorybench-095",
+        "tool_name": "gmail.messages.list"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-095\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-095-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-095\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy05NUBub3J0aHN0YXIuZXhhbXBsZQpUbzogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIG9seW1waWMubWV0cm9sb2d5QHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTA5NUBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wOTUg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3Igb21pdHRlZCBtYWludGVuYW5jZSBsYWJvcgpNSU1FLVZlcnNpb246IDEuMApDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgKCkEgbWFpbnRlbmFuY2UgbGFib3IgY2hhcmdlIHdhcyBvbWl0dGVkIGZyb20gdGhlIHBlcmlvZCwgYnV0IHRoZSBzb3VyY2UgaG91cnMgYW5kIHJhdGUgbXVzdCBiZSBkZWZlbnNpYmxlLiBEZXRlcm1pbmUgd2hhdCB0ZWNobmljaWFuIHRpbWUgYmVsb25ncyB0byB0aGUgY29ycmVjdCBvcmRlciBhbmQgZGF0ZSwgcXVhbnRpZnkgYW55IGR1cGxpY2F0ZSBvciB1bnN1cHBvcnRlZCBhbW91bnQsIGFuZCBkZWNpZGUgd2hldGhlciB0aGUgb3BlbiBwZXJpb2QgcGVybWl0cyBwb3N0aW5nIG5vdy4gUmVjb3JkIG9ubHkgdGhlIHN1cHBvcnRlZCBjaGFyZ2UuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKc3VwZXJ2aXNvciB0aW1lY2FyZCBhcHByb3ZhbDogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGVzdGltYXRlX21pc3NpbmdfaG91cnMgb24gMjAyNi0wMS0xNTsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTggd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDk1IGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDk1IC8gUjUuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpQbGFudCBjb250cm9sbGVyIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciBvbWl0dGVkIG1haW50ZW5hbmNlIGxhYm9yIGJ5IDIwMjYtMDEtMTc7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIHRlY2huaWNpYW4sIGFzc2V0LCBtYWludGVuYW5jZSBvcmRlciwgcmF0ZSwgdGltZWNhcmQsIGFuZCBwZXJpb2QuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA5NiB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBEdXBsaWNhdGUsIHVucmVsYXRlZCwgb3IgcG9zdC1jdXRvZmYgaG91cnMgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1783},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-095 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-095\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\"A maintenance labor charge was omitted from the period, but the source hours and rate must be defensible. Determine what technician time bel\",\"threadId\":\"thread-095\"}",
+        "task_id": "factorybench-095",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"ResourceTransactionDetail\":[{\"OrganizationCode\":\"SEA\",\"ResourceCode\":\"MAINT-RES-CERT-095\",\"TransactionQuantity\":8.5,\"TransactionUnitOfMeasure\":\"HR\",\"WoOperationSequenceNumber\":10,\"WorkOrderNumber\":\"MWO-0095\"}],\"SourceSystemCode\":\"FUSION_MOBILE\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"MAINT-RES-CERT-095\\\",\\\"TransactionQuantity\\\":8.5,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"MWO-0095\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"tool\\\":\\\"oracle_fusion.resource_transactions.create\\\"}\",\"resource_id\":\"factorybench-095-mutation-01\",\"resource_type\":\"oracle_fusion.resource_transactions\",\"revision\":1,\"status\":\"Maintenance labor posted\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-095\"}",
-        "fixture_id": "factorybench-095-call-24",
+        "fixture_id": "factorybench-095-call-26",
         "read_only": 0,
         "response_json": "{\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"RequestStatus\":\"PENDING\",\"ResourceTransactionHeaderId\":3200095,\"SourceSystemCode\":\"FUSION_MOBILE\",\"links\":[]}",
         "task_id": "factorybench-095",
@@ -4230,7 +4365,7 @@
       {
         "arguments_json": "{\"channel\":\"C-FINANCE\",\"text\":\"CASE-095: Oracle record NS-000095 now reflects post_supported_maintenance_labor with completion 2026-01-17. Binding constraint: technician, asset, maintenance order, rate, timecard, and period; duplicate, unrelated, or post-cutoff hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD. Alternatives: post_supported_maintenance_labor: outcome 2026-01-17, economic impact USD 0, SUPPORTED_AND_APPROVED; estimate_missing_hours: outcome 2026-01-18, economic impact USD 0, FAILS_CURRENT_CONTROL; defer_current_period_charge: outcome 2026-01-19, economic impact USD 782, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0095.\",\"thread_ts\":\"1768000095.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-FINANCE\\\",\\\"text\\\":\\\"CASE-095: Oracle record NS-000095 now reflects post_supported_maintenance_labor with completion 2026-01-17. Binding constraint: technician, asset, maintenance order, rate, timecard, and period; duplicate, unrelated, or post-cutoff hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD. Alternatives: post_supported_maintenance_labor: outcome 2026-01-17, economic impact USD 0, SUPPORTED_AND_APPROVED; estimate_missing_hours: outcome 2026-01-18, economic impact USD 0, FAILS_CURRENT_CONTROL; defer_current_period_charge: outcome 2026-01-19, economic impact USD 782, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0095.\\\",\\\"thread_ts\\\":\\\"1768000095.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-095-mutation-02\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-095\"}",
-        "fixture_id": "factorybench-095-call-26",
+        "fixture_id": "factorybench-095-call-28",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-FINANCE\",\"message\":{\"text\":\"CASE-095: Oracle record NS-000095 now reflects post_supported_maintenance_labor with completion 2026-01-17. Binding constraint: technician, asset, maintenance order, rate, timecard, and period; duplicate, unrelated, or post-cutoff hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD. Alternatives: post_supported_maintenance_labor: outcome 2026-01-17, economic impact USD 0, SUPPORTED_AND_APPROVED; estimate_missing_hours: outcome 2026-01-18, economic impact USD 0, FAILS_CURRENT_CONTROL; defer_current_period_charge: outcome 2026-01-19, economic impact USD 782, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0095.\",\"thread_ts\":\"1768000095.000100\"},\"ok\":true,\"ts\":\"1768000095.000900\"}",
         "task_id": "factorybench-095",
@@ -4239,7 +4374,7 @@
       {
         "arguments_json": "{\"fileId\":\"drive-095\",\"requestBody\":{\"content\":\"CASE-095: post_supported_maintenance_labor recorded on Oracle record NS-000095; completion 2026-01-17; constraint technician, asset, maintenance order, rate, timecard, and period; duplicate, unrelated, or post-cutoff hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0095.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-095\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-095: post_supported_maintenance_labor recorded on Oracle record NS-000095; completion 2026-01-17; constraint technician, asset, maintenance order, rate, timecard, and period; duplicate, unrelated, or post-cutoff hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0095.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-095-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-095\"}",
-        "fixture_id": "factorybench-095-call-27",
+        "fixture_id": "factorybench-095-call-29",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-095: post_supported_maintenance_labor recorded on Oracle record NS-000095; completion 2026-01-17; constraint technician, asset, maintenance order, rate, timecard, and period; duplicate, unrelated, or post-cutoff hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0095.\",\"id\":\"comment-095\",\"resolved\":false}",
         "task_id": "factorybench-095",
@@ -4262,24 +4397,6 @@
         "response_json": "{\"data\":\"T0xZTVBJQyBNRVRST0xPR1kg4oCUIENPTlRST0xMRUQgQ09NTUVSQ0lBTCAvIFNFUlZJQ0UgUkVDT1JECkRvY3VtZW50OiBtYWludGVuYW5jZS10aW1lY2FyZC1hbmQtY29zdC1yZWNvbmNpbGlhdGlvbi0wMDk1CkNhc2UgcmVmZXJlbmNlOiBDQVNFLTA5NQpJc3N1ZWQ6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpWYWxpZCB0aHJvdWdoOiAyMDI2LTAxLTE5CgoxLiBSRUZFUkVOQ0VEIFNDT1BFClNvdXJjZSBzdWJqZWN0OiBtYWludGVuYW5jZSB0aW1lY2FyZCBhbmQgY29zdCByZWNvbmNpbGlhdGlvbgpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDk1CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFI1Ck1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogOC41IEhSClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IGVzdGltYXRlX21pc3NpbmdfaG91cnMKU3RhbmRhcmQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTQKRXhwZWRpdGVkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTE1ClJlc3VsdGluZyBvcGVyYXRpbmcgb3V0Y29tZSBzdGF0ZWQgYnkgcmVxdWVzdGVyLCBub3QgYnkgY291bnRlcnBhcnR5OiAyMDI2LTAxLTE4CkVjb25vbWljIGltcGFjdCBzdGF0ZWQgYnkgY291bnRlcnBhcnR5OiBVU0QgMApJbmRlcGVuZGVudCBjb25kaXRpb246IHN1cGVydmlzb3IgdGltZWNhcmQgYXBwcm92YWwKQ2FwYWNpdHkgaXMgcmVzZXJ2ZWQgb25seSBhZnRlciB0aGUgYnV5ZXIgb3IgcGxhbm5lciBzdXBwbGllcyB0aGUgbWF0Y2hpbmcgaW1tdXRhYmxlIHJlY29yZCBhbmQgY3VycmVudCBhcHByb3ZhbC4KCjMuIEVYQ0xVU0lPTlMgQU5EIEFTU1VNUFRJT05TCk5vdCBpbmNsdWRlZDogZHVwbGljYXRlLCB1bnJlbGF0ZWQsIG9yIHBvc3QtY3V0b2ZmIGhvdXJzCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IHRlY2huaWNpYW4sIGFzc2V0LCBtYWludGVuYW5jZSBvcmRlciwgcmF0ZSwgdGltZWNhcmQsIGFuZCBwZXJpb2QKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDk2IGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogT2x5bXBpYyBNZXRyb2xvZ3kgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwOTUKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo\",\"size\":1538}",
         "task_id": "factorybench-095",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-095\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-095-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-095\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy05NUBub3J0aHN0YXIuZXhhbXBsZQpUbzogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIG9seW1waWMubWV0cm9sb2d5QHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTA5NUBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wOTUg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3Igb21pdHRlZCBtYWludGVuYW5jZSBsYWJvcgpNSU1FLVZlcnNpb246IDEuMApDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgKCkEgbWFpbnRlbmFuY2UgbGFib3IgY2hhcmdlIHdhcyBvbWl0dGVkIGZyb20gdGhlIHBlcmlvZCwgYnV0IHRoZSBzb3VyY2UgaG91cnMgYW5kIHJhdGUgbXVzdCBiZSBkZWZlbnNpYmxlLiBEZXRlcm1pbmUgd2hhdCB0ZWNobmljaWFuIHRpbWUgYmVsb25ncyB0byB0aGUgY29ycmVjdCBvcmRlciBhbmQgZGF0ZSwgcXVhbnRpZnkgYW55IGR1cGxpY2F0ZSBvciB1bnN1cHBvcnRlZCBhbW91bnQsIGFuZCBkZWNpZGUgd2hldGhlciB0aGUgb3BlbiBwZXJpb2QgcGVybWl0cyBwb3N0aW5nIG5vdy4gUmVjb3JkIG9ubHkgdGhlIHN1cHBvcnRlZCBjaGFyZ2UuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKc3VwZXJ2aXNvciB0aW1lY2FyZCBhcHByb3ZhbDogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGVzdGltYXRlX21pc3NpbmdfaG91cnMgb24gMjAyNi0wMS0xNTsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTggd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDk1IGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDk1IC8gUjUuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpQbGFudCBjb250cm9sbGVyIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciBvbWl0dGVkIG1haW50ZW5hbmNlIGxhYm9yIGJ5IDIwMjYtMDEtMTc7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIHRlY2huaWNpYW4sIGFzc2V0LCBtYWludGVuYW5jZSBvcmRlciwgcmF0ZSwgdGltZWNhcmQsIGFuZCBwZXJpb2QuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA5NiB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBEdXBsaWNhdGUsIHVucmVsYXRlZCwgb3IgcG9zdC1jdXRvZmYgaG91cnMgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1783},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-095 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-095\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\"A maintenance labor charge was omitted from the period, but the source hours and rate must be defensible. Determine what technician time bel\",\"threadId\":\"thread-095\"}",
-        "task_id": "factorybench-095",
-        "tool_name": "gmail.messages.get"
-      },
-      {
-        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-095\\\"\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-095-discovery-04",
-        "read_only": 1,
-        "response_json": "{\"messages\":[{\"id\":\"msg-095\",\"threadId\":\"thread-095\"},{\"id\":\"msg-095-1\",\"threadId\":\"thread-095\"},{\"id\":\"msg-095-2\",\"threadId\":\"thread-095\"},{\"id\":\"msg-095-3\",\"threadId\":\"thread-095\"}],\"resultSizeEstimate\":4}",
-        "task_id": "factorybench-095",
-        "tool_name": "gmail.messages.list"
       },
       {
         "arguments_json": "{\"commentId\":\"comment-095\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-095\"}",
@@ -4695,7 +4812,7 @@
       }
     ]
   },
-  "sequence_signature": "1c5030affdde71b9bc6d179ead8d7c1b82f89a93a2daa470e536d6896a774560",
+  "sequence_signature": "38bf727c897d125d5b549a97fc1305873a9caa3c7a573cefef28d884ad792018",
   "task_id": "factorybench-095",
   "title": "Post an omitted maintenance labor charge",
   "variant": null,

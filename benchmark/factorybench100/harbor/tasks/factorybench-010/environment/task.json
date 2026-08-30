@@ -884,6 +884,40 @@
         "id": "investigation_15",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-010",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-010",
+              "threadId": "thread-010"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-010",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-010"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-14 readiness input for assign_certified_contractor, then separately derived its 2026-01-16 operating outcome under worker certification, approved rate, and remaining assignment capacity instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "milestone_id": "investigation.requirements",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -1260,6 +1294,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.work_orders.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-010",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-010",
+        "threadId": "thread-010"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -1753,6 +1800,40 @@
       "id": "investigation_15",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-010",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-010",
+            "threadId": "thread-010"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-010",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-010"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-14 readiness input for assign_certified_contractor, then separately derived its 2026-01-16 operating outcome under worker certification, approved rate, and remaining assignment capacity instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -1950,6 +2031,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.work_orders.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-010",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-010",
+        "threadId": "thread-010"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_reads": [
@@ -1967,7 +2061,8 @@
     "oracle_fusion.work_order_resources.list",
     "oracle_fusion.suppliers.list",
     "oracle_fusion.work_order_operations.list",
-    "oracle_fusion.work_orders.list"
+    "oracle_fusion.work_orders.list",
+    "gmail.messages.get"
   ],
   "role": "production_planner",
   "rubric_milestones": [
@@ -1984,12 +2079,13 @@
       "weight": 4.0
     },
     {
-      "atomic_weight": 3.0,
+      "atomic_weight": 4.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_03",
         "investigation_09",
-        "investigation_11"
+        "investigation_11",
+        "investigation_16"
       ],
       "description": "Determine the operative R4 requirement for NS-000010, reconcile the current source material, and distinguish current evidence from superseded or merely contextual records.",
       "id": "investigation.requirements",
@@ -2360,9 +2456,18 @@
         "tool_name": "oracle_fusion.work_orders.list"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-010\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-010-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-010\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0xMEBub3J0aHN0YXIuZXhhbXBsZQpUbzogcHJvZHVjdGlvbi5wbGFubmVyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgcmFpbmllci5jb21wb25lbnRzQHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTAxMEBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wMTAg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3Igd2lyaW5nIG9wZXJhdGlvbiBvbiBXTy0wMDEwCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKV2lyaW5nIGlzIHNob3J0IG9mIGxhYm9yIGZvciB0aGUgY3VycmVudCBidWlsZCBhbmQgYW4gYWdlbmN5IGhhcyBvZmZlcmVkIGEgY29udHJhY3Rvci4gVGVsbCB0aGUgY2VsbCBsZWFkIHdoZXRoZXIgdGhhdCBwZXJzb24gaXMgcXVhbGlmaWVkIGFuZCBhY3R1YWxseSBmcmVlIGZvciB0aGUgbmVlZGVkIGhvdXJzLCB3aGVuIHRoZSBvcGVyYXRpb24gd291bGQgZmluaXNoIHdpdGggZWFjaCBjcmVkaWJsZSBzdGFmZmluZyBjaG9pY2UsIGFuZCB3aGV0aGVyIHRoZSByYXRlIGlzIHdpdGhpbiBhdXRob3JpdHkuIEFkZCBvbmx5IHRoZSBhcHByb3ZlZCByZXNvdXJjZSBhc3NpZ25tZW50LgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCmFnZW5jeSdzIGNvbmZpcm1lZCB3b3JrZXIgcm9zdGVyOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgYXNzaWduX2NlcnRpZmllZF9jb250cmFjdG9yIG9uIDIwMjYtMDEtMTQ7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTE2IHdpdGggZWNvbm9taWMgaW1wYWN0IFVTRCA1MjA7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDEwIGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDEwIC8gUjQuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpDZWxsIGxlYWQgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHdpcmluZyBvcGVyYXRpb24gb24gV08tMDAxMCBieSAyMDI2LTAxLTE2OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSB3b3JrZXIgY2VydGlmaWNhdGlvbiwgYXBwcm92ZWQgcmF0ZSwgYW5kIHJlbWFpbmluZyBhc3NpZ25tZW50IGNhcGFjaXR5LgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wMTEgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gSG91cnMgZnJvbSBleHBpcmVkIGNlcnRpZmljYXRpb25zIG9yIGNvbmZsaWN0aW5nIGFzc2lnbm1lbnRzIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1829},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-010 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-010\",\"size\":1024},\"filename\":\"resource-confirmation.pdf\"}]},\"snippet\":\"Wiring is short of labor for the current build and an agency has offered a contractor. Tell the cell lead whether that person is qualified a\",\"threadId\":\"thread-010\"}",
+        "task_id": "factorybench-010",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"WorkOrderId\":100010,\"WorkOrderOperationId\":200010,\"requestBody\":{\"AssignedUnits\":1,\"BasisType\":\"VARIABLE\",\"ResourceCode\":\"RES-CERT-010\",\"UsageRate\":1.0}}",
         "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"WorkOrderId\\\":100010,\\\"WorkOrderOperationId\\\":200010,\\\"requestBody\\\":{\\\"AssignedUnits\\\":1,\\\"BasisType\\\":\\\"VARIABLE\\\",\\\"ResourceCode\\\":\\\"RES-CERT-010\\\",\\\"UsageRate\\\":1.0}},\\\"tool\\\":\\\"oracle_fusion.work_order_resources.create\\\"}\",\"resource_id\":\"factorybench-010-mutation-01\",\"resource_type\":\"oracle_fusion.work_order_resources\",\"revision\":1,\"status\":\"Certified resource assigned\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-010\"}",
-        "fixture_id": "factorybench-010-call-25",
+        "fixture_id": "factorybench-010-call-26",
         "read_only": 0,
         "response_json": "{\"AssignedUnits\":1,\"BasisType\":\"VARIABLE\",\"ChargedQuantity\":0,\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OperationSequenceNumber\":10,\"ResourceCode\":\"RES-CERT-010\",\"UsageRate\":1.0,\"WorkOrderId\":100010,\"WorkOrderOperationId\":200010,\"WorkOrderOperationResourceId\":400010,\"links\":[]}",
         "task_id": "factorybench-010",
@@ -2371,7 +2476,7 @@
       {
         "arguments_json": "{\"channel\":\"C-QUALITY\",\"name\":\"white_check_mark\",\"timestamp\":\"1768000010.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-QUALITY\\\",\\\"name\\\":\\\"white_check_mark\\\",\\\"timestamp\\\":\\\"1768000010.000100\\\"},\\\"tool\\\":\\\"slack.reactions_add\\\"}\",\"resource_id\":\"factorybench-010-mutation-02\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-010\"}",
-        "fixture_id": "factorybench-010-call-27",
+        "fixture_id": "factorybench-010-call-28",
         "read_only": 0,
         "response_json": "{\"ok\":true}",
         "task_id": "factorybench-010",
@@ -2380,7 +2485,7 @@
       {
         "arguments_json": "{\"message\":{\"raw\":\"RnJvbTogcHJvZHVjdGlvbi5wbGFubmVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogY2VsbC5sZWFkQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAxMCDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGFzc2lnbl9jZXJ0aWZpZWRfY29udHJhY3Rvci4gQ29tcGxldGlvbjogMjAyNi0wMS0xNi4NCkJpbmRpbmcgY29uc3RyYWludDogd29ya2VyIGNlcnRpZmljYXRpb24sIGFwcHJvdmVkIHJhdGUsIGFuZCByZW1haW5pbmcgYXNzaWdubWVudCBjYXBhY2l0eTsgaG91cnMgZnJvbSBleHBpcmVkIGNlcnRpZmljYXRpb25zIG9yIGNvbmZsaWN0aW5nIGFzc2lnbm1lbnRzID0gNSBIUjsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjMuMCBIUi4NCkFsdGVybmF0aXZlczogd2FpdF9mb3JfaW50ZXJuYWxfbGFib3I6IG91dGNvbWUgMjAyNi0wMS0xOSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBhc3NpZ25fY2VydGlmaWVkX2NvbnRyYWN0b3I6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCA1MjAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGF1dGhvcml6ZV9vdmVydGltZV9jcmV3OiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMTQxMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAxMC4gQXBwcm92YWw6IEFQLTAwMTAuIENhc2U6IENBU0UtMDEwLg0K\",\"threadId\":\"thread-010\"},\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogcHJvZHVjdGlvbi5wbGFubmVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogY2VsbC5sZWFkQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAxMCDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGFzc2lnbl9jZXJ0aWZpZWRfY29udHJhY3Rvci4gQ29tcGxldGlvbjogMjAyNi0wMS0xNi4NCkJpbmRpbmcgY29uc3RyYWludDogd29ya2VyIGNlcnRpZmljYXRpb24sIGFwcHJvdmVkIHJhdGUsIGFuZCByZW1haW5pbmcgYXNzaWdubWVudCBjYXBhY2l0eTsgaG91cnMgZnJvbSBleHBpcmVkIGNlcnRpZmljYXRpb25zIG9yIGNvbmZsaWN0aW5nIGFzc2lnbm1lbnRzID0gNSBIUjsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjMuMCBIUi4NCkFsdGVybmF0aXZlczogd2FpdF9mb3JfaW50ZXJuYWxfbGFib3I6IG91dGNvbWUgMjAyNi0wMS0xOSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBhc3NpZ25fY2VydGlmaWVkX2NvbnRyYWN0b3I6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCA1MjAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGF1dGhvcml6ZV9vdmVydGltZV9jcmV3OiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMTQxMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAxMC4gQXBwcm92YWw6IEFQLTAwMTAuIENhc2U6IENBU0UtMDEwLg0K\\\",\\\"threadId\\\":\\\"thread-010\\\"},\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.drafts.create\\\"}\",\"resource_id\":\"factorybench-010-mutation-03\",\"resource_type\":\"gmail.drafts\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-010\"}",
-        "fixture_id": "factorybench-010-call-28",
+        "fixture_id": "factorybench-010-call-29",
         "read_only": 0,
         "response_json": "{\"id\":\"draft-010\",\"message\":{\"id\":\"draft-msg-010\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-010\"}}",
         "task_id": "factorybench-010",
@@ -2394,15 +2499,6 @@
         "response_json": "{\"id\":\"draft-010\",\"message\":{\"id\":\"draft-msg-010\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-010\"}}",
         "task_id": "factorybench-010",
         "tool_name": "gmail.drafts.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-010\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-010-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-010\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0xMEBub3J0aHN0YXIuZXhhbXBsZQpUbzogcHJvZHVjdGlvbi5wbGFubmVyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgcmFpbmllci5jb21wb25lbnRzQHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTAxMEBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wMTAg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3Igd2lyaW5nIG9wZXJhdGlvbiBvbiBXTy0wMDEwCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKV2lyaW5nIGlzIHNob3J0IG9mIGxhYm9yIGZvciB0aGUgY3VycmVudCBidWlsZCBhbmQgYW4gYWdlbmN5IGhhcyBvZmZlcmVkIGEgY29udHJhY3Rvci4gVGVsbCB0aGUgY2VsbCBsZWFkIHdoZXRoZXIgdGhhdCBwZXJzb24gaXMgcXVhbGlmaWVkIGFuZCBhY3R1YWxseSBmcmVlIGZvciB0aGUgbmVlZGVkIGhvdXJzLCB3aGVuIHRoZSBvcGVyYXRpb24gd291bGQgZmluaXNoIHdpdGggZWFjaCBjcmVkaWJsZSBzdGFmZmluZyBjaG9pY2UsIGFuZCB3aGV0aGVyIHRoZSByYXRlIGlzIHdpdGhpbiBhdXRob3JpdHkuIEFkZCBvbmx5IHRoZSBhcHByb3ZlZCByZXNvdXJjZSBhc3NpZ25tZW50LgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCmFnZW5jeSdzIGNvbmZpcm1lZCB3b3JrZXIgcm9zdGVyOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgYXNzaWduX2NlcnRpZmllZF9jb250cmFjdG9yIG9uIDIwMjYtMDEtMTQ7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTE2IHdpdGggZWNvbm9taWMgaW1wYWN0IFVTRCA1MjA7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDEwIGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDEwIC8gUjQuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpDZWxsIGxlYWQgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHdpcmluZyBvcGVyYXRpb24gb24gV08tMDAxMCBieSAyMDI2LTAxLTE2OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSB3b3JrZXIgY2VydGlmaWNhdGlvbiwgYXBwcm92ZWQgcmF0ZSwgYW5kIHJlbWFpbmluZyBhc3NpZ25tZW50IGNhcGFjaXR5LgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wMTEgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gSG91cnMgZnJvbSBleHBpcmVkIGNlcnRpZmljYXRpb25zIG9yIGNvbmZsaWN0aW5nIGFzc2lnbm1lbnRzIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1829},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-010 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-010\",\"size\":1024},\"filename\":\"resource-confirmation.pdf\"}]},\"snippet\":\"Wiring is short of labor for the current build and an agency has offered a contractor. Tell the cell lead whether that person is qualified a\",\"threadId\":\"thread-010\"}",
-        "task_id": "factorybench-010",
-        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-010\",\"userId\":\"me\"}",

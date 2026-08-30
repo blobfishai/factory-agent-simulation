@@ -1499,7 +1499,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.1",
+  "benchmark_version": "3.3.2",
   "decision_model": {
     "calculations": [
       {
@@ -2437,6 +2437,40 @@
         "id": "investigation_14",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-027",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-027",
+              "threadId": "thread-027"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-027",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-027"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-02-21 readiness input for forecast_all_asset_rows, then separately derived its 2026-02-24 operating outcome under generate only due rows inside the bounded horizon instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_15",
+        "milestone_id": "investigation.requirements",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -2718,6 +2752,16 @@
       "control": true,
       "phase": "investigation",
       "tool": "oracle_fusion.maintenance_work_orders.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-027",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -3150,6 +3194,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.maintenance_work_orders.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-027",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-027",
+        "threadId": "thread-027"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -3586,6 +3643,40 @@
       "id": "investigation_14",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-027",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-027",
+            "threadId": "thread-027"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-027",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-027"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-02-21 readiness input for forecast_all_asset_rows, then separately derived its 2026-02-24 operating outcome under generate only due rows inside the bounded horizon instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_15",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -3774,6 +3865,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.maintenance_work_orders.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-027",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-027",
+        "threadId": "thread-027"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_reads": [
@@ -3790,7 +3894,8 @@
     "oracle_fusion.maintenance_resources.list",
     "oracle_fusion.inventory_onhand_balances.list",
     "oracle_fusion.maintenance_programs.get",
-    "oracle_fusion.maintenance_work_orders.list"
+    "oracle_fusion.maintenance_work_orders.list",
+    "gmail.messages.get"
   ],
   "role": "reliability_engineer",
   "rubric_milestones": [
@@ -3807,12 +3912,13 @@
       "weight": 4.0
     },
     {
-      "atomic_weight": 3.0,
+      "atomic_weight": 4.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_05",
         "investigation_08",
-        "investigation_09"
+        "investigation_09",
+        "investigation_15"
       ],
       "description": "Determine the operative R7 requirement for NS-000027, reconcile the current source material, and distinguish current evidence from superseded or merely contextual records.",
       "id": "investigation.requirements",
@@ -4183,9 +4289,18 @@
         "tool_name": "oracle_fusion.maintenance_work_orders.list"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-027\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-027-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-027\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0yN0Bub3J0aHN0YXIuZXhhbXBsZQpUbzogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBjYXNjYWRlLmluZHVzdHJpYWxAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDI3QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAyNyDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBxdWFydGVybHkgY29tcHJlc3NvciBwcm9ncmFtCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKUmVsaWFiaWxpdHkgaXMgcHJlcGFyaW5nIHRoZSBxdWFydGVybHkgY29tcHJlc3NvciBwbGFuIGFuZCB3YW50cyBhIGNsZWFuIGZvcmVjYXN0IHJhdGhlciB0aGFuIGV2ZXJ5IHJvdyBpbiB0aGUgYXNzZXQgcm9zdGVyLiBEZXRlcm1pbmUgd2hpY2ggYWN0aXZlIGNvbXByZXNzb3JzIGFyZSBnZW51aW5lbHkgZHVlLCB3aGljaCByb3dzIGFyZSBkdXBsaWNhdGVzIG9yIGZhbGwgaW4gYmxhY2tvdXQgcGVyaW9kcywgYW5kIHdoZXRoZXIgdGhlIGF2YWlsYWJsZSBzaHV0ZG93biBjYXBhY2l0eSBjYW4gYWJzb3JiIHRoZW0uIEdlbmVyYXRlIG9ubHkgdGhlIHN1cHBvcnRlZCBmb3JlY2FzdCBob3Jpem9uLgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCmNvbnRyYWN0b3IgY292ZXJhZ2UgYnkgbW9udGg6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBmb3JlY2FzdF9hbGxfYXNzZXRfcm93cyBvbiAyMDI2LTAyLTIxOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMi0yNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMjcgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMjcgLyBSNy4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClJlbGlhYmlsaXR5IG9wZXJhdGlvbnMgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHF1YXJ0ZXJseSBjb21wcmVzc29yIHByb2dyYW0gYnkgMjAyNi0wMS0xNDsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgZ2VuZXJhdGUgb25seSBkdWUgcm93cyBpbnNpZGUgdGhlIGJvdW5kZWQgaG9yaXpvbi4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDI4IHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIEluYWN0aXZlIGFzc2V0cywgYmxhY2tvdXQgZGF0ZXMsIGFuZCBkdXBsaWNhdGUgZm9yZWNhc3RzIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1829},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-027 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-027\",\"size\":1024},\"filename\":\"meter-or-calendar-source-report.pdf\"}]},\"snippet\":\"Reliability is preparing the quarterly compressor plan and wants a clean forecast rather than every row in the asset roster. Determine which\",\"threadId\":\"thread-027\"}",
+        "task_id": "factorybench-027",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"ForecastEndDate\":\"2026-04-12\",\"ForecastStartDate\":\"2026-01-12\",\"MaintenanceProgramCode\":\"PM-0027\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"ForecastEndDate\\\":\\\"2026-04-12\\\",\\\"ForecastStartDate\\\":\\\"2026-01-12\\\",\\\"MaintenanceProgramCode\\\":\\\"PM-0027\\\"}},\\\"tool\\\":\\\"oracle_fusion.maintenance_programs.generate_forecasts\\\"}\",\"resource_id\":\"factorybench-027-mutation-01\",\"resource_type\":\"oracle_fusion.maintenance_programs\",\"revision\":1,\"status\":\"Forecast generated\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-027\"}",
-        "fixture_id": "factorybench-027-call-25",
+        "fixture_id": "factorybench-027-call-26",
         "read_only": 0,
         "response_json": "{\"ForecastEndDate\":\"2026-04-12\",\"ForecastStartDate\":\"2026-01-12\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"MaintenanceProgramCode\":\"PM-0027\",\"MaintenanceProgramId\":500027,\"MaintenanceProgramName\":\"CASE-027: Generate the quarterly compressor forecast\",\"OrganizationCode\":\"SEA\",\"StatusCode\":\"ACTIVE\",\"links\":[]}",
         "task_id": "factorybench-027",
@@ -4194,7 +4309,7 @@
       {
         "arguments_json": "{\"channel\":\"C-FINANCE\",\"name\":\"white_check_mark\",\"timestamp\":\"1768000027.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-FINANCE\\\",\\\"name\\\":\\\"white_check_mark\\\",\\\"timestamp\\\":\\\"1768000027.000100\\\"},\\\"tool\\\":\\\"slack.reactions_add\\\"}\",\"resource_id\":\"factorybench-027-mutation-02\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-027\"}",
-        "fixture_id": "factorybench-027-call-27",
+        "fixture_id": "factorybench-027-call-28",
         "read_only": 0,
         "response_json": "{\"ok\":true}",
         "task_id": "factorybench-027",
@@ -4203,7 +4318,7 @@
       {
         "arguments_json": "{\"insertDataOption\":\"INSERT_ROWS\",\"range\":\"Audit!A:G\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"2026-01-12\",\"CASE-027\",\"reliability_engineer\",\"generate_bounded_forecast\",\"2026-01-14\",\"NS-000027\",\"AP-0027\"]]},\"spreadsheetId\":\"sheet-027\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"insertDataOption\\\":\\\"INSERT_ROWS\\\",\\\"range\\\":\\\"Audit!A:G\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"2026-01-12\\\",\\\"CASE-027\\\",\\\"reliability_engineer\\\",\\\"generate_bounded_forecast\\\",\\\"2026-01-14\\\",\\\"NS-000027\\\",\\\"AP-0027\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-027\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.append\\\"}\",\"resource_id\":\"factorybench-027-mutation-03\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-027\"}",
-        "fixture_id": "factorybench-027-call-28",
+        "fixture_id": "factorybench-027-call-29",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-027\",\"tableRange\":\"Audit!A1:G20\",\"updates\":{\"updatedCells\":7,\"updatedRange\":\"Audit!A21:G21\",\"updatedRows\":1}}",
         "task_id": "factorybench-027",
@@ -4217,15 +4332,6 @@
         "response_json": "{\"id\":\"draft-027\",\"message\":{\"id\":\"draft-msg-027\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-027\"}}",
         "task_id": "factorybench-027",
         "tool_name": "gmail.drafts.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-027\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-027-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-027\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0yN0Bub3J0aHN0YXIuZXhhbXBsZQpUbzogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBjYXNjYWRlLmluZHVzdHJpYWxAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDI3QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAyNyDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBxdWFydGVybHkgY29tcHJlc3NvciBwcm9ncmFtCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKUmVsaWFiaWxpdHkgaXMgcHJlcGFyaW5nIHRoZSBxdWFydGVybHkgY29tcHJlc3NvciBwbGFuIGFuZCB3YW50cyBhIGNsZWFuIGZvcmVjYXN0IHJhdGhlciB0aGFuIGV2ZXJ5IHJvdyBpbiB0aGUgYXNzZXQgcm9zdGVyLiBEZXRlcm1pbmUgd2hpY2ggYWN0aXZlIGNvbXByZXNzb3JzIGFyZSBnZW51aW5lbHkgZHVlLCB3aGljaCByb3dzIGFyZSBkdXBsaWNhdGVzIG9yIGZhbGwgaW4gYmxhY2tvdXQgcGVyaW9kcywgYW5kIHdoZXRoZXIgdGhlIGF2YWlsYWJsZSBzaHV0ZG93biBjYXBhY2l0eSBjYW4gYWJzb3JiIHRoZW0uIEdlbmVyYXRlIG9ubHkgdGhlIHN1cHBvcnRlZCBmb3JlY2FzdCBob3Jpem9uLgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCmNvbnRyYWN0b3IgY292ZXJhZ2UgYnkgbW9udGg6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBmb3JlY2FzdF9hbGxfYXNzZXRfcm93cyBvbiAyMDI2LTAyLTIxOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMi0yNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMjcgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMjcgLyBSNy4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClJlbGlhYmlsaXR5IG9wZXJhdGlvbnMgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHF1YXJ0ZXJseSBjb21wcmVzc29yIHByb2dyYW0gYnkgMjAyNi0wMS0xNDsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgZ2VuZXJhdGUgb25seSBkdWUgcm93cyBpbnNpZGUgdGhlIGJvdW5kZWQgaG9yaXpvbi4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDI4IHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIEluYWN0aXZlIGFzc2V0cywgYmxhY2tvdXQgZGF0ZXMsIGFuZCBkdXBsaWNhdGUgZm9yZWNhc3RzIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1829},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-027 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-027\",\"size\":1024},\"filename\":\"meter-or-calendar-source-report.pdf\"}]},\"snippet\":\"Reliability is preparing the quarterly compressor plan and wants a clean forecast rather than every row in the asset roster. Determine which\",\"threadId\":\"thread-027\"}",
-        "task_id": "factorybench-027",
-        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-027\",\"userId\":\"me\"}",
@@ -4668,7 +4774,7 @@
       }
     ]
   },
-  "sequence_signature": "fdcd302081d80d5667c6b280bbd8ac46f613a7b59c5b386ba087444a7a861706",
+  "sequence_signature": "0bec8dea25363c8cb960f9a99197a68b32deea6fe9e10d03ae6f3e44cf16e1ce",
   "task_id": "factorybench-027",
   "title": "Generate the quarterly compressor forecast",
   "variant": null,

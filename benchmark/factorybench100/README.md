@@ -20,12 +20,12 @@ or gold state.
 | Shortcut | 43.00 | 0/100 |
 | State Only | 66.00 | 0/100 |
 | Incomplete Read | 94.07 | 0/100 |
-| Write Before Read | 67.40 | 0/100 |
+| Write Before Read | 67.33 | 0/100 |
 | Missing Readback | 94.00 | 0/100 |
 | Unauthorized Write | 98.00 | 0/100 |
 | Wrong Value | 98.01 | 0/100 |
 | Wrong Decision | 94.02 | 0/100 |
-| Wrong Evidence | 97.54 | 0/100 |
+| Wrong Evidence | 97.57 | 0/100 |
 
 The oracle is a solvability reference, not a model result. The ten negative
 controls cover no-op and shortcut behavior, missing handoff or evidence,

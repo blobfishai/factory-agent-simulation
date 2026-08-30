@@ -867,6 +867,40 @@
         "id": "investigation_15",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-015",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-015",
+              "threadId": "thread-015"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-015",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-015"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-11 readiness input for hold_for_timecard_correction, then separately derived its 2026-01-14 operating outcome under employee, operation, rate, and calibration interval must reconcile instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "milestone_id": "investigation.requirements",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -1237,6 +1271,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-015",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-015",
+        "threadId": "thread-015"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -1713,6 +1760,40 @@
       "id": "investigation_15",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-015",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-015",
+            "threadId": "thread-015"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-015",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-015"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-11 readiness input for hold_for_timecard_correction, then separately derived its 2026-01-14 operating outcome under employee, operation, rate, and calibration interval must reconcile instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -1908,6 +1989,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-015",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-015",
+        "threadId": "thread-015"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_reads": [
@@ -1925,7 +2019,8 @@
     "oracle_fusion.work_order_resources.list",
     "oracle_fusion.maintenance_programs.get",
     "oracle_fusion.work_orders.get",
-    "oracle_fusion.work_order_operations.list"
+    "oracle_fusion.work_order_operations.list",
+    "gmail.messages.get"
   ],
   "role": "shop_floor_controller",
   "rubric_milestones": [
@@ -1942,12 +2037,13 @@
       "weight": 4.0
     },
     {
-      "atomic_weight": 3.0,
+      "atomic_weight": 4.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_06",
         "investigation_07",
-        "investigation_11"
+        "investigation_11",
+        "investigation_16"
       ],
       "description": "Determine the operative R2 requirement for NS-000015, reconcile the current source material, and distinguish current evidence from superseded or merely contextual records.",
       "id": "investigation.requirements",
@@ -2317,9 +2413,18 @@
         "tool_name": "oracle_fusion.work_order_operations.list"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-015\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-015-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-015\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0xNUBub3J0aHN0YXIuZXhhbXBsZQpUbzogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgY2FzY2FkZS5pbmR1c3RyaWFsQHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTAxNUBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wMTUg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3IgdGVzdC1iZW5jaCByZXNvdXJjZSBhY3R1YWwKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpUZXN0LWJlbmNoIHRpbWUgaXMgbWlzc2luZyBmcm9tIHRoZSBhY3RpdmUgb3JkZXIsIGJ1dCBzb21lIHN1Ym1pdHRlZCBob3VycyBtYXkgYmUgZHVwbGljYXRlZCBvciBvdXRzaWRlIHRoZSBjYWxpYnJhdGlvbiB3aW5kb3cuIERldGVybWluZSB0aGUgYWN0dWFsIGhvdXJzIHRoYXQgYmVsb25nIHRvIHRoaXMgb3BlcmF0aW9uLCB0aGUgY29uc2VxdWVuY2Ugb2YgaG9sZGluZyB0aGUgcXVlc3Rpb25hYmxlIGVudHJpZXMsIGFuZCB0aGUgYW1vdW50IHdlIGNhbiBwb3N0IG5vdy4gUmVjb3JkIG9ubHkgdGhlIHN1cHBvcnRlZCByZXNvdXJjZSB1c2FnZS4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpjb3JyZWN0ZWQgdGltZWNhcmQgYXZhaWxhYmlsaXR5OiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgaG9sZF9mb3JfdGltZWNhcmRfY29ycmVjdGlvbiBvbiAyMDI2LTAxLTExOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMTUgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMTUgLyBSMi4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClNoaWZ0IHN1cGVydmlzb3IgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHRlc3QtYmVuY2ggcmVzb3VyY2UgYWN0dWFsIGJ5IDIwMjYtMDEtMTM7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIGVtcGxveWVlLCBvcGVyYXRpb24sIHJhdGUsIGFuZCBjYWxpYnJhdGlvbiBpbnRlcnZhbCBtdXN0IHJlY29uY2lsZS4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDE2IHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIER1cGxpY2F0ZSwgb3V0LW9mLXdpbmRvdywgb3IgdW5zaWduZWQgaG91cnMgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1804},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-015 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-015\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"Test-bench time is missing from the active order, but some submitted hours may be duplicated or outside the calibration window. Determine th\",\"threadId\":\"thread-015\"}",
+        "task_id": "factorybench-015",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"ResourceTransactionDetail\":[{\"OrganizationCode\":\"SEA\",\"ResourceCode\":\"RES-015\",\"TransactionQuantity\":110,\"TransactionUnitOfMeasure\":\"HR\",\"WoOperationSequenceNumber\":10,\"WorkOrderNumber\":\"WO-0015\"}],\"SourceSystemCode\":\"FUSION_MOBILE\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"ResourceTransactionDetail\\\":[{\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"ResourceCode\\\":\\\"RES-015\\\",\\\"TransactionQuantity\\\":110,\\\"TransactionUnitOfMeasure\\\":\\\"HR\\\",\\\"WoOperationSequenceNumber\\\":10,\\\"WorkOrderNumber\\\":\\\"WO-0015\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\"}},\\\"tool\\\":\\\"oracle_fusion.resource_transactions.create\\\"}\",\"resource_id\":\"factorybench-015-mutation-01\",\"resource_type\":\"oracle_fusion.resource_transactions\",\"revision\":1,\"status\":\"Resource actuals posted\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-015\"}",
-        "fixture_id": "factorybench-015-call-25",
+        "fixture_id": "factorybench-015-call-26",
         "read_only": 0,
         "response_json": "{\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"RequestStatus\":\"PENDING\",\"ResourceTransactionHeaderId\":3200015,\"SourceSystemCode\":\"FUSION_MOBILE\",\"links\":[]}",
         "task_id": "factorybench-015",
@@ -2328,7 +2433,7 @@
       {
         "arguments_json": "{\"raw\":\"RnJvbTogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogc2hpZnQuc3VwZXJ2aXNvckBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMTUg4oCUIENvbXBsZXRlZCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogcG9zdF9zdXBwb3J0ZWRfbGFib3IuIENvbXBsZXRpb246IDIwMjYtMDEtMTMuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IGVtcGxveWVlLCBvcGVyYXRpb24sIHJhdGUsIGFuZCBjYWxpYnJhdGlvbiBpbnRlcnZhbCBtdXN0IHJlY29uY2lsZTsgZHVwbGljYXRlLCBvdXQtb2Ytd2luZG93LCBvciB1bnNpZ25lZCBob3VycyA9IDEzIEhSOyB1bmNvdmVyZWQgb3IgdW5zdXBwb3J0ZWQgc2NvcGUgPSAyMC4wIEhSLg0KQWx0ZXJuYXRpdmVzOiBwb3N0X3N1cHBvcnRlZF9sYWJvcjogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGhvbGRfZm9yX3RpbWVjYXJkX2NvcnJlY3Rpb246IG91dGNvbWUgMjAyNi0wMS0xNCwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBwb3N0X3N1cGVydmlzb3JfZXN0aW1hdGU6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDE1LiBBcHByb3ZhbDogQVAtMDAxNS4gQ2FzZTogQ0FTRS0wMTUuDQo\",\"threadId\":\"thread-015\",\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogc2hpZnQuc3VwZXJ2aXNvckBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMTUg4oCUIENvbXBsZXRlZCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogcG9zdF9zdXBwb3J0ZWRfbGFib3IuIENvbXBsZXRpb246IDIwMjYtMDEtMTMuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IGVtcGxveWVlLCBvcGVyYXRpb24sIHJhdGUsIGFuZCBjYWxpYnJhdGlvbiBpbnRlcnZhbCBtdXN0IHJlY29uY2lsZTsgZHVwbGljYXRlLCBvdXQtb2Ytd2luZG93LCBvciB1bnNpZ25lZCBob3VycyA9IDEzIEhSOyB1bmNvdmVyZWQgb3IgdW5zdXBwb3J0ZWQgc2NvcGUgPSAyMC4wIEhSLg0KQWx0ZXJuYXRpdmVzOiBwb3N0X3N1cHBvcnRlZF9sYWJvcjogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGhvbGRfZm9yX3RpbWVjYXJkX2NvcnJlY3Rpb246IG91dGNvbWUgMjAyNi0wMS0xNCwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBwb3N0X3N1cGVydmlzb3JfZXN0aW1hdGU6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDE1LiBBcHByb3ZhbDogQVAtMDAxNS4gQ2FzZTogQ0FTRS0wMTUuDQo\\\",\\\"threadId\\\":\\\"thread-015\\\",\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-015-mutation-02\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-015\"}",
-        "fixture_id": "factorybench-015-call-27",
+        "fixture_id": "factorybench-015-call-28",
         "read_only": 0,
         "response_json": "{\"id\":\"sent-015\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-015\"}",
         "task_id": "factorybench-015",
@@ -2337,7 +2442,7 @@
       {
         "arguments_json": "{\"fileId\":\"drive-015\",\"requestBody\":{\"content\":\"CASE-015: post_supported_labor recorded on Oracle record NS-000015; completion 2026-01-13; constraint employee, operation, rate, and calibration interval must reconcile; duplicate, out-of-window, or unsigned hours = 13 HR; uncovered or unsupported scope = 20.0 HR; approval AP-0015.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-015\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-015: post_supported_labor recorded on Oracle record NS-000015; completion 2026-01-13; constraint employee, operation, rate, and calibration interval must reconcile; duplicate, out-of-window, or unsigned hours = 13 HR; uncovered or unsupported scope = 20.0 HR; approval AP-0015.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-015-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-015\"}",
-        "fixture_id": "factorybench-015-call-28",
+        "fixture_id": "factorybench-015-call-29",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-015: post_supported_labor recorded on Oracle record NS-000015; completion 2026-01-13; constraint employee, operation, rate, and calibration interval must reconcile; duplicate, out-of-window, or unsigned hours = 13 HR; uncovered or unsupported scope = 20.0 HR; approval AP-0015.\",\"id\":\"comment-015\",\"resolved\":false}",
         "task_id": "factorybench-015",
@@ -2351,15 +2456,6 @@
         "response_json": "{\"id\":\"draft-015\",\"message\":{\"id\":\"draft-msg-015\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-015\"}}",
         "task_id": "factorybench-015",
         "tool_name": "gmail.drafts.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-015\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-015-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-015\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0xNUBub3J0aHN0YXIuZXhhbXBsZQpUbzogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgY2FzY2FkZS5pbmR1c3RyaWFsQHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTAxNUBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wMTUg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3IgdGVzdC1iZW5jaCByZXNvdXJjZSBhY3R1YWwKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpUZXN0LWJlbmNoIHRpbWUgaXMgbWlzc2luZyBmcm9tIHRoZSBhY3RpdmUgb3JkZXIsIGJ1dCBzb21lIHN1Ym1pdHRlZCBob3VycyBtYXkgYmUgZHVwbGljYXRlZCBvciBvdXRzaWRlIHRoZSBjYWxpYnJhdGlvbiB3aW5kb3cuIERldGVybWluZSB0aGUgYWN0dWFsIGhvdXJzIHRoYXQgYmVsb25nIHRvIHRoaXMgb3BlcmF0aW9uLCB0aGUgY29uc2VxdWVuY2Ugb2YgaG9sZGluZyB0aGUgcXVlc3Rpb25hYmxlIGVudHJpZXMsIGFuZCB0aGUgYW1vdW50IHdlIGNhbiBwb3N0IG5vdy4gUmVjb3JkIG9ubHkgdGhlIHN1cHBvcnRlZCByZXNvdXJjZSB1c2FnZS4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpjb3JyZWN0ZWQgdGltZWNhcmQgYXZhaWxhYmlsaXR5OiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgaG9sZF9mb3JfdGltZWNhcmRfY29ycmVjdGlvbiBvbiAyMDI2LTAxLTExOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMTUgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMTUgLyBSMi4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClNoaWZ0IHN1cGVydmlzb3IgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHRlc3QtYmVuY2ggcmVzb3VyY2UgYWN0dWFsIGJ5IDIwMjYtMDEtMTM7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIGVtcGxveWVlLCBvcGVyYXRpb24sIHJhdGUsIGFuZCBjYWxpYnJhdGlvbiBpbnRlcnZhbCBtdXN0IHJlY29uY2lsZS4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDE2IHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIER1cGxpY2F0ZSwgb3V0LW9mLXdpbmRvdywgb3IgdW5zaWduZWQgaG91cnMgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1804},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-015 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-015\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"Test-bench time is missing from the active order, but some submitted hours may be duplicated or outside the calibration window. Determine th\",\"threadId\":\"thread-015\"}",
-        "task_id": "factorybench-015",
-        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-015\",\"userId\":\"me\"}",

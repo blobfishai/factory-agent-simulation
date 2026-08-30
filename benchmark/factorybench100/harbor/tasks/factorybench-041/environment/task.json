@@ -832,6 +832,40 @@
         "id": "investigation_15",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-041",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-041",
+              "threadId": "thread-041"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-041",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-041"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-13 readiness input for place_manual_hold, then separately derived its 2026-01-16 operating outcome under supplier, PO line, receipt, currency, tax, and tolerance must reconcile instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "milestone_id": "investigation.requirements",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -1229,6 +1263,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.receiving_receipt_transactions.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-041",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-041",
+        "threadId": "thread-041"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -1705,6 +1752,40 @@
       "id": "investigation_15",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-041",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-041",
+            "threadId": "thread-041"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-041",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-041"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-13 readiness input for place_manual_hold, then separately derived its 2026-01-16 operating outcome under supplier, PO line, receipt, currency, tax, and tolerance must reconcile instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -1901,6 +1982,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.receiving_receipt_transactions.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-041",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-041",
+        "threadId": "thread-041"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_reads": [
@@ -1918,7 +2012,8 @@
     "oracle_fusion.purchase_order_lines.list",
     "oracle_fusion.invoices.get",
     "oracle_fusion.purchase_orders.get",
-    "oracle_fusion.receiving_receipt_transactions.list"
+    "oracle_fusion.receiving_receipt_transactions.list",
+    "gmail.messages.get"
   ],
   "role": "accounts_payable_specialist",
   "rubric_milestones": [
@@ -1935,12 +2030,13 @@
       "weight": 4.0
     },
     {
-      "atomic_weight": 3.0,
+      "atomic_weight": 4.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_04",
         "investigation_05",
-        "investigation_11"
+        "investigation_11",
+        "investigation_16"
       ],
       "description": "Determine the operative R7 requirement for NS-000041, reconcile the current source material, and distinguish current evidence from superseded or merely contextual records.",
       "id": "investigation.requirements",
@@ -2309,9 +2405,18 @@
         "tool_name": "oracle_fusion.receiving_receipt_transactions.list"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-041\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-041-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-041\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy00MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogYWNjb3VudHMucGF5YWJsZS5zcGVjaWFsaXN0QG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgb2x5bXBpYy5tZXRyb2xvZ3lAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDQxQG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA0MSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBzdXBwbGllciBpbnZvaWNlIElOVi0wMDQxCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQWNjb3VudHMgUGF5YWJsZSBiZWxpZXZlcyB0aGlzIGludm9pY2UgaXMgY2xlYW4sIGJ1dCBpdCBtdXN0IGJlIHByb3ZlbiBhZ2FpbnN0IHdoYXQgd2FzIG9yZGVyZWQsIHJlY2VpdmVkLCBhbmQgYWNjZXB0ZWQuIEVzdGFibGlzaCB0aGUgc3VwcG9ydGVkIGFtb3VudCBhbmQgYW55IHJlc2lkdWFsIHZhcmlhbmNlLCB0aGVuIHNheSB3aGV0aGVyIHZhbGlkYXRpb24gbm93IGlzIHNhZmVyIHRoYW4gaG9sZGluZyBmb3IgY29ycmVjdGlvbi4gVmFsaWRhdGUgb25seSBpZiB0aGUgZG9jdW1lbnQgaXMgZ2VudWluZWx5IHdpdGhpbiB0b2xlcmFuY2UuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKc3VwcGxpZXIgUERGIGludm9pY2U6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBwbGFjZV9tYW51YWxfaG9sZCBvbiAyMDI2LTAxLTEzOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNiB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwNDEgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wNDEgLyBSNy4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCkFjY291bnRzIHBheWFibGUgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHN1cHBsaWVyIGludm9pY2UgSU5WLTAwNDEgYnkgMjAyNi0wMS0xNTsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgc3VwcGxpZXIsIFBPIGxpbmUsIHJlY2VpcHQsIGN1cnJlbmN5LCB0YXgsIGFuZCB0b2xlcmFuY2UgbXVzdCByZWNvbmNpbGUuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA0MiB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBVbm1hdGNoZWQgdGF4LCBmcmVpZ2h0LCBvciBxdWFudGl0eSB2YXJpYW5jZSBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1788},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-041 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-041\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\"Accounts Payable believes this invoice is clean, but it must be proven against what was ordered, received, and accepted. Establish the suppo\",\"threadId\":\"thread-041\"}",
+        "task_id": "factorybench-041",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"BusinessUnit\":\"Northstar Manufacturing BU\",\"InvoiceNumber\":\"INV-0041\",\"ProcessAction\":\"Validate\",\"Supplier\":\"Cascade Industrial\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-15\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"BusinessUnit\\\":\\\"Northstar Manufacturing BU\\\",\\\"InvoiceNumber\\\":\\\"INV-0041\\\",\\\"ProcessAction\\\":\\\"Validate\\\",\\\"Supplier\\\":\\\"Cascade Industrial\\\"}},\\\"tool\\\":\\\"oracle_fusion.invoices.validate\\\"}\",\"resource_id\":\"factorybench-041-mutation-01\",\"resource_type\":\"oracle_fusion.invoices\",\"revision\":1,\"status\":\"Validated\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-041\"}",
-        "fixture_id": "factorybench-041-call-25",
+        "fixture_id": "factorybench-041-call-26",
         "read_only": 0,
         "response_json": "{\"result\":\"The current action Validate Invoice has completed successfully.\"}",
         "task_id": "factorybench-041",
@@ -2320,7 +2425,7 @@
       {
         "arguments_json": "{\"insertDataOption\":\"INSERT_ROWS\",\"range\":\"Audit!A:G\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"2026-01-12\",\"CASE-041\",\"accounts_payable_specialist\",\"validate_matched_invoice\",\"2026-01-15\",\"NS-000041\",\"AP-0041\"]]},\"spreadsheetId\":\"sheet-041\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-15\",\"payload_json\":\"{\\\"arguments\\\":{\\\"insertDataOption\\\":\\\"INSERT_ROWS\\\",\\\"range\\\":\\\"Audit!A:G\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"2026-01-12\\\",\\\"CASE-041\\\",\\\"accounts_payable_specialist\\\",\\\"validate_matched_invoice\\\",\\\"2026-01-15\\\",\\\"NS-000041\\\",\\\"AP-0041\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-041\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.append\\\"}\",\"resource_id\":\"factorybench-041-mutation-02\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-041\"}",
-        "fixture_id": "factorybench-041-call-27",
+        "fixture_id": "factorybench-041-call-28",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-041\",\"tableRange\":\"Audit!A1:G20\",\"updates\":{\"updatedCells\":7,\"updatedRange\":\"Audit!A21:G21\",\"updatedRows\":1}}",
         "task_id": "factorybench-041",
@@ -2329,7 +2434,7 @@
       {
         "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"name\":\"white_check_mark\",\"timestamp\":\"1768000041.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-15\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PROCUREMENT\\\",\\\"name\\\":\\\"white_check_mark\\\",\\\"timestamp\\\":\\\"1768000041.000100\\\"},\\\"tool\\\":\\\"slack.reactions_add\\\"}\",\"resource_id\":\"factorybench-041-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-041\"}",
-        "fixture_id": "factorybench-041-call-28",
+        "fixture_id": "factorybench-041-call-29",
         "read_only": 0,
         "response_json": "{\"ok\":true}",
         "task_id": "factorybench-041",
@@ -2343,15 +2448,6 @@
         "response_json": "{\"id\":\"draft-041\",\"message\":{\"id\":\"draft-msg-041\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-041\"}}",
         "task_id": "factorybench-041",
         "tool_name": "gmail.drafts.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-041\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-041-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-041\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy00MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogYWNjb3VudHMucGF5YWJsZS5zcGVjaWFsaXN0QG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgb2x5bXBpYy5tZXRyb2xvZ3lAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDQxQG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA0MSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBzdXBwbGllciBpbnZvaWNlIElOVi0wMDQxCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQWNjb3VudHMgUGF5YWJsZSBiZWxpZXZlcyB0aGlzIGludm9pY2UgaXMgY2xlYW4sIGJ1dCBpdCBtdXN0IGJlIHByb3ZlbiBhZ2FpbnN0IHdoYXQgd2FzIG9yZGVyZWQsIHJlY2VpdmVkLCBhbmQgYWNjZXB0ZWQuIEVzdGFibGlzaCB0aGUgc3VwcG9ydGVkIGFtb3VudCBhbmQgYW55IHJlc2lkdWFsIHZhcmlhbmNlLCB0aGVuIHNheSB3aGV0aGVyIHZhbGlkYXRpb24gbm93IGlzIHNhZmVyIHRoYW4gaG9sZGluZyBmb3IgY29ycmVjdGlvbi4gVmFsaWRhdGUgb25seSBpZiB0aGUgZG9jdW1lbnQgaXMgZ2VudWluZWx5IHdpdGhpbiB0b2xlcmFuY2UuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKc3VwcGxpZXIgUERGIGludm9pY2U6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBwbGFjZV9tYW51YWxfaG9sZCBvbiAyMDI2LTAxLTEzOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNiB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwNDEgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wNDEgLyBSNy4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCkFjY291bnRzIHBheWFibGUgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHN1cHBsaWVyIGludm9pY2UgSU5WLTAwNDEgYnkgMjAyNi0wMS0xNTsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgc3VwcGxpZXIsIFBPIGxpbmUsIHJlY2VpcHQsIGN1cnJlbmN5LCB0YXgsIGFuZCB0b2xlcmFuY2UgbXVzdCByZWNvbmNpbGUuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA0MiB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBVbm1hdGNoZWQgdGF4LCBmcmVpZ2h0LCBvciBxdWFudGl0eSB2YXJpYW5jZSBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1788},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-041 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-041\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\"Accounts Payable believes this invoice is clean, but it must be proven against what was ordered, received, and accepted. Establish the suppo\",\"threadId\":\"thread-041\"}",
-        "task_id": "factorybench-041",
-        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-041\",\"userId\":\"me\"}",

@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.1",
+  "benchmark_version": "3.3.2",
   "decision_model": {
     "calculations": [
       {
@@ -2455,6 +2455,31 @@
         "id": "investigation_14",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-057\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-057"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-057 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_15",
+        "milestone_id": "investigation.scope",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -2717,6 +2742,26 @@
       "control": true,
       "phase": "investigation",
       "tool": "oracle_fusion.cycle_count_history.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-057\"",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-057",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -3123,6 +3168,35 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.cycle_count_history.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-057\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-057"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-057",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-057",
+        "threadId": "thread-057"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -3583,6 +3657,31 @@
       "id": "investigation_14",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-057\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-057"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-057 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_15",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -3762,6 +3861,22 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.cycle_count_history.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-057\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-057"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     }
   ],
   "required_reads": [
@@ -3778,16 +3893,18 @@
     "oracle_fusion.inventory_onhand_balances.list",
     "oracle_fusion.cycle_count_definitions.list",
     "oracle_fusion.cycle_count_sequence_details.list",
-    "oracle_fusion.cycle_count_history.list"
+    "oracle_fusion.cycle_count_history.list",
+    "gmail.messages.list"
   ],
   "role": "inventory_control_manager",
   "rubric_milestones": [
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 3.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_01",
-        "investigation_03"
+        "investigation_03",
+        "investigation_15"
       ],
       "description": "Establish the isolated CASE-057 scope and immutable identities across the mailbox, Drive index, and mounted systems before relying on similarly named records.",
       "id": "investigation.scope",
@@ -4160,9 +4277,27 @@
         "tool_name": "oracle_fusion.cycle_count_history.list"
       },
       {
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-057\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-057-call-24",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-057\",\"threadId\":\"thread-057\"},{\"id\":\"msg-057-1\",\"threadId\":\"thread-057\"},{\"id\":\"msg-057-2\",\"threadId\":\"thread-057\"},{\"id\":\"msg-057-3\",\"threadId\":\"thread-057\"}],\"resultSizeEstimate\":4}",
+        "task_id": "factorybench-057",
+        "tool_name": "gmail.messages.list"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-057\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-057-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-057\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy01N0Bub3J0aHN0YXIuZXhhbXBsZQpUbzogaW52ZW50b3J5LmNvbnRyb2wubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIGNhc2NhZGUuaW5kdXN0cmlhbEBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wNTdAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDU3IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIGJsaW5kIGN5Y2xlIGNvdW50Ck1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKVHdvIGluZGVwZW5kZW50IGNvdW50cyBkaXNhZ3JlZSB3aXRoIHRoZSBzeXN0ZW0gYmFsYW5jZSBmb3IgYSBjb250cm9sbGVkIGl0ZW0uIEVzdGFibGlzaCB0aGUgYmVzdCBzdXBwb3J0ZWQgb24taGFuZCBxdWFudGl0eSwgdGhlIGFkanVzdG1lbnQgYW5kIHVuY2VydGFpbnR5IGJlaGluZCBpdCwgYW5kIHdoZXRoZXIgYW5vdGhlciByZWNvdW50IHdvdWxkIG1hdGVyaWFsbHkgY2hhbmdlIHRoZSBhbnN3ZXIuIFBvc3Qgb25seSB0aGUgYm91bmRlZCBjb3JyZWN0aW9uIGFwcHJvdmVkIGJ5IGludmVudG9yeSBjb250cm9sLiBJZiB0aGUgZXZpZGVuY2Ugc3RpbGwgY29uZmxpY3RzLCBrZWVwIHRoZSB1bnN1cHBvcnRlZCBzY29wZSB1bmNoYW5nZWQgYW5kIGxlYXZlIG9wZXJhdGlvbnMgd2l0aCB0aGUgdW5yZXNvbHZlZCByaXNrIGFuZCBvd25lci4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpyZWNvdW50IGNvbXBsZXRpb246IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBmb3JjZV9ib29rX3F1YW50aXR5IG9uIDIwMjYtMDEtMTE7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTE0IHdpdGggbm8gc2VwYXJhdGVseSBkb2N1bWVudGVkIHNwZW5kOyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDA1NyBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTA1NyAvIFIyLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKTWF0ZXJpYWwgY29udHJvbCBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgYmxpbmQgY3ljbGUgY291bnQgYnkgMjAyNi0wMS0xMzsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgdGhlIGJvb2stdG8tY291bnQgdmFyaWFuY2UgbXVzdCBwYXNzIHRoZSByZWNvdW50IHRocmVzaG9sZCwgbG90LCByZWFzb24tY29kZSwgYW5kIHN1cGVydmlzb3IgY29udHJvbHMuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA1OCB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBDb3VudGVkIHVuaXRzIHdpdGggdGhlIHdyb25nIGxvdCBvciB1bnZlcmlmaWVkIG93bmVyc2hpcCBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1926},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-057 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-057\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"Two independent counts disagree with the system balance for a controlled item. Establish the best supported on-hand quantity, the adjustment\",\"threadId\":\"thread-057\"}",
+        "task_id": "factorybench-057",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"SourceSystemCode\":\"EXTERNAL\",\"TransactionLines\":[{\"Item\":\"NS-COMP-057\",\"LotNumber\":\"LOT-0057\",\"OrganizationCode\":\"SEA\",\"Subinventory\":\"STORES\",\"TransactionQuantity\":-11.0,\"TransactionType\":\"Cycle Count Adjustment\",\"TransactionUnitOfMeasure\":\"EA\"}],\"TransactionMode\":\"ONLINE\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"SourceSystemCode\\\":\\\"EXTERNAL\\\",\\\"TransactionLines\\\":[{\\\"Item\\\":\\\"NS-COMP-057\\\",\\\"LotNumber\\\":\\\"LOT-0057\\\",\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"Subinventory\\\":\\\"STORES\\\",\\\"TransactionQuantity\\\":-11.0,\\\"TransactionType\\\":\\\"Cycle Count Adjustment\\\",\\\"TransactionUnitOfMeasure\\\":\\\"EA\\\"}],\\\"TransactionMode\\\":\\\"ONLINE\\\"}},\\\"tool\\\":\\\"oracle_fusion.inventory_transactions.create\\\"}\",\"resource_id\":\"factorybench-057-mutation-01\",\"resource_type\":\"oracle_fusion.inventory_transactions\",\"revision\":1,\"status\":\"Cycle count adjusted\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-057\"}",
-        "fixture_id": "factorybench-057-call-24",
+        "fixture_id": "factorybench-057-call-26",
         "read_only": 0,
         "response_json": "{\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"ReturnStatus\":\"SUCCESS\",\"SourceSystemCode\":\"EXTERNAL\",\"TransactionHeaderId\":3300057,\"TransactionMode\":\"ONLINE\",\"links\":[]}",
         "task_id": "factorybench-057",
@@ -4171,7 +4306,7 @@
       {
         "arguments_json": "{\"fileId\":\"drive-057\",\"requestBody\":{\"content\":\"CASE-057: post_verified_count_adjustment recorded on Oracle record NS-000057; completion 2026-01-13; constraint the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA; approval AP-0057.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-057\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-057: post_verified_count_adjustment recorded on Oracle record NS-000057; completion 2026-01-13; constraint the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA; approval AP-0057.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-057-mutation-02\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-057\"}",
-        "fixture_id": "factorybench-057-call-26",
+        "fixture_id": "factorybench-057-call-28",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-057: post_verified_count_adjustment recorded on Oracle record NS-000057; completion 2026-01-13; constraint the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA; approval AP-0057.\",\"id\":\"comment-057\",\"resolved\":false}",
         "task_id": "factorybench-057",
@@ -4180,7 +4315,7 @@
       {
         "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"text\":\"CASE-057: Oracle record NS-000057 now reflects post_verified_count_adjustment with completion 2026-01-13. Binding constraint: the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA. Alternatives: post_verified_count_adjustment: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; force_book_quantity: outcome 2026-01-14, economic impact USD 0, FAILS_CURRENT_CONTROL; adjust_without_recount: outcome 2026-01-15, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0057.\",\"thread_ts\":\"1768000057.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PROCUREMENT\\\",\\\"text\\\":\\\"CASE-057: Oracle record NS-000057 now reflects post_verified_count_adjustment with completion 2026-01-13. Binding constraint: the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA. Alternatives: post_verified_count_adjustment: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; force_book_quantity: outcome 2026-01-14, economic impact USD 0, FAILS_CURRENT_CONTROL; adjust_without_recount: outcome 2026-01-15, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0057.\\\",\\\"thread_ts\\\":\\\"1768000057.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-057-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-057\"}",
-        "fixture_id": "factorybench-057-call-27",
+        "fixture_id": "factorybench-057-call-29",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-PROCUREMENT\",\"message\":{\"text\":\"CASE-057: Oracle record NS-000057 now reflects post_verified_count_adjustment with completion 2026-01-13. Binding constraint: the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA. Alternatives: post_verified_count_adjustment: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; force_book_quantity: outcome 2026-01-14, economic impact USD 0, FAILS_CURRENT_CONTROL; adjust_without_recount: outcome 2026-01-15, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0057.\",\"thread_ts\":\"1768000057.000100\"},\"ok\":true,\"ts\":\"1768000057.000900\"}",
         "task_id": "factorybench-057",
@@ -4203,24 +4338,6 @@
         "response_json": "{\"data\":\"Q0FTQ0FERSBJTkRVU1RSSUFMIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogYmxpbmQtY291bnQtYW5kLXZhcmlhbmNlLWFwcHJvdmFsLTAwNTcKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDU3Cklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IGJsaW5kIGNvdW50IGFuZCB2YXJpYW5jZSBhcHByb3ZhbApJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDU3CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFIyCk1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMTEgRUEKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogZm9yY2VfYm9va19xdWFudGl0eQpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMApFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTEKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTQKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogcmVjb3VudCBjb21wbGV0aW9uCkNhcGFjaXR5IGlzIHJlc2VydmVkIG9ubHkgYWZ0ZXIgdGhlIGJ1eWVyIG9yIHBsYW5uZXIgc3VwcGxpZXMgdGhlIG1hdGNoaW5nIGltbXV0YWJsZSByZWNvcmQgYW5kIGN1cnJlbnQgYXBwcm92YWwuCgozLiBFWENMVVNJT05TIEFORCBBU1NVTVBUSU9OUwpOb3QgaW5jbHVkZWQ6IGNvdW50ZWQgdW5pdHMgd2l0aCB0aGUgd3JvbmcgbG90IG9yIHVudmVyaWZpZWQgb3duZXJzaGlwCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IHRoZSBib29rLXRvLWNvdW50IHZhcmlhbmNlIG11c3QgcGFzcyB0aGUgcmVjb3VudCB0aHJlc2hvbGQsIGxvdCwgcmVhc29uLWNvZGUsIGFuZCBzdXBlcnZpc29yIGNvbnRyb2xzCk5lYXJieSBidXQgdW5yZWxhdGVkIHJlZmVyZW5jZSBDQVNFLTA1OCBpcyBleHBsaWNpdGx5IGV4Y2x1ZGVkLgpGcmVpZ2h0LCBwcmVtaXVtLCBjZXJ0aWZpY2F0aW9uLCBhbmQgbG90IHRlcm1zIGFwcGx5IG9ubHkgd2hlcmUgc3RhdGVkIGFib3ZlOyBzaWxlbmNlIGlzIG5vdCBhcHByb3ZhbC4KCjQuIEFDQ0VQVEFOQ0UKUHJlcGFyZWQgYnk6IENhc2NhZGUgSW5kdXN0cmlhbCBvcGVyYXRpb25zIGRlc2sKQ29uZmlybWF0aW9uIG51bWJlcjogQ05GLTAwMDA1NwpTdGF0dXM6IENPTkZJUk1FRCBBUyBBTiBJTlBVVCwgTk9UIEEgRklOQUwgT1BFUkFUSU5HIERFQ0lTSU9OCg\",\"size\":1555}",
         "task_id": "factorybench-057",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-057\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-057-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-057\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy01N0Bub3J0aHN0YXIuZXhhbXBsZQpUbzogaW52ZW50b3J5LmNvbnRyb2wubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIGNhc2NhZGUuaW5kdXN0cmlhbEBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wNTdAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDU3IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIGJsaW5kIGN5Y2xlIGNvdW50Ck1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKVHdvIGluZGVwZW5kZW50IGNvdW50cyBkaXNhZ3JlZSB3aXRoIHRoZSBzeXN0ZW0gYmFsYW5jZSBmb3IgYSBjb250cm9sbGVkIGl0ZW0uIEVzdGFibGlzaCB0aGUgYmVzdCBzdXBwb3J0ZWQgb24taGFuZCBxdWFudGl0eSwgdGhlIGFkanVzdG1lbnQgYW5kIHVuY2VydGFpbnR5IGJlaGluZCBpdCwgYW5kIHdoZXRoZXIgYW5vdGhlciByZWNvdW50IHdvdWxkIG1hdGVyaWFsbHkgY2hhbmdlIHRoZSBhbnN3ZXIuIFBvc3Qgb25seSB0aGUgYm91bmRlZCBjb3JyZWN0aW9uIGFwcHJvdmVkIGJ5IGludmVudG9yeSBjb250cm9sLiBJZiB0aGUgZXZpZGVuY2Ugc3RpbGwgY29uZmxpY3RzLCBrZWVwIHRoZSB1bnN1cHBvcnRlZCBzY29wZSB1bmNoYW5nZWQgYW5kIGxlYXZlIG9wZXJhdGlvbnMgd2l0aCB0aGUgdW5yZXNvbHZlZCByaXNrIGFuZCBvd25lci4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpyZWNvdW50IGNvbXBsZXRpb246IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBmb3JjZV9ib29rX3F1YW50aXR5IG9uIDIwMjYtMDEtMTE7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAxLTE0IHdpdGggbm8gc2VwYXJhdGVseSBkb2N1bWVudGVkIHNwZW5kOyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDA1NyBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTA1NyAvIFIyLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKTWF0ZXJpYWwgY29udHJvbCBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgYmxpbmQgY3ljbGUgY291bnQgYnkgMjAyNi0wMS0xMzsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgdGhlIGJvb2stdG8tY291bnQgdmFyaWFuY2UgbXVzdCBwYXNzIHRoZSByZWNvdW50IHRocmVzaG9sZCwgbG90LCByZWFzb24tY29kZSwgYW5kIHN1cGVydmlzb3IgY29udHJvbHMuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA1OCB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBDb3VudGVkIHVuaXRzIHdpdGggdGhlIHdyb25nIGxvdCBvciB1bnZlcmlmaWVkIG93bmVyc2hpcCBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1926},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-057 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-057\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"Two independent counts disagree with the system balance for a controlled item. Establish the best supported on-hand quantity, the adjustment\",\"threadId\":\"thread-057\"}",
-        "task_id": "factorybench-057",
-        "tool_name": "gmail.messages.get"
-      },
-      {
-        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-057\\\"\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-057-discovery-04",
-        "read_only": 1,
-        "response_json": "{\"messages\":[{\"id\":\"msg-057\",\"threadId\":\"thread-057\"},{\"id\":\"msg-057-1\",\"threadId\":\"thread-057\"},{\"id\":\"msg-057-2\",\"threadId\":\"thread-057\"},{\"id\":\"msg-057-3\",\"threadId\":\"thread-057\"}],\"resultSizeEstimate\":4}",
-        "task_id": "factorybench-057",
-        "tool_name": "gmail.messages.list"
       },
       {
         "arguments_json": "{\"commentId\":\"comment-057\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-057\"}",
@@ -4627,7 +4744,7 @@
       }
     ]
   },
-  "sequence_signature": "d2f26e6d79e2eaaabd4481c546be39e2b2a8a5a43d05eae4d349a980a27d2b0b",
+  "sequence_signature": "655df0a1fc4c9a9b82180e702867a35787c823d120383862d842c1c046decec1",
   "task_id": "factorybench-057",
   "title": "Post a blind cycle-count adjustment",
   "variant": null,

@@ -825,6 +825,40 @@
         "id": "investigation_15",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-089",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-089",
+              "threadId": "thread-089"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-089",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-089"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-09 readiness input for inspect_all_receipts, then separately derived its 2026-01-12 operating outcome under item substance class, supplier, country, lot, and plan revision instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "milestone_id": "investigation.requirements",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -1213,6 +1247,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-089",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-089",
+        "threadId": "thread-089"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -1669,6 +1716,40 @@
       "id": "investigation_15",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-089",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-089",
+            "threadId": "thread-089"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-089",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-089"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-09 readiness input for inspect_all_receipts, then separately derived its 2026-01-12 operating outcome under item substance class, supplier, country, lot, and plan revision instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -1869,6 +1950,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.inventory_onhand_balances.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-089",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-089",
+        "threadId": "thread-089"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_reads": [
@@ -1886,7 +1980,8 @@
     "oracle_fusion.inspection_plans.list",
     "oracle_fusion.quality_inspection_results.list",
     "oracle_fusion.receiving_receipt_transactions.list",
-    "oracle_fusion.inventory_onhand_balances.list"
+    "oracle_fusion.inventory_onhand_balances.list",
+    "gmail.messages.get"
   ],
   "role": "compliance_manager",
   "rubric_milestones": [
@@ -1903,12 +1998,13 @@
       "weight": 4.0
     },
     {
-      "atomic_weight": 3.0,
+      "atomic_weight": 4.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_05",
         "investigation_07",
-        "investigation_11"
+        "investigation_11",
+        "investigation_16"
       ],
       "description": "Determine the operative R6 requirement for NS-000089, reconcile the current source material, and distinguish current evidence from superseded or merely contextual records.",
       "id": "investigation.requirements",
@@ -2277,9 +2373,18 @@
         "tool_name": "oracle_fusion.inventory_onhand_balances.list"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-089\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-089-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-089\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy04OUBub3J0aHN0YXIuZXhhbXBsZQpUbzogY29tcGxpYW5jZS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgb2x5bXBpYy5tZXRyb2xvZ3lAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDg5QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA4OSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciByZXN0cmljdGVkLXN1YnN0YW5jZSBzY3JlZW5pbmcKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpBIHJlY2VpcHQgcmVxdWlyZXMgcmVzdHJpY3RlZC1zdWJzdGFuY2Ugc2NyZWVuaW5nIGJlZm9yZSBpdCBjYW4gZW50ZXIgcHJvZHVjdGlvbi4gSWRlbnRpZnkgdGhlIGFwcGxpY2FibGUgY3VycmVudCBwbGFuIGFuZCBhZmZlY3RlZCBsb3QsIGVzdGltYXRlIHdoZW4gYSBkZWZlbnNpYmxlIHJlc3VsdCBpcyBwb3NzaWJsZSwgYW5kIGNvbXBhcmUgaG9sZGluZywgc2NyZWVuaW5nLCBvciByZWplY3RpbmcgdGhlIG1hdGVyaWFsLiBDcmVhdGUgb25seSB0aGUgaW5zcGVjdGlvbiBzdXBwb3J0ZWQgYnkgdGhlIGNvbXBsaWFuY2Ugc2NvcGUuIElmIHRoZSBldmlkZW5jZSBzdGlsbCBjb25mbGljdHMsIGtlZXAgdGhlIHVuc3VwcG9ydGVkIHNjb3BlIHVuY2hhbmdlZCBhbmQgbGVhdmUgb3BlcmF0aW9ucyB3aXRoIHRoZSB1bnJlc29sdmVkIHJpc2sgYW5kIG93bmVyLgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCmxhYm9yYXRvcnkgc2NyZWVuaW5nIHR1cm5hcm91bmQ6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBpbnNwZWN0X2FsbF9yZWNlaXB0cyBvbiAyMDI2LTAxLTA5OyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xMiB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwODkgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wODkgLyBSNi4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCkNvbXBsaWFuY2UgYW5kIG9wZXJhdGlvbnMgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHJlc3RyaWN0ZWQtc3Vic3RhbmNlIHNjcmVlbmluZyBieSAyMDI2LTAxLTE3OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBpdGVtIHN1YnN0YW5jZSBjbGFzcywgc3VwcGxpZXIsIGNvdW50cnksIGxvdCwgYW5kIHBsYW4gcmV2aXNpb24uClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA5MCB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBQcmV2aW91c2x5IHNjcmVlbmVkIG9yIG91dC1vZi1zY29wZSBsb3RzIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1922},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-089 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-089\",\"size\":1024},\"filename\":\"signed-source-record.pdf\"}]},\"snippet\":\"A receipt requires restricted-substance screening before it can enter production. Identify the applicable current plan and affected lot, est\",\"threadId\":\"thread-089\"}",
+        "task_id": "factorybench-089",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"DocumentNumber\":\"RCV-0089\",\"DocumentType\":\"RECEIVING\",\"InspectionPlanId\":1200089,\"InspectionPlanName\":\"PLAN-06\",\"InspectionStatus\":\"IN_PROGRESS\",\"ItemNumber\":\"NS-COMP-089\",\"LotNumber\":\"LOT-0089\",\"OrganizationCode\":\"SEA\",\"Quantity\":1,\"samples\":[{\"Result\":\"PASS\",\"SampleNumber\":1}]}}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"DocumentNumber\\\":\\\"RCV-0089\\\",\\\"DocumentType\\\":\\\"RECEIVING\\\",\\\"InspectionPlanId\\\":1200089,\\\"InspectionPlanName\\\":\\\"PLAN-06\\\",\\\"InspectionStatus\\\":\\\"IN_PROGRESS\\\",\\\"ItemNumber\\\":\\\"NS-COMP-089\\\",\\\"LotNumber\\\":\\\"LOT-0089\\\",\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"Quantity\\\":1,\\\"samples\\\":[{\\\"Result\\\":\\\"PASS\\\",\\\"SampleNumber\\\":1}]}},\\\"tool\\\":\\\"oracle_fusion.quality_inspection_results.create\\\"}\",\"resource_id\":\"factorybench-089-mutation-01\",\"resource_type\":\"oracle_fusion.quality_inspection_results\",\"revision\":1,\"status\":\"Compliance inspection created\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-089\"}",
-        "fixture_id": "factorybench-089-call-25",
+        "fixture_id": "factorybench-089-call-26",
         "read_only": 0,
         "response_json": "{\"DocumentNumber\":\"RCV-0089\",\"DocumentType\":\"RECEIVING\",\"InspectionId\":1100089,\"InspectionPlanId\":1200089,\"InspectionPlanName\":\"PLAN-06\",\"InspectionResult\":\"ACCEPT\",\"InspectionStatus\":\"IN_PROGRESS\",\"ItemNumber\":\"NS-COMP-089\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"LotNumber\":\"LOT-0089\",\"OrganizationCode\":\"SEA\",\"Quantity\":1,\"QuantityAccepted\":1,\"QuantityRejected\":4,\"links\":[]}",
         "task_id": "factorybench-089",
@@ -2288,7 +2393,7 @@
       {
         "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"name\":\"white_check_mark\",\"timestamp\":\"1768000089.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PROCUREMENT\\\",\\\"name\\\":\\\"white_check_mark\\\",\\\"timestamp\\\":\\\"1768000089.000100\\\"},\\\"tool\\\":\\\"slack.reactions_add\\\"}\",\"resource_id\":\"factorybench-089-mutation-02\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-089\"}",
-        "fixture_id": "factorybench-089-call-27",
+        "fixture_id": "factorybench-089-call-28",
         "read_only": 0,
         "response_json": "{\"ok\":true}",
         "task_id": "factorybench-089",
@@ -2297,7 +2402,7 @@
       {
         "arguments_json": "{\"insertDataOption\":\"INSERT_ROWS\",\"range\":\"Audit!A:G\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"2026-01-12\",\"CASE-089\",\"compliance_manager\",\"create_scoped_compliance_inspection\",\"2026-01-13\",\"NS-000089\",\"AP-0089\"]]},\"spreadsheetId\":\"sheet-089\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"insertDataOption\\\":\\\"INSERT_ROWS\\\",\\\"range\\\":\\\"Audit!A:G\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"2026-01-12\\\",\\\"CASE-089\\\",\\\"compliance_manager\\\",\\\"create_scoped_compliance_inspection\\\",\\\"2026-01-13\\\",\\\"NS-000089\\\",\\\"AP-0089\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-089\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.append\\\"}\",\"resource_id\":\"factorybench-089-mutation-03\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-089\"}",
-        "fixture_id": "factorybench-089-call-28",
+        "fixture_id": "factorybench-089-call-29",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-089\",\"tableRange\":\"Audit!A1:G20\",\"updates\":{\"updatedCells\":7,\"updatedRange\":\"Audit!A21:G21\",\"updatedRows\":1}}",
         "task_id": "factorybench-089",
@@ -2311,15 +2416,6 @@
         "response_json": "{\"id\":\"draft-089\",\"message\":{\"id\":\"draft-msg-089\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-089\"}}",
         "task_id": "factorybench-089",
         "tool_name": "gmail.drafts.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-089\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-089-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-089\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy04OUBub3J0aHN0YXIuZXhhbXBsZQpUbzogY29tcGxpYW5jZS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgb2x5bXBpYy5tZXRyb2xvZ3lAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDg5QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA4OSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciByZXN0cmljdGVkLXN1YnN0YW5jZSBzY3JlZW5pbmcKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpBIHJlY2VpcHQgcmVxdWlyZXMgcmVzdHJpY3RlZC1zdWJzdGFuY2Ugc2NyZWVuaW5nIGJlZm9yZSBpdCBjYW4gZW50ZXIgcHJvZHVjdGlvbi4gSWRlbnRpZnkgdGhlIGFwcGxpY2FibGUgY3VycmVudCBwbGFuIGFuZCBhZmZlY3RlZCBsb3QsIGVzdGltYXRlIHdoZW4gYSBkZWZlbnNpYmxlIHJlc3VsdCBpcyBwb3NzaWJsZSwgYW5kIGNvbXBhcmUgaG9sZGluZywgc2NyZWVuaW5nLCBvciByZWplY3RpbmcgdGhlIG1hdGVyaWFsLiBDcmVhdGUgb25seSB0aGUgaW5zcGVjdGlvbiBzdXBwb3J0ZWQgYnkgdGhlIGNvbXBsaWFuY2Ugc2NvcGUuIElmIHRoZSBldmlkZW5jZSBzdGlsbCBjb25mbGljdHMsIGtlZXAgdGhlIHVuc3VwcG9ydGVkIHNjb3BlIHVuY2hhbmdlZCBhbmQgbGVhdmUgb3BlcmF0aW9ucyB3aXRoIHRoZSB1bnJlc29sdmVkIHJpc2sgYW5kIG93bmVyLgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCmxhYm9yYXRvcnkgc2NyZWVuaW5nIHR1cm5hcm91bmQ6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBpbnNwZWN0X2FsbF9yZWNlaXB0cyBvbiAyMDI2LTAxLTA5OyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xMiB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwODkgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wODkgLyBSNi4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCkNvbXBsaWFuY2UgYW5kIG9wZXJhdGlvbnMgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHJlc3RyaWN0ZWQtc3Vic3RhbmNlIHNjcmVlbmluZyBieSAyMDI2LTAxLTE3OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBpdGVtIHN1YnN0YW5jZSBjbGFzcywgc3VwcGxpZXIsIGNvdW50cnksIGxvdCwgYW5kIHBsYW4gcmV2aXNpb24uClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA5MCB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBQcmV2aW91c2x5IHNjcmVlbmVkIG9yIG91dC1vZi1zY29wZSBsb3RzIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1922},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-089 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-089\",\"size\":1024},\"filename\":\"signed-source-record.pdf\"}]},\"snippet\":\"A receipt requires restricted-substance screening before it can enter production. Identify the applicable current plan and affected lot, est\",\"threadId\":\"thread-089\"}",
-        "task_id": "factorybench-089",
-        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-089\",\"userId\":\"me\"}",

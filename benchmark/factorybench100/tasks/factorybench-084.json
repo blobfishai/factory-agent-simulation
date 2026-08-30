@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.1",
+  "benchmark_version": "3.3.2",
   "decision_model": {
     "calculations": [
       {
@@ -2464,6 +2464,40 @@
         "id": "investigation_15",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-084",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-084",
+              "threadId": "thread-084"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-084",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-084"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-12 readiness input for take_other_customer_reservation, then separately derived its 2026-01-14 operating outcome under reservation, service priority, item, lot, and repair operation instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "milestone_id": "investigation.requirements",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -2732,6 +2766,16 @@
       "control": true,
       "phase": "investigation",
       "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-084",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -3149,6 +3193,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-084",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-084",
+        "threadId": "thread-084"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -3616,6 +3673,40 @@
       "id": "investigation_15",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-084",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-084",
+            "threadId": "thread-084"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-084",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-084"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-12 readiness input for take_other_customer_reservation, then separately derived its 2026-01-14 operating outcome under reservation, service priority, item, lot, and repair operation instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -3814,6 +3905,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.supply_requests.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-084",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-084",
+        "threadId": "thread-084"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_reads": [
@@ -3831,7 +3935,8 @@
     "oracle_fusion.inventory_onhand_balances.list",
     "oracle_fusion.maintenance_materials.list",
     "oracle_fusion.maintenance_work_orders.get",
-    "oracle_fusion.supply_requests.list"
+    "oracle_fusion.supply_requests.list",
+    "gmail.messages.get"
   ],
   "role": "service_supply_coordinator",
   "rubric_milestones": [
@@ -3848,12 +3953,13 @@
       "weight": 4.0
     },
     {
-      "atomic_weight": 3.0,
+      "atomic_weight": 4.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_03",
         "investigation_09",
-        "investigation_10"
+        "investigation_10",
+        "investigation_16"
       ],
       "description": "Determine the operative R1 requirement for NS-000084, reconcile the current source material, and distinguish current evidence from superseded or merely contextual records.",
       "id": "investigation.requirements",
@@ -4223,9 +4329,18 @@
         "tool_name": "oracle_fusion.supply_requests.list"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-084\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-084-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-084\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy04NEBub3J0aHN0YXIuZXhhbXBsZQpUbzogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBjYXNjYWRlLmluZHVzdHJpYWxAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDg0QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA4NCDigJQgZGVjaXNpb24gbmVlZGVkIGZvciByZXNlcnZlZCBlbWVyZ2VuY3kgc3BhcmUKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpBbiBlbWVyZ2VuY3kgcmVwYWlyIGlzIHdhaXRpbmcgZm9yIGEgc3BhcmUgdGhhdCBtYXkgYWxyZWFkeSBiZSByZXNlcnZlZCBmb3IgaXQuIERldGVybWluZSB0aGUgZXhhY3QgbmVlZCBhbmQgdXNhYmxlIHJlc2VydmVkIGxvdCwgd2hhdCBzdG9jayBiZWxvbmdzIHRvIG90aGVyIHByaW9yaXRpZXMsIGFuZCB3aGV0aGVyIGlzc3Vpbmcgbm93IHByb3RlY3RzIHRoZSBzZXJ2aWNlIGRhdGUgYmV0dGVyIHRoYW4gcmVwbGVuaXNoaW5nLiBQb3N0IG9ubHkgdGhlIHN1cHBvcnRlZCBtYXRlcmlhbCBpc3N1ZS4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpyZWdpb25hbCByZXBsYWNlbWVudC1zdG9jayBhcnJpdmFsOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgdGFrZV9vdGhlcl9jdXN0b21lcl9yZXNlcnZhdGlvbiBvbiAyMDI2LTAxLTEyOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwODQgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wODQgLyBSMS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClNlcnZpY2UgZGlzcGF0Y2ggbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHJlc2VydmVkIGVtZXJnZW5jeSBzcGFyZSBieSAyMDI2LTAxLTEzOyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSByZXNlcnZhdGlvbiwgc2VydmljZSBwcmlvcml0eSwgaXRlbSwgbG90LCBhbmQgcmVwYWlyIG9wZXJhdGlvbi4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDg1IHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIFN0b2NrIHJlc2VydmVkIGZvciBoaWdoZXItcHJpb3JpdHkgZXZlbnRzIG9yIHdyb25nIG93bmVyc2hpcCBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1797},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-084 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-084\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"An emergency repair is waiting for a spare that may already be reserved for it. Determine the exact need and usable reserved lot, what stock\",\"threadId\":\"thread-084\"}",
+        "task_id": "factorybench-084",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"MaterialTransactionDetail\":[{\"InventoryItemNumber\":\"NS-COMP-084\",\"LotNumber\":\"LOT-0084\",\"OrganizationCode\":\"SEA\",\"SubinventoryCode\":\"SERVICE-STORES\",\"TransactionQuantity\":38,\"TransactionTypeCode\":\"MATERIAL_ISSUE\",\"TransactionUnitOfMeasure\":\"EA\",\"WorkOrderNumber\":\"MWO-0084\"}],\"SourceSystemCode\":\"FUSION_MOBILE\",\"SourceSystemType\":\"EXTERNAL\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"MaterialTransactionDetail\\\":[{\\\"InventoryItemNumber\\\":\\\"NS-COMP-084\\\",\\\"LotNumber\\\":\\\"LOT-0084\\\",\\\"OrganizationCode\\\":\\\"SEA\\\",\\\"SubinventoryCode\\\":\\\"SERVICE-STORES\\\",\\\"TransactionQuantity\\\":38,\\\"TransactionTypeCode\\\":\\\"MATERIAL_ISSUE\\\",\\\"TransactionUnitOfMeasure\\\":\\\"EA\\\",\\\"WorkOrderNumber\\\":\\\"MWO-0084\\\"}],\\\"SourceSystemCode\\\":\\\"FUSION_MOBILE\\\",\\\"SourceSystemType\\\":\\\"EXTERNAL\\\"}},\\\"tool\\\":\\\"oracle_fusion.material_transactions.create\\\"}\",\"resource_id\":\"factorybench-084-mutation-01\",\"resource_type\":\"oracle_fusion.material_transactions\",\"revision\":1,\"status\":\"Repair spare issued\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-084\"}",
-        "fixture_id": "factorybench-084-call-25",
+        "fixture_id": "factorybench-084-call-26",
         "read_only": 0,
         "response_json": "{\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"MaterialTransactionHeaderId\":3000084,\"RequestStatus\":\"PENDING\",\"SourceSystemCode\":\"FUSION_MOBILE\",\"SourceSystemType\":\"EXTERNAL\",\"links\":[]}",
         "task_id": "factorybench-084",
@@ -4234,7 +4349,7 @@
       {
         "arguments_json": "{\"fileId\":\"drive-084\",\"requestBody\":{\"content\":\"CASE-084: issue_matching_reserved_spare recorded on Oracle record NS-000084; completion 2026-01-13; constraint reservation, service priority, item, lot, and repair operation; stock reserved for higher-priority events or wrong ownership = 8 EA; uncovered or unsupported scope = 21.0 EA; approval AP-0084.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-084\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-084: issue_matching_reserved_spare recorded on Oracle record NS-000084; completion 2026-01-13; constraint reservation, service priority, item, lot, and repair operation; stock reserved for higher-priority events or wrong ownership = 8 EA; uncovered or unsupported scope = 21.0 EA; approval AP-0084.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-084-mutation-02\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-084\"}",
-        "fixture_id": "factorybench-084-call-27",
+        "fixture_id": "factorybench-084-call-28",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-084: issue_matching_reserved_spare recorded on Oracle record NS-000084; completion 2026-01-13; constraint reservation, service priority, item, lot, and repair operation; stock reserved for higher-priority events or wrong ownership = 8 EA; uncovered or unsupported scope = 21.0 EA; approval AP-0084.\",\"id\":\"comment-084\",\"resolved\":false}",
         "task_id": "factorybench-084",
@@ -4243,7 +4358,7 @@
       {
         "arguments_json": "{\"raw\":\"RnJvbTogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBzZXJ2aWNlLmRpc3BhdGNoQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA4NCDigJQgQ29tcGxldGVkIG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBpc3N1ZV9tYXRjaGluZ19yZXNlcnZlZF9zcGFyZS4gQ29tcGxldGlvbjogMjAyNi0wMS0xMy4NCkJpbmRpbmcgY29uc3RyYWludDogcmVzZXJ2YXRpb24sIHNlcnZpY2UgcHJpb3JpdHksIGl0ZW0sIGxvdCwgYW5kIHJlcGFpciBvcGVyYXRpb247IHN0b2NrIHJlc2VydmVkIGZvciBoaWdoZXItcHJpb3JpdHkgZXZlbnRzIG9yIHdyb25nIG93bmVyc2hpcCA9IDggRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDIxLjAgRUEuDQpBbHRlcm5hdGl2ZXM6IGlzc3VlX21hdGNoaW5nX3Jlc2VydmVkX3NwYXJlOiBvdXRjb21lIDIwMjYtMDEtMTMsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgdGFrZV9vdGhlcl9jdXN0b21lcl9yZXNlcnZhdGlvbjogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IHdhaXRfZm9yX3N0YW5kYXJkX3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwODQuIEFwcHJvdmFsOiBBUC0wMDg0LiBDYXNlOiBDQVNFLTA4NC4NCg\",\"threadId\":\"thread-084\",\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBzZXJ2aWNlLmRpc3BhdGNoQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA4NCDigJQgQ29tcGxldGVkIG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBpc3N1ZV9tYXRjaGluZ19yZXNlcnZlZF9zcGFyZS4gQ29tcGxldGlvbjogMjAyNi0wMS0xMy4NCkJpbmRpbmcgY29uc3RyYWludDogcmVzZXJ2YXRpb24sIHNlcnZpY2UgcHJpb3JpdHksIGl0ZW0sIGxvdCwgYW5kIHJlcGFpciBvcGVyYXRpb247IHN0b2NrIHJlc2VydmVkIGZvciBoaWdoZXItcHJpb3JpdHkgZXZlbnRzIG9yIHdyb25nIG93bmVyc2hpcCA9IDggRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDIxLjAgRUEuDQpBbHRlcm5hdGl2ZXM6IGlzc3VlX21hdGNoaW5nX3Jlc2VydmVkX3NwYXJlOiBvdXRjb21lIDIwMjYtMDEtMTMsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgdGFrZV9vdGhlcl9jdXN0b21lcl9yZXNlcnZhdGlvbjogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IHdhaXRfZm9yX3N0YW5kYXJkX3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwODQuIEFwcHJvdmFsOiBBUC0wMDg0LiBDYXNlOiBDQVNFLTA4NC4NCg\\\",\\\"threadId\\\":\\\"thread-084\\\",\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-084-mutation-03\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-084\"}",
-        "fixture_id": "factorybench-084-call-28",
+        "fixture_id": "factorybench-084-call-29",
         "read_only": 0,
         "response_json": "{\"id\":\"sent-084\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-084\"}",
         "task_id": "factorybench-084",
@@ -4257,15 +4372,6 @@
         "response_json": "{\"id\":\"draft-084\",\"message\":{\"id\":\"draft-msg-084\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-084\"}}",
         "task_id": "factorybench-084",
         "tool_name": "gmail.drafts.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-084\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-084-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-084\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy04NEBub3J0aHN0YXIuZXhhbXBsZQpUbzogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBjYXNjYWRlLmluZHVzdHJpYWxAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDg0QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA4NCDigJQgZGVjaXNpb24gbmVlZGVkIGZvciByZXNlcnZlZCBlbWVyZ2VuY3kgc3BhcmUKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpBbiBlbWVyZ2VuY3kgcmVwYWlyIGlzIHdhaXRpbmcgZm9yIGEgc3BhcmUgdGhhdCBtYXkgYWxyZWFkeSBiZSByZXNlcnZlZCBmb3IgaXQuIERldGVybWluZSB0aGUgZXhhY3QgbmVlZCBhbmQgdXNhYmxlIHJlc2VydmVkIGxvdCwgd2hhdCBzdG9jayBiZWxvbmdzIHRvIG90aGVyIHByaW9yaXRpZXMsIGFuZCB3aGV0aGVyIGlzc3Vpbmcgbm93IHByb3RlY3RzIHRoZSBzZXJ2aWNlIGRhdGUgYmV0dGVyIHRoYW4gcmVwbGVuaXNoaW5nLiBQb3N0IG9ubHkgdGhlIHN1cHBvcnRlZCBtYXRlcmlhbCBpc3N1ZS4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpyZWdpb25hbCByZXBsYWNlbWVudC1zdG9jayBhcnJpdmFsOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgdGFrZV9vdGhlcl9jdXN0b21lcl9yZXNlcnZhdGlvbiBvbiAyMDI2LTAxLTEyOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwODQgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wODQgLyBSMS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClNlcnZpY2UgZGlzcGF0Y2ggbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHJlc2VydmVkIGVtZXJnZW5jeSBzcGFyZSBieSAyMDI2LTAxLTEzOyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSByZXNlcnZhdGlvbiwgc2VydmljZSBwcmlvcml0eSwgaXRlbSwgbG90LCBhbmQgcmVwYWlyIG9wZXJhdGlvbi4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDg1IHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIFN0b2NrIHJlc2VydmVkIGZvciBoaWdoZXItcHJpb3JpdHkgZXZlbnRzIG9yIHdyb25nIG93bmVyc2hpcCBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1797},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-084 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-084\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"An emergency repair is waiting for a spare that may already be reserved for it. Determine the exact need and usable reserved lot, what stock\",\"threadId\":\"thread-084\"}",
-        "task_id": "factorybench-084",
-        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-084\",\"userId\":\"me\"}",
@@ -4699,7 +4805,7 @@
       }
     ]
   },
-  "sequence_signature": "d1e523966d6ec95c43bddf118c97e2497d15deca5eab760d5a42c8ff84e03730",
+  "sequence_signature": "003805c335bb4781eb52b143468429f6235c2955deaa7596743b642de8626078",
   "task_id": "factorybench-084",
   "title": "Issue a reserved spare to an emergency repair",
   "variant": null,

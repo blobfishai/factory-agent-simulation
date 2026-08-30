@@ -1494,7 +1494,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.1",
+  "benchmark_version": "3.3.2",
   "decision_model": {
     "calculations": [
       {
@@ -2469,6 +2469,31 @@
         "id": "investigation_14",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-019\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-019"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-019 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_15",
+        "milestone_id": "investigation.scope",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -2727,6 +2752,26 @@
       "control": true,
       "phase": "investigation",
       "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-019\"",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-019",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -3123,6 +3168,35 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-019\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-019"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-019",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-019",
+        "threadId": "thread-019"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -3589,6 +3663,31 @@
       "id": "investigation_14",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-019\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-019"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-019 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_15",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -3767,6 +3866,22 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.work_order_operations.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-019\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-019"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     }
   ],
   "required_reads": [
@@ -3783,16 +3898,18 @@
     "oracle_fusion.work_order_resources.list",
     "oracle_fusion.maintenance_work_orders.get",
     "oracle_fusion.work_orders.get",
-    "oracle_fusion.work_order_operations.list"
+    "oracle_fusion.work_order_operations.list",
+    "gmail.messages.list"
   ],
   "role": "manufacturing_scheduler",
   "rubric_milestones": [
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 3.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_01",
-        "investigation_04"
+        "investigation_04",
+        "investigation_15"
       ],
       "description": "Establish the isolated CASE-019 scope and immutable identities across the mailbox, Drive index, and mounted systems before relying on similarly named records.",
       "id": "investigation.scope",
@@ -4166,9 +4283,27 @@
         "tool_name": "oracle_fusion.work_order_operations.list"
       },
       {
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-019\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-019-call-24",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-019\",\"threadId\":\"thread-019\"},{\"id\":\"msg-019-1\",\"threadId\":\"thread-019\"},{\"id\":\"msg-019-2\",\"threadId\":\"thread-019\"},{\"id\":\"msg-019-3\",\"threadId\":\"thread-019\"}],\"resultSizeEstimate\":4}",
+        "task_id": "factorybench-019",
+        "tool_name": "gmail.messages.list"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-019\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-019-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-019\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0xOUBub3J0aHN0YXIuZXhhbXBsZQpUbzogbWFudWZhY3R1cmluZy5zY2hlZHVsZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCByYWluaWVyLmNvbXBvbmVudHNAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDE5QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAxOSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciB3ZWVrZW5kIGJhY2tsb2cgcmVjb3ZlcnkKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpPcGVyYXRpb25zIGhhcyB3ZWVrZW5kLW92ZXJ0aW1lIGFwcHJvdmFsIGZvciBwYXJ0IG9mIHRoZSBiYWNrbG9nLCBidXQgbm90IGV2ZXJ5IG9wZW4gb3JkZXIgYmVsb25ncyBpbiB0aGF0IHNjb3BlLiBEZXRlcm1pbmUgd2hpY2ggd29yayBhY3R1YWxseSBiZW5lZml0cywgd2hldGhlciBxdWFsaWZpZWQgaW5zcGVjdGlvbiBhbmQgd29yay1jZW50ZXIgY292ZXJhZ2UgYXJlIGF2YWlsYWJsZSwgYW5kIGhvdyB0aGUgYXBwcm92ZWQgd2Vla2VuZCBjaGFuZ2VzIGNvbXBsZXRpb24gdmVyc3VzIHRoZSB3ZWVrZGF5IHBsYW4uIFNjaGVkdWxlIG9ubHkgdGhlIGF1dGhvcml6ZWQgcmVjb3ZlcnkuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKdGVtcG9yYXJ5IGxhYm9yIGF2YWlsYWJpbGl0eTogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGFwcGx5X2FwcHJvdmVkX3dlZWtlbmRfb3ZlcnRpbWUgb24gMjAyNi0wMS0xNzsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMjAgd2l0aCBlY29ub21pYyBpbXBhY3QgVVNEIDY3MzsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMTkgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMTkgLyBSNi4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCk9wZXJhdGlvbnMgY29udHJvbCBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3Igd2Vla2VuZCBiYWNrbG9nIHJlY292ZXJ5IGJ5IDIwMjYtMDEtMjA7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIG9ubHkgbGlzdGVkIG9yZGVycyBhbmQgY29zdCBjZW50ZXIgbWF5IHVzZSB0aGUgb3ZlcnRpbWUgd2luZG93LgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wMjAgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gSG91cnMgb3V0c2lkZSB0aGUgbmFtZWQgb3JkZXJzIG9yIGFwcHJvdmFsIGNhcCBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1818},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-019 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-019\",\"size\":1024},\"filename\":\"resource-confirmation.pdf\"}]},\"snippet\":\"Operations has weekend-overtime approval for part of the backlog, but not every open order belongs in that scope. Determine which work actua\",\"threadId\":\"thread-019\"}",
+        "task_id": "factorybench-019",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"WorkOrderId\":100019,\"WorkOrderOperationId\":200019,\"requestBody\":{\"OperationName\":\"Controlled operation CASE-019\",\"PlannedCompletionDate\":\"2026-01-20\",\"PlannedStartDate\":\"2026-01-18\",\"WorkCenterCode\":\"WC-ALT-2\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-20\",\"payload_json\":\"{\\\"arguments\\\":{\\\"WorkOrderId\\\":100019,\\\"WorkOrderOperationId\\\":200019,\\\"requestBody\\\":{\\\"OperationName\\\":\\\"Controlled operation CASE-019\\\",\\\"PlannedCompletionDate\\\":\\\"2026-01-20\\\",\\\"PlannedStartDate\\\":\\\"2026-01-18\\\",\\\"WorkCenterCode\\\":\\\"WC-ALT-2\\\"}},\\\"tool\\\":\\\"oracle_fusion.work_order_operations.update\\\"}\",\"resource_id\":\"factorybench-019-mutation-01\",\"resource_type\":\"oracle_fusion.work_order_operations\",\"revision\":1,\"status\":\"Overtime plan applied\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-019\"}",
-        "fixture_id": "factorybench-019-call-24",
+        "fixture_id": "factorybench-019-call-26",
         "read_only": 0,
         "response_json": "{\"CompletedQuantity\":0,\"DispatchStatus\":\"READY\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OperationName\":\"Controlled operation CASE-019\",\"OperationSequenceNumber\":10,\"PlannedCompletionDate\":\"2026-01-20\",\"PlannedStartDate\":\"2026-01-18\",\"RejectedQuantity\":0,\"WorkCenterCode\":\"WC-ALT-2\",\"WorkOrderId\":100019,\"WorkOrderOperationId\":200019,\"links\":[]}",
         "task_id": "factorybench-019",
@@ -4177,7 +4312,7 @@
       {
         "arguments_json": "{\"fileId\":\"drive-019\",\"requestBody\":{\"content\":\"CASE-019: apply_approved_weekend_overtime recorded on Oracle record NS-000019; completion 2026-01-20; constraint only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR; approval AP-0019.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-20\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-019\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-019: apply_approved_weekend_overtime recorded on Oracle record NS-000019; completion 2026-01-20; constraint only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR; approval AP-0019.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-019-mutation-02\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-019\"}",
-        "fixture_id": "factorybench-019-call-26",
+        "fixture_id": "factorybench-019-call-28",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-019: apply_approved_weekend_overtime recorded on Oracle record NS-000019; completion 2026-01-20; constraint only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR; approval AP-0019.\",\"id\":\"comment-019\",\"resolved\":false}",
         "task_id": "factorybench-019",
@@ -4186,7 +4321,7 @@
       {
         "arguments_json": "{\"channel\":\"C-FINANCE\",\"text\":\"CASE-019: Oracle record NS-000019 now reflects apply_approved_weekend_overtime with completion 2026-01-20. Binding constraint: only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR. Alternatives: keep_weekday_sequence: outcome 2026-01-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_approved_weekend_overtime: outcome 2026-01-20, economic impact USD 673, SUPPORTED_AND_APPROVED; add_second_unapproved_shift: outcome 2026-01-19, economic impact USD 1689, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0019.\",\"thread_ts\":\"1768000019.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-20\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-FINANCE\\\",\\\"text\\\":\\\"CASE-019: Oracle record NS-000019 now reflects apply_approved_weekend_overtime with completion 2026-01-20. Binding constraint: only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR. Alternatives: keep_weekday_sequence: outcome 2026-01-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_approved_weekend_overtime: outcome 2026-01-20, economic impact USD 673, SUPPORTED_AND_APPROVED; add_second_unapproved_shift: outcome 2026-01-19, economic impact USD 1689, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0019.\\\",\\\"thread_ts\\\":\\\"1768000019.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-019-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-019\"}",
-        "fixture_id": "factorybench-019-call-27",
+        "fixture_id": "factorybench-019-call-29",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-FINANCE\",\"message\":{\"text\":\"CASE-019: Oracle record NS-000019 now reflects apply_approved_weekend_overtime with completion 2026-01-20. Binding constraint: only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR. Alternatives: keep_weekday_sequence: outcome 2026-01-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_approved_weekend_overtime: outcome 2026-01-20, economic impact USD 673, SUPPORTED_AND_APPROVED; add_second_unapproved_shift: outcome 2026-01-19, economic impact USD 1689, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0019.\",\"thread_ts\":\"1768000019.000100\"},\"ok\":true,\"ts\":\"1768000019.000900\"}",
         "task_id": "factorybench-019",
@@ -4209,24 +4344,6 @@
         "response_json": "{\"data\":\"UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogb3ZlcnRpbWUtYXV0aG9yaXphdGlvbi1hbmQtZmluaXRlLXNjaGVkdWxlLTAwMTkKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDE5Cklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IG92ZXJ0aW1lIGF1dGhvcml6YXRpb24gYW5kIGZpbml0ZSBzY2hlZHVsZQpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDE5CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFI2Ck1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMTkgSFIKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogYXBwbHlfYXBwcm92ZWRfd2Vla2VuZF9vdmVydGltZQpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0yMApFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTcKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMjAKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCA2NzMKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiB0ZW1wb3JhcnkgbGFib3IgYXZhaWxhYmlsaXR5CkNhcGFjaXR5IGlzIHJlc2VydmVkIG9ubHkgYWZ0ZXIgdGhlIGJ1eWVyIG9yIHBsYW5uZXIgc3VwcGxpZXMgdGhlIG1hdGNoaW5nIGltbXV0YWJsZSByZWNvcmQgYW5kIGN1cnJlbnQgYXBwcm92YWwuCgozLiBFWENMVVNJT05TIEFORCBBU1NVTVBUSU9OUwpOb3QgaW5jbHVkZWQ6IGhvdXJzIG91dHNpZGUgdGhlIG5hbWVkIG9yZGVycyBvciBhcHByb3ZhbCBjYXAKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogb25seSBsaXN0ZWQgb3JkZXJzIGFuZCBjb3N0IGNlbnRlciBtYXkgdXNlIHRoZSBvdmVydGltZSB3aW5kb3cKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDIwIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogUmFpbmllciBDb21wb25lbnRzIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDE5ClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K\",\"size\":1548}",
         "task_id": "factorybench-019",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-019\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-019-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-019\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0xOUBub3J0aHN0YXIuZXhhbXBsZQpUbzogbWFudWZhY3R1cmluZy5zY2hlZHVsZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCByYWluaWVyLmNvbXBvbmVudHNAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDE5QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAxOSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciB3ZWVrZW5kIGJhY2tsb2cgcmVjb3ZlcnkKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpPcGVyYXRpb25zIGhhcyB3ZWVrZW5kLW92ZXJ0aW1lIGFwcHJvdmFsIGZvciBwYXJ0IG9mIHRoZSBiYWNrbG9nLCBidXQgbm90IGV2ZXJ5IG9wZW4gb3JkZXIgYmVsb25ncyBpbiB0aGF0IHNjb3BlLiBEZXRlcm1pbmUgd2hpY2ggd29yayBhY3R1YWxseSBiZW5lZml0cywgd2hldGhlciBxdWFsaWZpZWQgaW5zcGVjdGlvbiBhbmQgd29yay1jZW50ZXIgY292ZXJhZ2UgYXJlIGF2YWlsYWJsZSwgYW5kIGhvdyB0aGUgYXBwcm92ZWQgd2Vla2VuZCBjaGFuZ2VzIGNvbXBsZXRpb24gdmVyc3VzIHRoZSB3ZWVrZGF5IHBsYW4uIFNjaGVkdWxlIG9ubHkgdGhlIGF1dGhvcml6ZWQgcmVjb3ZlcnkuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKdGVtcG9yYXJ5IGxhYm9yIGF2YWlsYWJpbGl0eTogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGFwcGx5X2FwcHJvdmVkX3dlZWtlbmRfb3ZlcnRpbWUgb24gMjAyNi0wMS0xNzsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMjAgd2l0aCBlY29ub21pYyBpbXBhY3QgVVNEIDY3MzsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMTkgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMTkgLyBSNi4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljCk9wZXJhdGlvbnMgY29udHJvbCBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3Igd2Vla2VuZCBiYWNrbG9nIHJlY292ZXJ5IGJ5IDIwMjYtMDEtMjA7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIG9ubHkgbGlzdGVkIG9yZGVycyBhbmQgY29zdCBjZW50ZXIgbWF5IHVzZSB0aGUgb3ZlcnRpbWUgd2luZG93LgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wMjAgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gSG91cnMgb3V0c2lkZSB0aGUgbmFtZWQgb3JkZXJzIG9yIGFwcHJvdmFsIGNhcCBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":1818},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-019 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-019\",\"size\":1024},\"filename\":\"resource-confirmation.pdf\"}]},\"snippet\":\"Operations has weekend-overtime approval for part of the backlog, but not every open order belongs in that scope. Determine which work actua\",\"threadId\":\"thread-019\"}",
-        "task_id": "factorybench-019",
-        "tool_name": "gmail.messages.get"
-      },
-      {
-        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-019\\\"\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-019-discovery-04",
-        "read_only": 1,
-        "response_json": "{\"messages\":[{\"id\":\"msg-019\",\"threadId\":\"thread-019\"},{\"id\":\"msg-019-1\",\"threadId\":\"thread-019\"},{\"id\":\"msg-019-2\",\"threadId\":\"thread-019\"},{\"id\":\"msg-019-3\",\"threadId\":\"thread-019\"}],\"resultSizeEstimate\":4}",
-        "task_id": "factorybench-019",
-        "tool_name": "gmail.messages.list"
       },
       {
         "arguments_json": "{\"commentId\":\"comment-019\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-019\"}",
@@ -4651,7 +4768,7 @@
       }
     ]
   },
-  "sequence_signature": "280a69a1f43e61b2e76332d36a95451f23e9020945b2de7271f3e63b15cc7972",
+  "sequence_signature": "087891d910d88815ddb7293e877208f3d7312bf7bf8df03d735fbcb4011c64d6",
   "task_id": "factorybench-019",
   "title": "Apply approved weekend overtime to backlog",
   "variant": null,

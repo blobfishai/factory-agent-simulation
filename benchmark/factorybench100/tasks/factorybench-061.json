@@ -1504,7 +1504,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.1",
+  "benchmark_version": "3.3.2",
   "decision_model": {
     "calculations": [
       {
@@ -2800,6 +2800,27 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "thread-061",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.threads.get"
+    },
+    {
+      "arguments": {
+        "count": 50,
+        "query": "\"CASE-061\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "slack.search_messages"
+    },
+    {
+      "arguments": {
         "requestBody": {
           "SupplyOrderReferenceNumber": "SUPPLY-0061",
           "SupplyRequestDate": "2026-01-17",
@@ -3216,6 +3237,37 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.sales_orders.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "thread-061",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "thread-061"
+      },
+      "match": "result_contains",
+      "tool": "gmail.threads.get"
+    },
+    {
+      "arguments": {
+        "count": 50,
+        "query": "\"CASE-061\"",
+        "sort": "timestamp",
+        "sort_dir": "asc"
+      },
+      "expected_result_contains": {
+        "messages": {
+          "matches": [
+            {
+              "ts": "1768000061.000100"
+            }
+          ]
+        }
+      },
+      "match": "result_contains",
+      "tool": "slack.search_messages"
     }
   ],
   "required_investigations": [
@@ -4298,9 +4350,27 @@
         "tool_name": "oracle_fusion.sales_orders.list"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"thread-061\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-061-call-24",
+        "read_only": 1,
+        "response_json": "{\"historyId\":\"900061\",\"id\":\"thread-061\",\"messages\":[{\"id\":\"msg-061\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy02MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogc3VwcGx5LnBsYW5uZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCByYWluaWVyLmNvbXBvbmVudHNAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDYxQG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA2MSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBjb3BwZXIgZGVtYW5kIHNwaWtlCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKRGVtYW5kIGZvciBjb3BwZXIganVtcGVkIGFmdGVyIHRoZSBsYXRlc3QgcGxhbiBhbmQgcHJvZHVjdGlvbiB3YW50cyBhIGNvdmVyYWdlIGRhdGUuIE5ldCB0aGUgbmV3IHJlcXVpcmVtZW50IGFnYWluc3QgdXNhYmxlIHN0b2NrIGFuZCBmaXJtIGluYm91bmQsIGNvbXBhcmUgYnV5LCB0cmFuc2ZlciwgYW5kIHNjaGVkdWxlIGFsdGVybmF0aXZlcywgYW5kIGlkZW50aWZ5IHRoZSBjb25zdHJhaW50IGJlaGluZCB0aGUgZWFybGllc3QgZmVhc2libGUgcGxhbi4gQ3JlYXRlIHN1cHBseSBvbmx5IGZvciB0aGUgcmVtYWluaW5nIGdhcC4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgo\",\"size\":744},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-061 \\u2014 operating request and source reply\"}]},\"snippet\":\"From: operations-61@northstar.example\\nTo: supply.planner@northstar.example\\nCc: controls@northstar.example, rainier.components@supplier.examp\",\"threadId\":\"thread-061\"},{\"id\":\"msg-061-1\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnN1cHBsaWVyIGNvcHBlciBsZWFkIHRpbWU6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBidXlfZ3Jvc3NfcmV2aXNlZF9kZW1hbmQgb24gMjAyNi0wMS0xNDsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTcgd2l0aCBlY29ub21pYyBpbXBhY3QgVVNEIDEzODc7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDYxIGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDYxIC8gUjYuCgo\",\"size\":413},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-061 \\u2014 operating request and source reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-061\",\"size\":1024},\"filename\":\"supplier-confirmation.pdf\"}]},\"snippet\":\" external operations desk ---\\nDate: 2026-01-12 11:25 Pacific\\nsupplier copper lead time: the independent source confirms readiness for buy_gr\",\"threadId\":\"thread-061\"},{\"id\":\"msg-061-2\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClN1cHBseSBwbGFubmluZyBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgY29wcGVyIGRlbWFuZCBzcGlrZSBieSAyMDI2LTAxLTIwOyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBuZXQgb25seSB0aGUgaW5jcmVtZW50YWwgZGVtYW5kIGFuZCBhdm9pZCBkb3VibGUgY292ZXJhZ2UuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA2MiB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgo\",\"size\":323},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-061 \\u2014 operating request and source reply\"}]},\"snippet\":\" operations lead ---\\nDate: 2026-01-12 09:10 Pacific\\nSupply planning needs one defensible decision for copper demand spike by 2026-01-20; a f\",\"threadId\":\"thread-061\"},{\"id\":\"msg-061-3\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIFJlc2VydmVkLCBsYXRlLCBvciB1bmZpcm0gY292ZXJhZ2UgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":198},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-061 \\u2014 operating request and source reply\"}]},\"snippet\":\" controller ---\\nDate: 2026-01-11 16:40 Pacific\\nReconcile the raw rows before acting. Reserved, late, or unfirm coverage must remain outside \",\"threadId\":\"thread-061\"}]}",
+        "task_id": "factorybench-061",
+        "tool_name": "gmail.threads.get"
+      },
+      {
+        "arguments_json": "{\"count\":50,\"query\":\"\\\"CASE-061\\\"\",\"sort\":\"timestamp\",\"sort_dir\":\"asc\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-061-call-25",
+        "read_only": 1,
+        "response_json": "{\"messages\":{\"matches\":[{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"text\":\"Supply planning needs one defensible decision for copper demand spike by 2026-01-20; a faster or broader action has value only if it remains inside net only the incremental demand and avoid double coverage.\",\"ts\":\"1768000061.000100\",\"user\":\"U-OPS-LEAD\"},{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"text\":\"I found 55 KG on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000061.000150\",\"user\":\"U-PLANNER\"},{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"files\":[{\"id\":\"F-000061\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-061 approval and impact note\"}],\"text\":\"Approval AP-0061 permits one control-compliant action on NS-000061 up to 15.0 KG, provided net only the incremental demand and avoid double coverage. It does not select an option in advance and does not authorize broader records or defer_unplanned_demand.\",\"ts\":\"1768000061.000200\",\"user\":\"U-APPROVER\"},{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"text\":\"Protected load remains non-displaceable. The calendar for qualified production need date is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000061.000240\",\"user\":\"U-SCHEDULER\"},{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"text\":\"Revision R9 and the CASE-062 record are visible in search but are not applicable to CASE-061.\",\"ts\":\"1768000061.000270\",\"user\":\"U-QUALITY\"},{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"text\":\"Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000061.000300\",\"user\":\"U-CONTROLLER\"}],\"total\":6},\"ok\":true,\"query\":\"\\\"CASE-061\\\"\"}",
+        "task_id": "factorybench-061",
+        "tool_name": "slack.search_messages"
+      },
+      {
         "arguments_json": "{\"requestBody\":{\"SupplyOrderReferenceNumber\":\"SUPPLY-0061\",\"SupplyRequestDate\":\"2026-01-17\",\"SupplyRequestSystem\":\"EXT\",\"supplyRequestLines\":[{\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-061\",\"NeedByDate\":\"2026-01-19\",\"Quantity\":15.0,\"SupplyOrderSource\":\"EXT\",\"SupplyType\":\"BUY\"}]}}",
         "effect_json": "{\"effective_at\":\"2026-01-19\",\"payload_json\":\"{\\\"arguments\\\":{\\\"requestBody\\\":{\\\"SupplyOrderReferenceNumber\\\":\\\"SUPPLY-0061\\\",\\\"SupplyRequestDate\\\":\\\"2026-01-17\\\",\\\"SupplyRequestSystem\\\":\\\"EXT\\\",\\\"supplyRequestLines\\\":[{\\\"DestinationOrganizationCode\\\":\\\"SEA\\\",\\\"ItemNumber\\\":\\\"NS-COMP-061\\\",\\\"NeedByDate\\\":\\\"2026-01-19\\\",\\\"Quantity\\\":15.0,\\\"SupplyOrderSource\\\":\\\"EXT\\\",\\\"SupplyType\\\":\\\"BUY\\\"}]}},\\\"tool\\\":\\\"oracle_fusion.supply_requests.create\\\"}\",\"resource_id\":\"factorybench-061-mutation-01\",\"resource_type\":\"oracle_fusion.supply_requests\",\"revision\":1,\"status\":\"Shortage supply created\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-061\"}",
-        "fixture_id": "factorybench-061-call-24",
+        "fixture_id": "factorybench-061-call-26",
         "read_only": 0,
         "response_json": "{\"Description\":\"CASE-061\",\"DestinationOrganizationCode\":\"SEA\",\"ItemNumber\":\"NS-COMP-061\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"NeedByDate\":\"2026-01-20\",\"Quantity\":55,\"SupplyOrderReferenceNumber\":\"SUPPLY-0061\",\"SupplyRequestDate\":\"2026-01-17\",\"SupplyRequestId\":1500061,\"SupplyRequestStatus\":\"NEW\",\"SupplyRequestSystem\":\"EXT\",\"links\":[]}",
         "task_id": "factorybench-061",
@@ -4309,7 +4379,7 @@
       {
         "arguments_json": "{\"includeValuesInResponse\":true,\"range\":\"Control!H23\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"CASE-061 | create_net_shortage_supply | 2026-01-19 | NS-000061 | net only the incremental demand and avoid double coverage; reserved, late, or unfirm coverage = 6 KG; uncovered or unsupported scope = 15.0 KG | AP-0061\"]]},\"spreadsheetId\":\"sheet-061\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-19\",\"payload_json\":\"{\\\"arguments\\\":{\\\"includeValuesInResponse\\\":true,\\\"range\\\":\\\"Control!H23\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"CASE-061 | create_net_shortage_supply | 2026-01-19 | NS-000061 | net only the incremental demand and avoid double coverage; reserved, late, or unfirm coverage = 6 KG; uncovered or unsupported scope = 15.0 KG | AP-0061\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-061\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.update\\\"}\",\"resource_id\":\"factorybench-061-mutation-02\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-061\"}",
-        "fixture_id": "factorybench-061-call-26",
+        "fixture_id": "factorybench-061-call-28",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-061\",\"updatedCells\":1,\"updatedColumns\":1,\"updatedRange\":\"Control!H23\",\"updatedRows\":1}",
         "task_id": "factorybench-061",
@@ -4318,7 +4388,7 @@
       {
         "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"text\":\"CASE-061: Oracle record NS-000061 now reflects create_net_shortage_supply with completion 2026-01-19. Binding constraint: net only the incremental demand and avoid double coverage; reserved, late, or unfirm coverage = 6 KG; uncovered or unsupported scope = 15.0 KG. Alternatives: create_net_shortage_supply: outcome 2026-01-19, economic impact USD 0, SUPPORTED_AND_APPROVED; buy_gross_revised_demand: outcome 2026-01-17, economic impact USD 1387, FEASIBLE_WITH_INFERIOR_TRADEOFF; defer_unplanned_demand: outcome 2026-01-16, economic impact USD 2991, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0061.\",\"thread_ts\":\"1768000061.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-19\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PROCUREMENT\\\",\\\"text\\\":\\\"CASE-061: Oracle record NS-000061 now reflects create_net_shortage_supply with completion 2026-01-19. Binding constraint: net only the incremental demand and avoid double coverage; reserved, late, or unfirm coverage = 6 KG; uncovered or unsupported scope = 15.0 KG. Alternatives: create_net_shortage_supply: outcome 2026-01-19, economic impact USD 0, SUPPORTED_AND_APPROVED; buy_gross_revised_demand: outcome 2026-01-17, economic impact USD 1387, FEASIBLE_WITH_INFERIOR_TRADEOFF; defer_unplanned_demand: outcome 2026-01-16, economic impact USD 2991, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0061.\\\",\\\"thread_ts\\\":\\\"1768000061.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-061-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-061\"}",
-        "fixture_id": "factorybench-061-call-27",
+        "fixture_id": "factorybench-061-call-29",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-PROCUREMENT\",\"message\":{\"text\":\"CASE-061: Oracle record NS-000061 now reflects create_net_shortage_supply with completion 2026-01-19. Binding constraint: net only the incremental demand and avoid double coverage; reserved, late, or unfirm coverage = 6 KG; uncovered or unsupported scope = 15.0 KG. Alternatives: create_net_shortage_supply: outcome 2026-01-19, economic impact USD 0, SUPPORTED_AND_APPROVED; buy_gross_revised_demand: outcome 2026-01-17, economic impact USD 1387, FEASIBLE_WITH_INFERIOR_TRADEOFF; defer_unplanned_demand: outcome 2026-01-16, economic impact USD 2991, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0061.\",\"thread_ts\":\"1768000061.000100\"},\"ok\":true,\"ts\":\"1768000061.000900\"}",
         "task_id": "factorybench-061",
@@ -4341,15 +4411,6 @@
         "response_json": "{\"data\":\"UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogcmV2aXNlZC1kZW1hbmQtYW5kLXN1cHBseS1wZWdnaW5nLXdvcmtib29rLTAwNjEKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDYxCklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IHJldmlzZWQgZGVtYW5kIGFuZCBzdXBwbHktcGVnZ2luZyB3b3JrYm9vawpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDYxCkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFI2Ck1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMTUgS0cKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogYnV5X2dyb3NzX3JldmlzZWRfZGVtYW5kClN0YW5kYXJkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTE2CkV4cGVkaXRlZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xNApSZXN1bHRpbmcgb3BlcmF0aW5nIG91dGNvbWUgc3RhdGVkIGJ5IHJlcXVlc3Rlciwgbm90IGJ5IGNvdW50ZXJwYXJ0eTogMjAyNi0wMS0xNwpFY29ub21pYyBpbXBhY3Qgc3RhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogVVNEIDEzODcKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiBzdXBwbGllciBjb3BwZXIgbGVhZCB0aW1lCkNhcGFjaXR5IGlzIHJlc2VydmVkIG9ubHkgYWZ0ZXIgdGhlIGJ1eWVyIG9yIHBsYW5uZXIgc3VwcGxpZXMgdGhlIG1hdGNoaW5nIGltbXV0YWJsZSByZWNvcmQgYW5kIGN1cnJlbnQgYXBwcm92YWwuCgozLiBFWENMVVNJT05TIEFORCBBU1NVTVBUSU9OUwpOb3QgaW5jbHVkZWQ6IHJlc2VydmVkLCBsYXRlLCBvciB1bmZpcm0gY292ZXJhZ2UKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogbmV0IG9ubHkgdGhlIGluY3JlbWVudGFsIGRlbWFuZCBhbmQgYXZvaWQgZG91YmxlIGNvdmVyYWdlCk5lYXJieSBidXQgdW5yZWxhdGVkIHJlZmVyZW5jZSBDQVNFLTA2MiBpcyBleHBsaWNpdGx5IGV4Y2x1ZGVkLgpGcmVpZ2h0LCBwcmVtaXVtLCBjZXJ0aWZpY2F0aW9uLCBhbmQgbG90IHRlcm1zIGFwcGx5IG9ubHkgd2hlcmUgc3RhdGVkIGFib3ZlOyBzaWxlbmNlIGlzIG5vdCBhcHByb3ZhbC4KCjQuIEFDQ0VQVEFOQ0UKUHJlcGFyZWQgYnk6IFJhaW5pZXIgQ29tcG9uZW50cyBvcGVyYXRpb25zIGRlc2sKQ29uZmlybWF0aW9uIG51bWJlcjogQ05GLTAwMDA2MQpTdGF0dXM6IENPTkZJUk1FRCBBUyBBTiBJTlBVVCwgTk9UIEEgRklOQUwgT1BFUkFUSU5HIERFQ0lTSU9OCg\",\"size\":1522}",
         "task_id": "factorybench-061",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"thread-061\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-061-discovery-05",
-        "read_only": 1,
-        "response_json": "{\"historyId\":\"900061\",\"id\":\"thread-061\",\"messages\":[{\"id\":\"msg-061\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy02MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogc3VwcGx5LnBsYW5uZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCByYWluaWVyLmNvbXBvbmVudHNAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDYxQG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA2MSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBjb3BwZXIgZGVtYW5kIHNwaWtlCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKRGVtYW5kIGZvciBjb3BwZXIganVtcGVkIGFmdGVyIHRoZSBsYXRlc3QgcGxhbiBhbmQgcHJvZHVjdGlvbiB3YW50cyBhIGNvdmVyYWdlIGRhdGUuIE5ldCB0aGUgbmV3IHJlcXVpcmVtZW50IGFnYWluc3QgdXNhYmxlIHN0b2NrIGFuZCBmaXJtIGluYm91bmQsIGNvbXBhcmUgYnV5LCB0cmFuc2ZlciwgYW5kIHNjaGVkdWxlIGFsdGVybmF0aXZlcywgYW5kIGlkZW50aWZ5IHRoZSBjb25zdHJhaW50IGJlaGluZCB0aGUgZWFybGllc3QgZmVhc2libGUgcGxhbi4gQ3JlYXRlIHN1cHBseSBvbmx5IGZvciB0aGUgcmVtYWluaW5nIGdhcC4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgo\",\"size\":744},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-061 \\u2014 operating request and source reply\"}]},\"snippet\":\"From: operations-61@northstar.example\\nTo: supply.planner@northstar.example\\nCc: controls@northstar.example, rainier.components@supplier.examp\",\"threadId\":\"thread-061\"},{\"id\":\"msg-061-1\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnN1cHBsaWVyIGNvcHBlciBsZWFkIHRpbWU6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBidXlfZ3Jvc3NfcmV2aXNlZF9kZW1hbmQgb24gMjAyNi0wMS0xNDsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTcgd2l0aCBlY29ub21pYyBpbXBhY3QgVVNEIDEzODc7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDYxIGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDYxIC8gUjYuCgo\",\"size\":413},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-061 \\u2014 operating request and source reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-061\",\"size\":1024},\"filename\":\"supplier-confirmation.pdf\"}]},\"snippet\":\" external operations desk ---\\nDate: 2026-01-12 11:25 Pacific\\nsupplier copper lead time: the independent source confirms readiness for buy_gr\",\"threadId\":\"thread-061\"},{\"id\":\"msg-061-2\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClN1cHBseSBwbGFubmluZyBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgY29wcGVyIGRlbWFuZCBzcGlrZSBieSAyMDI2LTAxLTIwOyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBuZXQgb25seSB0aGUgaW5jcmVtZW50YWwgZGVtYW5kIGFuZCBhdm9pZCBkb3VibGUgY292ZXJhZ2UuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA2MiB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgo\",\"size\":323},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-061 \\u2014 operating request and source reply\"}]},\"snippet\":\" operations lead ---\\nDate: 2026-01-12 09:10 Pacific\\nSupply planning needs one defensible decision for copper demand spike by 2026-01-20; a f\",\"threadId\":\"thread-061\"},{\"id\":\"msg-061-3\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIFJlc2VydmVkLCBsYXRlLCBvciB1bmZpcm0gY292ZXJhZ2UgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":198},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-061 \\u2014 operating request and source reply\"}]},\"snippet\":\" controller ---\\nDate: 2026-01-11 16:40 Pacific\\nReconcile the raw rows before acting. Reserved, late, or unfirm coverage must remain outside \",\"threadId\":\"thread-061\"}]}",
-        "task_id": "factorybench-061",
-        "tool_name": "gmail.threads.get"
       },
       {
         "arguments_json": "{\"commentId\":\"comment-061\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-061\"}",
@@ -4422,15 +4483,6 @@
         "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Supply planning needs one defensible decision for copper demand spike by 2026-01-20; a faster or broader action has value only if it remains inside net only the incremental demand and avoid double coverage.\",\"ts\":\"1768000061.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 55 KG on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000061.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000061\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-061 approval and impact note\"}],\"text\":\"Approval AP-0061 permits one control-compliant action on NS-000061 up to 15.0 KG, provided net only the incremental demand and avoid double coverage. It does not select an option in advance and does not authorize broader records or defer_unplanned_demand.\",\"ts\":\"1768000061.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for qualified production need date is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000061.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R9 and the CASE-062 record are visible in search but are not applicable to CASE-061.\",\"ts\":\"1768000061.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000061.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
         "task_id": "factorybench-061",
         "tool_name": "slack.conversations_replies"
-      },
-      {
-        "arguments_json": "{\"count\":50,\"query\":\"\\\"CASE-061\\\"\",\"sort\":\"timestamp\",\"sort_dir\":\"asc\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-061-discovery-24",
-        "read_only": 1,
-        "response_json": "{\"messages\":{\"matches\":[{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"text\":\"Supply planning needs one defensible decision for copper demand spike by 2026-01-20; a faster or broader action has value only if it remains inside net only the incremental demand and avoid double coverage.\",\"ts\":\"1768000061.000100\",\"user\":\"U-OPS-LEAD\"},{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"text\":\"I found 55 KG on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000061.000150\",\"user\":\"U-PLANNER\"},{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"files\":[{\"id\":\"F-000061\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-061 approval and impact note\"}],\"text\":\"Approval AP-0061 permits one control-compliant action on NS-000061 up to 15.0 KG, provided net only the incremental demand and avoid double coverage. It does not select an option in advance and does not authorize broader records or defer_unplanned_demand.\",\"ts\":\"1768000061.000200\",\"user\":\"U-APPROVER\"},{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"text\":\"Protected load remains non-displaceable. The calendar for qualified production need date is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000061.000240\",\"user\":\"U-SCHEDULER\"},{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"text\":\"Revision R9 and the CASE-062 record are visible in search but are not applicable to CASE-061.\",\"ts\":\"1768000061.000270\",\"user\":\"U-QUALITY\"},{\"channel\":{\"id\":\"C-PROCUREMENT\"},\"text\":\"Required closeout records: record the selected option, committed completion, and binding constraint in the existing Control outcome cell; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000061.000300\",\"user\":\"U-CONTROLLER\"}],\"total\":6},\"ok\":true,\"query\":\"\\\"CASE-061\\\"\"}",
-        "task_id": "factorybench-061",
-        "tool_name": "slack.search_messages"
       }
     ],
     "evidence_files": [
@@ -4783,7 +4835,7 @@
       }
     ]
   },
-  "sequence_signature": "e01e6f7c8c2fdf740f9f5ee2fc8f1ca039fdca5ee446fbfb837c4796ada4cfbf",
+  "sequence_signature": "237c1dc9d36c3305c59312f867437be945ab3b8a1008d13f0c20a6c9ad087499",
   "task_id": "factorybench-061",
   "title": "Cover an unplanned copper demand spike",
   "variant": null,

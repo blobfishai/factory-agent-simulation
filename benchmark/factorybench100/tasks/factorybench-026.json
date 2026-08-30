@@ -1499,7 +1499,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.1",
+  "benchmark_version": "3.3.2",
   "decision_model": {
     "calculations": [
       {
@@ -2445,6 +2445,31 @@
         "id": "investigation_13",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "maxResults": 20,
+              "q": "\"CASE-026\"",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "messages": [
+                {
+                  "id": "msg-026"
+                }
+              ]
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.list"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Located the task-scoped correspondence for CASE-026 before opening any message; did not rely on a filename or a guessed sender.",
+        "id": "investigation_14",
+        "milestone_id": "investigation.scope",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -2716,6 +2741,26 @@
       "control": true,
       "phase": "investigation",
       "tool": "oracle_fusion.maintenance_work_orders.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-026\"",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-026",
+        "userId": "me"
+      },
+      "control": true,
+      "phase": "investigation",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -3122,6 +3167,35 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.maintenance_work_orders.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-026\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-026"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-026",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-026",
+        "threadId": "thread-026"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -3548,6 +3622,31 @@
       "id": "investigation_13",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "maxResults": 20,
+            "q": "\"CASE-026\"",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "messages": [
+              {
+                "id": "msg-026"
+              }
+            ]
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.list"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Located the task-scoped correspondence for CASE-026 before opening any message; did not rely on a filename or a guessed sender.",
+      "id": "investigation_14",
+      "milestone_id": "investigation.scope",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -3718,6 +3817,22 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.maintenance_work_orders.list"
+    },
+    {
+      "arguments": {
+        "maxResults": 20,
+        "q": "\"CASE-026\"",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "messages": [
+          {
+            "id": "msg-026"
+          }
+        ]
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.list"
     }
   ],
   "required_reads": [
@@ -3733,16 +3848,18 @@
     "oracle_fusion.maintenance_programs.get",
     "oracle_fusion.inventory_onhand_balances.list",
     "oracle_fusion.maintenance_resources.list",
-    "oracle_fusion.maintenance_work_orders.list"
+    "oracle_fusion.maintenance_work_orders.list",
+    "gmail.messages.list"
   ],
   "role": "reliability_engineer",
   "rubric_milestones": [
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 3.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_01",
-        "investigation_02"
+        "investigation_02",
+        "investigation_14"
       ],
       "description": "Establish the isolated CASE-026 scope and immutable identities across the mailbox, Drive index, and mounted systems before relying on similarly named records.",
       "id": "investigation.scope",
@@ -4116,9 +4233,27 @@
         "tool_name": "oracle_fusion.maintenance_work_orders.list"
       },
       {
+        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-026\\\"\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-026-call-24",
+        "read_only": 1,
+        "response_json": "{\"messages\":[{\"id\":\"msg-026\",\"threadId\":\"thread-026\"},{\"id\":\"msg-026-1\",\"threadId\":\"thread-026\"},{\"id\":\"msg-026-2\",\"threadId\":\"thread-026\"},{\"id\":\"msg-026-3\",\"threadId\":\"thread-026\"}],\"resultSizeEstimate\":4}",
+        "task_id": "factorybench-026",
+        "tool_name": "gmail.messages.list"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-026\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-026-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-026\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0yNkBub3J0aHN0YXIuZXhhbXBsZQpUbzogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBvbHltcGljLm1ldHJvbG9neUBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wMjZAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDI2IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIG1ldGVyLWJhc2VkIGx1YnJpY2F0aW9uIHByb2dyYW0KTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpBIG1ldGVyIHNwaWtlIG1heSBoYXZlIHB1bGxlZCB0aGUgbmV4dCBsdWJyaWNhdGlvbiBmb3J3YXJkLCBidXQgdGhlIGhpc3RvcnkgYWxzbyBjb250YWlucyByZXNldHMgYW5kIGR1cGxpY2F0ZSByZWFkaW5ncy4gVGVsbCByZWxpYWJpbGl0eSB3aGV0aGVyIHRoZSBhc3NldCBpcyB0cnVseSBkdWUsIHRoZSBmaXJzdCBzYWZlIHNlcnZpY2Ugd2luZG93LCBhbmQgdGhlIHJpc2sgb2Yga2VlcGluZyB0aGUgY2FsZW5kYXIgZGF0ZSB2ZXJzdXMgYWR2YW5jaW5nIGl0LiBVcGRhdGUgb25seSB0aGUgYm91bmRlZCBwcm9ncmFtIHdpbmRvdyB0aGF0IGlzIGF1dGhvcml6ZWQuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKbHVicmljYW50LWtpdCByZWFkaW5lc3M6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBrZWVwX2NhbGVuZGFyX2R1ZV9kYXRlIG9uIDIwMjYtMDItMjE7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAyLTIzIHdpdGggbm8gc2VwYXJhdGVseSBkb2N1bWVudGVkIHNwZW5kOyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDAyNiBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTAyNiAvIFI2LgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKUmVsaWFiaWxpdHkgb3BlcmF0aW9ucyBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgbWV0ZXItYmFzZWQgbHVicmljYXRpb24gcHJvZ3JhbSBieSAyMDI2LTAxLTE2OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBlZmZlY3RpdmUgbWV0ZXIgdGhyZXNob2xkIGFuZCBibGFja291dCBjYWxlbmRhciBkZXRlcm1pbmUgdGhlIGR1ZSBkYXRlLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wMjcgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gSW52YWxpZCBzcGlrZXMgYW5kIHJlYWRpbmdzIGJlZm9yZSB0aGUgbGFzdCBzZXJ2aWNlIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1826},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-026 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-026\",\"size\":1024},\"filename\":\"meter-or-calendar-source-report.pdf\"}]},\"snippet\":\"A meter spike may have pulled the next lubrication forward, but the history also contains resets and duplicate readings. Tell reliability wh\",\"threadId\":\"thread-026\"}",
+        "task_id": "factorybench-026",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"MaintenanceProgramId\":500026,\"requestBody\":{\"ForecastEndDate\":\"2026-04-15\",\"ForecastStartDate\":\"2026-01-15\",\"StatusCode\":\"ACTIVE\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"MaintenanceProgramId\\\":500026,\\\"requestBody\\\":{\\\"ForecastEndDate\\\":\\\"2026-04-15\\\",\\\"ForecastStartDate\\\":\\\"2026-01-15\\\",\\\"StatusCode\\\":\\\"ACTIVE\\\"}},\\\"tool\\\":\\\"oracle_fusion.maintenance_programs.update\\\"}\",\"resource_id\":\"factorybench-026-mutation-01\",\"resource_type\":\"oracle_fusion.maintenance_programs\",\"revision\":1,\"status\":\"Forecast window advanced\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-026\"}",
-        "fixture_id": "factorybench-026-call-24",
+        "fixture_id": "factorybench-026-call-26",
         "read_only": 0,
         "response_json": "{\"ForecastEndDate\":\"2026-04-15\",\"ForecastStartDate\":\"2026-01-15\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"MaintenanceProgramCode\":\"PM-0026\",\"MaintenanceProgramId\":500026,\"MaintenanceProgramName\":\"CASE-026: Advance lubrication after a meter spike\",\"OrganizationCode\":\"SEA\",\"StatusCode\":\"ACTIVE\",\"links\":[]}",
         "task_id": "factorybench-026",
@@ -4127,7 +4262,7 @@
       {
         "arguments_json": "{\"channel\":\"C-QUALITY\",\"text\":\"CASE-026: Oracle record NS-000026 now reflects advance_program_forecast with completion 2026-01-16. Binding constraint: effective meter threshold and blackout calendar determine the due date; invalid spikes and readings before the last service = 150 HOURS; uncovered or unsupported scope = 150.0 HOURS. Alternatives: advance_program_forecast: outcome 2026-01-16, economic impact USD 0, SUPPORTED_AND_APPROVED; keep_calendar_due_date: outcome 2026-02-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; generate_emergency_work: outcome 2026-01-17, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0026.\",\"thread_ts\":\"1768000026.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-QUALITY\\\",\\\"text\\\":\\\"CASE-026: Oracle record NS-000026 now reflects advance_program_forecast with completion 2026-01-16. Binding constraint: effective meter threshold and blackout calendar determine the due date; invalid spikes and readings before the last service = 150 HOURS; uncovered or unsupported scope = 150.0 HOURS. Alternatives: advance_program_forecast: outcome 2026-01-16, economic impact USD 0, SUPPORTED_AND_APPROVED; keep_calendar_due_date: outcome 2026-02-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; generate_emergency_work: outcome 2026-01-17, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0026.\\\",\\\"thread_ts\\\":\\\"1768000026.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-026-mutation-02\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-026\"}",
-        "fixture_id": "factorybench-026-call-26",
+        "fixture_id": "factorybench-026-call-28",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-QUALITY\",\"message\":{\"text\":\"CASE-026: Oracle record NS-000026 now reflects advance_program_forecast with completion 2026-01-16. Binding constraint: effective meter threshold and blackout calendar determine the due date; invalid spikes and readings before the last service = 150 HOURS; uncovered or unsupported scope = 150.0 HOURS. Alternatives: advance_program_forecast: outcome 2026-01-16, economic impact USD 0, SUPPORTED_AND_APPROVED; keep_calendar_due_date: outcome 2026-02-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; generate_emergency_work: outcome 2026-01-17, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0026.\",\"thread_ts\":\"1768000026.000100\"},\"ok\":true,\"ts\":\"1768000026.000900\"}",
         "task_id": "factorybench-026",
@@ -4136,7 +4271,7 @@
       {
         "arguments_json": "{\"fileId\":\"drive-026\",\"requestBody\":{\"content\":\"CASE-026: advance_program_forecast recorded on Oracle record NS-000026; completion 2026-01-16; constraint effective meter threshold and blackout calendar determine the due date; invalid spikes and readings before the last service = 150 HOURS; uncovered or unsupported scope = 150.0 HOURS; approval AP-0026.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-026\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-026: advance_program_forecast recorded on Oracle record NS-000026; completion 2026-01-16; constraint effective meter threshold and blackout calendar determine the due date; invalid spikes and readings before the last service = 150 HOURS; uncovered or unsupported scope = 150.0 HOURS; approval AP-0026.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-026-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-026\"}",
-        "fixture_id": "factorybench-026-call-27",
+        "fixture_id": "factorybench-026-call-29",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-026: advance_program_forecast recorded on Oracle record NS-000026; completion 2026-01-16; constraint effective meter threshold and blackout calendar determine the due date; invalid spikes and readings before the last service = 150 HOURS; uncovered or unsupported scope = 150.0 HOURS; approval AP-0026.\",\"id\":\"comment-026\",\"resolved\":false}",
         "task_id": "factorybench-026",
@@ -4159,24 +4294,6 @@
         "response_json": "{\"data\":\"T0xZTVBJQyBNRVRST0xPR1kg4oCUIENPTlRST0xMRUQgQ09NTUVSQ0lBTCAvIFNFUlZJQ0UgUkVDT1JECkRvY3VtZW50OiBtZXRlci1oaXN0b3J5LWFuZC1sdWJyaWNhdGlvbi10aHJlc2hvbGQtMDAyNgpDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMjYKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogbWV0ZXIgaGlzdG9yeSBhbmQgbHVicmljYXRpb24gdGhyZXNob2xkCkltbXV0YWJsZSByZWNvcmQgb3IgaXRlbTogTlMtQ09NUC0wMjYKRWZmZWN0aXZlIHJldmlzaW9uIHN1cHBsaWVkIGJ5IHJlcXVlc3RlcjogUjYKTWF4aW11bSBzY29wZSByZXByZXNlbnRlZCBieSB0aGlzIHJlc3BvbnNlOiAxNTAgSE9VUlMKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3Rlcjoga2VlcF9jYWxlbmRhcl9kdWVfZGF0ZQpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xNApFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDItMjEKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDItMjMKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogbHVicmljYW50LWtpdCByZWFkaW5lc3MKQ2FwYWNpdHkgaXMgcmVzZXJ2ZWQgb25seSBhZnRlciB0aGUgYnV5ZXIgb3IgcGxhbm5lciBzdXBwbGllcyB0aGUgbWF0Y2hpbmcgaW1tdXRhYmxlIHJlY29yZCBhbmQgY3VycmVudCBhcHByb3ZhbC4KCjMuIEVYQ0xVU0lPTlMgQU5EIEFTU1VNUFRJT05TCk5vdCBpbmNsdWRlZDogaW52YWxpZCBzcGlrZXMgYW5kIHJlYWRpbmdzIGJlZm9yZSB0aGUgbGFzdCBzZXJ2aWNlCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IGVmZmVjdGl2ZSBtZXRlciB0aHJlc2hvbGQgYW5kIGJsYWNrb3V0IGNhbGVuZGFyIGRldGVybWluZSB0aGUgZHVlIGRhdGUKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDI3IGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogT2x5bXBpYyBNZXRyb2xvZ3kgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwMjYKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo\",\"size\":1541}",
         "task_id": "factorybench-026",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-026\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-026-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-026\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0yNkBub3J0aHN0YXIuZXhhbXBsZQpUbzogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBvbHltcGljLm1ldHJvbG9neUBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wMjZAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDI2IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIG1ldGVyLWJhc2VkIGx1YnJpY2F0aW9uIHByb2dyYW0KTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpBIG1ldGVyIHNwaWtlIG1heSBoYXZlIHB1bGxlZCB0aGUgbmV4dCBsdWJyaWNhdGlvbiBmb3J3YXJkLCBidXQgdGhlIGhpc3RvcnkgYWxzbyBjb250YWlucyByZXNldHMgYW5kIGR1cGxpY2F0ZSByZWFkaW5ncy4gVGVsbCByZWxpYWJpbGl0eSB3aGV0aGVyIHRoZSBhc3NldCBpcyB0cnVseSBkdWUsIHRoZSBmaXJzdCBzYWZlIHNlcnZpY2Ugd2luZG93LCBhbmQgdGhlIHJpc2sgb2Yga2VlcGluZyB0aGUgY2FsZW5kYXIgZGF0ZSB2ZXJzdXMgYWR2YW5jaW5nIGl0LiBVcGRhdGUgb25seSB0aGUgYm91bmRlZCBwcm9ncmFtIHdpbmRvdyB0aGF0IGlzIGF1dGhvcml6ZWQuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKbHVicmljYW50LWtpdCByZWFkaW5lc3M6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBrZWVwX2NhbGVuZGFyX2R1ZV9kYXRlIG9uIDIwMjYtMDItMjE7IGZpbml0ZS1jYXBhY2l0eSBzY2hlZHVsaW5nIHByb2R1Y2VzIHRoZSBzZXBhcmF0ZSBvcGVyYXRpbmcgb3V0Y29tZSAyMDI2LTAyLTIzIHdpdGggbm8gc2VwYXJhdGVseSBkb2N1bWVudGVkIHNwZW5kOyB0aGF0IHNvdXJjZSBhbG9uZSBkb2VzIG5vdCBwcm92ZSBlbGlnaWJpbGl0eSwgaWRlbnRpdHksIG9yIGFwcHJvdmFsLgpDb25maXJtYXRpb24gQ05GLTAwMDAyNiBpcyB2YWxpZCBvbmx5IGZvciBOUy1DT01QLTAyNiAvIFI2LgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogb3BlcmF0aW9ucyBsZWFkIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDA5OjEwIFBhY2lmaWMKUmVsaWFiaWxpdHkgb3BlcmF0aW9ucyBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgbWV0ZXItYmFzZWQgbHVicmljYXRpb24gcHJvZ3JhbSBieSAyMDI2LTAxLTE2OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBlZmZlY3RpdmUgbWV0ZXIgdGhyZXNob2xkIGFuZCBibGFja291dCBjYWxlbmRhciBkZXRlcm1pbmUgdGhlIGR1ZSBkYXRlLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wMjcgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gSW52YWxpZCBzcGlrZXMgYW5kIHJlYWRpbmdzIGJlZm9yZSB0aGUgbGFzdCBzZXJ2aWNlIG11c3QgcmVtYWluIG91dHNpZGUgdGhlIHRyYW5zYWN0aW9uLCBldmVuIGlmIHRoZSBoZWFkZXIgdG90YWwgYXBwZWFycyB0byBmaXQuCg\",\"size\":1826},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-026 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-026\",\"size\":1024},\"filename\":\"meter-or-calendar-source-report.pdf\"}]},\"snippet\":\"A meter spike may have pulled the next lubrication forward, but the history also contains resets and duplicate readings. Tell reliability wh\",\"threadId\":\"thread-026\"}",
-        "task_id": "factorybench-026",
-        "tool_name": "gmail.messages.get"
-      },
-      {
-        "arguments_json": "{\"maxResults\":20,\"q\":\"\\\"CASE-026\\\"\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-026-discovery-04",
-        "read_only": 1,
-        "response_json": "{\"messages\":[{\"id\":\"msg-026\",\"threadId\":\"thread-026\"},{\"id\":\"msg-026-1\",\"threadId\":\"thread-026\"},{\"id\":\"msg-026-2\",\"threadId\":\"thread-026\"},{\"id\":\"msg-026-3\",\"threadId\":\"thread-026\"}],\"resultSizeEstimate\":4}",
-        "task_id": "factorybench-026",
-        "tool_name": "gmail.messages.list"
       },
       {
         "arguments_json": "{\"commentId\":\"comment-026\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-026\"}",
@@ -4601,7 +4718,7 @@
       }
     ]
   },
-  "sequence_signature": "796f9dbe51a3912145072aa98f6a834ba6706eed53b572840e2649b06ed8d5ba",
+  "sequence_signature": "c5500297ec77727ed4d9b1d3376e33152904c5e0405229dcf8cbff14516f9607",
   "task_id": "factorybench-026",
   "title": "Advance lubrication after a meter spike",
   "variant": null,

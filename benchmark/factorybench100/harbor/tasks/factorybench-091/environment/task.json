@@ -845,6 +845,40 @@
         "id": "investigation_15",
         "milestone_id": "investigation.erp_correlation",
         "weight": 1.0
+      },
+      {
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "msg-091",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "msg-091",
+              "threadId": "thread-091"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          },
+          {
+            "arguments": {
+              "format": "full",
+              "id": "thread-091",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "thread-091"
+            },
+            "match": "result_contains",
+            "tool": "gmail.threads.get"
+          }
+        ],
+        "before_primary_mutation": true,
+        "description": "Used the independently confirmed 2026-01-15 readiness input for close_with_open_balance, then separately derived its 2026-01-18 operating outcome under all source activity must be complete before the close cutoff instead of treating an external promise as authorization or a completion date.",
+        "id": "investigation_16",
+        "milestone_id": "investigation.requirements",
+        "weight": 1.0
       }
     ],
     "post_write_verifications": [
@@ -1234,6 +1268,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.purchase_order_lines.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-091",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-091",
+        "threadId": "thread-091"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_investigations": [
@@ -1710,6 +1757,40 @@
       "id": "investigation_15",
       "milestone_id": "investigation.erp_correlation",
       "weight": 1.0
+    },
+    {
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "msg-091",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "msg-091",
+            "threadId": "thread-091"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        },
+        {
+          "arguments": {
+            "format": "full",
+            "id": "thread-091",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "thread-091"
+          },
+          "match": "result_contains",
+          "tool": "gmail.threads.get"
+        }
+      ],
+      "before_primary_mutation": true,
+      "description": "Used the independently confirmed 2026-01-15 readiness input for close_with_open_balance, then separately derived its 2026-01-18 operating outcome under all source activity must be complete before the close cutoff instead of treating an external promise as authorization or a completion date.",
+      "id": "investigation_16",
+      "milestone_id": "investigation.requirements",
+      "weight": 1.0
     }
   ],
   "required_read_calls": [
@@ -1905,6 +1986,19 @@
       },
       "match": "result_contains",
       "tool": "oracle_fusion.purchase_order_lines.list"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "msg-091",
+        "userId": "me"
+      },
+      "expected_result_contains": {
+        "id": "msg-091",
+        "threadId": "thread-091"
+      },
+      "match": "result_contains",
+      "tool": "gmail.messages.get"
     }
   ],
   "required_reads": [
@@ -1922,7 +2016,8 @@
     "oracle_fusion.receiving_receipt_transactions.list",
     "oracle_fusion.invoices.get",
     "oracle_fusion.purchase_orders.get",
-    "oracle_fusion.purchase_order_lines.list"
+    "oracle_fusion.purchase_order_lines.list",
+    "gmail.messages.get"
   ],
   "role": "plant_controller",
   "rubric_milestones": [
@@ -1939,12 +2034,13 @@
       "weight": 4.0
     },
     {
-      "atomic_weight": 3.0,
+      "atomic_weight": 4.0,
       "category": "investigation",
       "criterion_ids": [
         "investigation_05",
         "investigation_06",
-        "investigation_11"
+        "investigation_11",
+        "investigation_16"
       ],
       "description": "Determine the operative R1 requirement for NS-000091, reconcile the current source material, and distinguish current evidence from superseded or merely contextual records.",
       "id": "investigation.requirements",
@@ -2313,9 +2409,18 @@
         "tool_name": "oracle_fusion.purchase_order_lines.list"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-091\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-091-call-25",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-091\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy05MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIHJhaW5pZXIuY29tcG9uZW50c0BzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wOTFAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDkxIOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIHRvb2xpbmcgUE8gY2xvc2UgZXhjZXB0aW9uCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQSB0b29saW5nIFBPIGlzIG9uIHRoZSBjbG9zZSBleGNlcHRpb24gbGlzdCBhbmQgYXBwZWFycyBmaW5hbmNpYWxseSBzZXR0bGVkLiBEZXRlcm1pbmUgd2hldGhlciBldmVyeSByZWNlaXB0LCBhY2NlcHRhbmNlLCBpbnZvaWNlLCBwYXltZW50LCBhbmQgcmVtYWluaW5nIGNvbW1pdG1lbnQgdHJ1bHkgbmV0cyB0byB6ZXJvLCBleHBsYWluIGFueSBjdXRvZmYgcmlzaywgYW5kIGRlY2lkZSB3aGV0aGVyIGZpbmFsIGNsb3NlIGlzIGFwcHJvcHJpYXRlLiBDbG9zZSBvbmx5IHRoaXMgZG9jdW1lbnQgaWYgbm8gZXhwb3N1cmUgcmVtYWlucy4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpzdXBwbGllciBmaW5hbC1zZXR0bGVtZW50IGV2aWRlbmNlOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgY2xvc2Vfd2l0aF9vcGVuX2JhbGFuY2Ugb24gMjAyNi0wMS0xNTsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTggd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDkxIGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDkxIC8gUjEuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpQbGFudCBjb250cm9sbGVyIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciB0b29saW5nIFBPIGNsb3NlIGV4Y2VwdGlvbiBieSAyMDI2LTAxLTE3OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBhbGwgc291cmNlIGFjdGl2aXR5IG11c3QgYmUgY29tcGxldGUgYmVmb3JlIHRoZSBjbG9zZSBjdXRvZmYuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA5MiB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBPcGVuIHJldGFpbmFnZSBvciB1bm1hdGNoZWQgdmFsdWUgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1774},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-091 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-091\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\"A tooling PO is on the close exception list and appears financially settled. Determine whether every receipt, acceptance, invoice, payment, \",\"threadId\":\"thread-091\"}",
+        "task_id": "factorybench-091",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"purchaseOrdersUniqID\":\"purchaseOrdersUniqID-0091\",\"requestBody\":{\"closeAction\":\"finallyClose\",\"closeReason\":\"PO close exception resolved: close_fully_settled_po; completion 2026-01-17; constraint all source activity must be complete before the close cutoff; open retainage or unmatched value = 0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0091\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"purchaseOrdersUniqID\\\":\\\"purchaseOrdersUniqID-0091\\\",\\\"requestBody\\\":{\\\"closeAction\\\":\\\"finallyClose\\\",\\\"closeReason\\\":\\\"PO close exception resolved: close_fully_settled_po; completion 2026-01-17; constraint all source activity must be complete before the close cutoff; open retainage or unmatched value = 0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0091\\\"}},\\\"tool\\\":\\\"oracle_fusion.purchase_orders.close\\\"}\",\"resource_id\":\"factorybench-091-mutation-01\",\"resource_type\":\"oracle_fusion.purchase_orders\",\"revision\":1,\"status\":\"PO close exception resolved\",\"system\":\"oracle_fusion\",\"task_id\":\"factorybench-091\"}",
-        "fixture_id": "factorybench-091-call-25",
+        "fixture_id": "factorybench-091-call-26",
         "read_only": 0,
         "response_json": "{\"CurrencyCode\":\"USD\",\"Description\":\"CASE-091\",\"DocumentStatus\":\"OPEN\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrderNumber\":\"PO-0091\",\"OrderedAmount\":19989.75,\"POHeaderId\":2000091,\"ProcurementBU\":\"Northstar Manufacturing BU\",\"ScheduleDate\":\"2026-01-14\",\"Supplier\":\"Rainier Components\",\"SupplierId\":600091,\"closeAction\":\"finallyClose\",\"closeReason\":\"PO close exception resolved: close_fully_settled_po; completion 2026-01-17; constraint all source activity must be complete before the close cutoff; open retainage or unmatched value = 0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0091\",\"links\":[]}",
         "task_id": "factorybench-091",
@@ -2324,7 +2429,7 @@
       {
         "arguments_json": "{\"raw\":\"RnJvbTogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHBsYW50LmNvbnRyb2xsZXJAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDkxIOKAlCBDb21wbGV0ZWQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGNsb3NlX2Z1bGx5X3NldHRsZWRfcG8uIENvbXBsZXRpb246IDIwMjYtMDEtMTcuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IGFsbCBzb3VyY2UgYWN0aXZpdHkgbXVzdCBiZSBjb21wbGV0ZSBiZWZvcmUgdGhlIGNsb3NlIGN1dG9mZjsgb3BlbiByZXRhaW5hZ2Ugb3IgdW5tYXRjaGVkIHZhbHVlID0gMCBVU0Q7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDAuMCBVU0QuDQpBbHRlcm5hdGl2ZXM6IGNsb3NlX2Z1bGx5X3NldHRsZWRfcG86IG91dGNvbWUgMjAyNi0wMS0xNywgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTVVBQT1JURURfQU5EX0FQUFJPVkVEOyBjbG9zZV93aXRoX29wZW5fYmFsYW5jZTogb3V0Y29tZSAyMDI2LTAxLTE4LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZBSUxTX0NVUlJFTlRfQ09OVFJPTDsgZGVmZXJfY29tcGxldGVfcG86IG91dGNvbWUgMjAyNi0wMS0xOSwgZWNvbm9taWMgaW1wYWN0IFVTRCAxOTk5MCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA5MS4gQXBwcm92YWw6IEFQLTAwOTEuIENhc2U6IENBU0UtMDkxLg0K\",\"threadId\":\"thread-091\",\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHBsYW50LmNvbnRyb2xsZXJAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDkxIOKAlCBDb21wbGV0ZWQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGNsb3NlX2Z1bGx5X3NldHRsZWRfcG8uIENvbXBsZXRpb246IDIwMjYtMDEtMTcuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IGFsbCBzb3VyY2UgYWN0aXZpdHkgbXVzdCBiZSBjb21wbGV0ZSBiZWZvcmUgdGhlIGNsb3NlIGN1dG9mZjsgb3BlbiByZXRhaW5hZ2Ugb3IgdW5tYXRjaGVkIHZhbHVlID0gMCBVU0Q7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDAuMCBVU0QuDQpBbHRlcm5hdGl2ZXM6IGNsb3NlX2Z1bGx5X3NldHRsZWRfcG86IG91dGNvbWUgMjAyNi0wMS0xNywgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTVVBQT1JURURfQU5EX0FQUFJPVkVEOyBjbG9zZV93aXRoX29wZW5fYmFsYW5jZTogb3V0Y29tZSAyMDI2LTAxLTE4LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZBSUxTX0NVUlJFTlRfQ09OVFJPTDsgZGVmZXJfY29tcGxldGVfcG86IG91dGNvbWUgMjAyNi0wMS0xOSwgZWNvbm9taWMgaW1wYWN0IFVTRCAxOTk5MCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA5MS4gQXBwcm92YWw6IEFQLTAwOTEuIENhc2U6IENBU0UtMDkxLg0K\\\",\\\"threadId\\\":\\\"thread-091\\\",\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-091-mutation-02\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-091\"}",
-        "fixture_id": "factorybench-091-call-27",
+        "fixture_id": "factorybench-091-call-28",
         "read_only": 0,
         "response_json": "{\"id\":\"sent-091\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-091\"}",
         "task_id": "factorybench-091",
@@ -2333,7 +2438,7 @@
       {
         "arguments_json": "{\"fileId\":\"drive-091\",\"requestBody\":{\"content\":\"CASE-091: close_fully_settled_po recorded on Oracle record NS-000091; completion 2026-01-17; constraint all source activity must be complete before the close cutoff; open retainage or unmatched value = 0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0091.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-091\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-091: close_fully_settled_po recorded on Oracle record NS-000091; completion 2026-01-17; constraint all source activity must be complete before the close cutoff; open retainage or unmatched value = 0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0091.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-091-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-091\"}",
-        "fixture_id": "factorybench-091-call-28",
+        "fixture_id": "factorybench-091-call-29",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-091: close_fully_settled_po recorded on Oracle record NS-000091; completion 2026-01-17; constraint all source activity must be complete before the close cutoff; open retainage or unmatched value = 0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0091.\",\"id\":\"comment-091\",\"resolved\":false}",
         "task_id": "factorybench-091",
@@ -2347,15 +2452,6 @@
         "response_json": "{\"id\":\"draft-091\",\"message\":{\"id\":\"draft-msg-091\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-091\"}}",
         "task_id": "factorybench-091",
         "tool_name": "gmail.drafts.get"
-      },
-      {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"msg-091\",\"userId\":\"me\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-091-discovery-03",
-        "read_only": 1,
-        "response_json": "{\"id\":\"msg-091\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy05MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIHJhaW5pZXIuY29tcG9uZW50c0BzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wOTFAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDkxIOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIHRvb2xpbmcgUE8gY2xvc2UgZXhjZXB0aW9uCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQSB0b29saW5nIFBPIGlzIG9uIHRoZSBjbG9zZSBleGNlcHRpb24gbGlzdCBhbmQgYXBwZWFycyBmaW5hbmNpYWxseSBzZXR0bGVkLiBEZXRlcm1pbmUgd2hldGhlciBldmVyeSByZWNlaXB0LCBhY2NlcHRhbmNlLCBpbnZvaWNlLCBwYXltZW50LCBhbmQgcmVtYWluaW5nIGNvbW1pdG1lbnQgdHJ1bHkgbmV0cyB0byB6ZXJvLCBleHBsYWluIGFueSBjdXRvZmYgcmlzaywgYW5kIGRlY2lkZSB3aGV0aGVyIGZpbmFsIGNsb3NlIGlzIGFwcHJvcHJpYXRlLiBDbG9zZSBvbmx5IHRoaXMgZG9jdW1lbnQgaWYgbm8gZXhwb3N1cmUgcmVtYWlucy4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpzdXBwbGllciBmaW5hbC1zZXR0bGVtZW50IGV2aWRlbmNlOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgY2xvc2Vfd2l0aF9vcGVuX2JhbGFuY2Ugb24gMjAyNi0wMS0xNTsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTggd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDkxIGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDkxIC8gUjEuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpQbGFudCBjb250cm9sbGVyIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciB0b29saW5nIFBPIGNsb3NlIGV4Y2VwdGlvbiBieSAyMDI2LTAxLTE3OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBhbGwgc291cmNlIGFjdGl2aXR5IG11c3QgYmUgY29tcGxldGUgYmVmb3JlIHRoZSBjbG9zZSBjdXRvZmYuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA5MiB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBPcGVuIHJldGFpbmFnZSBvciB1bm1hdGNoZWQgdmFsdWUgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1774},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-091 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-091\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\"A tooling PO is on the close exception list and appears financially settled. Determine whether every receipt, acceptance, invoice, payment, \",\"threadId\":\"thread-091\"}",
-        "task_id": "factorybench-091",
-        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-091\",\"userId\":\"me\"}",
