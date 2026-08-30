@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import tempfile
 from copy import deepcopy
@@ -32,6 +33,8 @@ NEGATIVE_POLICIES = (
     "wrong_value",
     "wrong_decision",
     "wrong_evidence",
+    "wrong_target",
+    "keyword_stuffing",
 )
 POLICIES = ("oracle", *NEGATIVE_POLICIES)
 
@@ -560,6 +563,97 @@ def policy_steps(task: dict[str, Any], policy: str) -> list[dict[str, Any]]:
             used_file_ids,
         )
         return steps
+    if policy in {"wrong_target", "keyword_stuffing"}:
+        natural_tools = {
+            "gmail.drafts.create",
+            "gmail.messages.send",
+            "google_drive.comments.create",
+            "slack.chat_postMessage",
+        }
+        content_tools = natural_tools | {
+            "google_sheets.spreadsheets.values.append",
+            "google_sheets.spreadsheets.values.update",
+        }
+        candidates = [
+            step
+            for step in steps
+            if step.get("phase") == "collaboration_mutation"
+            and step["tool"] in content_tools
+        ]
+        target = next(
+            (step for step in candidates if step["tool"] in natural_tools),
+            candidates[0],
+        )
+        target_index = next(
+            index for index, step in enumerate(steps) if step is target
+        )
+        readback = next(
+            step
+            for step in steps[target_index + 1 :]
+            if step.get("phase") == "post_write_verification"
+        )
+        arguments = target["arguments"]
+        ordinal = int(task["task_id"].rsplit("-", 1)[1])
+        case = task["decision_model"]["case_reference"]
+        option = task["decision_model"]["selected_option"]
+        completion = task["decision_model"]["selected_completion"]
+
+        if policy == "wrong_target":
+            if target["tool"] in {"gmail.drafts.create", "gmail.messages.send"}:
+                envelope = arguments.get("message", arguments)
+                raw = envelope["raw"]
+                decoded = base64.urlsafe_b64decode(
+                    raw + "=" * (-len(raw) % 4)
+                ).decode("utf-8")
+                current_to = next(
+                    line for line in decoded.splitlines() if line.startswith("To: ")
+                )
+                adjacent_mailbox = next(
+                    address
+                    for address in (
+                        "operations.lead@northstar.example",
+                        "finance.controls@northstar.example",
+                    )
+                    if f"To: {address}" != current_to
+                )
+                decoded = decoded.replace(
+                    current_to,
+                    f"To: {adjacent_mailbox}",
+                    1,
+                )
+                envelope["raw"] = base64.urlsafe_b64encode(decoded.encode()).decode().rstrip("=")
+            elif target["tool"] == "google_drive.comments.create":
+                arguments["fileId"] = f"drive-approval-{ordinal:03d}"
+                readback["arguments"]["fileId"] = arguments["fileId"]
+            elif target["tool"] == "slack.chat_postMessage":
+                arguments.pop("thread_ts", None)
+                readback["arguments"]["ts"] = f"1768{ordinal:06d}.000900"
+            else:
+                sheet, cell = str(arguments["range"]).split("!", 1)
+                arguments["range"] = (
+                    "Control!A1" if sheet == "Audit" else f"{sheet}!A1"
+                )
+                readback["arguments"]["range"] = arguments["range"]
+            return steps
+
+        anchors = f"{case} {option} {completion}"
+        if target["tool"] in {"gmail.drafts.create", "gmail.messages.send"}:
+            envelope = arguments.get("message", arguments)
+            raw = envelope["raw"]
+            decoded = base64.urlsafe_b64decode(
+                raw + "=" * (-len(raw) % 4)
+            ).decode("utf-8")
+            headers = decoded.split("\r\n\r\n", 1)[0]
+            envelope["raw"] = base64.urlsafe_b64encode(
+                f"{headers}\r\n\r\n{anchors}".encode()
+            ).decode().rstrip("=")
+        elif target["tool"] == "google_drive.comments.create":
+            arguments["requestBody"]["content"] = anchors
+        elif target["tool"] == "slack.chat_postMessage":
+            arguments["text"] = anchors
+        else:
+            arguments["requestBody"]["values"] = [[anchors]]
+        return steps
     raise ValueError(f"unknown policy: {policy}")
 
 
@@ -703,7 +797,7 @@ def qualify(tasks: Iterable[dict[str, Any]] | None = None) -> dict[str, Any]:
         and mutation_omissions["all_detected"]
     )
     return {
-        "schema_version": "factorybench.qualification.v2",
+        "schema_version": "factorybench.qualification.v3",
         "benchmark": "FactoryBench-100",
         "version": selected[0]["benchmark_version"] if selected else None,
         "metric": "FactoryScore",

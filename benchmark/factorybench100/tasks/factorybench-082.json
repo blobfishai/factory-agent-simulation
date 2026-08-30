@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1826,6 +1826,11 @@
           },
           "tool": "slack.chat_postMessage"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-082",
@@ -1863,6 +1868,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "service.dispatch@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-082",
@@ -1872,7 +1883,8 @@
         ],
         "payload_text_contains": [
           "2026-01-14",
-          "quarantine_matching_return"
+          "quarantine_matching_return",
+          "service.dispatch@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -2540,6 +2552,70 @@
           "InventoryItemId": 1400082
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000082.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-082",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-082",
+              "message": {
+                "id": "draft-msg-082",
+                "threadId": "thread-082"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-082",
+          "message": {
+            "id": "draft-msg-082",
+            "threadId": "thread-082"
+          }
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
       }
     ]
   },
@@ -2836,6 +2912,16 @@
     },
     {
       "arguments": {
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000082.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "message": {
           "raw": "RnJvbTogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBzZXJ2aWNlLmRpc3BhdGNoQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA4MiDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IHF1YXJhbnRpbmVfbWF0Y2hpbmdfcmV0dXJuLiBDb21wbGV0aW9uOiAyMDI2LTAxLTE0Lg0KQmluZGluZyBjb25zdHJhaW50OiBSTUEsIHNlcmlhbCwgb3duZXJzaGlwLCBmYWlsdXJlIGNvZGUsIGFuZCBxdWFyYW50aW5lIGxvY2F0aW9uOyBkaWZmZXJlbnQgc2VyaWFscywgYWNjZXNzb3JpZXMsIGFuZCBhZHZhbmNlIHJlcGxhY2VtZW50ID0gMTMgU0VSSUFMUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTkuMCBTRVJJQUxTLg0KQWx0ZXJuYXRpdmVzOiBxdWFyYW50aW5lX21hdGNoaW5nX3JldHVybjogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHJldHVybl90b19hdmFpbGFibGVfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBxdWFyYW50aW5lX2FsbF9jdXN0b21lcl9yZXR1cm5zOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA4Mi4gQXBwcm92YWw6IEFQLTAwODIuIENhc2U6IENBU0UtMDgyLg0K",
           "threadId": "thread-082"
@@ -2845,6 +2931,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "draft-082",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.drafts.get"
     },
     {
       "arguments": {
@@ -2903,6 +2999,70 @@
         "InventoryItemId": 1400082
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000082.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-082",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-082",
+            "message": {
+              "id": "draft-msg-082",
+              "threadId": "thread-082"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-082",
+        "message": {
+          "id": "draft-msg-082",
+          "threadId": "thread-082"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4089,10 +4249,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000082 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4379,9 +4541,18 @@
         "tool_name": "slack.chat_postMessage"
       },
       {
+        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000082.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-082-call-29",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Service dispatch needs one defensible decision for returned field controller by 2026-01-14; a faster or broader action has value only if it remains inside RMA, serial, ownership, failure code, and quarantine location.\",\"ts\":\"1768000082.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 120 SERIALS on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000082.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000082\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-082 approval and impact note\"}],\"text\":\"Approval AP-0082 permits one control-compliant action on NS-000082 up to 101 SERIALS, provided RMA, serial, ownership, failure code, and quarantine location. It does not select an option in advance and does not authorize broader records or quarantine_all_customer_returns.\",\"ts\":\"1768000082.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for secure quarantine capacity is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000082.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R9 and the CASE-083 record are visible in search but are not applicable to CASE-082.\",\"ts\":\"1768000082.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000082.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-082",
+        "tool_name": "slack.conversations_replies"
+      },
+      {
         "arguments_json": "{\"message\":{\"raw\":\"RnJvbTogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBzZXJ2aWNlLmRpc3BhdGNoQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA4MiDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IHF1YXJhbnRpbmVfbWF0Y2hpbmdfcmV0dXJuLiBDb21wbGV0aW9uOiAyMDI2LTAxLTE0Lg0KQmluZGluZyBjb25zdHJhaW50OiBSTUEsIHNlcmlhbCwgb3duZXJzaGlwLCBmYWlsdXJlIGNvZGUsIGFuZCBxdWFyYW50aW5lIGxvY2F0aW9uOyBkaWZmZXJlbnQgc2VyaWFscywgYWNjZXNzb3JpZXMsIGFuZCBhZHZhbmNlIHJlcGxhY2VtZW50ID0gMTMgU0VSSUFMUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTkuMCBTRVJJQUxTLg0KQWx0ZXJuYXRpdmVzOiBxdWFyYW50aW5lX21hdGNoaW5nX3JldHVybjogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHJldHVybl90b19hdmFpbGFibGVfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBxdWFyYW50aW5lX2FsbF9jdXN0b21lcl9yZXR1cm5zOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA4Mi4gQXBwcm92YWw6IEFQLTAwODIuIENhc2U6IENBU0UtMDgyLg0K\",\"threadId\":\"thread-082\"},\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiBzZXJ2aWNlLmRpc3BhdGNoQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA4MiDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IHF1YXJhbnRpbmVfbWF0Y2hpbmdfcmV0dXJuLiBDb21wbGV0aW9uOiAyMDI2LTAxLTE0Lg0KQmluZGluZyBjb25zdHJhaW50OiBSTUEsIHNlcmlhbCwgb3duZXJzaGlwLCBmYWlsdXJlIGNvZGUsIGFuZCBxdWFyYW50aW5lIGxvY2F0aW9uOyBkaWZmZXJlbnQgc2VyaWFscywgYWNjZXNzb3JpZXMsIGFuZCBhZHZhbmNlIHJlcGxhY2VtZW50ID0gMTMgU0VSSUFMUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTkuMCBTRVJJQUxTLg0KQWx0ZXJuYXRpdmVzOiBxdWFyYW50aW5lX21hdGNoaW5nX3JldHVybjogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHJldHVybl90b19hdmFpbGFibGVfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBxdWFyYW50aW5lX2FsbF9jdXN0b21lcl9yZXR1cm5zOiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA4Mi4gQXBwcm92YWw6IEFQLTAwODIuIENhc2U6IENBU0UtMDgyLg0K\\\",\\\"threadId\\\":\\\"thread-082\\\"},\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.drafts.create\\\"}\",\"resource_id\":\"factorybench-082-mutation-03\",\"resource_type\":\"gmail.drafts\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-082\"}",
-        "fixture_id": "factorybench-082-call-29",
+        "fixture_id": "factorybench-082-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"draft-082\",\"message\":{\"id\":\"draft-msg-082\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-082\"}}",
         "task_id": "factorybench-082",
@@ -4390,7 +4561,7 @@
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-082\",\"userId\":\"me\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-082-discovery-01",
+        "fixture_id": "factorybench-082-call-31",
         "read_only": 1,
         "response_json": "{\"id\":\"draft-082\",\"message\":{\"id\":\"draft-msg-082\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-082\"}}",
         "task_id": "factorybench-082",
@@ -4449,15 +4620,6 @@
         "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-082\",\"OBS-0082-1\",29,\"\",\"SERIALS\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"serials matching the RMA and customer asset\"],[\"CASE-082\",\"OBS-0082-2\",29,\"\",\"SERIALS\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"serials matching the RMA and customer asset\"],[\"CASE-082\",\"OBS-0082-3\",28,\"\",\"SERIALS\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"serials matching the RMA and customer asset\"],[\"CASE-082\",\"OBS-0082-4\",28,\"\",\"SERIALS\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"serials matching the RMA and customer asset\"],[\"CASE-082\",\"EXCL-0082-1\",\"\",7,\"SERIALS\",\"R6\",\"SEA\",\"EXCLUDE\",\"different serials, accessories, and advance replacement\"],[\"CASE-082\",\"EXCL-0082-2\",\"\",6,\"SERIALS\",\"R6\",\"SEA\",\"EXCLUDE\",\"different serials, accessories, and advance replacement\"],[\"CASE-083\",\"DISTRACTOR-CASE\",40,\"\",\"SERIALS\",\"R6\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-082\",\"DISTRACTOR-REVISION\",30,\"\",\"SERIALS\",\"R9\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-082\",\"DISTRACTOR-PLANT\",24,\"\",\"SERIALS\",\"R6\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
         "task_id": "factorybench-082",
         "tool_name": "google_sheets.spreadsheets.values.get"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000082.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-082-discovery-21",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Service dispatch needs one defensible decision for returned field controller by 2026-01-14; a faster or broader action has value only if it remains inside RMA, serial, ownership, failure code, and quarantine location.\",\"ts\":\"1768000082.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 120 SERIALS on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000082.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000082\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-082 approval and impact note\"}],\"text\":\"Approval AP-0082 permits one control-compliant action on NS-000082 up to 101 SERIALS, provided RMA, serial, ownership, failure code, and quarantine location. It does not select an option in advance and does not authorize broader records or quarantine_all_customer_returns.\",\"ts\":\"1768000082.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for secure quarantine capacity is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000082.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R9 and the CASE-083 record are visible in search but are not applicable to CASE-082.\",\"ts\":\"1768000082.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000082.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-082",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000082\"}",
@@ -4828,7 +4990,7 @@
       }
     ]
   },
-  "sequence_signature": "27149f0a2146e9c074dcc99e1463d240d89a3207ffa82ece387412a803ae4e2b",
+  "sequence_signature": "87f120a510177d354e17de43738a67c6553923f65698cbf0e8aa1ee4336949bc",
   "task_id": "factorybench-082",
   "title": "Quarantine a returned field controller",
   "variant": null,

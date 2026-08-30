@@ -1484,7 +1484,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1811,6 +1811,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "reliability.operations@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-030",
@@ -1820,7 +1826,8 @@
         ],
         "payload_text_contains": [
           "2026-01-13",
-          "link_released_procedure"
+          "link_released_procedure",
+          "reliability.operations@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -1845,6 +1852,11 @@
             "thread_ts": "1768000030.000100"
           },
           "tool": "slack.chat_postMessage"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2512,6 +2524,70 @@
           "WorkOrderId": 100030
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-030",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-030",
+              "message": {
+                "id": "draft-msg-030",
+                "threadId": "thread-030"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-030",
+          "message": {
+            "id": "draft-msg-030",
+            "threadId": "thread-030"
+          }
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000030.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
       }
     ]
   },
@@ -2799,6 +2875,16 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "draft-030",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.drafts.get"
+    },
+    {
+      "arguments": {
         "channel": "C-QUALITY",
         "text": "CASE-030: Oracle record NS-000030 now reflects link_released_procedure with completion 2026-01-13. Binding constraint: document number, revision, approval, and asset applicability must match; draft, superseded, or wrong-asset procedures = 2 FILES; uncovered or unsupported scope = 2.0 FILES. Alternatives: link_released_procedure: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; link_latest_filename: outcome 2026-01-12, economic impact USD 0, FAILS_CURRENT_CONTROL; delay_work_for_new_revision: outcome 2026-01-18, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0030.",
         "thread_ts": "1768000030.000100"
@@ -2806,6 +2892,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "slack.chat_postMessage"
+    },
+    {
+      "arguments": {
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000030.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
@@ -2860,6 +2956,70 @@
         "WorkOrderId": 100030
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-030",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-030",
+            "message": {
+              "id": "draft-msg-030",
+              "threadId": "thread-030"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-030",
+        "message": {
+          "id": "draft-msg-030",
+          "threadId": "thread-030"
+        }
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000030.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4026,10 +4186,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000030 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4316,22 +4478,31 @@
         "tool_name": "gmail.drafts.create"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-030\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-030-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"draft-030\",\"message\":{\"id\":\"draft-msg-030\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-030\"}}",
+        "task_id": "factorybench-030",
+        "tool_name": "gmail.drafts.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-QUALITY\",\"text\":\"CASE-030: Oracle record NS-000030 now reflects link_released_procedure with completion 2026-01-13. Binding constraint: document number, revision, approval, and asset applicability must match; draft, superseded, or wrong-asset procedures = 2 FILES; uncovered or unsupported scope = 2.0 FILES. Alternatives: link_released_procedure: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; link_latest_filename: outcome 2026-01-12, economic impact USD 0, FAILS_CURRENT_CONTROL; delay_work_for_new_revision: outcome 2026-01-18, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0030.\",\"thread_ts\":\"1768000030.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-QUALITY\\\",\\\"text\\\":\\\"CASE-030: Oracle record NS-000030 now reflects link_released_procedure with completion 2026-01-13. Binding constraint: document number, revision, approval, and asset applicability must match; draft, superseded, or wrong-asset procedures = 2 FILES; uncovered or unsupported scope = 2.0 FILES. Alternatives: link_released_procedure: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; link_latest_filename: outcome 2026-01-12, economic impact USD 0, FAILS_CURRENT_CONTROL; delay_work_for_new_revision: outcome 2026-01-18, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0030.\\\",\\\"thread_ts\\\":\\\"1768000030.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-030-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-030\"}",
-        "fixture_id": "factorybench-030-call-29",
+        "fixture_id": "factorybench-030-call-30",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-QUALITY\",\"message\":{\"text\":\"CASE-030: Oracle record NS-000030 now reflects link_released_procedure with completion 2026-01-13. Binding constraint: document number, revision, approval, and asset applicability must match; draft, superseded, or wrong-asset procedures = 2 FILES; uncovered or unsupported scope = 2.0 FILES. Alternatives: link_released_procedure: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; link_latest_filename: outcome 2026-01-12, economic impact USD 0, FAILS_CURRENT_CONTROL; delay_work_for_new_revision: outcome 2026-01-18, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0030.\",\"thread_ts\":\"1768000030.000100\"},\"ok\":true,\"ts\":\"1768000030.000900\"}",
         "task_id": "factorybench-030",
         "tool_name": "slack.chat_postMessage"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-030\",\"userId\":\"me\"}",
+        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000030.000100\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-030-discovery-01",
+        "fixture_id": "factorybench-030-call-31",
         "read_only": 1,
-        "response_json": "{\"id\":\"draft-030\",\"message\":{\"id\":\"draft-msg-030\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-030\"}}",
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Reliability operations needs one defensible decision for revised lockout procedure by 2026-01-15; a faster or broader action has value only if it remains inside document number, revision, approval, and asset applicability must match.\",\"ts\":\"1768000030.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 3 FILES on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000030.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000030\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-030 approval and impact note\"}],\"text\":\"Approval AP-0030 permits one control-compliant action on NS-000030 up to 1 FILES, provided document number, revision, approval, and asset applicability must match. It does not select an option in advance and does not authorize broader records or delay_work_for_new_revision.\",\"ts\":\"1768000030.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for PM work-order start window is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000030.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-031 record are visible in search but are not applicable to CASE-030.\",\"ts\":\"1768000030.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000030.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
         "task_id": "factorybench-030",
-        "tool_name": "gmail.drafts.get"
+        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"id\":\"att-030\",\"messageId\":\"msg-030-1\",\"userId\":\"me\"}",
@@ -4395,15 +4566,6 @@
         "response_json": "{\"count\":4,\"hasMore\":false,\"items\":[{\"AssetNumber\":\"ASSET-030\",\"LastUpdateDate\":\"2025-12-18T16:20:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"WorkOrderDescription\":\"CASE-030: Link the revised lockout procedure to PM work\",\"WorkOrderId\":800030,\"WorkOrderNumber\":\"MWO-0030\",\"WorkOrderStatusCode\":\"SUPERSEDED\"},{\"AssetNumber\":\"ASSET-030\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"PDX\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"WorkOrderDescription\":\"CASE-030: Link the revised lockout procedure to PM work\",\"WorkOrderId\":900030,\"WorkOrderNumber\":\"MWO-0030\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"},{\"AssetNumber\":\"ASSET-030\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"WorkOrderDescription\":\"CASE-030: Link the revised lockout procedure to PM work\",\"WorkOrderId\":100030,\"WorkOrderNumber\":\"MWO-0030\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"},{\"AssetNumber\":\"ASSET-030\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"WorkOrderDescription\":\"CASE-030: Link the revised lockout procedure to PM work\",\"WorkOrderId\":1000030,\"WorkOrderNumber\":\"MWO-0030\",\"WorkOrderStatusCode\":\"DRAFT\"}],\"limit\":50,\"links\":[],\"offset\":0}",
         "task_id": "factorybench-030",
         "tool_name": "oracle_fusion.maintenance_work_orders.list"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000030.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-030-discovery-22",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Reliability operations needs one defensible decision for revised lockout procedure by 2026-01-15; a faster or broader action has value only if it remains inside document number, revision, approval, and asset applicability must match.\",\"ts\":\"1768000030.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 3 FILES on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000030.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000030\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-030 approval and impact note\"}],\"text\":\"Approval AP-0030 permits one control-compliant action on NS-000030 up to 1 FILES, provided document number, revision, approval, and asset applicability must match. It does not select an option in advance and does not authorize broader records or delay_work_for_new_revision.\",\"ts\":\"1768000030.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for PM work-order start window is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000030.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-031 record are visible in search but are not applicable to CASE-030.\",\"ts\":\"1768000030.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000030.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-030",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000030\"}",
@@ -4774,7 +4936,7 @@
       }
     ]
   },
-  "sequence_signature": "61f0efece4070239c4fc21fb80968d4185072c3078e4038ebfaadf6f10152aa2",
+  "sequence_signature": "0e759f178dc7c15a9cb78be66cb8eaf29efb41c2e690bdd3b855b6562e605316",
   "task_id": "factorybench-030",
   "title": "Link the revised lockout procedure to PM work",
   "variant": null,

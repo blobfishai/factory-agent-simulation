@@ -1494,7 +1494,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1853,6 +1853,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "cell.lead@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-010",
@@ -1862,7 +1868,8 @@
         ],
         "payload_text_contains": [
           "2026-01-16",
-          "assign_certified_contractor"
+          "assign_certified_contractor",
+          "cell.lead@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -2557,6 +2564,70 @@
           "WorkOrderId": 100010
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "slack.reactions_add",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000010.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "name"
+        ]
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-010",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-010",
+              "message": {
+                "id": "draft-msg-010",
+                "threadId": "thread-010"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-010",
+          "message": {
+            "id": "draft-msg-010",
+            "threadId": "thread-010"
+          }
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
       }
     ]
   },
@@ -2843,6 +2914,16 @@
     },
     {
       "arguments": {
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000010.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "message": {
           "raw": "RnJvbTogcHJvZHVjdGlvbi5wbGFubmVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogY2VsbC5sZWFkQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAxMCDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGFzc2lnbl9jZXJ0aWZpZWRfY29udHJhY3Rvci4gQ29tcGxldGlvbjogMjAyNi0wMS0xNi4NCkJpbmRpbmcgY29uc3RyYWludDogd29ya2VyIGNlcnRpZmljYXRpb24sIGFwcHJvdmVkIHJhdGUsIGFuZCByZW1haW5pbmcgYXNzaWdubWVudCBjYXBhY2l0eTsgaG91cnMgZnJvbSBleHBpcmVkIGNlcnRpZmljYXRpb25zIG9yIGNvbmZsaWN0aW5nIGFzc2lnbm1lbnRzID0gNSBIUjsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjMuMCBIUi4NCkFsdGVybmF0aXZlczogd2FpdF9mb3JfaW50ZXJuYWxfbGFib3I6IG91dGNvbWUgMjAyNi0wMS0xOSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBhc3NpZ25fY2VydGlmaWVkX2NvbnRyYWN0b3I6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCA1MjAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGF1dGhvcml6ZV9vdmVydGltZV9jcmV3OiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMTQxMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAxMC4gQXBwcm92YWw6IEFQLTAwMTAuIENhc2U6IENBU0UtMDEwLg0K",
           "threadId": "thread-010"
@@ -2852,6 +2933,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "draft-010",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.drafts.get"
     },
     {
       "arguments": {
@@ -2910,6 +3001,70 @@
         "WorkOrderId": 100010
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "slack.reactions_add",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000010.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "name"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-010",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-010",
+            "message": {
+              "id": "draft-msg-010",
+              "threadId": "thread-010"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-010",
+        "message": {
+          "id": "draft-msg-010",
+          "threadId": "thread-010"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4115,10 +4270,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000010 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4405,9 +4562,18 @@
         "tool_name": "slack.reactions_add"
       },
       {
+        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000010.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-010-call-29",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Cell lead needs one defensible decision for wiring operation on WO-0010 by 2026-01-16; a faster or broader action has value only if it remains inside worker certification, approved rate, and remaining assignment capacity.\",\"ts\":\"1768000010.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 53 HR on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000010.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000010\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-010 approval and impact note\"}],\"text\":\"Approval AP-0010 permits one control-compliant action on NS-000010 up to 30 HR, provided worker certification, approved rate, and remaining assignment capacity. It does not select an option in advance and does not authorize broader records or authorize_overtime_crew.\",\"ts\":\"1768000010.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for wiring bench and supervisor coverage is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000010.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R9 and the CASE-011 record are visible in search but are not applicable to CASE-010.\",\"ts\":\"1768000010.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: mark the existing operations thread complete with the approved check reaction; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000010.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-010",
+        "tool_name": "slack.conversations_replies"
+      },
+      {
         "arguments_json": "{\"message\":{\"raw\":\"RnJvbTogcHJvZHVjdGlvbi5wbGFubmVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogY2VsbC5sZWFkQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAxMCDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGFzc2lnbl9jZXJ0aWZpZWRfY29udHJhY3Rvci4gQ29tcGxldGlvbjogMjAyNi0wMS0xNi4NCkJpbmRpbmcgY29uc3RyYWludDogd29ya2VyIGNlcnRpZmljYXRpb24sIGFwcHJvdmVkIHJhdGUsIGFuZCByZW1haW5pbmcgYXNzaWdubWVudCBjYXBhY2l0eTsgaG91cnMgZnJvbSBleHBpcmVkIGNlcnRpZmljYXRpb25zIG9yIGNvbmZsaWN0aW5nIGFzc2lnbm1lbnRzID0gNSBIUjsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjMuMCBIUi4NCkFsdGVybmF0aXZlczogd2FpdF9mb3JfaW50ZXJuYWxfbGFib3I6IG91dGNvbWUgMjAyNi0wMS0xOSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBhc3NpZ25fY2VydGlmaWVkX2NvbnRyYWN0b3I6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCA1MjAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGF1dGhvcml6ZV9vdmVydGltZV9jcmV3OiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMTQxMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAxMC4gQXBwcm92YWw6IEFQLTAwMTAuIENhc2U6IENBU0UtMDEwLg0K\",\"threadId\":\"thread-010\"},\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogcHJvZHVjdGlvbi5wbGFubmVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogY2VsbC5sZWFkQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAxMCDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGFzc2lnbl9jZXJ0aWZpZWRfY29udHJhY3Rvci4gQ29tcGxldGlvbjogMjAyNi0wMS0xNi4NCkJpbmRpbmcgY29uc3RyYWludDogd29ya2VyIGNlcnRpZmljYXRpb24sIGFwcHJvdmVkIHJhdGUsIGFuZCByZW1haW5pbmcgYXNzaWdubWVudCBjYXBhY2l0eTsgaG91cnMgZnJvbSBleHBpcmVkIGNlcnRpZmljYXRpb25zIG9yIGNvbmZsaWN0aW5nIGFzc2lnbm1lbnRzID0gNSBIUjsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMjMuMCBIUi4NCkFsdGVybmF0aXZlczogd2FpdF9mb3JfaW50ZXJuYWxfbGFib3I6IG91dGNvbWUgMjAyNi0wMS0xOSwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBhc3NpZ25fY2VydGlmaWVkX2NvbnRyYWN0b3I6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCA1MjAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGF1dGhvcml6ZV9vdmVydGltZV9jcmV3OiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMTQxMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAxMC4gQXBwcm92YWw6IEFQLTAwMTAuIENhc2U6IENBU0UtMDEwLg0K\\\",\\\"threadId\\\":\\\"thread-010\\\"},\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.drafts.create\\\"}\",\"resource_id\":\"factorybench-010-mutation-03\",\"resource_type\":\"gmail.drafts\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-010\"}",
-        "fixture_id": "factorybench-010-call-29",
+        "fixture_id": "factorybench-010-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"draft-010\",\"message\":{\"id\":\"draft-msg-010\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-010\"}}",
         "task_id": "factorybench-010",
@@ -4416,7 +4582,7 @@
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-010\",\"userId\":\"me\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-010-discovery-01",
+        "fixture_id": "factorybench-010-call-31",
         "read_only": 1,
         "response_json": "{\"id\":\"draft-010\",\"message\":{\"id\":\"draft-msg-010\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-010\"}}",
         "task_id": "factorybench-010",
@@ -4484,15 +4650,6 @@
         "response_json": "{\"ItemNumber\":\"NS-COMP-010\",\"ItemRevision\":\"R4\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":53,\"SourceHeaderReference\":\"CASE-010\",\"WorkOrderDescription\":\"CASE-010: Assign certified contract labor to wiring\",\"WorkOrderId\":100010,\"WorkOrderNumber\":\"WO-0010\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"}",
         "task_id": "factorybench-010",
         "tool_name": "oracle_fusion.work_orders.get"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000010.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-010-discovery-22",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Cell lead needs one defensible decision for wiring operation on WO-0010 by 2026-01-16; a faster or broader action has value only if it remains inside worker certification, approved rate, and remaining assignment capacity.\",\"ts\":\"1768000010.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 53 HR on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000010.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000010\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-010 approval and impact note\"}],\"text\":\"Approval AP-0010 permits one control-compliant action on NS-000010 up to 30 HR, provided worker certification, approved rate, and remaining assignment capacity. It does not select an option in advance and does not authorize broader records or authorize_overtime_crew.\",\"ts\":\"1768000010.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for wiring bench and supervisor coverage is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000010.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R9 and the CASE-011 record are visible in search but are not applicable to CASE-010.\",\"ts\":\"1768000010.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: mark the existing operations thread complete with the approved check reaction; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000010.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-010",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000010\"}",
@@ -4863,7 +5020,7 @@
       }
     ]
   },
-  "sequence_signature": "3e6b45c81bf6e257415f14530e80e1fcc26f6c4a7e9bb5665315047673dff6cc",
+  "sequence_signature": "4a5c1d21f471e92fb0cb6596f1a676cbdb011acf90905551584d18e97e0d7696",
   "task_id": "factorybench-010",
   "title": "Assign certified contract labor to wiring",
   "variant": null,

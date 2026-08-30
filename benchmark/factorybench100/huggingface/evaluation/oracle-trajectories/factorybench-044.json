@@ -882,7 +882,7 @@
       "description": "Read NS-000044 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000044 back through the documented Oracle invoices.get operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'PaymentTerms'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
@@ -902,9 +902,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "slack.conversations_replies"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "gmail.drafts.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1031,7 +1061,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 44,
+  "passed_atomic_checks": 46,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1243,7 +1273,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-044",
-  "total_atomic_checks": 44,
+  "total_atomic_checks": 46,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -2825,13 +2855,77 @@
     },
     {
       "arguments": {
+        "channel": "C-PRODUCTION",
+        "limit": 100,
+        "ts": "1768000044.000100"
+      },
+      "index": 29,
+      "result": {
+        "has_more": false,
+        "messages": [
+          {
+            "text": "Accounts payable needs one defensible decision for payment terms on INV-0044 by 2026-01-14; a faster or broader action has value only if it remains inside executed agreement, effective date, supplier site, and invoice must match.",
+            "ts": "1768000044.000100",
+            "user": "U-OPS-LEAD"
+          },
+          {
+            "text": "I found 13539.0 USD on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.",
+            "ts": "1768000044.000150",
+            "user": "U-PLANNER"
+          },
+          {
+            "files": [
+              {
+                "id": "F-000044",
+                "mimetype": "application/pdf",
+                "name": "approval-and-impact-note.pdf",
+                "title": "CASE-044 approval and impact note"
+              }
+            ],
+            "text": "Approval AP-0044 permits one control-compliant action on NS-000044 up to 13539.0 USD, provided executed agreement, effective date, supplier site, and invoice must match. It does not select an option in advance and does not authorize broader records or edit_supplier_master_globally.",
+            "ts": "1768000044.000200",
+            "user": "U-APPROVER"
+          },
+          {
+            "text": "Protected load remains non-displaceable. The calendar for discount and payment calendar is the source for internal windows; the supplier response covers only its stated alternative.",
+            "ts": "1768000044.000240",
+            "user": "U-SCHEDULER"
+          },
+          {
+            "text": "Revision R10 and the CASE-045 record are visible in search but are not applicable to CASE-044.",
+            "ts": "1768000044.000270",
+            "user": "U-QUALITY"
+          },
+          {
+            "text": "Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.",
+            "ts": "1768000044.000300",
+            "user": "U-CONTROLLER"
+          },
+          {
+            "text": "CASE-044: Oracle record NS-000044 now reflects apply_signed_contract_terms with completion 2026-01-14. Binding constraint: executed agreement, effective date, supplier site, and invoice must match; value under an obsolete master term = 0 USD; uncovered or unsupported scope = 0.0 USD. Alternatives: keep_invoice_terms: outcome 2026-01-14, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_signed_contract_terms: outcome 2026-01-14, economic impact USD 0, SUPPORTED_AND_APPROVED; edit_supplier_master_globally: outcome 2026-01-16, economic impact USD 13539, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0044.",
+            "thread_ts": "1768000044.000100",
+            "ts": "1768000044.000901",
+            "type": "message",
+            "user": "U-FACTORY-AGENT"
+          }
+        ],
+        "ok": true,
+        "response_metadata": {
+          "next_cursor": ""
+        }
+      },
+      "success": true,
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "message": {
           "raw": "RnJvbTogYWNjb3VudHMucGF5YWJsZS5zcGVjaWFsaXN0QG5vcnRoc3Rhci5leGFtcGxlDQpUbzogYWNjb3VudHMucGF5YWJsZUBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wNDQg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBhcHBseV9zaWduZWRfY29udHJhY3RfdGVybXMuIENvbXBsZXRpb246IDIwMjYtMDEtMTQuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IGV4ZWN1dGVkIGFncmVlbWVudCwgZWZmZWN0aXZlIGRhdGUsIHN1cHBsaWVyIHNpdGUsIGFuZCBpbnZvaWNlIG11c3QgbWF0Y2g7IHZhbHVlIHVuZGVyIGFuIG9ic29sZXRlIG1hc3RlciB0ZXJtID0gMCBVU0Q7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDAuMCBVU0QuDQpBbHRlcm5hdGl2ZXM6IGtlZXBfaW52b2ljZV90ZXJtczogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IGFwcGx5X3NpZ25lZF9jb250cmFjdF90ZXJtczogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGVkaXRfc3VwcGxpZXJfbWFzdGVyX2dsb2JhbGx5OiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMTM1MzksIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwNDQuIEFwcHJvdmFsOiBBUC0wMDQ0LiBDYXNlOiBDQVNFLTA0NC4NCg",
           "threadId": "thread-044"
         },
         "userId": "me"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "id": "draft-044",
         "message": {
@@ -2844,6 +2938,34 @@
       },
       "success": true,
       "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "draft-044",
+        "userId": "me"
+      },
+      "index": 31,
+      "result": {
+        "id": "draft-044",
+        "message": {
+          "id": "draft-msg-044",
+          "labelIds": [
+            "DRAFT"
+          ],
+          "payload": {
+            "body": {
+              "data": "RnJvbTogYWNjb3VudHMucGF5YWJsZS5zcGVjaWFsaXN0QG5vcnRoc3Rhci5leGFtcGxlDQpUbzogYWNjb3VudHMucGF5YWJsZUBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wNDQg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBhcHBseV9zaWduZWRfY29udHJhY3RfdGVybXMuIENvbXBsZXRpb246IDIwMjYtMDEtMTQuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IGV4ZWN1dGVkIGFncmVlbWVudCwgZWZmZWN0aXZlIGRhdGUsIHN1cHBsaWVyIHNpdGUsIGFuZCBpbnZvaWNlIG11c3QgbWF0Y2g7IHZhbHVlIHVuZGVyIGFuIG9ic29sZXRlIG1hc3RlciB0ZXJtID0gMCBVU0Q7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDAuMCBVU0QuDQpBbHRlcm5hdGl2ZXM6IGtlZXBfaW52b2ljZV90ZXJtczogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IGFwcGx5X3NpZ25lZF9jb250cmFjdF90ZXJtczogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGVkaXRfc3VwcGxpZXJfbWFzdGVyX2dsb2JhbGx5OiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMTM1MzksIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwNDQuIEFwcHJvdmFsOiBBUC0wMDQ0LiBDYXNlOiBDQVNFLTA0NC4NCg",
+              "size": 1102
+            }
+          },
+          "raw": "RnJvbTogYWNjb3VudHMucGF5YWJsZS5zcGVjaWFsaXN0QG5vcnRoc3Rhci5leGFtcGxlDQpUbzogYWNjb3VudHMucGF5YWJsZUBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wNDQg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBhcHBseV9zaWduZWRfY29udHJhY3RfdGVybXMuIENvbXBsZXRpb246IDIwMjYtMDEtMTQuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IGV4ZWN1dGVkIGFncmVlbWVudCwgZWZmZWN0aXZlIGRhdGUsIHN1cHBsaWVyIHNpdGUsIGFuZCBpbnZvaWNlIG11c3QgbWF0Y2g7IHZhbHVlIHVuZGVyIGFuIG9ic29sZXRlIG1hc3RlciB0ZXJtID0gMCBVU0Q7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDAuMCBVU0QuDQpBbHRlcm5hdGl2ZXM6IGtlZXBfaW52b2ljZV90ZXJtczogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IGFwcGx5X3NpZ25lZF9jb250cmFjdF90ZXJtczogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGVkaXRfc3VwcGxpZXJfbWFzdGVyX2dsb2JhbGx5OiBvdXRjb21lIDIwMjYtMDEtMTYsIGVjb25vbWljIGltcGFjdCBVU0QgMTM1MzksIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwNDQuIEFwcHJvdmFsOiBBUC0wMDQ0LiBDYXNlOiBDQVNFLTA0NC4NCg",
+          "sizeEstimate": 1102,
+          "threadId": "thread-044"
+        }
+      },
+      "success": true,
+      "tool": "gmail.drafts.get"
     },
     {
       "arguments": {
@@ -2867,7 +2989,7 @@
         "signed_payment_term_days": 45,
         "supported_amount_usd": 13539.0
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

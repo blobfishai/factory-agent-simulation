@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1812,6 +1812,11 @@
           },
           "tool": "google_drive.comments.create"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-038",
@@ -1842,8 +1847,24 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "insertDataOption": "INSERT_ROWS",
             "range": "Audit!A:G",
-            "spreadsheetId": "sheet-038"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "2026-01-12",
+                  "CASE-038",
+                  "receiving_specialist",
+                  "correct_to_verified_quantity",
+                  "2026-01-12",
+                  "NS-000038",
+                  "AP-0038"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-038",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.append"
         },
@@ -2496,6 +2517,67 @@
           "HeaderInterfaceId": 700038
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-038",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-038"
+            },
+            "expected_result_contains": {
+              "id": "comment-038",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-038",
+          "resolved": false
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.append",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Audit!A:G",
+              "spreadsheetId": "sheet-038",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Audit!A:G"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Audit!A:G"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
       }
     ]
   },
@@ -2780,6 +2862,16 @@
     },
     {
       "arguments": {
+        "commentId": "comment-038",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-038"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
+    },
+    {
+      "arguments": {
         "insertDataOption": "INSERT_ROWS",
         "range": "Audit!A:G",
         "requestBody": {
@@ -2802,6 +2894,17 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_sheets.spreadsheets.values.append"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "spreadsheetId": "sheet-038",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
@@ -2860,6 +2963,67 @@
         "HeaderInterfaceId": 700038
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-038",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-038"
+          },
+          "expected_result_contains": {
+            "id": "comment-038",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-038",
+        "resolved": false
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.append",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G",
+            "spreadsheetId": "sheet-038",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4022,10 +4186,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000038 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4312,13 +4478,31 @@
         "tool_name": "google_drive.comments.create"
       },
       {
+        "arguments_json": "{\"commentId\":\"comment-038\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-038\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-038-call-29",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-038\",\"resolved\":false}",
+        "task_id": "factorybench-038",
+        "tool_name": "google_drive.comments.get"
+      },
+      {
         "arguments_json": "{\"insertDataOption\":\"INSERT_ROWS\",\"range\":\"Audit!A:G\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"2026-01-12\",\"CASE-038\",\"receiving_specialist\",\"correct_to_verified_quantity\",\"2026-01-12\",\"NS-000038\",\"AP-0038\"]]},\"spreadsheetId\":\"sheet-038\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-12\",\"payload_json\":\"{\\\"arguments\\\":{\\\"insertDataOption\\\":\\\"INSERT_ROWS\\\",\\\"range\\\":\\\"Audit!A:G\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"2026-01-12\\\",\\\"CASE-038\\\",\\\"receiving_specialist\\\",\\\"correct_to_verified_quantity\\\",\\\"2026-01-12\\\",\\\"NS-000038\\\",\\\"AP-0038\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-038\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.append\\\"}\",\"resource_id\":\"factorybench-038-mutation-03\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-038\"}",
-        "fixture_id": "factorybench-038-call-29",
+        "fixture_id": "factorybench-038-call-30",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-038\",\"tableRange\":\"Audit!A1:G20\",\"updates\":{\"updatedCells\":7,\"updatedRange\":\"Audit!A21:G21\",\"updatedRows\":1}}",
         "task_id": "factorybench-038",
         "tool_name": "google_sheets.spreadsheets.values.append"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:G\",\"spreadsheetId\":\"sheet-038\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-038-call-31",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:G\",\"values\":[[\"event_date\",\"case\",\"role\",\"decision_option\",\"outcome_date\",\"record\",\"approval_id\"],[\"2026-01-10\",\"CASE-039\",\"operations_planner\",\"unrelated_completed_decision\",\"2026-01-11\",\"NS-000039\",\"AP-0039\"]]}",
+        "task_id": "factorybench-038",
+        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-038\",\"userId\":\"me\"}",
@@ -4348,15 +4532,6 @@
         "tool_name": "gmail.messages.get"
       },
       {
-        "arguments_json": "{\"commentId\":\"comment-038\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-038\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-038-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-038\",\"resolved\":false}",
-        "task_id": "factorybench-038",
-        "tool_name": "google_drive.comments.get"
-      },
-      {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-038\",\"pageSize\":100}",
         "effect_json": null,
         "fixture_id": "factorybench-038-discovery-07",
@@ -4373,15 +4548,6 @@
         "response_json": "{\"spreadsheetId\":\"sheet-038\",\"valueRanges\":[{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-038\",\"OBS-0038-1\",41,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"scale-ticket and physical-count quantity\"],[\"CASE-038\",\"OBS-0038-2\",41,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"scale-ticket and physical-count quantity\"],[\"CASE-038\",\"OBS-0038-3\",40,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"scale-ticket and physical-count quantity\"],[\"CASE-038\",\"OBS-0038-4\",40,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"scale-ticket and physical-count quantity\"],[\"CASE-038\",\"EXCL-0038-1\",\"\",18,\"EA\",\"R4\",\"SEA\",\"EXCLUDE\",\"transposition overstatement\"],[\"CASE-038\",\"EXCL-0038-2\",\"\",18,\"EA\",\"R4\",\"SEA\",\"EXCLUDE\",\"transposition overstatement\"],[\"CASE-039\",\"DISTRACTOR-CASE\",54,\"\",\"EA\",\"R4\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-038\",\"DISTRACTOR-REVISION\",40,\"\",\"EA\",\"R10\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-038\",\"DISTRACTOR-PLANT\",32,\"\",\"EA\",\"R4\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]},{\"majorDimension\":\"ROWS\",\"range\":\"Approvals!A1:G20\",\"values\":[[\"case\",\"approval_id\",\"decision_option\",\"approval_status\",\"authorized_measure\",\"outcome_date\",\"source_revision\"],[\"CASE-038\",\"AP-0038\",\"correct_to_verified_quantity\",\"APPROVED\",126,\"2026-01-12\",\"R4\"],[\"CASE-038\",\"AP-0038-EXCEPTION\",\"broader_or_exception_scope\",\"NOT_GRANTED\",\"\",\"\",\"R4\"],[\"CASE-039\",\"AP-0039\",\"unrelated_case_option\",\"APPROVED\",162,\"2026-01-12\",\"R4\"]]}]}",
         "task_id": "factorybench-038",
         "tool_name": "google_sheets.spreadsheets.values.batchGet"
-      },
-      {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-038\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-038-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-038\",\"OBS-0038-1\",41,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"scale-ticket and physical-count quantity\"],[\"CASE-038\",\"OBS-0038-2\",41,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"scale-ticket and physical-count quantity\"],[\"CASE-038\",\"OBS-0038-3\",40,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"scale-ticket and physical-count quantity\"],[\"CASE-038\",\"OBS-0038-4\",40,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"scale-ticket and physical-count quantity\"],[\"CASE-038\",\"EXCL-0038-1\",\"\",18,\"EA\",\"R4\",\"SEA\",\"EXCLUDE\",\"transposition overstatement\"],[\"CASE-038\",\"EXCL-0038-2\",\"\",18,\"EA\",\"R4\",\"SEA\",\"EXCLUDE\",\"transposition overstatement\"],[\"CASE-039\",\"DISTRACTOR-CASE\",54,\"\",\"EA\",\"R4\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-038\",\"DISTRACTOR-REVISION\",40,\"\",\"EA\",\"R10\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-038\",\"DISTRACTOR-PLANT\",32,\"\",\"EA\",\"R4\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-038",
-        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"OrderNumber='PO-0038'\"}",
@@ -4770,7 +4936,7 @@
       }
     ]
   },
-  "sequence_signature": "73b32b63ac452e82a818b24f87bbf40ab458be22e364f2c5abc3631ed2a442d4",
+  "sequence_signature": "9202e93e11e98c09f059300e080de7cc78aa2fcebe590ee2b5447c7cd000edb3",
   "task_id": "factorybench-038",
   "title": "Correct a transposed receiving quantity",
   "variant": null,

@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1809,6 +1809,11 @@
           },
           "tool": "slack.chat_postMessage"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-033",
@@ -1842,6 +1847,11 @@
             "fileId": "drive-033"
           },
           "tool": "google_drive.comments.create"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2534,6 +2544,64 @@
           "POHeaderId": 2000033
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PROCUREMENT",
+              "limit": 100,
+              "ts": "1768000033.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-033",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-033"
+            },
+            "expected_result_contains": {
+              "id": "comment-033",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-033",
+          "resolved": false
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
       }
     ]
   },
@@ -2814,6 +2882,16 @@
     },
     {
       "arguments": {
+        "channel": "C-PROCUREMENT",
+        "limit": 100,
+        "ts": "1768000033.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "fileId": "drive-033",
         "requestBody": {
           "content": "CASE-033: cancel_affected_open_quantity recorded on Oracle record NS-000033; completion 2026-01-13; constraint bulletin material code, lot scope, and cancellation authority; received, consumed, or unaffected resin = 9 KG; uncovered or unsupported scope = 21.0 KG; approval AP-0033."
@@ -2822,6 +2900,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "commentId": "comment-033",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-033"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
     },
     {
       "arguments": {
@@ -2888,6 +2976,64 @@
         "POHeaderId": 2000033
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000033.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-033",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-033"
+          },
+          "expected_result_contains": {
+            "id": "comment-033",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-033",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4077,10 +4223,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000033 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4369,11 +4517,20 @@
       {
         "arguments_json": "{\"fileId\":\"drive-033\",\"requestBody\":{\"content\":\"CASE-033: cancel_affected_open_quantity recorded on Oracle record NS-000033; completion 2026-01-13; constraint bulletin material code, lot scope, and cancellation authority; received, consumed, or unaffected resin = 9 KG; uncovered or unsupported scope = 21.0 KG; approval AP-0033.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-033\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-033: cancel_affected_open_quantity recorded on Oracle record NS-000033; completion 2026-01-13; constraint bulletin material code, lot scope, and cancellation authority; received, consumed, or unaffected resin = 9 KG; uncovered or unsupported scope = 21.0 KG; approval AP-0033.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-033-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-033\"}",
-        "fixture_id": "factorybench-033-call-29",
+        "fixture_id": "factorybench-033-call-30",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-033: cancel_affected_open_quantity recorded on Oracle record NS-000033; completion 2026-01-13; constraint bulletin material code, lot scope, and cancellation authority; received, consumed, or unaffected resin = 9 KG; uncovered or unsupported scope = 21.0 KG; approval AP-0033.\",\"id\":\"comment-033\",\"resolved\":false}",
         "task_id": "factorybench-033",
         "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"commentId\":\"comment-033\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-033\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-033-call-31",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-033\",\"resolved\":false}",
+        "task_id": "factorybench-033",
+        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-033\",\"userId\":\"me\"}",
@@ -4401,15 +4558,6 @@
         "response_json": "{\"id\":\"msg-033\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0zM0Bub3J0aHN0YXIuZXhhbXBsZQpUbzogYnV5ZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBjYXNjYWRlLmluZHVzdHJpYWxAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDMzQG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTAzMyDigJQgZGVjaXNpb24gbmVlZGVkIGZvciByZXNpbiBQTyBhZmZlY3RlZCBieSBzYWZldHkgYnVsbGV0aW4KTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpBIHNhZmV0eSBidWxsZXRpbiBuYW1lcyByZXNpbiB3ZSBzdGlsbCBoYXZlIG9uIG9yZGVyLCBhbmQgdGhlIHN1cHBsaWVyIGN1dG9mZiBpcyBjbG9zZS4gRXN0YWJsaXNoIHdoaWNoIG9wZW4gcXVhbnRpdHkgaXMgYWN0dWFsbHkgYWZmZWN0ZWQgYW5kIHN0aWxsIGNhbmNlbGFibGUsIHdoYXQgaGFzIGFscmVhZHkgYmVlbiByZWNlaXZlZCBvciBjb25zdW1lZCwgYW5kIHdoZXRoZXIgcmVwbGFjZW1lbnQgY292ZXJhZ2UgbWFrZXMgY2FuY2VsbGF0aW9uIHNhZmUuIFN0b3Agb25seSB0aGUgY292ZXJlZCBwdXJjaGFzZSBjb21taXRtZW50LgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnN1cHBsaWVyIGNhbmNlbGxhdGlvbiBkZWFkbGluZTogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIGNhbmNlbF9lbnRpcmVfc3VwcGxpZXJfYWNjb3VudCBvbiAyMDI2LTAxLTExOyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwMzMgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wMzMgLyBSNi4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClJlcXVlc3RpbmcgcGxhbm5lciBuZWVkcyBvbmUgZGVmZW5zaWJsZSBkZWNpc2lvbiBmb3IgcmVzaW4gUE8gYWZmZWN0ZWQgYnkgc2FmZXR5IGJ1bGxldGluIGJ5IDIwMjYtMDEtMTM7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIGJ1bGxldGluIG1hdGVyaWFsIGNvZGUsIGxvdCBzY29wZSwgYW5kIGNhbmNlbGxhdGlvbiBhdXRob3JpdHkuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTAzNCB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBSZWNlaXZlZCwgY29uc3VtZWQsIG9yIHVuYWZmZWN0ZWQgcmVzaW4gbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1795},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-033 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-033\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"A safety bulletin names resin we still have on order, and the supplier cutoff is close. Establish which open quantity is actually affected a\",\"threadId\":\"thread-033\"}",
         "task_id": "factorybench-033",
         "tool_name": "gmail.messages.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-033\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-033\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-033-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-033\",\"resolved\":false}",
-        "task_id": "factorybench-033",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-033\",\"pageSize\":100}",
@@ -4825,7 +4973,7 @@
       }
     ]
   },
-  "sequence_signature": "e1cc2c5dacee2ac6a602563b6e062f5a97093251ed8f14a14d2b54f22c0cd7dd",
+  "sequence_signature": "2f01db88b79d9811bb0aed803e484e8e37dca405f413788b5637ddc01a8bc115",
   "task_id": "factorybench-033",
   "title": "Cancel a resin order after a safety bulletin",
   "variant": null,

@@ -860,7 +860,7 @@
       "description": "Read NS-000100 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000100 back through the documented Oracle purchase orders.get operation after the mutation and confirmed the resource-specific changed fields ['DocumentStatus', 'LastUpdateDate'], including the effective update at 2026-01-14, rather than relying on the write acknowledgement.",
@@ -880,9 +880,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "google_drive.comments.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "google_sheets.spreadsheets.values.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1009,7 +1039,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 42,
+  "passed_atomic_checks": 44,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1211,7 +1241,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-100",
-  "total_atomic_checks": 42,
+  "total_atomic_checks": 44,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -2746,6 +2776,22 @@
     },
     {
       "arguments": {
+        "commentId": "comment-100",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-100"
+      },
+      "index": 29,
+      "result": {
+        "content": "CASE-100: close_fully_reconciled_osp_po recorded on Oracle record NS-000100; completion 2026-01-14; constraint ordered, sent, accepted, invoiced, and paid quantities must all reconcile; rejected, missing, unreceived, or uninvoiced balance = 0 EA; uncovered or unsupported scope = 0.0 EA; approval AP-0100.",
+        "createdTime": "2026-01-12T16:00:00Z",
+        "id": "comment-100",
+        "resolved": false
+      },
+      "success": true,
+      "tool": "google_drive.comments.get"
+    },
+    {
+      "arguments": {
         "insertDataOption": "INSERT_ROWS",
         "range": "Audit!A:G",
         "requestBody": {
@@ -2765,7 +2811,7 @@
         "spreadsheetId": "sheet-100",
         "valueInputOption": "RAW"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "spreadsheetId": "sheet-100",
         "tableRange": "Audit!A1:G20",
@@ -2777,6 +2823,32 @@
       },
       "success": true,
       "tool": "google_sheets.spreadsheets.values.append"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "spreadsheetId": "sheet-100",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "index": 31,
+      "result": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-100",
+            "outside_processing_coordinator",
+            "close_fully_reconciled_osp_po",
+            "2026-01-14",
+            "NS-000100",
+            "AP-0100"
+          ]
+        ]
+      },
+      "success": true,
+      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
@@ -2798,7 +2870,7 @@
         "supported_quantity": 49,
         "transaction_quantity": 49
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

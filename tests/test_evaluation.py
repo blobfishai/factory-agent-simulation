@@ -12,6 +12,7 @@ from factorybench.evaluation import (
     NEGATIVE_POLICIES,
     _aggregate_semantic_checks,
     evaluate_policy,
+    policy_steps,
     qualify,
     run_episode,
     verify_episode,
@@ -171,7 +172,7 @@ def test_environment_does_not_use_an_observer_only_read_gate(tasks, tmp_path: Pa
 
 def test_verifier_scores_each_missing_business_investigation(tasks, tmp_path: Path) -> None:
     task = tasks[0]
-    control_steps = [step for step in task["oracle_steps"] if step["tool"] in READ_TOOLS]
+    control_steps = [step for step in task["oracle_steps"] if step["control"]]
     omitted = control_steps[1]
     first_write = next(step for step in task["oracle_steps"] if step["tool"] in WRITE_TOOLS)
     with FactoryWorld.fresh(task, tmp_path / "missing-evidence.db") as world:
@@ -322,7 +323,7 @@ def test_oracle_accepts_business_wrong_values_and_verifier_detects_them(
     tasks, tmp_path: Path
 ) -> None:
     task = tasks[0]
-    control_steps = [step for step in task["oracle_steps"] if step["tool"] in READ_TOOLS]
+    control_steps = [step for step in task["oracle_steps"] if step["control"]]
     primary_write = next(
         step for step in task["oracle_steps"] if step["tool"] == task["workflow"]["primary_write"]
     )
@@ -522,6 +523,39 @@ def test_write_acknowledgement_without_provider_readback_is_incomplete(tasks, tm
         verdict = verify_episode(task, world)
     check = _atomic_check(verdict, "verify_primary_oracle_state")
     assert check["passed"] is False
+
+
+def test_every_collaboration_write_is_reopened_with_its_actual_payload(
+    tasks, tmp_path: Path
+) -> None:
+    exercised: set[str] = set()
+    expected_write_tools = {
+        "gmail.drafts.create",
+        "gmail.messages.send",
+        "google_drive.comments.create",
+        "google_sheets.spreadsheets.values.append",
+        "google_sheets.spreadsheets.values.update",
+        "slack.chat_postMessage",
+        "slack.reactions_add",
+    }
+    for task in tasks:
+        verifications = task["post_write_verifications"][1:]
+        assert len(verifications) == 2
+        with FactoryWorld.fresh(
+            task, tmp_path / f"{task['task_id']}-collaboration-readback.db"
+        ) as world:
+            for step in task["oracle_steps"]:
+                assert "error" not in world.call_tool(
+                    step["tool"], step["arguments"]
+                )
+            verdict = verify_episode(task, world)
+        for verification in verifications:
+            exercised.add(verification["after_tool"])
+            assert verification["write_argument_projection_paths"]
+            assert _atomic_check(verdict, verification["id"])["passed"] is True
+        if exercised == expected_write_tools:
+            break
+    assert exercised == expected_write_tools
 
 
 def test_input_contract_rejects_legacy_invoice_id_shape(tasks, tmp_path: Path) -> None:
@@ -758,12 +792,50 @@ def test_negative_controls_are_diagnostic(tasks) -> None:
         assert control["strict_passes"] == 0
 
 
+def test_wrong_target_uses_provider_valid_adjacent_destinations(tasks, tmp_path: Path) -> None:
+    exercised: set[str] = set()
+    route_classes = {
+        "gmail.drafts.create": "gmail",
+        "gmail.messages.send": "gmail",
+        "google_drive.comments.create": "drive",
+        "google_sheets.spreadsheets.values.append": "sheets",
+        "google_sheets.spreadsheets.values.update": "sheets",
+        "slack.chat_postMessage": "slack",
+    }
+    for task in tasks:
+        oracle = task["oracle_steps"]
+        wrong = policy_steps(task, "wrong_target")
+        changed = next(
+            altered
+            for expected, altered in zip(oracle, wrong, strict=True)
+            if expected != altered
+        )
+        route_class = route_classes[changed["tool"]]
+        if route_class in exercised:
+            continue
+        with FactoryWorld.fresh(task, tmp_path / f"wrong-target-{route_class}.db") as world:
+            for step in wrong:
+                assert "error" not in world.call_tool(step["tool"], step["arguments"])
+            verdict = verify_episode(task, world)
+        assert verdict["strict_pass"] is False
+        assert _atomic_check(verdict, "no_rejected_mutation")["passed"] is True
+        assert next(
+            milestone
+            for milestone in verdict["checks"]
+            if milestone["id"] == "state.collaboration"
+        )["passed"] is False
+        exercised.add(route_class)
+        if exercised == {"gmail", "drive", "sheets", "slack"}:
+            break
+    assert exercised == {"gmail", "drive", "sheets", "slack"}
+
+
 def test_full_release_qualification_passes(tasks) -> None:
     report = qualify(tasks)
     assert report["qualification_passed"] is True
     assert report["oracle_all_strict"] is True
     assert report["deterministic_replay"] is True
-    assert report["executions"] == 1200
+    assert report["executions"] == 1400
     assert report["determinism"] == {
         "replays": 100,
         "exact_episode_matches": 100,
@@ -792,4 +864,4 @@ def test_subset_qualification_bounds_the_determinism_sample(tasks) -> None:
     report = qualify(tasks[:1])
     assert report["qualification_passed"] is True
     assert report["determinism_sample_size"] == 1
-    assert report["executions"] == 12
+    assert report["executions"] == 14

@@ -1484,7 +1484,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1811,6 +1811,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "compliance.and.operations@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-087",
@@ -1820,7 +1826,8 @@
         ],
         "payload_text_contains": [
           "2026-01-13",
-          "attach_matching_certificate"
+          "attach_matching_certificate",
+          "compliance.and.operations@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -1841,8 +1848,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H9",
-            "spreadsheetId": "sheet-087"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-087 | attach_matching_certificate | 2026-01-13 | NS-000087 | immutable certificate identity and applicability to the repair material; expired, unsigned, wrong-lot, or similar-item certificates = 2 FILES; uncovered or unsupported scope = 2.0 FILES | AP-0087"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-087",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -2505,6 +2522,73 @@
           "WorkOrderId": 100087
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-087",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-087",
+              "message": {
+                "id": "draft-msg-087",
+                "threadId": "thread-087"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-087",
+          "message": {
+            "id": "draft-msg-087",
+            "threadId": "thread-087"
+          }
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H9",
+              "spreadsheetId": "sheet-087",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H9"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H9"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
       }
     ]
   },
@@ -2788,6 +2872,16 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "draft-087",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.drafts.get"
+    },
+    {
+      "arguments": {
         "includeValuesInResponse": true,
         "range": "Control!H9",
         "requestBody": {
@@ -2804,6 +2898,17 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_sheets.spreadsheets.values.update"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!H9",
+        "spreadsheetId": "sheet-087",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
@@ -2858,6 +2963,73 @@
         "WorkOrderId": 100087
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-087",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-087",
+            "message": {
+              "id": "draft-msg-087",
+              "threadId": "thread-087"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-087",
+        "message": {
+          "id": "draft-msg-087",
+          "threadId": "thread-087"
+        }
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H9",
+            "spreadsheetId": "sheet-087",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H9"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H9"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4017,10 +4189,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000087 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4307,22 +4481,31 @@
         "tool_name": "gmail.drafts.create"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-087\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-087-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"draft-087\",\"message\":{\"id\":\"draft-msg-087\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-087\"}}",
+        "task_id": "factorybench-087",
+        "tool_name": "gmail.drafts.get"
+      },
+      {
         "arguments_json": "{\"includeValuesInResponse\":true,\"range\":\"Control!H9\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"CASE-087 | attach_matching_certificate | 2026-01-13 | NS-000087 | immutable certificate identity and applicability to the repair material; expired, unsigned, wrong-lot, or similar-item certificates = 2 FILES; uncovered or unsupported scope = 2.0 FILES | AP-0087\"]]},\"spreadsheetId\":\"sheet-087\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"includeValuesInResponse\\\":true,\\\"range\\\":\\\"Control!H9\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"CASE-087 | attach_matching_certificate | 2026-01-13 | NS-000087 | immutable certificate identity and applicability to the repair material; expired, unsigned, wrong-lot, or similar-item certificates = 2 FILES; uncovered or unsupported scope = 2.0 FILES | AP-0087\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-087\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.update\\\"}\",\"resource_id\":\"factorybench-087-mutation-03\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-087\"}",
-        "fixture_id": "factorybench-087-call-29",
+        "fixture_id": "factorybench-087-call-30",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-087\",\"updatedCells\":1,\"updatedColumns\":1,\"updatedRange\":\"Control!H9\",\"updatedRows\":1}",
         "task_id": "factorybench-087",
         "tool_name": "google_sheets.spreadsheets.values.update"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-087\",\"userId\":\"me\"}",
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H9\",\"spreadsheetId\":\"sheet-087\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-087-discovery-01",
+        "fixture_id": "factorybench-087-call-31",
         "read_only": 1,
-        "response_json": "{\"id\":\"draft-087\",\"message\":{\"id\":\"draft-msg-087\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-087\"}}",
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H9\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-087\",\"OBS-0087-1\",1,\"\",\"FILES\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"certificate matching supplier, lot, item, asset repair, revision, and signature\"],[\"CASE-087\",\"OBS-0087-2\",1,\"\",\"FILES\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"certificate matching supplier, lot, item, asset repair, revision, and signature\"],[\"CASE-087\",\"OBS-0087-3\",1,\"\",\"FILES\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"certificate matching supplier, lot, item, asset repair, revision, and signature\"],[\"CASE-087\",\"OBS-0087-4\",0,\"\",\"FILES\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"certificate matching supplier, lot, item, asset repair, revision, and signature\"],[\"CASE-087\",\"EXCL-0087-1\",\"\",1,\"FILES\",\"R4\",\"SEA\",\"EXCLUDE\",\"expired, unsigned, wrong-lot, or similar-item certificates\"],[\"CASE-087\",\"EXCL-0087-2\",\"\",1,\"FILES\",\"R4\",\"SEA\",\"EXCLUDE\",\"expired, unsigned, wrong-lot, or similar-item certificates\"],[\"CASE-088\",\"DISTRACTOR-CASE\",1,\"\",\"FILES\",\"R4\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-087\",\"DISTRACTOR-REVISION\",1,\"\",\"FILES\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-087\",\"DISTRACTOR-PLANT\",1,\"\",\"FILES\",\"R4\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
         "task_id": "factorybench-087",
-        "tool_name": "gmail.drafts.get"
+        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"id\":\"att-087\",\"messageId\":\"msg-087-1\",\"userId\":\"me\"}",
@@ -4359,15 +4542,6 @@
         "response_json": "{\"developerMetadata\":[{\"metadataKey\":\"case\",\"metadataValue\":\"CASE-087\"},{\"metadataKey\":\"sourceRevision\",\"metadataValue\":\"R4\"}],\"namedRanges\":[{\"name\":\"EligibleCoverage\",\"namedRangeId\":\"control-087\"},{\"name\":\"DecisionApprovals\",\"namedRangeId\":\"approval-087\"},{\"name\":\"DecisionAudit\",\"namedRangeId\":\"audit-087\"}],\"properties\":{\"title\":\"CASE-087 finite-capacity and coverage workbook\"},\"sheets\":[{\"properties\":{\"sheetId\":0,\"title\":\"Control\"}},{\"properties\":{\"sheetId\":1,\"title\":\"Approvals\"}},{\"properties\":{\"sheetId\":2,\"title\":\"Audit\"}}],\"spreadsheetId\":\"sheet-087\"}",
         "task_id": "factorybench-087",
         "tool_name": "google_sheets.spreadsheets.get"
-      },
-      {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-087\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-087-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-087\",\"OBS-0087-1\",1,\"\",\"FILES\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"certificate matching supplier, lot, item, asset repair, revision, and signature\"],[\"CASE-087\",\"OBS-0087-2\",1,\"\",\"FILES\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"certificate matching supplier, lot, item, asset repair, revision, and signature\"],[\"CASE-087\",\"OBS-0087-3\",1,\"\",\"FILES\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"certificate matching supplier, lot, item, asset repair, revision, and signature\"],[\"CASE-087\",\"OBS-0087-4\",0,\"\",\"FILES\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"certificate matching supplier, lot, item, asset repair, revision, and signature\"],[\"CASE-087\",\"EXCL-0087-1\",\"\",1,\"FILES\",\"R4\",\"SEA\",\"EXCLUDE\",\"expired, unsigned, wrong-lot, or similar-item certificates\"],[\"CASE-087\",\"EXCL-0087-2\",\"\",1,\"FILES\",\"R4\",\"SEA\",\"EXCLUDE\",\"expired, unsigned, wrong-lot, or similar-item certificates\"],[\"CASE-088\",\"DISTRACTOR-CASE\",1,\"\",\"FILES\",\"R4\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-087\",\"DISTRACTOR-REVISION\",1,\"\",\"FILES\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-087\",\"DISTRACTOR-PLANT\",1,\"\",\"FILES\",\"R4\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-087",
-        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"MaintenanceProgramCode='PM-0087'\"}",
@@ -4765,7 +4939,7 @@
       }
     ]
   },
-  "sequence_signature": "3735dfe3d93bf2682f68098589f32d541749e01d638e0cd3f5124786f583ce05",
+  "sequence_signature": "c527f7ddc1948ee913ec3b2450143b7766204626abf273403deab291cf85cb6f",
   "task_id": "factorybench-087",
   "title": "Attach a certificate of conformance to repair work",
   "variant": null,

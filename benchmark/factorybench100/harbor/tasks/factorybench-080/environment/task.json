@@ -229,8 +229,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H2",
-            "spreadsheetId": "sheet-080"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-080 | create_project_prototype_order | 2026-01-18 | NS-000080 | SOW, project/task, ECO revision, quantity, and isolated start window; customer-production stock and out-of-scope quantity = 14 EA; uncovered or unsupported scope = 17.0 EA | AP-0080"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-080",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -264,6 +274,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "project.team@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-080",
@@ -273,7 +289,8 @@
         ],
         "payload_text_contains": [
           "2026-01-18",
-          "create_project_prototype_order"
+          "create_project_prototype_order",
+          "project.team@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -963,6 +980,73 @@
           "WorkOrderId": 100080
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H2",
+              "spreadsheetId": "sheet-080",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H2"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H2"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-080",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-080",
+              "message": {
+                "id": "draft-msg-080",
+                "threadId": "thread-080"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-080",
+          "message": {
+            "id": "draft-msg-080",
+            "threadId": "thread-080"
+          }
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
       }
     ]
   },
@@ -1013,6 +1097,73 @@
         "WorkOrderId": 100080
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H2",
+            "spreadsheetId": "sheet-080",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H2"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H2"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-080",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-080",
+            "message": {
+              "id": "draft-msg-080",
+              "threadId": "thread-080"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-080",
+        "message": {
+          "id": "draft-msg-080",
+          "threadId": "thread-080"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2171,10 +2322,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000080 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2461,9 +2614,18 @@
         "tool_name": "google_sheets.spreadsheets.values.update"
       },
       {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H2\",\"spreadsheetId\":\"sheet-080\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-080-call-29",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H2\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-080\",\"OBS-0080-1\",24,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"released-design material and project funding coverage\"],[\"CASE-080\",\"OBS-0080-2\",24,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"released-design material and project funding coverage\"],[\"CASE-080\",\"OBS-0080-3\",24,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"released-design material and project funding coverage\"],[\"CASE-080\",\"OBS-0080-4\",23,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"released-design material and project funding coverage\"],[\"CASE-080\",\"EXCL-0080-1\",\"\",7,\"EA\",\"R4\",\"SEA\",\"EXCLUDE\",\"customer-production stock and out-of-scope quantity\"],[\"CASE-080\",\"EXCL-0080-2\",\"\",7,\"EA\",\"R4\",\"SEA\",\"EXCLUDE\",\"customer-production stock and out-of-scope quantity\"],[\"CASE-081\",\"DISTRACTOR-CASE\",32,\"\",\"EA\",\"R4\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-080\",\"DISTRACTOR-REVISION\",24,\"\",\"EA\",\"R10\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-080\",\"DISTRACTOR-PLANT\",19,\"\",\"EA\",\"R4\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
+        "task_id": "factorybench-080",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
         "arguments_json": "{\"message\":{\"raw\":\"RnJvbTogcHJvamVjdC5tYXRlcmlhbC5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogcHJvamVjdC50ZWFtQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA4MCDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGNyZWF0ZV9wcm9qZWN0X3Byb3RvdHlwZV9vcmRlci4gQ29tcGxldGlvbjogMjAyNi0wMS0xOC4NCkJpbmRpbmcgY29uc3RyYWludDogU09XLCBwcm9qZWN0L3Rhc2ssIEVDTyByZXZpc2lvbiwgcXVhbnRpdHksIGFuZCBpc29sYXRlZCBzdGFydCB3aW5kb3c7IGN1c3RvbWVyLXByb2R1Y3Rpb24gc3RvY2sgYW5kIG91dC1vZi1zY29wZSBxdWFudGl0eSA9IDE0IEVBOyB1bmNvdmVyZWQgb3IgdW5zdXBwb3J0ZWQgc2NvcGUgPSAxNy4wIEVBLg0KQWx0ZXJuYXRpdmVzOiBjcmVhdGVfcHJvamVjdF9wcm90b3R5cGVfb3JkZXI6IG91dGNvbWUgMjAyNi0wMS0xOCwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTVVBQT1JURURfQU5EX0FQUFJPVkVEOyB1c2Vfc3RhbmRhcmRfY3VzdG9tZXJfb3JkZXI6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCAxNzEwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBidWlsZF9iZXlvbmRfc293X3F1YW50aXR5OiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMzU4MCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA4MC4gQXBwcm92YWw6IEFQLTAwODAuIENhc2U6IENBU0UtMDgwLg0K\",\"threadId\":\"thread-080\"},\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-18\",\"payload_json\":\"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogcHJvamVjdC5tYXRlcmlhbC5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogcHJvamVjdC50ZWFtQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTA4MCDigJQgRHJhZnQgb3BlcmF0aW5nIGRlY2lzaW9uDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRGLTgNCg0KRGVjaXNpb246IGNyZWF0ZV9wcm9qZWN0X3Byb3RvdHlwZV9vcmRlci4gQ29tcGxldGlvbjogMjAyNi0wMS0xOC4NCkJpbmRpbmcgY29uc3RyYWludDogU09XLCBwcm9qZWN0L3Rhc2ssIEVDTyByZXZpc2lvbiwgcXVhbnRpdHksIGFuZCBpc29sYXRlZCBzdGFydCB3aW5kb3c7IGN1c3RvbWVyLXByb2R1Y3Rpb24gc3RvY2sgYW5kIG91dC1vZi1zY29wZSBxdWFudGl0eSA9IDE0IEVBOyB1bmNvdmVyZWQgb3IgdW5zdXBwb3J0ZWQgc2NvcGUgPSAxNy4wIEVBLg0KQWx0ZXJuYXRpdmVzOiBjcmVhdGVfcHJvamVjdF9wcm90b3R5cGVfb3JkZXI6IG91dGNvbWUgMjAyNi0wMS0xOCwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTVVBQT1JURURfQU5EX0FQUFJPVkVEOyB1c2Vfc3RhbmRhcmRfY3VzdG9tZXJfb3JkZXI6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCAxNzEwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBidWlsZF9iZXlvbmRfc293X3F1YW50aXR5OiBvdXRjb21lIDIwMjYtMDEtMTUsIGVjb25vbWljIGltcGFjdCBVU0QgMzU4MCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA4MC4gQXBwcm92YWw6IEFQLTAwODAuIENhc2U6IENBU0UtMDgwLg0K\\\",\\\"threadId\\\":\\\"thread-080\\\"},\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.drafts.create\\\"}\",\"resource_id\":\"factorybench-080-mutation-03\",\"resource_type\":\"gmail.drafts\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-080\"}",
-        "fixture_id": "factorybench-080-call-29",
+        "fixture_id": "factorybench-080-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"draft-080\",\"message\":{\"id\":\"draft-msg-080\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-080\"}}",
         "task_id": "factorybench-080",
@@ -2472,7 +2634,7 @@
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-080\",\"userId\":\"me\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-080-discovery-01",
+        "fixture_id": "factorybench-080-call-31",
         "read_only": 1,
         "response_json": "{\"id\":\"draft-080\",\"message\":{\"id\":\"draft-msg-080\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-080\"}}",
         "task_id": "factorybench-080",
@@ -2513,15 +2675,6 @@
         "response_json": "{\"developerMetadata\":[{\"metadataKey\":\"case\",\"metadataValue\":\"CASE-080\"},{\"metadataKey\":\"sourceRevision\",\"metadataValue\":\"R4\"}],\"namedRanges\":[{\"name\":\"EligibleCoverage\",\"namedRangeId\":\"control-080\"},{\"name\":\"DecisionApprovals\",\"namedRangeId\":\"approval-080\"},{\"name\":\"DecisionAudit\",\"namedRangeId\":\"audit-080\"}],\"properties\":{\"title\":\"CASE-080 finite-capacity and coverage workbook\"},\"sheets\":[{\"properties\":{\"sheetId\":0,\"title\":\"Control\"}},{\"properties\":{\"sheetId\":1,\"title\":\"Approvals\"}},{\"properties\":{\"sheetId\":2,\"title\":\"Audit\"}}],\"spreadsheetId\":\"sheet-080\"}",
         "task_id": "factorybench-080",
         "tool_name": "google_sheets.spreadsheets.get"
-      },
-      {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-080\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-080-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-080\",\"OBS-0080-1\",24,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"released-design material and project funding coverage\"],[\"CASE-080\",\"OBS-0080-2\",24,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"released-design material and project funding coverage\"],[\"CASE-080\",\"OBS-0080-3\",24,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"released-design material and project funding coverage\"],[\"CASE-080\",\"OBS-0080-4\",23,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"released-design material and project funding coverage\"],[\"CASE-080\",\"EXCL-0080-1\",\"\",7,\"EA\",\"R4\",\"SEA\",\"EXCLUDE\",\"customer-production stock and out-of-scope quantity\"],[\"CASE-080\",\"EXCL-0080-2\",\"\",7,\"EA\",\"R4\",\"SEA\",\"EXCLUDE\",\"customer-production stock and out-of-scope quantity\"],[\"CASE-081\",\"DISTRACTOR-CASE\",32,\"\",\"EA\",\"R4\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-080\",\"DISTRACTOR-REVISION\",24,\"\",\"EA\",\"R10\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-080\",\"DISTRACTOR-PLANT\",19,\"\",\"EA\",\"R4\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-080",
-        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"OrderNumber='SO-47080'\"}",

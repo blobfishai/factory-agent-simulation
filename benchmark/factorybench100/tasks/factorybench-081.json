@@ -1504,7 +1504,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1860,6 +1860,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "service.dispatch@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-081",
@@ -1869,7 +1875,8 @@
         ],
         "payload_text_contains": [
           "2026-01-19",
-          "create_net_technician_replenishment"
+          "create_net_technician_replenishment",
+          "service.dispatch@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -1890,8 +1897,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H3",
-            "spreadsheetId": "sheet-081"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-081 | create_net_technician_replenishment | 2026-01-19 | NS-000081 | technician, territory, entitlement, min-max, and destination; reserved, quarantined, or wrong-owner relays = 13 EA; uncovered or unsupported scope = 18.0 EA | AP-0081"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-081",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -2568,6 +2585,67 @@
           "SupplyRequestId": 1500081
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-081",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-081",
+              "threadId": "thread-081"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-081",
+          "threadId": "thread-081"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H3",
+              "spreadsheetId": "sheet-081",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H3"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H3"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
       }
     ]
   },
@@ -2858,6 +2936,16 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "sent-081",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.messages.get"
+    },
+    {
+      "arguments": {
         "includeValuesInResponse": true,
         "range": "Control!H3",
         "requestBody": {
@@ -2874,6 +2962,17 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_sheets.spreadsheets.values.update"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!H3",
+        "spreadsheetId": "sheet-081",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
@@ -2939,6 +3038,67 @@
         "SupplyRequestId": 1500081
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-081",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-081",
+            "threadId": "thread-081"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-081",
+        "threadId": "thread-081"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H3",
+            "spreadsheetId": "sheet-081",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H3"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H3"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4077,10 +4237,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000081 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4367,13 +4529,31 @@
         "tool_name": "gmail.messages.send"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"sent-081\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-081-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-081\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy04MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogc2VydmljZS5zdXBwbHkuY29vcmRpbmF0b3JAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBjYXNjYWRlLmluZHVzdHJpYWxAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDgxQG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA4MSDigJQgZGVjaXNpb24gbmVlZGVkIGZvciB0ZWNobmljaWFuIGNyaXRpY2FsLXJlbGF5IHN0b2NrCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQSBmaWVsZCB0ZWNobmljaWFuIGlzIGJlbG93IG1pbmltdW0gb24gYSBjcml0aWNhbCByZWxheSB3aGlsZSByZWdpb25hbCBzdXBwbHkgaXMgY29uc3RyYWluZWQuIERldGVybWluZSB0aGUgZW50aXRsZWQgcmVwbGVuaXNobWVudCBhZnRlciBvcGVuIGRlbWFuZCBhbmQgcHJvdGVjdGVkIGFsbG9jYXRpb25zLCB0aGUgZWFybGllc3QgYXJyaXZhbCwgYW5kIHdoZXRoZXIgdHJhbnNmZXIsIHB1cmNoYXNlLCBvciB3YWl0aW5nIGlzIGJlc3QgZm9yIHNlcnZpY2UgY29udGludWl0eS4gQ3JlYXRlIG9ubHkgdGhlIGFwcHJvdmVkIHRlY2huaWNpYW4tc3RvY2sgc3VwcGx5LgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnJlZ2lvbmFsIHJlcGxlbmlzaG1lbnQgYXJyaXZhbDogdGhlIGluZGVwZW5kZW50IHNvdXJjZSBjb25maXJtcyByZWFkaW5lc3MgZm9yIHNoaXBfZnVsbF9kZXBvdF9zdG9jayBvbiAyMDI2LTAxLTE0OyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xNyB3aXRoIGVjb25vbWljIGltcGFjdCBVU0QgMTcyNzsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwODEgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wODEgLyBSNS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClNlcnZpY2UgZGlzcGF0Y2ggbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHRlY2huaWNpYW4gY3JpdGljYWwtcmVsYXkgc3RvY2sgYnkgMjAyNi0wMS0yMDsgYSBmYXN0ZXIgb3IgYnJvYWRlciBhY3Rpb24gaGFzIHZhbHVlIG9ubHkgaWYgaXQgcmVtYWlucyBpbnNpZGUgdGVjaG5pY2lhbiwgdGVycml0b3J5LCBlbnRpdGxlbWVudCwgbWluLW1heCwgYW5kIGRlc3RpbmF0aW9uLgpUaGUgZGF0ZSBpbiB0aGUgcHJpb3IgQ0FTRS0wODIgdGhyZWFkIGlzIG5vdCBvdXIgY29udHJvbCBkYXRlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogY29udHJvbGxlciAtLS0KRGF0ZTogMjAyNi0wMS0xMSAxNjo0MCBQYWNpZmljClJlY29uY2lsZSB0aGUgcmF3IHJvd3MgYmVmb3JlIGFjdGluZy4gUmVzZXJ2ZWQsIHF1YXJhbnRpbmVkLCBvciB3cm9uZy1vd25lciByZWxheXMgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1810},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-081 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-081\",\"size\":1024},\"filename\":\"supplier-confirmation.pdf\"}]},\"snippet\":\"A field technician is below minimum on a critical relay while regional supply is constrained. Determine the entitled replenishment after ope\",\"threadId\":\"thread-081\"}",
+        "task_id": "factorybench-081",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"includeValuesInResponse\":true,\"range\":\"Control!H3\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"CASE-081 | create_net_technician_replenishment | 2026-01-19 | NS-000081 | technician, territory, entitlement, min-max, and destination; reserved, quarantined, or wrong-owner relays = 13 EA; uncovered or unsupported scope = 18.0 EA | AP-0081\"]]},\"spreadsheetId\":\"sheet-081\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-19\",\"payload_json\":\"{\\\"arguments\\\":{\\\"includeValuesInResponse\\\":true,\\\"range\\\":\\\"Control!H3\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"CASE-081 | create_net_technician_replenishment | 2026-01-19 | NS-000081 | technician, territory, entitlement, min-max, and destination; reserved, quarantined, or wrong-owner relays = 13 EA; uncovered or unsupported scope = 18.0 EA | AP-0081\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-081\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.update\\\"}\",\"resource_id\":\"factorybench-081-mutation-03\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-081\"}",
-        "fixture_id": "factorybench-081-call-29",
+        "fixture_id": "factorybench-081-call-30",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-081\",\"updatedCells\":1,\"updatedColumns\":1,\"updatedRange\":\"Control!H3\",\"updatedRows\":1}",
         "task_id": "factorybench-081",
         "tool_name": "google_sheets.spreadsheets.values.update"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H3\",\"spreadsheetId\":\"sheet-081\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-081-call-31",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H3\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-081\",\"OBS-0081-1\",26,\"\",\"EA\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable van and regional stock already allocated\"],[\"CASE-081\",\"OBS-0081-2\",26,\"\",\"EA\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable van and regional stock already allocated\"],[\"CASE-081\",\"OBS-0081-3\",26,\"\",\"EA\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable van and regional stock already allocated\"],[\"CASE-081\",\"OBS-0081-4\",26,\"\",\"EA\",\"R5\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"usable van and regional stock already allocated\"],[\"CASE-081\",\"EXCL-0081-1\",\"\",7,\"EA\",\"R5\",\"SEA\",\"EXCLUDE\",\"reserved, quarantined, or wrong-owner relays\"],[\"CASE-081\",\"EXCL-0081-2\",\"\",6,\"EA\",\"R5\",\"SEA\",\"EXCLUDE\",\"reserved, quarantined, or wrong-owner relays\"],[\"CASE-082\",\"DISTRACTOR-CASE\",36,\"\",\"EA\",\"R5\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-081\",\"DISTRACTOR-REVISION\",27,\"\",\"EA\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-081\",\"DISTRACTOR-PLANT\",21,\"\",\"EA\",\"R5\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
+        "task_id": "factorybench-081",
+        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-081\",\"userId\":\"me\"}",
@@ -4825,7 +5005,7 @@
       }
     ]
   },
-  "sequence_signature": "621be30089c139a24081e3d91dd8de6929908f8039ab17f5e6648f878afee6d1",
+  "sequence_signature": "e22aa54455ac70a5a0033d1aa4829d97a76953309dac7c34ec2ec15b6758320b",
   "task_id": "factorybench-081",
   "title": "Replenish a technician's critical relay stock",
   "variant": null,

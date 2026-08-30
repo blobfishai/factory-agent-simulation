@@ -115,6 +115,12 @@
         },
         "tool": "gmail.messages.send"
       },
+      "payload_email_to": "production.and.supplier.operations@northstar.example",
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
+      },
       "payload_text_any_of": [
         [
           "CASE-098",
@@ -124,7 +130,8 @@
       ],
       "payload_text_contains": [
         "2026-01-15",
-        "complete_accepted_quantity"
+        "complete_accepted_quantity",
+        "production.and.supplier.operations@northstar.example"
       ],
       "table": "resource_state",
       "values": {
@@ -145,8 +152,18 @@
       "milestone_id": "state.collaboration",
       "payload_contains": {
         "arguments": {
+          "includeValuesInResponse": true,
           "range": "Control!H20",
-          "spreadsheetId": "sheet-098"
+          "requestBody": {
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "CASE-098 | complete_accepted_quantity | 2026-01-15 | NS-000098 | operation completion cannot exceed accepted returned quantity; rejected, missing, or not-yet-received quantity = 14 EA; uncovered or unsupported scope = 18.0 EA | AP-0098"
+              ]
+            ]
+          },
+          "spreadsheetId": "sheet-098",
+          "valueInputOption": "RAW"
         },
         "tool": "google_sheets.spreadsheets.values.update"
       },
@@ -817,6 +834,67 @@
         "WorkOrderId": 100098
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-098",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-098",
+            "threadId": "thread-098"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-098",
+        "threadId": "thread-098"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H20",
+            "spreadsheetId": "sheet-098",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H20"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H20"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
     }
   ]
 }

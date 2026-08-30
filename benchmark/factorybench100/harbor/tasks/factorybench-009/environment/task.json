@@ -208,6 +208,11 @@
           },
           "tool": "slack.chat_postMessage"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-009",
@@ -238,8 +243,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H11",
-            "spreadsheetId": "sheet-009"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-009 | apply_approved_relay_substitute | 2026-01-13 | NS-000009 | substitute effectivity, conversion ratio, and available lot status; original relays already issued or substitute lots outside effectivity = 8 EA; uncovered or unsupported scope = 14.0 EA | AP-0009"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-009",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -878,6 +893,65 @@
           "WorkOrderId": 100009
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PROCUREMENT",
+              "limit": 100,
+              "ts": "1768000009.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H11",
+              "spreadsheetId": "sheet-009",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H11"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H11"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
       }
     ]
   },
@@ -913,6 +987,65 @@
         "WorkOrderId": 100009
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000009.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H11",
+            "spreadsheetId": "sheet-009",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H11"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H11"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2051,10 +2184,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000009 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2341,13 +2476,31 @@
         "tool_name": "slack.chat_postMessage"
       },
       {
+        "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"limit\":100,\"ts\":\"1768000009.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-009-call-29",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Cell lead needs one defensible decision for relay material line on WO-0009 by 2026-01-13; a faster or broader action has value only if it remains inside substitute effectivity, conversion ratio, and available lot status.\",\"ts\":\"1768000009.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 64 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000009.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000009\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-009 approval and impact note\"}],\"text\":\"Approval AP-0009 permits one control-compliant action on NS-000009 up to 50 EA, provided substitute effectivity, conversion ratio, and available lot status. It does not select an option in advance and does not authorize broader records or reduce_build_quantity.\",\"ts\":\"1768000009.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for remaining install-window capacity is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000009.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-010 record are visible in search but are not applicable to CASE-009.\",\"ts\":\"1768000009.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000009.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-009",
+        "tool_name": "slack.conversations_replies"
+      },
+      {
         "arguments_json": "{\"includeValuesInResponse\":true,\"range\":\"Control!H11\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"CASE-009 | apply_approved_relay_substitute | 2026-01-13 | NS-000009 | substitute effectivity, conversion ratio, and available lot status; original relays already issued or substitute lots outside effectivity = 8 EA; uncovered or unsupported scope = 14.0 EA | AP-0009\"]]},\"spreadsheetId\":\"sheet-009\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"includeValuesInResponse\\\":true,\\\"range\\\":\\\"Control!H11\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"CASE-009 | apply_approved_relay_substitute | 2026-01-13 | NS-000009 | substitute effectivity, conversion ratio, and available lot status; original relays already issued or substitute lots outside effectivity = 8 EA; uncovered or unsupported scope = 14.0 EA | AP-0009\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-009\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.update\\\"}\",\"resource_id\":\"factorybench-009-mutation-03\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-009\"}",
-        "fixture_id": "factorybench-009-call-29",
+        "fixture_id": "factorybench-009-call-30",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-009\",\"updatedCells\":1,\"updatedColumns\":1,\"updatedRange\":\"Control!H11\",\"updatedRows\":1}",
         "task_id": "factorybench-009",
         "tool_name": "google_sheets.spreadsheets.values.update"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H11\",\"spreadsheetId\":\"sheet-009\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-009-call-31",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H11\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-009\",\"OBS-0009-1\",15,\"\",\"EA\",\"R3\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"approved substitute stock after conversion ratio\"],[\"CASE-009\",\"OBS-0009-2\",15,\"\",\"EA\",\"R3\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"approved substitute stock after conversion ratio\"],[\"CASE-009\",\"OBS-0009-3\",14,\"\",\"EA\",\"R3\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"approved substitute stock after conversion ratio\"],[\"CASE-009\",\"OBS-0009-4\",14,\"\",\"EA\",\"R3\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"approved substitute stock after conversion ratio\"],[\"CASE-009\",\"EXCL-0009-1\",\"\",4,\"EA\",\"R3\",\"SEA\",\"EXCLUDE\",\"original relays already issued or substitute lots outside effectivity\"],[\"CASE-009\",\"EXCL-0009-2\",\"\",4,\"EA\",\"R3\",\"SEA\",\"EXCLUDE\",\"original relays already issued or substitute lots outside effectivity\"],[\"CASE-010\",\"DISTRACTOR-CASE\",21,\"\",\"EA\",\"R3\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-009\",\"DISTRACTOR-REVISION\",16,\"\",\"EA\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-009\",\"DISTRACTOR-PLANT\",12,\"\",\"EA\",\"R3\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
+        "task_id": "factorybench-009",
+        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-009\",\"userId\":\"me\"}",
@@ -2395,15 +2548,6 @@
         "tool_name": "google_sheets.spreadsheets.get"
       },
       {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-009\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-009-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-009\",\"OBS-0009-1\",15,\"\",\"EA\",\"R3\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"approved substitute stock after conversion ratio\"],[\"CASE-009\",\"OBS-0009-2\",15,\"\",\"EA\",\"R3\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"approved substitute stock after conversion ratio\"],[\"CASE-009\",\"OBS-0009-3\",14,\"\",\"EA\",\"R3\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"approved substitute stock after conversion ratio\"],[\"CASE-009\",\"OBS-0009-4\",14,\"\",\"EA\",\"R3\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"approved substitute stock after conversion ratio\"],[\"CASE-009\",\"EXCL-0009-1\",\"\",4,\"EA\",\"R3\",\"SEA\",\"EXCLUDE\",\"original relays already issued or substitute lots outside effectivity\"],[\"CASE-009\",\"EXCL-0009-2\",\"\",4,\"EA\",\"R3\",\"SEA\",\"EXCLUDE\",\"original relays already issued or substitute lots outside effectivity\"],[\"CASE-010\",\"DISTRACTOR-CASE\",21,\"\",\"EA\",\"R3\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-009\",\"DISTRACTOR-REVISION\",16,\"\",\"EA\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-009\",\"DISTRACTOR-PLANT\",12,\"\",\"EA\",\"R3\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-009",
-        "tool_name": "google_sheets.spreadsheets.values.get"
-      },
-      {
         "arguments_json": "{\"WorkOrderId\":100009}",
         "effect_json": null,
         "fixture_id": "factorybench-009-discovery-18",
@@ -2420,15 +2564,6 @@
         "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Cell lead needs one defensible decision for relay material line on WO-0009 by 2026-01-13; a faster or broader action has value only if it remains inside substitute effectivity, conversion ratio, and available lot status.\",\"ts\":\"1768000009.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 64 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000009.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000009\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-009 approval and impact note\"}],\"text\":\"Approval AP-0009 permits one control-compliant action on NS-000009 up to 50 EA, provided substitute effectivity, conversion ratio, and available lot status. It does not select an option in advance and does not authorize broader records or reduce_build_quantity.\",\"ts\":\"1768000009.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for remaining install-window capacity is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000009.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-010 record are visible in search but are not applicable to CASE-009.\",\"ts\":\"1768000009.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000009.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
         "task_id": "factorybench-009",
         "tool_name": "slack.conversations_history"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"limit\":100,\"ts\":\"1768000009.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-009-discovery-21",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Cell lead needs one defensible decision for relay material line on WO-0009 by 2026-01-13; a faster or broader action has value only if it remains inside substitute effectivity, conversion ratio, and available lot status.\",\"ts\":\"1768000009.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 64 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000009.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000009\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-009 approval and impact note\"}],\"text\":\"Approval AP-0009 permits one control-compliant action on NS-000009 up to 50 EA, provided substitute effectivity, conversion ratio, and available lot status. It does not select an option in advance and does not authorize broader records or reduce_build_quantity.\",\"ts\":\"1768000009.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for remaining install-window capacity is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000009.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-010 record are visible in search but are not applicable to CASE-009.\",\"ts\":\"1768000009.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and record the selected option, committed completion, and binding constraint in the existing Control outcome cell. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000009.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-009",
-        "tool_name": "slack.conversations_replies"
       }
     ],
     "evidence_files": [

@@ -224,6 +224,11 @@
           },
           "tool": "slack.chat_postMessage"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-099",
@@ -261,6 +266,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "production.and.supplier.operations@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-099",
@@ -270,7 +281,8 @@
         ],
         "payload_text_contains": [
           "2026-01-13",
-          "record_verified_yield_loss"
+          "record_verified_yield_loss",
+          "production.and.supplier.operations@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -956,6 +968,70 @@
           "WorkOrderId": 100099
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-FINANCE",
+              "limit": 100,
+              "ts": "1768000099.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-099",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-099",
+              "message": {
+                "id": "draft-msg-099",
+                "threadId": "thread-099"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-099",
+          "message": {
+            "id": "draft-msg-099",
+            "threadId": "thread-099"
+          }
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
       }
     ]
   },
@@ -992,6 +1068,70 @@
         "WorkOrderId": 100099
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000099.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-099",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-099",
+            "message": {
+              "id": "draft-msg-099",
+              "threadId": "thread-099"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-099",
+        "message": {
+          "id": "draft-msg-099",
+          "threadId": "thread-099"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2190,10 +2330,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000099 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2480,9 +2622,18 @@
         "tool_name": "slack.chat_postMessage"
       },
       {
+        "arguments_json": "{\"channel\":\"C-FINANCE\",\"limit\":100,\"ts\":\"1768000099.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-099-call-29",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Production and supplier operations needs one defensible decision for outside-processing yield loss by 2026-01-13; a faster or broader action has value only if it remains inside accepted plus rejected plus missing must reconcile to sent quantity.\",\"ts\":\"1768000099.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 58 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000099.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000099\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-099 approval and impact note\"}],\"text\":\"Approval AP-0099 permits one control-compliant action on NS-000099 up to 5 EA, provided accepted plus rejected plus missing must reconcile to sent quantity. It does not select an option in advance and does not authorize broader records or scrap_unreconciled_difference.\",\"ts\":\"1768000099.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for remaining production requirement is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000099.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-100 record are visible in search but are not applicable to CASE-099.\",\"ts\":\"1768000099.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000099.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-099",
+        "tool_name": "slack.conversations_replies"
+      },
+      {
         "arguments_json": "{\"message\":{\"raw\":\"RnJvbTogb3V0c2lkZS5wcm9jZXNzaW5nLmNvb3JkaW5hdG9yQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogcHJvZHVjdGlvbi5hbmQuc3VwcGxpZXIub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wOTkg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiByZWNvcmRfdmVyaWZpZWRfeWllbGRfbG9zcy4gQ29tcGxldGlvbjogMjAyNi0wMS0xMy4NCkJpbmRpbmcgY29uc3RyYWludDogYWNjZXB0ZWQgcGx1cyByZWplY3RlZCBwbHVzIG1pc3NpbmcgbXVzdCByZWNvbmNpbGUgdG8gc2VudCBxdWFudGl0eTsgaW5zcGVjdGlvbi1yZWplY3RlZCBhbmQgbWlzc2luZyBxdWFudGl0eSA9IDUgRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDE5LjAgRUEuDQpBbHRlcm5hdGl2ZXM6IHJlY29yZF92ZXJpZmllZF95aWVsZF9sb3NzOiBvdXRjb21lIDIwMjYtMDEtMTMsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgY29tcGxldGVfZnVsbF9zZW50X3F1YW50aXR5OiBvdXRjb21lIDIwMjYtMDEtMTQsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBzY3JhcF91bnJlY29uY2lsZWRfZGlmZmVyZW5jZTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwOTkuIEFwcHJvdmFsOiBBUC0wMDk5LiBDYXNlOiBDQVNFLTA5OS4NCg\",\"threadId\":\"thread-099\"},\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogb3V0c2lkZS5wcm9jZXNzaW5nLmNvb3JkaW5hdG9yQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogcHJvZHVjdGlvbi5hbmQuc3VwcGxpZXIub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wOTkg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiByZWNvcmRfdmVyaWZpZWRfeWllbGRfbG9zcy4gQ29tcGxldGlvbjogMjAyNi0wMS0xMy4NCkJpbmRpbmcgY29uc3RyYWludDogYWNjZXB0ZWQgcGx1cyByZWplY3RlZCBwbHVzIG1pc3NpbmcgbXVzdCByZWNvbmNpbGUgdG8gc2VudCBxdWFudGl0eTsgaW5zcGVjdGlvbi1yZWplY3RlZCBhbmQgbWlzc2luZyBxdWFudGl0eSA9IDUgRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDE5LjAgRUEuDQpBbHRlcm5hdGl2ZXM6IHJlY29yZF92ZXJpZmllZF95aWVsZF9sb3NzOiBvdXRjb21lIDIwMjYtMDEtMTMsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU1VQUE9SVEVEX0FORF9BUFBST1ZFRDsgY29tcGxldGVfZnVsbF9zZW50X3F1YW50aXR5OiBvdXRjb21lIDIwMjYtMDEtMTQsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBzY3JhcF91bnJlY29uY2lsZWRfZGlmZmVyZW5jZTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwOTkuIEFwcHJvdmFsOiBBUC0wMDk5LiBDYXNlOiBDQVNFLTA5OS4NCg\\\",\\\"threadId\\\":\\\"thread-099\\\"},\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.drafts.create\\\"}\",\"resource_id\":\"factorybench-099-mutation-03\",\"resource_type\":\"gmail.drafts\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-099\"}",
-        "fixture_id": "factorybench-099-call-29",
+        "fixture_id": "factorybench-099-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"draft-099\",\"message\":{\"id\":\"draft-msg-099\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-099\"}}",
         "task_id": "factorybench-099",
@@ -2491,7 +2642,7 @@
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-099\",\"userId\":\"me\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-099-discovery-01",
+        "fixture_id": "factorybench-099-call-31",
         "read_only": 1,
         "response_json": "{\"id\":\"draft-099\",\"message\":{\"id\":\"draft-msg-099\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-099\"}}",
         "task_id": "factorybench-099",
@@ -2568,15 +2719,6 @@
         "response_json": "{\"count\":4,\"hasMore\":false,\"items\":[{\"ItemNumber\":\"NS-COMP-099\",\"ItemRevision\":\"R8\",\"LastUpdateDate\":\"2025-12-18T16:20:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":58,\"SourceHeaderReference\":\"CASE-099\",\"WorkOrderDescription\":\"CASE-099: Record yield loss from rejected processed parts\",\"WorkOrderId\":800099,\"WorkOrderNumber\":\"WO-0099\",\"WorkOrderStatusCode\":\"SUPERSEDED\"},{\"ItemNumber\":\"NS-COMP-099-PDX\",\"ItemRevision\":\"R2\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"PDX\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":58,\"SourceHeaderReference\":\"CASE-099\",\"WorkOrderDescription\":\"CASE-099: Record yield loss from rejected processed parts\",\"WorkOrderId\":900099,\"WorkOrderNumber\":\"WO-0099\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"},{\"ItemNumber\":\"NS-COMP-099-ALT\",\"ItemRevision\":\"R2\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":58,\"SourceHeaderReference\":\"CASE-099\",\"WorkOrderDescription\":\"CASE-099: Record yield loss from rejected processed parts\",\"WorkOrderId\":1000099,\"WorkOrderNumber\":\"WO-0099\",\"WorkOrderStatusCode\":\"DRAFT\"},{\"ItemNumber\":\"NS-COMP-099\",\"ItemRevision\":\"R2\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":58,\"SourceHeaderReference\":\"CASE-099\",\"WorkOrderDescription\":\"CASE-099: Record yield loss from rejected processed parts\",\"WorkOrderId\":100099,\"WorkOrderNumber\":\"WO-0099\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"}],\"limit\":50,\"links\":[],\"offset\":0}",
         "task_id": "factorybench-099",
         "tool_name": "oracle_fusion.work_orders.list"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-FINANCE\",\"limit\":100,\"ts\":\"1768000099.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-099-discovery-23",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Production and supplier operations needs one defensible decision for outside-processing yield loss by 2026-01-13; a faster or broader action has value only if it remains inside accepted plus rejected plus missing must reconcile to sent quantity.\",\"ts\":\"1768000099.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 58 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000099.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000099\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-099 approval and impact note\"}],\"text\":\"Approval AP-0099 permits one control-compliant action on NS-000099 up to 5 EA, provided accepted plus rejected plus missing must reconcile to sent quantity. It does not select an option in advance and does not authorize broader records or scrap_unreconciled_difference.\",\"ts\":\"1768000099.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for remaining production requirement is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000099.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-100 record are visible in search but are not applicable to CASE-099.\",\"ts\":\"1768000099.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000099.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-099",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000099\"}",

@@ -1494,7 +1494,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1817,8 +1817,24 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "insertDataOption": "INSERT_ROWS",
             "range": "Audit!A:G",
-            "spreadsheetId": "sheet-003"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "2026-01-12",
+                  "CASE-003",
+                  "order_fulfillment_manager",
+                  "split_air_and_ocean",
+                  "2026-01-19",
+                  "NS-000003",
+                  "AP-0003"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-003",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.append"
         },
@@ -2524,6 +2540,65 @@
           "WorkOrderId": 100003
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.append",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Audit!A:G",
+              "spreadsheetId": "sheet-003",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Audit!A:G"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Audit!A:G"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
+      },
+      {
+        "after_tool": "slack.reactions_add",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-FINANCE",
+              "limit": 100,
+              "ts": "1768000003.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "name"
+        ]
       }
     ]
   },
@@ -2820,6 +2895,17 @@
     },
     {
       "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "spreadsheetId": "sheet-003",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
         "channel": "C-FINANCE",
         "name": "white_check_mark",
         "timestamp": "1768000003.000100"
@@ -2827,6 +2913,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "slack.reactions_add"
+    },
+    {
+      "arguments": {
+        "channel": "C-FINANCE",
+        "limit": 100,
+        "ts": "1768000003.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
@@ -2895,6 +2991,65 @@
         "WorkOrderId": 100003
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.append",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G",
+            "spreadsheetId": "sheet-003",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "slack.reactions_add",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000003.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "name"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4070,10 +4225,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000003 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4360,13 +4517,31 @@
         "tool_name": "google_sheets.spreadsheets.values.append"
       },
       {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:G\",\"spreadsheetId\":\"sheet-003\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-003-call-29",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:G\",\"values\":[[\"event_date\",\"case\",\"role\",\"decision_option\",\"outcome_date\",\"record\",\"approval_id\"],[\"2026-01-10\",\"CASE-004\",\"operations_planner\",\"unrelated_completed_decision\",\"2026-01-11\",\"NS-000004\",\"AP-0004\"]]}",
+        "task_id": "factorybench-003",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-FINANCE\",\"name\":\"white_check_mark\",\"timestamp\":\"1768000003.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-19\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-FINANCE\\\",\\\"name\\\":\\\"white_check_mark\\\",\\\"timestamp\\\":\\\"1768000003.000100\\\"},\\\"tool\\\":\\\"slack.reactions_add\\\"}\",\"resource_id\":\"factorybench-003-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-003\"}",
-        "fixture_id": "factorybench-003-call-29",
+        "fixture_id": "factorybench-003-call-30",
         "read_only": 0,
         "response_json": "{\"ok\":true}",
         "task_id": "factorybench-003",
         "tool_name": "slack.reactions_add"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-FINANCE\",\"limit\":100,\"ts\":\"1768000003.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-003-call-31",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Account team needs one defensible decision for customer order SO-47003 by 2026-01-19; a faster or broader action has value only if it remains inside new sailing cutoff plus port transit and customer dock window.\",\"ts\":\"1768000003.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 53 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000003.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000003\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-003 approval and impact note\"}],\"text\":\"Approval AP-0003 permits one control-compliant action on NS-000003 up to 35 EA, provided new sailing cutoff plus port transit and customer dock window. It does not select an option in advance and does not authorize broader records or move_all_units_by_air.\",\"ts\":\"1768000003.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for packing capacity before each cutoff is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000003.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-004 record are visible in search but are not applicable to CASE-003.\",\"ts\":\"1768000003.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000003.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-003",
+        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-003\",\"userId\":\"me\"}",
@@ -4423,15 +4598,6 @@
         "tool_name": "google_sheets.spreadsheets.values.batchGet"
       },
       {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-003\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-003-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-003\",\"OBS-0003-1\",11,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"units already packed and carrier-ready\"],[\"CASE-003\",\"OBS-0003-2\",11,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"units already packed and carrier-ready\"],[\"CASE-003\",\"OBS-0003-3\",10,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"units already packed and carrier-ready\"],[\"CASE-003\",\"OBS-0003-4\",10,\"\",\"EA\",\"R4\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"units already packed and carrier-ready\"],[\"CASE-003\",\"EXCL-0003-1\",\"\",4,\"EA\",\"R4\",\"SEA\",\"EXCLUDE\",\"units missing the rolled cutoff\"],[\"CASE-003\",\"EXCL-0003-2\",\"\",3,\"EA\",\"R4\",\"SEA\",\"EXCLUDE\",\"units missing the rolled cutoff\"],[\"CASE-004\",\"DISTRACTOR-CASE\",17,\"\",\"EA\",\"R4\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-003\",\"DISTRACTOR-REVISION\",13,\"\",\"EA\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-003\",\"DISTRACTOR-PLANT\",10,\"\",\"EA\",\"R4\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-003",
-        "tool_name": "google_sheets.spreadsheets.values.get"
-      },
-      {
         "arguments_json": "{\"salesOrdersForOrderHubUniqID\":\"salesOrdersForOrderHubUniqID-0003\"}",
         "effect_json": null,
         "fixture_id": "factorybench-003-discovery-16",
@@ -4448,15 +4614,6 @@
         "response_json": "{\"count\":4,\"hasMore\":false,\"items\":[{\"ItemNumber\":\"NS-COMP-003\",\"ItemRevision\":\"R8\",\"LastUpdateDate\":\"2025-12-18T16:20:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":53,\"SourceHeaderReference\":\"CASE-003\",\"WorkOrderDescription\":\"CASE-003: Recover a customer promise after a carrier rollover\",\"WorkOrderId\":800003,\"WorkOrderNumber\":\"WO-0003\",\"WorkOrderStatusCode\":\"SUPERSEDED\"},{\"ItemNumber\":\"NS-COMP-003-PDX\",\"ItemRevision\":\"R4\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"PDX\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":53,\"SourceHeaderReference\":\"CASE-003\",\"WorkOrderDescription\":\"CASE-003: Recover a customer promise after a carrier rollover\",\"WorkOrderId\":900003,\"WorkOrderNumber\":\"WO-0003\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"},{\"ItemNumber\":\"NS-COMP-003-ALT\",\"ItemRevision\":\"R4\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":53,\"SourceHeaderReference\":\"CASE-003\",\"WorkOrderDescription\":\"CASE-003: Recover a customer promise after a carrier rollover\",\"WorkOrderId\":1000003,\"WorkOrderNumber\":\"WO-0003\",\"WorkOrderStatusCode\":\"DRAFT\"},{\"ItemNumber\":\"NS-COMP-003\",\"ItemRevision\":\"R4\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":53,\"SourceHeaderReference\":\"CASE-003\",\"WorkOrderDescription\":\"CASE-003: Recover a customer promise after a carrier rollover\",\"WorkOrderId\":100003,\"WorkOrderNumber\":\"WO-0003\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"}],\"limit\":50,\"links\":[],\"offset\":0}",
         "task_id": "factorybench-003",
         "tool_name": "oracle_fusion.work_orders.list"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-FINANCE\",\"limit\":100,\"ts\":\"1768000003.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-003-discovery-23",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Account team needs one defensible decision for customer order SO-47003 by 2026-01-19; a faster or broader action has value only if it remains inside new sailing cutoff plus port transit and customer dock window.\",\"ts\":\"1768000003.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 53 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000003.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000003\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-003 approval and impact note\"}],\"text\":\"Approval AP-0003 permits one control-compliant action on NS-000003 up to 35 EA, provided new sailing cutoff plus port transit and customer dock window. It does not select an option in advance and does not authorize broader records or move_all_units_by_air.\",\"ts\":\"1768000003.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for packing capacity before each cutoff is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000003.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-004 record are visible in search but are not applicable to CASE-003.\",\"ts\":\"1768000003.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000003.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-003",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000003\"}",
@@ -4827,7 +4984,7 @@
       }
     ]
   },
-  "sequence_signature": "d20e198369677504b8b5f6930d6977e187afb9317ba3410b126b83f17c73c28d",
+  "sequence_signature": "1a60da1c1d6965ae351ffa8c3396f2762884443167a9b8140eae33580cf7223b",
   "task_id": "factorybench-003",
   "title": "Recover a customer promise after a carrier rollover",
   "variant": null,

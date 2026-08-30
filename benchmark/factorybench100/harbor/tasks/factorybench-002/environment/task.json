@@ -223,6 +223,11 @@
           },
           "tool": "google_drive.comments.create"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-002",
@@ -257,6 +262,11 @@
             "thread_ts": "1768000002.000100"
           },
           "tool": "slack.chat_postMessage"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -924,6 +934,64 @@
           "SupplyRequestId": 1500002
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-002",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-002"
+            },
+            "expected_result_contains": {
+              "id": "comment-002",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-002",
+          "resolved": false
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000002.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
       }
     ]
   },
@@ -966,6 +1034,64 @@
         "SupplyRequestId": 1500002
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-002",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-002"
+          },
+          "expected_result_contains": {
+            "id": "comment-002",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-002",
+        "resolved": false
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000002.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2121,10 +2247,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000002 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2411,9 +2539,18 @@
         "tool_name": "google_drive.comments.create"
       },
       {
+        "arguments_json": "{\"commentId\":\"comment-002\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-002\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-002-call-29",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-002\",\"resolved\":false}",
+        "task_id": "factorybench-002",
+        "tool_name": "google_drive.comments.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-QUALITY\",\"text\":\"CASE-002: Oracle record NS-000002 now reflects release_domestic_quantity with completion 2026-01-20. Binding constraint: release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA. Alternatives: wait_for_full_license: outcome 2026-02-02, economic impact USD 0, FAILS_CURRENT_CONTROL; release_domestic_quantity: outcome 2026-01-20, economic impact USD 0, SUPPORTED_AND_APPROVED; cancel_restricted_line: outcome 2026-01-14, economic impact USD 900, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0002.\",\"thread_ts\":\"1768000002.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-20\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-QUALITY\\\",\\\"text\\\":\\\"CASE-002: Oracle record NS-000002 now reflects release_domestic_quantity with completion 2026-01-20. Binding constraint: release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA. Alternatives: wait_for_full_license: outcome 2026-02-02, economic impact USD 0, FAILS_CURRENT_CONTROL; release_domestic_quantity: outcome 2026-01-20, economic impact USD 0, SUPPORTED_AND_APPROVED; cancel_restricted_line: outcome 2026-01-14, economic impact USD 900, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0002.\\\",\\\"thread_ts\\\":\\\"1768000002.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-002-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-002\"}",
-        "fixture_id": "factorybench-002-call-29",
+        "fixture_id": "factorybench-002-call-30",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-QUALITY\",\"message\":{\"text\":\"CASE-002: Oracle record NS-000002 now reflects release_domestic_quantity with completion 2026-01-20. Binding constraint: release only quantities whose destination and end-use are cleared; export-controlled lines awaiting a license = 28 EA; uncovered or unsupported scope = 28.0 EA. Alternatives: wait_for_full_license: outcome 2026-02-02, economic impact USD 0, FAILS_CURRENT_CONTROL; release_domestic_quantity: outcome 2026-01-20, economic impact USD 0, SUPPORTED_AND_APPROVED; cancel_restricted_line: outcome 2026-01-14, economic impact USD 900, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0002.\",\"thread_ts\":\"1768000002.000100\"},\"ok\":true,\"ts\":\"1768000002.000900\"}",
         "task_id": "factorybench-002",
@@ -2436,15 +2573,6 @@
         "response_json": "{\"data\":\"T0xZTVBJQyBNRVRST0xPR1kg4oCUIENPTlRST0xMRUQgQ09NTUVSQ0lBTCAvIFNFUlZJQ0UgUkVDT1JECkRvY3VtZW50OiBleHBvcnQtY2xhc3NpZmljYXRpb24tYW5kLWVuZC11c2UtcmVnaXN0ZXItMDAwMgpDYXNlIHJlZmVyZW5jZTogQ0FTRS0wMDIKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogZXhwb3J0IGNsYXNzaWZpY2F0aW9uIGFuZCBlbmQtdXNlIHJlZ2lzdGVyCkltbXV0YWJsZSByZWNvcmQgb3IgaXRlbTogQ1RSTC1ERUYtRVhQT1JUCkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFIzCk1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMjggRUEKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogcmVsZWFzZV9kb21lc3RpY19xdWFudGl0eQpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0zMQpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTgKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMjAKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogY291bnNlbCdzIGV4cG9ydC1saWNlbnNlIGRlY2lzaW9uIGRhdGUKQ2FwYWNpdHkgaXMgcmVzZXJ2ZWQgb25seSBhZnRlciB0aGUgYnV5ZXIgb3IgcGxhbm5lciBzdXBwbGllcyB0aGUgbWF0Y2hpbmcgaW1tdXRhYmxlIHJlY29yZCBhbmQgY3VycmVudCBhcHByb3ZhbC4KCjMuIEVYQ0xVU0lPTlMgQU5EIEFTU1VNUFRJT05TCk5vdCBpbmNsdWRlZDogZXhwb3J0LWNvbnRyb2xsZWQgbGluZXMgYXdhaXRpbmcgYSBsaWNlbnNlCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IHJlbGVhc2Ugb25seSBxdWFudGl0aWVzIHdob3NlIGRlc3RpbmF0aW9uIGFuZCBlbmQtdXNlIGFyZSBjbGVhcmVkCk5lYXJieSBidXQgdW5yZWxhdGVkIHJlZmVyZW5jZSBDQVNFLTAwMyBpcyBleHBsaWNpdGx5IGV4Y2x1ZGVkLgpGcmVpZ2h0LCBwcmVtaXVtLCBjZXJ0aWZpY2F0aW9uLCBhbmQgbG90IHRlcm1zIGFwcGx5IG9ubHkgd2hlcmUgc3RhdGVkIGFib3ZlOyBzaWxlbmNlIGlzIG5vdCBhcHByb3ZhbC4KCjQuIEFDQ0VQVEFOQ0UKUHJlcGFyZWQgYnk6IE9seW1waWMgTWV0cm9sb2d5IG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDAyClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K\",\"size\":1551}",
         "task_id": "factorybench-002",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-002\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-002\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-002-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-002\",\"resolved\":false}",
-        "task_id": "factorybench-002",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-002\",\"pageSize\":100}",

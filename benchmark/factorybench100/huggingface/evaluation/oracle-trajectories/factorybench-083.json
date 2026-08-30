@@ -882,7 +882,7 @@
       "description": "Read NS-000083 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000083 back through the documented Oracle maintenance work orders.list operation after the mutation and confirmed the resource-specific changed fields ['AssetNumber', 'LastUpdateDate', 'OrganizationCode', 'PlannedCompletionDate', 'PlannedStartDate', 'WorkOrderNumber', 'WorkOrderStatusCode'], including the effective update at 2026-01-19, rather than relying on the write acknowledgement.",
@@ -902,9 +902,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "google_drive.comments.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "google_sheets.spreadsheets.values.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1031,7 +1061,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 44,
+  "passed_atomic_checks": 46,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1238,7 +1268,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-083",
-  "total_atomic_checks": 44,
+  "total_atomic_checks": 46,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -2888,6 +2918,22 @@
     },
     {
       "arguments": {
+        "commentId": "comment-083",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-083"
+      },
+      "index": 29,
+      "result": {
+        "content": "CASE-083: open_entitled_depot_repair recorded on Oracle record NS-000083; completion 2026-01-19; constraint asset serial, entitlement, diagnosis, scope, and customer authorization; cosmetic work and non-entitled damage = 6 HR; uncovered or unsupported scope = 19.0 HR; approval AP-0083.",
+        "createdTime": "2026-01-12T16:00:00Z",
+        "id": "comment-083",
+        "resolved": false
+      },
+      "success": true,
+      "tool": "google_drive.comments.get"
+    },
+    {
+      "arguments": {
         "insertDataOption": "INSERT_ROWS",
         "range": "Audit!A:G",
         "requestBody": {
@@ -2907,7 +2953,7 @@
         "spreadsheetId": "sheet-083",
         "valueInputOption": "RAW"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "spreadsheetId": "sheet-083",
         "tableRange": "Audit!A1:G20",
@@ -2919,6 +2965,32 @@
       },
       "success": true,
       "tool": "google_sheets.spreadsheets.values.append"
+    },
+    {
+      "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "spreadsheetId": "sheet-083",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "index": 31,
+      "result": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G",
+        "values": [
+          [
+            "2026-01-12",
+            "CASE-083",
+            "service_supply_coordinator",
+            "open_entitled_depot_repair",
+            "2026-01-19",
+            "NS-000083",
+            "AP-0083"
+          ]
+        ]
+      },
+      "success": true,
+      "tool": "google_sheets.spreadsheets.values.get"
     },
     {
       "arguments": {
@@ -2941,7 +3013,7 @@
         "selected_resource_or_control": "ASSET-083",
         "unavailable_or_protected_capacity": 6
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

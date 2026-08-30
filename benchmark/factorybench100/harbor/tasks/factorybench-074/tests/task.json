@@ -202,8 +202,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H36",
-            "spreadsheetId": "sheet-074"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-074 | validate_supported_outside_invoice | 2026-01-16 | NS-000074 | PO line, receipt, inspection, invoice, currency, and tolerance; rejected, unreceived, duplicate, or rate-variance value = 0 USD; uncovered or unsupported scope = 0.0 USD | AP-0074"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-074",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -235,6 +245,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "plant.controller@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-074",
@@ -244,7 +260,8 @@
         ],
         "payload_text_contains": [
           "2026-01-16",
-          "validate_supported_outside_invoice"
+          "validate_supported_outside_invoice",
+          "plant.controller@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -924,6 +941,67 @@
           "InvoiceId": 900074
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H36",
+              "spreadsheetId": "sheet-074",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H36"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H36"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-074",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-074",
+              "threadId": "thread-074"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-074",
+          "threadId": "thread-074"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
       }
     ]
   },
@@ -969,6 +1047,67 @@
         "InvoiceId": 900074
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H36",
+            "spreadsheetId": "sheet-074",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H36"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H36"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-074",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-074",
+            "threadId": "thread-074"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-074",
+        "threadId": "thread-074"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2135,10 +2274,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000074 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",

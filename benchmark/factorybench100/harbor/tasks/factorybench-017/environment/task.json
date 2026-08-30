@@ -222,6 +222,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "operations.control@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-017",
@@ -231,7 +237,8 @@
         ],
         "payload_text_contains": [
           "2026-01-18",
-          "assign_qualified_alternate_welder"
+          "assign_qualified_alternate_welder",
+          "operations.control@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -951,6 +958,70 @@
           "WorkOrderId": 100017
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-017",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-017",
+              "message": {
+                "id": "draft-msg-017",
+                "threadId": "thread-017"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-017",
+          "message": {
+            "id": "draft-msg-017",
+            "threadId": "thread-017"
+          }
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
+      },
+      {
+        "after_tool": "slack.reactions_add",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PROCUREMENT",
+              "limit": 100,
+              "ts": "1768000017.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "name"
+        ]
       }
     ]
   },
@@ -988,6 +1059,70 @@
         "WorkOrderId": 100017
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-017",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-017",
+            "message": {
+              "id": "draft-msg-017",
+              "threadId": "thread-017"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-017",
+        "message": {
+          "id": "draft-msg-017",
+          "threadId": "thread-017"
+        }
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
+    },
+    {
+      "after_tool": "slack.reactions_add",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000017.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "name"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2189,10 +2324,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000017 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2479,22 +2616,31 @@
         "tool_name": "gmail.drafts.create"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-017\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-017-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"draft-017\",\"message\":{\"id\":\"draft-msg-017\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-017\"}}",
+        "task_id": "factorybench-017",
+        "tool_name": "gmail.drafts.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"name\":\"white_check_mark\",\"timestamp\":\"1768000017.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-18\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PROCUREMENT\\\",\\\"name\\\":\\\"white_check_mark\\\",\\\"timestamp\\\":\\\"1768000017.000100\\\"},\\\"tool\\\":\\\"slack.reactions_add\\\"}\",\"resource_id\":\"factorybench-017-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-017\"}",
-        "fixture_id": "factorybench-017-call-29",
+        "fixture_id": "factorybench-017-call-30",
         "read_only": 0,
         "response_json": "{\"ok\":true}",
         "task_id": "factorybench-017",
         "tool_name": "slack.reactions_add"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-017\",\"userId\":\"me\"}",
+        "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"limit\":100,\"ts\":\"1768000017.000100\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-017-discovery-01",
+        "fixture_id": "factorybench-017-call-31",
         "read_only": 1,
-        "response_json": "{\"id\":\"draft-017\",\"message\":{\"id\":\"draft-msg-017\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-017\"}}",
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Operations control needs one defensible decision for welding backlog after absence by 2026-01-18; a faster or broader action has value only if it remains inside process certification and shift availability must overlap.\",\"ts\":\"1768000017.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 53 HR on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000017.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000017\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-017 approval and impact note\"}],\"text\":\"Approval AP-0017 permits one control-compliant action on NS-000017 up to 29 HR, provided process certification and shift availability must overlap. It does not select an option in advance and does not authorize broader records or use_uncertified_labor.\",\"ts\":\"1768000017.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for weld-booth and inspector capacity is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000017.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R10 and the CASE-018 record are visible in search but are not applicable to CASE-017.\",\"ts\":\"1768000017.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and mark the existing operations thread complete with the approved check reaction. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000017.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
         "task_id": "factorybench-017",
-        "tool_name": "gmail.drafts.get"
+        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"thread-017\",\"userId\":\"me\"}",
@@ -2558,15 +2704,6 @@
         "response_json": "{\"count\":4,\"hasMore\":false,\"items\":[{\"ItemNumber\":\"NS-COMP-017\",\"ItemRevision\":\"R10\",\"LastUpdateDate\":\"2025-12-18T16:20:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":53,\"SourceHeaderReference\":\"CASE-017\",\"WorkOrderDescription\":\"CASE-017: Recover output after a certified welder absence\",\"WorkOrderId\":800017,\"WorkOrderNumber\":\"WO-0017\",\"WorkOrderStatusCode\":\"SUPERSEDED\"},{\"ItemNumber\":\"NS-COMP-017\",\"ItemRevision\":\"R4\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":53,\"SourceHeaderReference\":\"CASE-017\",\"WorkOrderDescription\":\"CASE-017: Recover output after a certified welder absence\",\"WorkOrderId\":100017,\"WorkOrderNumber\":\"WO-0017\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"},{\"ItemNumber\":\"NS-COMP-017-PDX\",\"ItemRevision\":\"R4\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"PDX\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":53,\"SourceHeaderReference\":\"CASE-017\",\"WorkOrderDescription\":\"CASE-017: Recover output after a certified welder absence\",\"WorkOrderId\":900017,\"WorkOrderNumber\":\"WO-0017\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"},{\"ItemNumber\":\"NS-COMP-017-ALT\",\"ItemRevision\":\"R4\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":53,\"SourceHeaderReference\":\"CASE-017\",\"WorkOrderDescription\":\"CASE-017: Recover output after a certified welder absence\",\"WorkOrderId\":1000017,\"WorkOrderNumber\":\"WO-0017\",\"WorkOrderStatusCode\":\"DRAFT\"}],\"limit\":50,\"links\":[],\"offset\":0}",
         "task_id": "factorybench-017",
         "tool_name": "oracle_fusion.work_orders.list"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"limit\":100,\"ts\":\"1768000017.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-017-discovery-22",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Operations control needs one defensible decision for welding backlog after absence by 2026-01-18; a faster or broader action has value only if it remains inside process certification and shift availability must overlap.\",\"ts\":\"1768000017.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 53 HR on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000017.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000017\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-017 approval and impact note\"}],\"text\":\"Approval AP-0017 permits one control-compliant action on NS-000017 up to 29 HR, provided process certification and shift availability must overlap. It does not select an option in advance and does not authorize broader records or use_uncertified_labor.\",\"ts\":\"1768000017.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for weld-booth and inspector capacity is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000017.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R10 and the CASE-018 record are visible in search but are not applicable to CASE-017.\",\"ts\":\"1768000017.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and mark the existing operations thread complete with the approved check reaction. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000017.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-017",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000017\"}",

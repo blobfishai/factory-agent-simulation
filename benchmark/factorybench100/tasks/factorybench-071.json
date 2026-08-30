@@ -1527,7 +1527,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1872,6 +1872,11 @@
           },
           "tool": "slack.chat_postMessage"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-071",
@@ -1905,6 +1910,11 @@
             "fileId": "drive-071"
           },
           "tool": "google_drive.comments.create"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2584,6 +2594,64 @@
           "WorkOrderId": 100071
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-FINANCE",
+              "limit": 100,
+              "ts": "1768000071.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-071",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-071"
+            },
+            "expected_result_contains": {
+              "id": "comment-071",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-071",
+          "resolved": false
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
       }
     ]
   },
@@ -2874,6 +2942,16 @@
     },
     {
       "arguments": {
+        "channel": "C-FINANCE",
+        "limit": 100,
+        "ts": "1768000071.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "fileId": "drive-071",
         "requestBody": {
           "content": "CASE-071: post_supported_missing_labor recorded on Oracle record NS-000071; completion 2026-01-17; constraint employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0071."
@@ -2882,6 +2960,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "commentId": "comment-071",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-071"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
     },
     {
       "arguments": {
@@ -2940,6 +3028,64 @@
         "WorkOrderId": 100071
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000071.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-071",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-071"
+          },
+          "expected_result_contains": {
+            "id": "comment-071",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-071",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4099,10 +4245,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000071 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4391,11 +4539,20 @@
       {
         "arguments_json": "{\"fileId\":\"drive-071\",\"requestBody\":{\"content\":\"CASE-071: post_supported_missing_labor recorded on Oracle record NS-000071; completion 2026-01-17; constraint employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0071.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-071\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-071: post_supported_missing_labor recorded on Oracle record NS-000071; completion 2026-01-17; constraint employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0071.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-071-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-071\"}",
-        "fixture_id": "factorybench-071-call-29",
+        "fixture_id": "factorybench-071-call-30",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-071: post_supported_missing_labor recorded on Oracle record NS-000071; completion 2026-01-17; constraint employee, timecard, operation, rate, and period must reconcile; duplicate, unsigned, or wrong-period hours = 0.0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0071.\",\"id\":\"comment-071\",\"resolved\":false}",
         "task_id": "factorybench-071",
         "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"commentId\":\"comment-071\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-071\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-071-call-31",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-071\",\"resolved\":false}",
+        "task_id": "factorybench-071",
+        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-071\",\"userId\":\"me\"}",
@@ -4414,15 +4571,6 @@
         "response_json": "{\"data\":\"T0xZTVBJQyBNRVRST0xPR1kg4oCUIENPTlRST0xMRUQgQ09NTUVSQ0lBTCAvIFNFUlZJQ0UgUkVDT1JECkRvY3VtZW50OiB0aW1lY2FyZC10by1yZXNvdXJjZS1jb3N0LXJlY29uY2lsaWF0aW9uLTAwNzEKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDcxCklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IHRpbWVjYXJkLXRvLXJlc291cmNlLWNvc3QgcmVjb25jaWxpYXRpb24KSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTA3MQpFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSMgpNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDEyLjAgSFIKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogcG9zdF9lc3RpbWF0ZWRfaG91cnMKU3RhbmRhcmQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTQKRXhwZWRpdGVkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTE1ClJlc3VsdGluZyBvcGVyYXRpbmcgb3V0Y29tZSBzdGF0ZWQgYnkgcmVxdWVzdGVyLCBub3QgYnkgY291bnRlcnBhcnR5OiAyMDI2LTAxLTE4CkVjb25vbWljIGltcGFjdCBzdGF0ZWQgYnkgY291bnRlcnBhcnR5OiBVU0QgMApJbmRlcGVuZGVudCBjb25kaXRpb246IHRpbWVjYXJkIGFwcHJvdmFsIHN0YXR1cwpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiBkdXBsaWNhdGUsIHVuc2lnbmVkLCBvciB3cm9uZy1wZXJpb2QgaG91cnMKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogZW1wbG95ZWUsIHRpbWVjYXJkLCBvcGVyYXRpb24sIHJhdGUsIGFuZCBwZXJpb2QgbXVzdCByZWNvbmNpbGUKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDcyIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogT2x5bXBpYyBNZXRyb2xvZ3kgb3BlcmF0aW9ucyBkZXNrCkNvbmZpcm1hdGlvbiBudW1iZXI6IENORi0wMDAwNzEKU3RhdHVzOiBDT05GSVJNRUQgQVMgQU4gSU5QVVQsIE5PVCBBIEZJTkFMIE9QRVJBVElORyBERUNJU0lPTgo\",\"size\":1523}",
         "task_id": "factorybench-071",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-071\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-071\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-071-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-071\",\"resolved\":false}",
-        "task_id": "factorybench-071",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-071\",\"pageSize\":100}",
@@ -4829,7 +4977,7 @@
       }
     ]
   },
-  "sequence_signature": "936a5d146fb6a64c230d42a30c6954f3711c604f0df36275a3442895e2f5b68b",
+  "sequence_signature": "4942fe9336a6e678ee324b7190c7d87a540d404d93b23dbb35413ce2bebd809e",
   "task_id": "factorybench-071",
   "title": "Post missing setup labor from signed timecards",
   "variant": null,

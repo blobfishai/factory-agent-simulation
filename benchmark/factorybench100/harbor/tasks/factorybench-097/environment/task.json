@@ -222,6 +222,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "production.and.supplier.operations@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-097",
@@ -231,7 +237,8 @@
         ],
         "payload_text_contains": [
           "2026-01-14",
-          "receive_accepted_quantity"
+          "receive_accepted_quantity",
+          "production.and.supplier.operations@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -255,6 +262,11 @@
             "fileId": "drive-097"
           },
           "tool": "google_drive.comments.create"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -927,6 +939,72 @@
           "HeaderInterfaceId": 700097
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-097",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-097",
+              "message": {
+                "id": "draft-msg-097",
+                "threadId": "thread-097"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-097",
+          "message": {
+            "id": "draft-msg-097",
+            "threadId": "thread-097"
+          }
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-097",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-097"
+            },
+            "expected_result_contains": {
+              "id": "comment-097",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-097",
+          "resolved": false
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
       }
     ]
   },
@@ -966,6 +1044,72 @@
         "HeaderInterfaceId": 700097
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-097",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-097",
+            "message": {
+              "id": "draft-msg-097",
+              "threadId": "thread-097"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-097",
+        "message": {
+          "id": "draft-msg-097",
+          "threadId": "thread-097"
+        }
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-097",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-097"
+          },
+          "expected_result_contains": {
+            "id": "comment-097",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-097",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2141,10 +2285,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000097 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2431,22 +2577,31 @@
         "tool_name": "gmail.drafts.create"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-097\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-097-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"draft-097\",\"message\":{\"id\":\"draft-msg-097\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-097\"}}",
+        "task_id": "factorybench-097",
+        "tool_name": "gmail.drafts.get"
+      },
+      {
         "arguments_json": "{\"fileId\":\"drive-097\",\"requestBody\":{\"content\":\"CASE-097: receive_accepted_quantity recorded on Oracle record NS-000097; completion 2026-01-14; constraint PO line, supplier lot, inspection result, and dock count; rejected, missing, or wrong-lot housings = 14 EA; uncovered or unsupported scope = 17.0 EA; approval AP-0097.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-097\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-097: receive_accepted_quantity recorded on Oracle record NS-000097; completion 2026-01-14; constraint PO line, supplier lot, inspection result, and dock count; rejected, missing, or wrong-lot housings = 14 EA; uncovered or unsupported scope = 17.0 EA; approval AP-0097.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-097-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-097\"}",
-        "fixture_id": "factorybench-097-call-29",
+        "fixture_id": "factorybench-097-call-30",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-097: receive_accepted_quantity recorded on Oracle record NS-000097; completion 2026-01-14; constraint PO line, supplier lot, inspection result, and dock count; rejected, missing, or wrong-lot housings = 14 EA; uncovered or unsupported scope = 17.0 EA; approval AP-0097.\",\"id\":\"comment-097\",\"resolved\":false}",
         "task_id": "factorybench-097",
         "tool_name": "google_drive.comments.create"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-097\",\"userId\":\"me\"}",
+        "arguments_json": "{\"commentId\":\"comment-097\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-097\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-097-discovery-01",
+        "fixture_id": "factorybench-097-call-31",
         "read_only": 1,
-        "response_json": "{\"id\":\"draft-097\",\"message\":{\"id\":\"draft-msg-097\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-097\"}}",
+        "response_json": "{\"content\":\"\",\"id\":\"comment-097\",\"resolved\":false}",
         "task_id": "factorybench-097",
-        "tool_name": "gmail.drafts.get"
+        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"id\":\"att-097\",\"messageId\":\"msg-097-1\",\"userId\":\"me\"}",
@@ -2456,15 +2611,6 @@
         "response_json": "{\"data\":\"UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogb3V0c2lkZS1wcm9jZXNzaW5nLXJlY2VpcHQtYW5kLWluc3BlY3Rpb24tMDA5NwpDYXNlIHJlZmVyZW5jZTogQ0FTRS0wOTcKSXNzdWVkOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKVmFsaWQgdGhyb3VnaDogMjAyNi0wMS0xOQoKMS4gUkVGRVJFTkNFRCBTQ09QRQpTb3VyY2Ugc3ViamVjdDogb3V0c2lkZS1wcm9jZXNzaW5nIHJlY2VpcHQgYW5kIGluc3BlY3Rpb24KSW1tdXRhYmxlIHJlY29yZCBvciBpdGVtOiBOUy1DT01QLTA5NwpFZmZlY3RpdmUgcmV2aXNpb24gc3VwcGxpZWQgYnkgcmVxdWVzdGVyOiBSNwpNYXhpbXVtIHNjb3BlIHJlcHJlc2VudGVkIGJ5IHRoaXMgcmVzcG9uc2U6IDE3IEVBClRoaXMgY29uZmlybWF0aW9uIGlzIG5vdCB2YWxpZCBmb3Igc2ltaWxhcmx5IG5hbWVkIGl0ZW1zLCBzdXBlcnNlZGVkIHJldmlzaW9ucywgb3RoZXIgcGxhbnRzLCBvciBhbm90aGVyIGNhc2UuCgoyLiBDT05GSVJNRUQgQ09NTUVSQ0lBTCAvIENBUEFDSVRZIElOUFVUCkFsdGVybmF0aXZlIGRlc2NyaWJlZCBieSByZXF1ZXN0ZXI6IHJlY2VpdmVfc2hpcHBlZF9xdWFudGl0eQpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMQpFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTIKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTUKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogc3VwcGxpZXIgcmVwbGFjZW1lbnQgZGF0ZQpDYXBhY2l0eSBpcyByZXNlcnZlZCBvbmx5IGFmdGVyIHRoZSBidXllciBvciBwbGFubmVyIHN1cHBsaWVzIHRoZSBtYXRjaGluZyBpbW11dGFibGUgcmVjb3JkIGFuZCBjdXJyZW50IGFwcHJvdmFsLgoKMy4gRVhDTFVTSU9OUyBBTkQgQVNTVU1QVElPTlMKTm90IGluY2x1ZGVkOiByZWplY3RlZCwgbWlzc2luZywgb3Igd3JvbmctbG90IGhvdXNpbmdzCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IFBPIGxpbmUsIHN1cHBsaWVyIGxvdCwgaW5zcGVjdGlvbiByZXN1bHQsIGFuZCBkb2NrIGNvdW50Ck5lYXJieSBidXQgdW5yZWxhdGVkIHJlZmVyZW5jZSBDQVNFLTA5OCBpcyBleHBsaWNpdGx5IGV4Y2x1ZGVkLgpGcmVpZ2h0LCBwcmVtaXVtLCBjZXJ0aWZpY2F0aW9uLCBhbmQgbG90IHRlcm1zIGFwcGx5IG9ubHkgd2hlcmUgc3RhdGVkIGFib3ZlOyBzaWxlbmNlIGlzIG5vdCBhcHByb3ZhbC4KCjQuIEFDQ0VQVEFOQ0UKUHJlcGFyZWQgYnk6IFJhaW5pZXIgQ29tcG9uZW50cyBvcGVyYXRpb25zIGRlc2sKQ29uZmlybWF0aW9uIG51bWJlcjogQ05GLTAwMDA5NwpTdGF0dXM6IENPTkZJUk1FRCBBUyBBTiBJTlBVVCwgTk9UIEEgRklOQUwgT1BFUkFUSU5HIERFQ0lTSU9OCg\",\"size\":1522}",
         "task_id": "factorybench-097",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-097\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-097\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-097-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-097\",\"resolved\":false}",
-        "task_id": "factorybench-097",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-097\",\"pageSize\":100}",

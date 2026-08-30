@@ -23,7 +23,7 @@ from .scenarios import FAMILIES, FAMILY_DESCRIPTIONS, SCENARIOS, Scenario
 
 
 BENCHMARK_NAME = "FactoryBench-100"
-BENCHMARK_VERSION = "3.3.2"
+BENCHMARK_VERSION = "3.3.3"
 MINIMUM_PROVIDER_READ_CALLS = 26
 AS_OF_DATE = date(2026, 1, 12)
 WORLD_ID = "northstar-enterprise-fusion-v3"
@@ -2403,6 +2403,116 @@ def _mutation_scope_arguments(tool: str, arguments: dict[str, Any]) -> dict[str,
     return deepcopy(arguments)
 
 
+def _collaboration_post_write_verification(
+    write_tool: str,
+    ordinal: int,
+    scenario: Scenario,
+    *,
+    index: int,
+) -> dict[str, Any]:
+    """Describe the provider read that must reopen one collaboration write.
+
+    Projection paths are evaluated against the arguments the agent actually
+    wrote. This proves persistence without exact-string-grading oracle prose.
+    """
+
+    write_arguments = _arguments(write_tool, ordinal, scenario)
+    if write_tool == "gmail.drafts.create":
+        read_tool = "gmail.drafts.get"
+        read_arguments = {
+            "userId": "me",
+            "id": f"draft-{ordinal:03d}",
+            "format": "full",
+        }
+        expected = {
+            "id": f"draft-{ordinal:03d}",
+            "message": {
+                "id": f"draft-msg-{ordinal:03d}",
+                "threadId": write_arguments["message"]["threadId"],
+            },
+        }
+        projection_paths = ["message.raw"]
+    elif write_tool == "gmail.messages.send":
+        read_tool = "gmail.messages.get"
+        read_arguments = {
+            "userId": "me",
+            "id": f"sent-{ordinal:03d}",
+            "format": "full",
+        }
+        expected = {
+            "id": f"sent-{ordinal:03d}",
+            "threadId": write_arguments["threadId"],
+        }
+        projection_paths = ["raw"]
+    elif write_tool == "google_drive.comments.create":
+        read_tool = "google_drive.comments.get"
+        read_arguments = {
+            "fileId": write_arguments["fileId"],
+            "commentId": f"comment-{ordinal:03d}",
+            "fields": "id,content,resolved,createdTime",
+        }
+        expected = {"id": f"comment-{ordinal:03d}", "resolved": False}
+        projection_paths = ["requestBody.content"]
+    elif write_tool.startswith("google_sheets.spreadsheets.values."):
+        read_tool = "google_sheets.spreadsheets.values.get"
+        read_arguments = {
+            "spreadsheetId": write_arguments["spreadsheetId"],
+            "range": write_arguments["range"],
+            "majorDimension": "ROWS",
+            "valueRenderOption": "UNFORMATTED_VALUE",
+        }
+        expected = {
+            "range": write_arguments["range"],
+            "majorDimension": write_arguments["requestBody"].get(
+                "majorDimension", "ROWS"
+            ),
+        }
+        projection_paths = ["requestBody.values"]
+    elif write_tool == "slack.chat_postMessage":
+        read_tool = "slack.conversations_replies"
+        read_arguments = {
+            "channel": write_arguments["channel"],
+            "ts": write_arguments["thread_ts"],
+            "limit": 100,
+        }
+        expected = {"ok": True}
+        projection_paths = ["text"]
+    elif write_tool == "slack.reactions_add":
+        read_tool = "slack.conversations_replies"
+        read_arguments = {
+            "channel": write_arguments["channel"],
+            "ts": write_arguments["timestamp"],
+            "limit": 100,
+        }
+        expected = {"ok": True}
+        projection_paths = ["name"]
+    else:  # pragma: no cover - every evidence pattern is enumerated above.
+        raise ValueError(f"no collaboration readback contract for {write_tool}")
+
+    return {
+        "id": f"verify_collaboration_{index:02d}",
+        "milestone_id": "verification.readback",
+        "description": (
+            f"Reopened the task-scoped {write_tool} result through {read_tool} "
+            "and confirmed the agent's actual written value persisted instead "
+            "of trusting the mutation acknowledgement."
+        ),
+        "weight": 1.0,
+        "after_tool": write_tool,
+        "any_of": [
+            {
+                "tool": read_tool,
+                "arguments": read_arguments,
+                "expected_result_contains": expected,
+                "match": "result_contains",
+            }
+        ],
+        "expected_result_contains": expected,
+        "write_argument_projection_paths": projection_paths,
+        "materializes_new_record": True,
+    }
+
+
 def _mutation_description(
     tool: str,
     scenario: Scenario,
@@ -2537,6 +2647,35 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
             f"{task_id} has only {1 + len(read_specs)} provider reads; "
             f"expected at least {MINIMUM_PROVIDER_READ_CALLS}"
         )
+    collaboration_verifications = [
+        _collaboration_post_write_verification(
+            tool,
+            ordinal,
+            scenario,
+            index=index,
+        )
+        for index, tool in enumerate(pattern_writes, start=1)
+    ]
+    collaboration_steps: list[dict[str, Any]] = []
+    for tool, verification in zip(
+        pattern_writes, collaboration_verifications, strict=True
+    ):
+        collaboration_steps.extend(
+            [
+                {
+                    "tool": tool,
+                    "arguments": _arguments(tool, ordinal, scenario),
+                    "phase": "collaboration_mutation",
+                },
+                {
+                    "tool": verification["any_of"][0]["tool"],
+                    "arguments": deepcopy(
+                        verification["any_of"][0]["arguments"]
+                    ),
+                    "phase": "post_write_verification",
+                },
+            ]
+        )
     step_specs = [
         {"tool": "factorybench.context.get", "arguments": {}, "phase": "investigation"},
         *read_specs,
@@ -2550,10 +2689,7 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
             "arguments": post_write_read_arguments,
             "phase": "post_write_verification",
         },
-        *(
-            {"tool": tool, "arguments": _arguments(tool, ordinal, scenario), "phase": "collaboration_mutation"}
-            for tool in pattern_writes
-        ),
+        *collaboration_steps,
         {"tool": "factorybench.submit_answer", "arguments": deepcopy(answer), "phase": "answer"},
     ]
     tool_names = [step["tool"] for step in step_specs]
@@ -2631,6 +2767,7 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
                         if primary
                         else arguments
                         if tool not in _CONTENT_BEARING_WRITE_TOOLS
+                        or tool.startswith("google_sheets.spreadsheets.values.")
                         else _mutation_scope_arguments(tool, arguments)
                     ),
                 },
@@ -2658,6 +2795,23 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
                             decision["item"],
                         ]
                     ]
+                if tool.startswith("gmail."):
+                    stakeholder_mailbox = (
+                        f"{decision['stakeholder'].replace(' ', '.')}@northstar.example"
+                    )
+                    assertion["payload_text_contains"].append(stakeholder_mailbox)
+                    assertion["payload_email_to"] = stakeholder_mailbox
+                if tool in {
+                    "gmail.drafts.create",
+                    "gmail.messages.send",
+                    "google_drive.comments.create",
+                    "slack.chat_postMessage",
+                }:
+                    assertion["payload_narrative"] = {
+                        "minimum_words": 30,
+                        "minimum_punctuation": 2,
+                        "reject_serialized": True,
+                    }
             assertions.append(assertion)
         fixture_key = (tool, _canonical(arguments))
         if any(
@@ -2844,7 +2998,8 @@ def _build_task(ordinal: int, scenario: Scenario) -> dict[str, Any]:
             "materializes_new_record": _materializes_new_provider_record(
                 scenario.primary_write
             ),
-        }
+        },
+        *collaboration_verifications,
     ]
     insight_fields_by_mode = {
         "plan": ("recommended_option", "recommended_outcome_date", "coverage_item_or_resource", "shortage_quantity", "decision_timing_status"),

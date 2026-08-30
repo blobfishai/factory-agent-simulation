@@ -1488,7 +1488,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1799,6 +1799,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "plant.controller@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-091",
@@ -1808,7 +1814,8 @@
         ],
         "payload_text_contains": [
           "2026-01-17",
-          "close_fully_settled_po"
+          "close_fully_settled_po",
+          "plant.controller@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -1832,6 +1839,11 @@
             "fileId": "drive-091"
           },
           "tool": "google_drive.comments.create"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2514,6 +2526,66 @@
           "POHeaderId": 2000091
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-091",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-091",
+              "threadId": "thread-091"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-091",
+          "threadId": "thread-091"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-091",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-091"
+            },
+            "expected_result_contains": {
+              "id": "comment-091",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-091",
+          "resolved": false
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
       }
     ]
   },
@@ -2790,6 +2862,16 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "sent-091",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.messages.get"
+    },
+    {
+      "arguments": {
         "fileId": "drive-091",
         "requestBody": {
           "content": "CASE-091: close_fully_settled_po recorded on Oracle record NS-000091; completion 2026-01-17; constraint all source activity must be complete before the close cutoff; open retainage or unmatched value = 0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0091."
@@ -2798,6 +2880,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "commentId": "comment-091",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-091"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
     },
     {
       "arguments": {
@@ -2862,6 +2954,66 @@
         "POHeaderId": 2000091
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-091",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-091",
+            "threadId": "thread-091"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-091",
+        "threadId": "thread-091"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-091",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-091"
+          },
+          "expected_result_contains": {
+            "id": "comment-091",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-091",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4043,10 +4195,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000091 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4333,13 +4487,31 @@
         "tool_name": "gmail.messages.send"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"sent-091\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-091-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-091\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy05MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIHJhaW5pZXIuY29tcG9uZW50c0BzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wOTFAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDkxIOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIHRvb2xpbmcgUE8gY2xvc2UgZXhjZXB0aW9uCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQSB0b29saW5nIFBPIGlzIG9uIHRoZSBjbG9zZSBleGNlcHRpb24gbGlzdCBhbmQgYXBwZWFycyBmaW5hbmNpYWxseSBzZXR0bGVkLiBEZXRlcm1pbmUgd2hldGhlciBldmVyeSByZWNlaXB0LCBhY2NlcHRhbmNlLCBpbnZvaWNlLCBwYXltZW50LCBhbmQgcmVtYWluaW5nIGNvbW1pdG1lbnQgdHJ1bHkgbmV0cyB0byB6ZXJvLCBleHBsYWluIGFueSBjdXRvZmYgcmlzaywgYW5kIGRlY2lkZSB3aGV0aGVyIGZpbmFsIGNsb3NlIGlzIGFwcHJvcHJpYXRlLiBDbG9zZSBvbmx5IHRoaXMgZG9jdW1lbnQgaWYgbm8gZXhwb3N1cmUgcmVtYWlucy4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgotLS0gRWFybGllciBtZXNzYWdlOiBleHRlcm5hbCBvcGVyYXRpb25zIGRlc2sgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMTE6MjUgUGFjaWZpYwpzdXBwbGllciBmaW5hbC1zZXR0bGVtZW50IGV2aWRlbmNlOiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgY2xvc2Vfd2l0aF9vcGVuX2JhbGFuY2Ugb24gMjAyNi0wMS0xNTsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTggd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDkxIGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDkxIC8gUjEuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpQbGFudCBjb250cm9sbGVyIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciB0b29saW5nIFBPIGNsb3NlIGV4Y2VwdGlvbiBieSAyMDI2LTAxLTE3OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBhbGwgc291cmNlIGFjdGl2aXR5IG11c3QgYmUgY29tcGxldGUgYmVmb3JlIHRoZSBjbG9zZSBjdXRvZmYuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA5MiB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBPcGVuIHJldGFpbmFnZSBvciB1bm1hdGNoZWQgdmFsdWUgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1774},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-091 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-091\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\"A tooling PO is on the close exception list and appears financially settled. Determine whether every receipt, acceptance, invoice, payment, \",\"threadId\":\"thread-091\"}",
+        "task_id": "factorybench-091",
+        "tool_name": "gmail.messages.get"
+      },
+      {
         "arguments_json": "{\"fileId\":\"drive-091\",\"requestBody\":{\"content\":\"CASE-091: close_fully_settled_po recorded on Oracle record NS-000091; completion 2026-01-17; constraint all source activity must be complete before the close cutoff; open retainage or unmatched value = 0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0091.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-17\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-091\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-091: close_fully_settled_po recorded on Oracle record NS-000091; completion 2026-01-17; constraint all source activity must be complete before the close cutoff; open retainage or unmatched value = 0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0091.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-091-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-091\"}",
-        "fixture_id": "factorybench-091-call-29",
+        "fixture_id": "factorybench-091-call-30",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-091: close_fully_settled_po recorded on Oracle record NS-000091; completion 2026-01-17; constraint all source activity must be complete before the close cutoff; open retainage or unmatched value = 0 USD; uncovered or unsupported scope = 0.0 USD; approval AP-0091.\",\"id\":\"comment-091\",\"resolved\":false}",
         "task_id": "factorybench-091",
         "tool_name": "google_drive.comments.create"
+      },
+      {
+        "arguments_json": "{\"commentId\":\"comment-091\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-091\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-091-call-31",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-091\",\"resolved\":false}",
+        "task_id": "factorybench-091",
+        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-091\",\"userId\":\"me\"}",
@@ -4358,15 +4530,6 @@
         "response_json": "{\"historyId\":\"900091\",\"id\":\"thread-091\",\"messages\":[{\"id\":\"msg-091\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy05MUBub3J0aHN0YXIuZXhhbXBsZQpUbzogcGxhbnQuY29udHJvbGxlckBub3J0aHN0YXIuZXhhbXBsZQpDYzogY29udHJvbHNAbm9ydGhzdGFyLmV4YW1wbGUsIHJhaW5pZXIuY29tcG9uZW50c0BzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wOTFAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDkxIOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIHRvb2xpbmcgUE8gY2xvc2UgZXhjZXB0aW9uCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKQSB0b29saW5nIFBPIGlzIG9uIHRoZSBjbG9zZSBleGNlcHRpb24gbGlzdCBhbmQgYXBwZWFycyBmaW5hbmNpYWxseSBzZXR0bGVkLiBEZXRlcm1pbmUgd2hldGhlciBldmVyeSByZWNlaXB0LCBhY2NlcHRhbmNlLCBpbnZvaWNlLCBwYXltZW50LCBhbmQgcmVtYWluaW5nIGNvbW1pdG1lbnQgdHJ1bHkgbmV0cyB0byB6ZXJvLCBleHBsYWluIGFueSBjdXRvZmYgcmlzaywgYW5kIGRlY2lkZSB3aGV0aGVyIGZpbmFsIGNsb3NlIGlzIGFwcHJvcHJpYXRlLiBDbG9zZSBvbmx5IHRoaXMgZG9jdW1lbnQgaWYgbm8gZXhwb3N1cmUgcmVtYWlucy4KClBsZWFzZSB1c2UgdGhlIGltbXV0YWJsZSByZWZlcmVuY2VzIGluIHRoZSBhdHRhY2hlZCBzb3VyY2UgcmVjb3JkOyB0aGUgc2ltaWxhcmx5IG5hbWVkIGFyY2hpdmUgYmVsb25ncyB0byBhbm90aGVyIGNhc2UuCgo\",\"size\":756},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-091 \\u2014 operating request and source reply\"}]},\"snippet\":\"From: operations-91@northstar.example\\nTo: plant.controller@northstar.example\\nCc: controls@northstar.example, rainier.components@supplier.exa\",\"threadId\":\"thread-091\"},{\"id\":\"msg-091-1\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnN1cHBsaWVyIGZpbmFsLXNldHRsZW1lbnQgZXZpZGVuY2U6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBjbG9zZV93aXRoX29wZW5fYmFsYW5jZSBvbiAyMDI2LTAxLTE1OyBmaW5pdGUtY2FwYWNpdHkgc2NoZWR1bGluZyBwcm9kdWNlcyB0aGUgc2VwYXJhdGUgb3BlcmF0aW5nIG91dGNvbWUgMjAyNi0wMS0xOCB3aXRoIG5vIHNlcGFyYXRlbHkgZG9jdW1lbnRlZCBzcGVuZDsgdGhhdCBzb3VyY2UgYWxvbmUgZG9lcyBub3QgcHJvdmUgZWxpZ2liaWxpdHksIGlkZW50aXR5LCBvciBhcHByb3ZhbC4KQ29uZmlybWF0aW9uIENORi0wMDAwOTEgaXMgdmFsaWQgb25seSBmb3IgTlMtQ09NUC0wOTEgLyBSMS4KCg\",\"size\":427},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-091 \\u2014 operating request and source reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-091\",\"size\":1024},\"filename\":\"commercial-source-document.pdf\"}]},\"snippet\":\" external operations desk ---\\nDate: 2026-01-12 11:25 Pacific\\nsupplier final-settlement evidence: the independent source confirms readiness f\",\"threadId\":\"thread-091\"},{\"id\":\"msg-091-2\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IG9wZXJhdGlvbnMgbGVhZCAtLS0KRGF0ZTogMjAyNi0wMS0xMiAwOToxMCBQYWNpZmljClBsYW50IGNvbnRyb2xsZXIgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHRvb2xpbmcgUE8gY2xvc2UgZXhjZXB0aW9uIGJ5IDIwMjYtMDEtMTc7IGEgZmFzdGVyIG9yIGJyb2FkZXIgYWN0aW9uIGhhcyB2YWx1ZSBvbmx5IGlmIGl0IHJlbWFpbnMgaW5zaWRlIGFsbCBzb3VyY2UgYWN0aXZpdHkgbXVzdCBiZSBjb21wbGV0ZSBiZWZvcmUgdGhlIGNsb3NlIGN1dG9mZi4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDkyIHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCg\",\"size\":334},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-091 \\u2014 operating request and source reply\"}]},\"snippet\":\" operations lead ---\\nDate: 2026-01-12 09:10 Pacific\\nPlant controller needs one defensible decision for tooling PO close exception by 2026-01\",\"threadId\":\"thread-091\"},{\"id\":\"msg-091-3\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIE9wZW4gcmV0YWluYWdlIG9yIHVubWF0Y2hlZCB2YWx1ZSBtdXN0IHJlbWFpbiBvdXRzaWRlIHRoZSB0cmFuc2FjdGlvbiwgZXZlbiBpZiB0aGUgaGVhZGVyIHRvdGFsIGFwcGVhcnMgdG8gZml0Lgo\",\"size\":197},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-091 \\u2014 operating request and source reply\"}]},\"snippet\":\" controller ---\\nDate: 2026-01-11 16:40 Pacific\\nReconcile the raw rows before acting. Open retainage or unmatched value must remain outside t\",\"threadId\":\"thread-091\"}]}",
         "task_id": "factorybench-091",
         "tool_name": "gmail.threads.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-091\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-091\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-091-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-091\",\"resolved\":false}",
-        "task_id": "factorybench-091",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-091\",\"pageSize\":100}",
@@ -4791,7 +4954,7 @@
       }
     ]
   },
-  "sequence_signature": "527922da97c7b0049edda59b9f6da02dceacd4b650ad1d229c86570b7140f7c0",
+  "sequence_signature": "dfd0f098a9b3111ce74ab5ebb639e427ca2010f2e4ab2ed604f014014b5ff4c7",
   "task_id": "factorybench-091",
   "title": "Close a fully settled tooling PO before cutoff",
   "variant": null,

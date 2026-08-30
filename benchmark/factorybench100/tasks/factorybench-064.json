@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1807,6 +1807,11 @@
           },
           "tool": "google_drive.comments.create"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-064",
@@ -1841,6 +1846,11 @@
             "thread_ts": "1768000064.000100"
           },
           "tool": "slack.chat_postMessage"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2512,6 +2522,64 @@
           "WorkOrderId": 100064
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-064",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-064"
+            },
+            "expected_result_contains": {
+              "id": "comment-064",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-064",
+          "resolved": false
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PRODUCTION",
+              "limit": 100,
+              "ts": "1768000064.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
       }
     ]
   },
@@ -2794,6 +2862,16 @@
     },
     {
       "arguments": {
+        "commentId": "comment-064",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-064"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
+    },
+    {
+      "arguments": {
         "channel": "C-PRODUCTION",
         "text": "CASE-064: Oracle record NS-000064 now reflects apply_planning_substitute with completion 2026-01-14. Binding constraint: substitution approval, effectivity, ratio, and planned-order scope; stock outside effectivity or committed elsewhere = 12 EA; uncovered or unsupported scope = 18.0 EA. Alternatives: apply_planning_substitute: outcome 2026-01-14, economic impact USD 0, SUPPORTED_AND_APPROVED; wait_for_original_component: outcome 2026-01-15, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; substitute_all_open_orders: outcome 2026-01-16, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0064.",
         "thread_ts": "1768000064.000100"
@@ -2801,6 +2879,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "slack.chat_postMessage"
+    },
+    {
+      "arguments": {
+        "channel": "C-PRODUCTION",
+        "limit": 100,
+        "ts": "1768000064.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
@@ -2856,6 +2944,64 @@
         "WorkOrderId": 100064
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-064",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-064"
+          },
+          "expected_result_contains": {
+            "id": "comment-064",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-064",
+        "resolved": false
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PRODUCTION",
+            "limit": 100,
+            "ts": "1768000064.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4035,10 +4181,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000064 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4325,9 +4473,18 @@
         "tool_name": "google_drive.comments.create"
       },
       {
+        "arguments_json": "{\"commentId\":\"comment-064\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-064\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-064-call-29",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-064\",\"resolved\":false}",
+        "task_id": "factorybench-064",
+        "tool_name": "google_drive.comments.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-PRODUCTION\",\"text\":\"CASE-064: Oracle record NS-000064 now reflects apply_planning_substitute with completion 2026-01-14. Binding constraint: substitution approval, effectivity, ratio, and planned-order scope; stock outside effectivity or committed elsewhere = 12 EA; uncovered or unsupported scope = 18.0 EA. Alternatives: apply_planning_substitute: outcome 2026-01-14, economic impact USD 0, SUPPORTED_AND_APPROVED; wait_for_original_component: outcome 2026-01-15, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; substitute_all_open_orders: outcome 2026-01-16, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0064.\",\"thread_ts\":\"1768000064.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-14\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PRODUCTION\\\",\\\"text\\\":\\\"CASE-064: Oracle record NS-000064 now reflects apply_planning_substitute with completion 2026-01-14. Binding constraint: substitution approval, effectivity, ratio, and planned-order scope; stock outside effectivity or committed elsewhere = 12 EA; uncovered or unsupported scope = 18.0 EA. Alternatives: apply_planning_substitute: outcome 2026-01-14, economic impact USD 0, SUPPORTED_AND_APPROVED; wait_for_original_component: outcome 2026-01-15, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; substitute_all_open_orders: outcome 2026-01-16, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0064.\\\",\\\"thread_ts\\\":\\\"1768000064.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-064-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-064\"}",
-        "fixture_id": "factorybench-064-call-29",
+        "fixture_id": "factorybench-064-call-30",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-PRODUCTION\",\"message\":{\"text\":\"CASE-064: Oracle record NS-000064 now reflects apply_planning_substitute with completion 2026-01-14. Binding constraint: substitution approval, effectivity, ratio, and planned-order scope; stock outside effectivity or committed elsewhere = 12 EA; uncovered or unsupported scope = 18.0 EA. Alternatives: apply_planning_substitute: outcome 2026-01-14, economic impact USD 0, SUPPORTED_AND_APPROVED; wait_for_original_component: outcome 2026-01-15, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; substitute_all_open_orders: outcome 2026-01-16, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0064.\",\"thread_ts\":\"1768000064.000100\"},\"ok\":true,\"ts\":\"1768000064.000900\"}",
         "task_id": "factorybench-064",
@@ -4359,15 +4516,6 @@
         "response_json": "{\"id\":\"msg-064\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy02NEBub3J0aHN0YXIuZXhhbXBsZQpUbzogc3VwcGx5LnBsYW5uZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCByYWluaWVyLmNvbXBvbmVudHNAc3VwcGxpZXIuZXhhbXBsZQpEYXRlOiAyMDI2LTAxLTEyCk1lc3NhZ2UtSUQ6IDxtc2ctMDY0QG5vcnRoc3Rhci5leGFtcGxlPgpTdWJqZWN0OiBDQVNFLTA2NCDigJQgZGVjaXNpb24gbmVlZGVkIGZvciBwbGFubmVkIGNvbXBvbmVudCBzdWJzdGl0dXRpb24KTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpQbGFubmluZyBjYW5ub3QgY292ZXIgdGhlIG9yaWdpbmFsIGNvbXBvbmVudCBmb3IgYW4gdXBjb21pbmcgb3JkZXIgYW5kIGFuIGFwcHJvdmVkIHN1YnN0aXR1dGUgbWF5IGJyaWRnZSB0aGUgZ2FwLiBEZXRlcm1pbmUgdGhlIGRlbWFuZCBpbnNpZGUgdGhlIHN1YnN0aXR1dGUncyBlZmZlY3Rpdml0eSwgYXZhaWxhYmxlIGNvbnZlcnRlZCBxdWFudGl0eSwgYW5kIGNvbXBsZXRpb24gdW5kZXIgc3Vic3RpdHV0ZSwgd2FpdCwgb3IgcmVkdWNlZCBidWlsZC4gQ2hhbmdlIG9ubHkgdGhlIGVsaWdpYmxlIHBsYW5uZWQgbWF0ZXJpYWwuIElmIHRoZSBldmlkZW5jZSBzdGlsbCBjb25mbGljdHMsIGtlZXAgdGhlIHVuc3VwcG9ydGVkIHNjb3BlIHVuY2hhbmdlZCBhbmQgbGVhdmUgb3BlcmF0aW9ucyB3aXRoIHRoZSB1bnJlc29sdmVkIHJpc2sgYW5kIG93bmVyLgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCm9yaWdpbmFsIGFuZCBzdWJzdGl0dXRlIGxlYWQgdGltZXM6IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciB3YWl0X2Zvcl9vcmlnaW5hbF9jb21wb25lbnQgb24gMjAyNi0wMS0xMzsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTUgd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDY0IGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDY0IC8gUjIuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpTdXBwbHkgcGxhbm5pbmcgbmVlZHMgb25lIGRlZmVuc2libGUgZGVjaXNpb24gZm9yIHBsYW5uZWQgY29tcG9uZW50IHN1YnN0aXR1dGlvbiBieSAyMDI2LTAxLTE0OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBzdWJzdGl0dXRpb24gYXBwcm92YWwsIGVmZmVjdGl2aXR5LCByYXRpbywgYW5kIHBsYW5uZWQtb3JkZXIgc2NvcGUuClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTA2NSB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBTdG9jayBvdXRzaWRlIGVmZmVjdGl2aXR5IG9yIGNvbW1pdHRlZCBlbHNld2hlcmUgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1927},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-064 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-064\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"Planning cannot cover the original component for an upcoming order and an approved substitute may bridge the gap. Determine the demand insid\",\"threadId\":\"thread-064\"}",
         "task_id": "factorybench-064",
         "tool_name": "gmail.messages.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-064\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-064\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-064-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-064\",\"resolved\":false}",
-        "task_id": "factorybench-064",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-064\",\"pageSize\":100}",
@@ -4774,7 +4922,7 @@
       }
     ]
   },
-  "sequence_signature": "0e895ebfb3bccabe3d5b02dfb1d5a162ad30eba6fb82a21eae1231e6f011b8b1",
+  "sequence_signature": "9344386f60c5beaa08058cea1a8ad9635b100dd5aad0fb12bfe5e7b4d028dd50",
   "task_id": "factorybench-064",
   "title": "Replace a constrained component in planned work",
   "variant": null,

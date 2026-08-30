@@ -1488,7 +1488,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1801,6 +1801,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "accounts.payable@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-042",
@@ -1810,7 +1816,8 @@
         ],
         "payload_text_contains": [
           "2026-01-16",
-          "place_freight_variance_hold"
+          "place_freight_variance_hold",
+          "accounts.payable@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -1834,6 +1841,11 @@
             "fileId": "drive-042"
           },
           "tool": "google_drive.comments.create"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2502,6 +2514,72 @@
           "InvoiceId": 900042
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-042",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-042",
+              "message": {
+                "id": "draft-msg-042",
+                "threadId": "thread-042"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-042",
+          "message": {
+            "id": "draft-msg-042",
+            "threadId": "thread-042"
+          }
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-042",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-042"
+            },
+            "expected_result_contains": {
+              "id": "comment-042",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-042",
+          "resolved": false
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
       }
     ]
   },
@@ -2784,6 +2862,16 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "draft-042",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.drafts.get"
+    },
+    {
+      "arguments": {
         "fileId": "drive-042",
         "requestBody": {
           "content": "CASE-042: place_freight_variance_hold recorded on Oracle record NS-000042; completion 2026-01-16; constraint hold only the documented exception with the approved reason; freight excluded from the contract above tolerance = 331.61 USD; uncovered or unsupported scope = 331.61 USD; approval AP-0042."
@@ -2792,6 +2880,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "google_drive.comments.create"
+    },
+    {
+      "arguments": {
+        "commentId": "comment-042",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-042"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
     },
     {
       "arguments": {
@@ -2864,6 +2962,72 @@
         "InvoiceId": 900042
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-042",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-042",
+            "message": {
+              "id": "draft-msg-042",
+              "threadId": "thread-042"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-042",
+        "message": {
+          "id": "draft-msg-042",
+          "threadId": "thread-042"
+        }
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-042",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-042"
+          },
+          "expected_result_contains": {
+            "id": "comment-042",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-042",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4017,10 +4181,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000042 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4307,22 +4473,31 @@
         "tool_name": "gmail.drafts.create"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-042\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-042-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"draft-042\",\"message\":{\"id\":\"draft-msg-042\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-042\"}}",
+        "task_id": "factorybench-042",
+        "tool_name": "gmail.drafts.get"
+      },
+      {
         "arguments_json": "{\"fileId\":\"drive-042\",\"requestBody\":{\"content\":\"CASE-042: place_freight_variance_hold recorded on Oracle record NS-000042; completion 2026-01-16; constraint hold only the documented exception with the approved reason; freight excluded from the contract above tolerance = 331.61 USD; uncovered or unsupported scope = 331.61 USD; approval AP-0042.\"}}",
         "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"fileId\\\":\\\"drive-042\\\",\\\"requestBody\\\":{\\\"content\\\":\\\"CASE-042: place_freight_variance_hold recorded on Oracle record NS-000042; completion 2026-01-16; constraint hold only the documented exception with the approved reason; freight excluded from the contract above tolerance = 331.61 USD; uncovered or unsupported scope = 331.61 USD; approval AP-0042.\\\"}},\\\"tool\\\":\\\"google_drive.comments.create\\\"}\",\"resource_id\":\"factorybench-042-mutation-03\",\"resource_type\":\"google_drive.comments\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_drive\",\"task_id\":\"factorybench-042\"}",
-        "fixture_id": "factorybench-042-call-29",
+        "fixture_id": "factorybench-042-call-30",
         "read_only": 0,
         "response_json": "{\"content\":\"CASE-042: place_freight_variance_hold recorded on Oracle record NS-000042; completion 2026-01-16; constraint hold only the documented exception with the approved reason; freight excluded from the contract above tolerance = 331.61 USD; uncovered or unsupported scope = 331.61 USD; approval AP-0042.\",\"id\":\"comment-042\",\"resolved\":false}",
         "task_id": "factorybench-042",
         "tool_name": "google_drive.comments.create"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-042\",\"userId\":\"me\"}",
+        "arguments_json": "{\"commentId\":\"comment-042\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-042\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-042-discovery-01",
+        "fixture_id": "factorybench-042-call-31",
         "read_only": 1,
-        "response_json": "{\"id\":\"draft-042\",\"message\":{\"id\":\"draft-msg-042\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-042\"}}",
+        "response_json": "{\"content\":\"\",\"id\":\"comment-042\",\"resolved\":false}",
         "task_id": "factorybench-042",
-        "tool_name": "gmail.drafts.get"
+        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"id\":\"att-042\",\"messageId\":\"msg-042-1\",\"userId\":\"me\"}",
@@ -4332,15 +4507,6 @@
         "response_json": "{\"data\":\"Q0FTQ0FERSBJTkRVU1RSSUFMIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogaW52b2ljZS1mcmVpZ2h0LWFuZC1wby1jaGFyZ2UtcG9saWN5LTAwNDIKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDQyCklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IGludm9pY2UgZnJlaWdodCBhbmQgUE8gY2hhcmdlIHBvbGljeQpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDQyCkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFIxCk1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMzMxIFVTRApUaGlzIGNvbmZpcm1hdGlvbiBpcyBub3QgdmFsaWQgZm9yIHNpbWlsYXJseSBuYW1lZCBpdGVtcywgc3VwZXJzZWRlZCByZXZpc2lvbnMsIG90aGVyIHBsYW50cywgb3IgYW5vdGhlciBjYXNlLgoKMi4gQ09ORklSTUVEIENPTU1FUkNJQUwgLyBDQVBBQ0lUWSBJTlBVVApBbHRlcm5hdGl2ZSBkZXNjcmliZWQgYnkgcmVxdWVzdGVyOiBwbGFjZV9mcmVpZ2h0X3ZhcmlhbmNlX2hvbGQKU3RhbmRhcmQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTQKRXhwZWRpdGVkIGlucHV0IG9yIHNlcnZpY2UgcmVhZGluZXNzOiAyMDI2LTAxLTE0ClJlc3VsdGluZyBvcGVyYXRpbmcgb3V0Y29tZSBzdGF0ZWQgYnkgcmVxdWVzdGVyLCBub3QgYnkgY291bnRlcnBhcnR5OiAyMDI2LTAxLTE2CkVjb25vbWljIGltcGFjdCBzdGF0ZWQgYnkgY291bnRlcnBhcnR5OiBVU0QgMApJbmRlcGVuZGVudCBjb25kaXRpb246IHN1cHBsaWVyIGZyZWlnaHQgZXhwbGFuYXRpb24KQ2FwYWNpdHkgaXMgcmVzZXJ2ZWQgb25seSBhZnRlciB0aGUgYnV5ZXIgb3IgcGxhbm5lciBzdXBwbGllcyB0aGUgbWF0Y2hpbmcgaW1tdXRhYmxlIHJlY29yZCBhbmQgY3VycmVudCBhcHByb3ZhbC4KCjMuIEVYQ0xVU0lPTlMgQU5EIEFTU1VNUFRJT05TCk5vdCBpbmNsdWRlZDogZnJlaWdodCBleGNsdWRlZCBmcm9tIHRoZSBjb250cmFjdCBhYm92ZSB0b2xlcmFuY2UKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogaG9sZCBvbmx5IHRoZSBkb2N1bWVudGVkIGV4Y2VwdGlvbiB3aXRoIHRoZSBhcHByb3ZlZCByZWFzb24KTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDQzIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogQ2FzY2FkZSBJbmR1c3RyaWFsIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDQyClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K\",\"size\":1533}",
         "task_id": "factorybench-042",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-042\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-042\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-042-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-042\",\"resolved\":false}",
-        "task_id": "factorybench-042",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-042\",\"pageSize\":100}",
@@ -4756,7 +4922,7 @@
       }
     ]
   },
-  "sequence_signature": "becd7d61ef3527bfef26aad950a28d84eff1e82d8ce38262e7b4df4fc55ef182",
+  "sequence_signature": "93de04a76ad3b2d035449a8afbce1ae8390fbf763a9eaa1d3f527be032ec19f1",
   "task_id": "factorybench-042",
   "title": "Place a freight-variance hold",
   "variant": null,

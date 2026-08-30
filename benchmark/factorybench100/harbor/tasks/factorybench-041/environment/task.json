@@ -203,8 +203,24 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "insertDataOption": "INSERT_ROWS",
             "range": "Audit!A:G",
-            "spreadsheetId": "sheet-041"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "2026-01-12",
+                  "CASE-041",
+                  "accounts_payable_specialist",
+                  "validate_matched_invoice",
+                  "2026-01-15",
+                  "NS-000041",
+                  "AP-0041"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-041",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.append"
         },
@@ -910,6 +926,65 @@
           "InvoiceId": 900041
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.append",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Audit!A:G",
+              "spreadsheetId": "sheet-041",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Audit!A:G"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Audit!A:G"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
+      },
+      {
+        "after_tool": "slack.reactions_add",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PROCUREMENT",
+              "limit": 100,
+              "ts": "1768000041.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "name"
+        ]
       }
     ]
   },
@@ -958,6 +1033,65 @@
         "InvoiceId": 900041
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.append",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G",
+            "spreadsheetId": "sheet-041",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "slack.reactions_add",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000041.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "name"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2142,10 +2276,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000041 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2432,13 +2568,31 @@
         "tool_name": "google_sheets.spreadsheets.values.append"
       },
       {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:G\",\"spreadsheetId\":\"sheet-041\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-041-call-29",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:G\",\"values\":[[\"event_date\",\"case\",\"role\",\"decision_option\",\"outcome_date\",\"record\",\"approval_id\"],[\"2026-01-10\",\"CASE-042\",\"operations_planner\",\"unrelated_completed_decision\",\"2026-01-11\",\"NS-000042\",\"AP-0042\"]]}",
+        "task_id": "factorybench-041",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"name\":\"white_check_mark\",\"timestamp\":\"1768000041.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-15\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PROCUREMENT\\\",\\\"name\\\":\\\"white_check_mark\\\",\\\"timestamp\\\":\\\"1768000041.000100\\\"},\\\"tool\\\":\\\"slack.reactions_add\\\"}\",\"resource_id\":\"factorybench-041-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-041\"}",
-        "fixture_id": "factorybench-041-call-29",
+        "fixture_id": "factorybench-041-call-30",
         "read_only": 0,
         "response_json": "{\"ok\":true}",
         "task_id": "factorybench-041",
         "tool_name": "slack.reactions_add"
+      },
+      {
+        "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"limit\":100,\"ts\":\"1768000041.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-041-call-31",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Accounts payable needs one defensible decision for supplier invoice INV-0041 by 2026-01-15; a faster or broader action has value only if it remains inside supplier, PO line, receipt, currency, tax, and tolerance must reconcile.\",\"ts\":\"1768000041.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 13127.25 USD on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000041.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000041\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-041 approval and impact note\"}],\"text\":\"Approval AP-0041 permits one control-compliant action on NS-000041 up to 13127.25 USD, provided supplier, PO line, receipt, currency, tax, and tolerance must reconcile. It does not select an option in advance and does not authorize broader records or change_invoice_amount.\",\"ts\":\"1768000041.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for open accounting and payment cycle is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000041.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R10 and the CASE-042 record are visible in search but are not applicable to CASE-041.\",\"ts\":\"1768000041.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000041.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-041",
+        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-041\",\"userId\":\"me\"}",
@@ -2486,15 +2640,6 @@
         "tool_name": "google_sheets.spreadsheets.values.batchGet"
       },
       {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-041\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-041-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-041\",\"OBS-0041-1\",3281.82,\"\",\"USD\",\"R7\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"PO-backed accepted-receipt amount within tolerance\"],[\"CASE-041\",\"OBS-0041-2\",3281.81,\"\",\"USD\",\"R7\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"PO-backed accepted-receipt amount within tolerance\"],[\"CASE-041\",\"OBS-0041-3\",3281.81,\"\",\"USD\",\"R7\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"PO-backed accepted-receipt amount within tolerance\"],[\"CASE-041\",\"OBS-0041-4\",3281.81,\"\",\"USD\",\"R7\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"PO-backed accepted-receipt amount within tolerance\"],[\"CASE-041\",\"EXCL-0041-1\",\"\",0,\"USD\",\"R7\",\"SEA\",\"EXCLUDE\",\"unmatched tax, freight, or quantity variance\"],[\"CASE-041\",\"EXCL-0041-2\",\"\",0,\"USD\",\"R7\",\"SEA\",\"EXCLUDE\",\"unmatched tax, freight, or quantity variance\"],[\"CASE-042\",\"DISTRACTOR-CASE\",4375,\"\",\"USD\",\"R7\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-041\",\"DISTRACTOR-REVISION\",3281,\"\",\"USD\",\"R10\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-041\",\"DISTRACTOR-PLANT\",2625,\"\",\"USD\",\"R7\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-041",
-        "tool_name": "google_sheets.spreadsheets.values.get"
-      },
-      {
         "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"InvoiceNumber='INV-0041'\"}",
         "effect_json": null,
         "fixture_id": "factorybench-041-discovery-16",
@@ -2511,15 +2656,6 @@
         "response_json": "{\"count\":4,\"hasMore\":false,\"items\":[{\"CurrencyCode\":\"USD\",\"Description\":\"CASE-041\",\"DocumentStatus\":\"SUPERSEDED\",\"LastUpdateDate\":\"2025-12-18T16:20:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrderNumber\":\"PO-0041\",\"OrderedAmount\":13127.25,\"POHeaderId\":2700041,\"ProcurementBU\":\"Northstar Manufacturing BU\",\"ScheduleDate\":\"2026-01-12\",\"Supplier\":\"Olympic Metrology\",\"SupplierId\":600041},{\"CurrencyCode\":\"USD\",\"Description\":\"CASE-041\",\"DocumentStatus\":\"OPEN\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrderNumber\":\"PO-0041\",\"OrderedAmount\":13127.25,\"POHeaderId\":2000041,\"ProcurementBU\":\"Northstar Manufacturing BU\",\"ScheduleDate\":\"2026-01-12\",\"Supplier\":\"Olympic Metrology\",\"SupplierId\":600041},{\"CurrencyCode\":\"USD\",\"Description\":\"CASE-041\",\"DocumentStatus\":\"OPEN\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrderNumber\":\"PO-0041\",\"OrderedAmount\":13127.25,\"POHeaderId\":2800041,\"ProcurementBU\":\"Northstar Manufacturing BU\",\"ScheduleDate\":\"2026-01-12\",\"Supplier\":\"Olympic Metrology\",\"SupplierId\":600041},{\"CurrencyCode\":\"USD\",\"Description\":\"Unapproved nearby record; not CASE-041\",\"DocumentStatus\":\"DRAFT\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrderNumber\":\"PO-0041\",\"OrderedAmount\":13127.25,\"POHeaderId\":2900041,\"ProcurementBU\":\"Northstar Manufacturing BU\",\"ScheduleDate\":\"2026-01-12\",\"Supplier\":\"Olympic Metrology\",\"SupplierId\":600041}],\"limit\":50,\"links\":[],\"offset\":0}",
         "task_id": "factorybench-041",
         "tool_name": "oracle_fusion.purchase_orders.list"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"limit\":100,\"ts\":\"1768000041.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-041-discovery-22",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Accounts payable needs one defensible decision for supplier invoice INV-0041 by 2026-01-15; a faster or broader action has value only if it remains inside supplier, PO line, receipt, currency, tax, and tolerance must reconcile.\",\"ts\":\"1768000041.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 13127.25 USD on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000041.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000041\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-041 approval and impact note\"}],\"text\":\"Approval AP-0041 permits one control-compliant action on NS-000041 up to 13127.25 USD, provided supplier, PO line, receipt, currency, tax, and tolerance must reconcile. It does not select an option in advance and does not authorize broader records or change_invoice_amount.\",\"ts\":\"1768000041.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for open accounting and payment cycle is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000041.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R10 and the CASE-042 record are visible in search but are not applicable to CASE-041.\",\"ts\":\"1768000041.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: append one dated decision row to the existing audit tab; do not overwrite prior entries; and mark the existing operations thread complete with the approved check reaction. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000041.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-041",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000041\"}",

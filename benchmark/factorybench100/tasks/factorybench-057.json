@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1823,6 +1823,11 @@
           },
           "tool": "google_drive.comments.create"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-057",
@@ -1857,6 +1862,11 @@
             "thread_ts": "1768000057.000100"
           },
           "tool": "slack.chat_postMessage"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2514,6 +2524,64 @@
           "InventoryItemId": 1400057
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-057",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-057"
+            },
+            "expected_result_contains": {
+              "id": "comment-057",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-057",
+          "resolved": false
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PROCUREMENT",
+              "limit": 100,
+              "ts": "1768000057.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
       }
     ]
   },
@@ -2808,6 +2876,16 @@
     },
     {
       "arguments": {
+        "commentId": "comment-057",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-057"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_drive.comments.get"
+    },
+    {
+      "arguments": {
         "channel": "C-PROCUREMENT",
         "text": "CASE-057: Oracle record NS-000057 now reflects post_verified_count_adjustment with completion 2026-01-13. Binding constraint: the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA. Alternatives: post_verified_count_adjustment: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; force_book_quantity: outcome 2026-01-14, economic impact USD 0, FAILS_CURRENT_CONTROL; adjust_without_recount: outcome 2026-01-15, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0057.",
         "thread_ts": "1768000057.000100"
@@ -2815,6 +2893,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "slack.chat_postMessage"
+    },
+    {
+      "arguments": {
+        "channel": "C-PROCUREMENT",
+        "limit": 100,
+        "ts": "1768000057.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
@@ -2873,6 +2961,64 @@
         "InventoryItemId": 1400057
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-057",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-057"
+          },
+          "expected_result_contains": {
+            "id": "comment-057",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-057",
+        "resolved": false
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PROCUREMENT",
+            "limit": 100,
+            "ts": "1768000057.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4023,10 +4169,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000057 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4313,9 +4461,18 @@
         "tool_name": "google_drive.comments.create"
       },
       {
+        "arguments_json": "{\"commentId\":\"comment-057\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-057\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-057-call-29",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-057\",\"resolved\":false}",
+        "task_id": "factorybench-057",
+        "tool_name": "google_drive.comments.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-PROCUREMENT\",\"text\":\"CASE-057: Oracle record NS-000057 now reflects post_verified_count_adjustment with completion 2026-01-13. Binding constraint: the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA. Alternatives: post_verified_count_adjustment: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; force_book_quantity: outcome 2026-01-14, economic impact USD 0, FAILS_CURRENT_CONTROL; adjust_without_recount: outcome 2026-01-15, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0057.\",\"thread_ts\":\"1768000057.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-PROCUREMENT\\\",\\\"text\\\":\\\"CASE-057: Oracle record NS-000057 now reflects post_verified_count_adjustment with completion 2026-01-13. Binding constraint: the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA. Alternatives: post_verified_count_adjustment: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; force_book_quantity: outcome 2026-01-14, economic impact USD 0, FAILS_CURRENT_CONTROL; adjust_without_recount: outcome 2026-01-15, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0057.\\\",\\\"thread_ts\\\":\\\"1768000057.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-057-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-057\"}",
-        "fixture_id": "factorybench-057-call-29",
+        "fixture_id": "factorybench-057-call-30",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-PROCUREMENT\",\"message\":{\"text\":\"CASE-057: Oracle record NS-000057 now reflects post_verified_count_adjustment with completion 2026-01-13. Binding constraint: the book-to-count variance must pass the recount threshold, lot, reason-code, and supervisor controls; counted units with the wrong lot or unverified ownership = 0 EA; uncovered or unsupported scope = 11.0 EA. Alternatives: post_verified_count_adjustment: outcome 2026-01-13, economic impact USD 0, SUPPORTED_AND_APPROVED; force_book_quantity: outcome 2026-01-14, economic impact USD 0, FAILS_CURRENT_CONTROL; adjust_without_recount: outcome 2026-01-15, economic impact USD 0, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0057.\",\"thread_ts\":\"1768000057.000100\"},\"ok\":true,\"ts\":\"1768000057.000900\"}",
         "task_id": "factorybench-057",
@@ -4338,15 +4495,6 @@
         "response_json": "{\"data\":\"Q0FTQ0FERSBJTkRVU1RSSUFMIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogYmxpbmQtY291bnQtYW5kLXZhcmlhbmNlLWFwcHJvdmFsLTAwNTcKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDU3Cklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IGJsaW5kIGNvdW50IGFuZCB2YXJpYW5jZSBhcHByb3ZhbApJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDU3CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFIyCk1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMTEgRUEKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogZm9yY2VfYm9va19xdWFudGl0eQpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0xMApFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTEKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMTQKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCAwCkluZGVwZW5kZW50IGNvbmRpdGlvbjogcmVjb3VudCBjb21wbGV0aW9uCkNhcGFjaXR5IGlzIHJlc2VydmVkIG9ubHkgYWZ0ZXIgdGhlIGJ1eWVyIG9yIHBsYW5uZXIgc3VwcGxpZXMgdGhlIG1hdGNoaW5nIGltbXV0YWJsZSByZWNvcmQgYW5kIGN1cnJlbnQgYXBwcm92YWwuCgozLiBFWENMVVNJT05TIEFORCBBU1NVTVBUSU9OUwpOb3QgaW5jbHVkZWQ6IGNvdW50ZWQgdW5pdHMgd2l0aCB0aGUgd3JvbmcgbG90IG9yIHVudmVyaWZpZWQgb3duZXJzaGlwCkNvbnRyb2wgbm90IGV2YWx1YXRlZCBieSBjb3VudGVycGFydHk6IHRoZSBib29rLXRvLWNvdW50IHZhcmlhbmNlIG11c3QgcGFzcyB0aGUgcmVjb3VudCB0aHJlc2hvbGQsIGxvdCwgcmVhc29uLWNvZGUsIGFuZCBzdXBlcnZpc29yIGNvbnRyb2xzCk5lYXJieSBidXQgdW5yZWxhdGVkIHJlZmVyZW5jZSBDQVNFLTA1OCBpcyBleHBsaWNpdGx5IGV4Y2x1ZGVkLgpGcmVpZ2h0LCBwcmVtaXVtLCBjZXJ0aWZpY2F0aW9uLCBhbmQgbG90IHRlcm1zIGFwcGx5IG9ubHkgd2hlcmUgc3RhdGVkIGFib3ZlOyBzaWxlbmNlIGlzIG5vdCBhcHByb3ZhbC4KCjQuIEFDQ0VQVEFOQ0UKUHJlcGFyZWQgYnk6IENhc2NhZGUgSW5kdXN0cmlhbCBvcGVyYXRpb25zIGRlc2sKQ29uZmlybWF0aW9uIG51bWJlcjogQ05GLTAwMDA1NwpTdGF0dXM6IENPTkZJUk1FRCBBUyBBTiBJTlBVVCwgTk9UIEEgRklOQUwgT1BFUkFUSU5HIERFQ0lTSU9OCg\",\"size\":1555}",
         "task_id": "factorybench-057",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-057\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-057\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-057-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-057\",\"resolved\":false}",
-        "task_id": "factorybench-057",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-057\",\"pageSize\":100}",
@@ -4744,7 +4892,7 @@
       }
     ]
   },
-  "sequence_signature": "655df0a1fc4c9a9b82180e702867a35787c823d120383862d842c1c046decec1",
+  "sequence_signature": "17292e84f240fc32d13a08a052d4351a19c887f319edbb93c851728800506e77",
   "task_id": "factorybench-057",
   "title": "Post a blind cycle-count adjustment",
   "variant": null,

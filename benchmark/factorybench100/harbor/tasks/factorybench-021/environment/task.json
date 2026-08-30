@@ -222,6 +222,11 @@
           },
           "tool": "google_drive.comments.create"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-021",
@@ -252,8 +257,24 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "insertDataOption": "INSERT_ROWS",
             "range": "Audit!A:G",
-            "spreadsheetId": "sheet-021"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "2026-01-12",
+                  "CASE-021",
+                  "maintenance_planner",
+                  "open_internal_corrective_repair",
+                  "2026-01-18",
+                  "NS-000021",
+                  "AP-0021"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-021",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.append"
         },
@@ -925,6 +946,67 @@
           "WorkOrderId": 100021
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-021",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-021"
+            },
+            "expected_result_contains": {
+              "id": "comment-021",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-021",
+          "resolved": false
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.append",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Audit!A:G",
+              "spreadsheetId": "sheet-021",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Audit!A:G"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Audit!A:G"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
       }
     ]
   },
@@ -975,6 +1057,67 @@
         "WorkOrderId": 100021
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-021",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-021"
+          },
+          "expected_result_contains": {
+            "id": "comment-021",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-021",
+        "resolved": false
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.append",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G",
+            "spreadsheetId": "sheet-021",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2139,10 +2282,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000021 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2429,13 +2574,31 @@
         "tool_name": "google_drive.comments.create"
       },
       {
+        "arguments_json": "{\"commentId\":\"comment-021\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-021\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-021-call-29",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-021\",\"resolved\":false}",
+        "task_id": "factorybench-021",
+        "tool_name": "google_drive.comments.get"
+      },
+      {
         "arguments_json": "{\"insertDataOption\":\"INSERT_ROWS\",\"range\":\"Audit!A:G\",\"requestBody\":{\"majorDimension\":\"ROWS\",\"values\":[[\"2026-01-12\",\"CASE-021\",\"maintenance_planner\",\"open_internal_corrective_repair\",\"2026-01-18\",\"NS-000021\",\"AP-0021\"]]},\"spreadsheetId\":\"sheet-021\",\"valueInputOption\":\"RAW\"}",
         "effect_json": "{\"effective_at\":\"2026-01-18\",\"payload_json\":\"{\\\"arguments\\\":{\\\"insertDataOption\\\":\\\"INSERT_ROWS\\\",\\\"range\\\":\\\"Audit!A:G\\\",\\\"requestBody\\\":{\\\"majorDimension\\\":\\\"ROWS\\\",\\\"values\\\":[[\\\"2026-01-12\\\",\\\"CASE-021\\\",\\\"maintenance_planner\\\",\\\"open_internal_corrective_repair\\\",\\\"2026-01-18\\\",\\\"NS-000021\\\",\\\"AP-0021\\\"]]},\\\"spreadsheetId\\\":\\\"sheet-021\\\",\\\"valueInputOption\\\":\\\"RAW\\\"},\\\"tool\\\":\\\"google_sheets.spreadsheets.values.append\\\"}\",\"resource_id\":\"factorybench-021-mutation-03\",\"resource_type\":\"google_sheets.spreadsheets.values\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"google_sheets\",\"task_id\":\"factorybench-021\"}",
-        "fixture_id": "factorybench-021-call-29",
+        "fixture_id": "factorybench-021-call-30",
         "read_only": 0,
         "response_json": "{\"spreadsheetId\":\"sheet-021\",\"tableRange\":\"Audit!A1:G20\",\"updates\":{\"updatedCells\":7,\"updatedRange\":\"Audit!A21:G21\",\"updatedRows\":1}}",
         "task_id": "factorybench-021",
         "tool_name": "google_sheets.spreadsheets.values.append"
+      },
+      {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:G\",\"spreadsheetId\":\"sheet-021\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-021-call-31",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Audit!A:G\",\"values\":[[\"event_date\",\"case\",\"role\",\"decision_option\",\"outcome_date\",\"record\",\"approval_id\"],[\"2026-01-10\",\"CASE-022\",\"operations_planner\",\"unrelated_completed_decision\",\"2026-01-11\",\"NS-000022\",\"AP-0022\"]]}",
+        "task_id": "factorybench-021",
+        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-021\",\"userId\":\"me\"}",
@@ -2465,15 +2628,6 @@
         "tool_name": "gmail.messages.get"
       },
       {
-        "arguments_json": "{\"commentId\":\"comment-021\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-021\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-021-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-021\",\"resolved\":false}",
-        "task_id": "factorybench-021",
-        "tool_name": "google_drive.comments.get"
-      },
-      {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-021\",\"pageSize\":100}",
         "effect_json": null,
         "fixture_id": "factorybench-021-discovery-07",
@@ -2490,15 +2644,6 @@
         "response_json": "{\"spreadsheetId\":\"sheet-021\",\"valueRanges\":[{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-021\",\"OBS-0021-1\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"qualified electrical labor and stocked parts\"],[\"CASE-021\",\"OBS-0021-2\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"qualified electrical labor and stocked parts\"],[\"CASE-021\",\"OBS-0021-3\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"qualified electrical labor and stocked parts\"],[\"CASE-021\",\"OBS-0021-4\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"qualified electrical labor and stocked parts\"],[\"CASE-021\",\"EXCL-0021-1\",\"\",4,\"HR\",\"R1\",\"SEA\",\"EXCLUDE\",\"unavailable parts and conflicting shop load\"],[\"CASE-021\",\"EXCL-0021-2\",\"\",3,\"HR\",\"R1\",\"SEA\",\"EXCLUDE\",\"unavailable parts and conflicting shop load\"],[\"CASE-022\",\"DISTRACTOR-CASE\",10,\"\",\"HR\",\"R1\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-021\",\"DISTRACTOR-REVISION\",8,\"\",\"HR\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-021\",\"DISTRACTOR-PLANT\",6,\"\",\"HR\",\"R1\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]},{\"majorDimension\":\"ROWS\",\"range\":\"Approvals!A1:G20\",\"values\":[[\"case\",\"approval_id\",\"decision_option\",\"approval_status\",\"authorized_measure\",\"outcome_date\",\"source_revision\"],[\"CASE-021\",\"AP-0021\",\"open_internal_corrective_repair\",\"APPROVED\",9,\"2026-01-18\",\"R1\"],[\"CASE-021\",\"AP-0021-EXCEPTION\",\"broader_or_exception_scope\",\"NOT_GRANTED\",\"\",\"\",\"R1\"],[\"CASE-022\",\"AP-0022\",\"unrelated_case_option\",\"APPROVED\",32,\"2026-01-17\",\"R1\"]]}]}",
         "task_id": "factorybench-021",
         "tool_name": "google_sheets.spreadsheets.values.batchGet"
-      },
-      {
-        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"spreadsheetId\":\"sheet-021\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-021-discovery-14",
-        "read_only": 1,
-        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!A1:I50\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-021\",\"OBS-0021-1\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"qualified electrical labor and stocked parts\"],[\"CASE-021\",\"OBS-0021-2\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"qualified electrical labor and stocked parts\"],[\"CASE-021\",\"OBS-0021-3\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"qualified electrical labor and stocked parts\"],[\"CASE-021\",\"OBS-0021-4\",4,\"\",\"HR\",\"R1\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"qualified electrical labor and stocked parts\"],[\"CASE-021\",\"EXCL-0021-1\",\"\",4,\"HR\",\"R1\",\"SEA\",\"EXCLUDE\",\"unavailable parts and conflicting shop load\"],[\"CASE-021\",\"EXCL-0021-2\",\"\",3,\"HR\",\"R1\",\"SEA\",\"EXCLUDE\",\"unavailable parts and conflicting shop load\"],[\"CASE-022\",\"DISTRACTOR-CASE\",10,\"\",\"HR\",\"R1\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-021\",\"DISTRACTOR-REVISION\",8,\"\",\"HR\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-021\",\"DISTRACTOR-PLANT\",6,\"\",\"HR\",\"R1\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
-        "task_id": "factorybench-021",
-        "tool_name": "google_sheets.spreadsheets.values.get"
       },
       {
         "arguments_json": "{\"limit\":50,\"onlyData\":true,\"q\":\"MaintenanceProgramCode='PM-0021'\"}",

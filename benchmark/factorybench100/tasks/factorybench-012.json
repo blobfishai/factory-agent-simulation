@@ -1489,7 +1489,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1821,8 +1821,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H14",
-            "spreadsheetId": "sheet-012"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-012 | return_verified_excess | 2026-01-13 | NS-000012 | return cannot exceed issued less consumed and must preserve project ownership; scrap, consumed, or unverified copper = 13 KG; uncovered or unsupported scope = 17.0 KG | AP-0012"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-012",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -1854,6 +1864,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "shift.supervisor@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-012",
@@ -1863,7 +1879,8 @@
         ],
         "payload_text_contains": [
           "2026-01-13",
-          "return_verified_excess"
+          "return_verified_excess",
+          "shift.supervisor@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -2497,6 +2514,67 @@
           "WorkOrderId": 100012
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H14",
+              "spreadsheetId": "sheet-012",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H14"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H14"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-012",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-012",
+              "threadId": "thread-012"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-012",
+          "threadId": "thread-012"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
       }
     ]
   },
@@ -2794,6 +2872,17 @@
     },
     {
       "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!H14",
+        "spreadsheetId": "sheet-012",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
         "raw": "RnJvbTogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogc2hpZnQuc3VwZXJ2aXNvckBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMTIg4oCUIENvbXBsZXRlZCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogcmV0dXJuX3ZlcmlmaWVkX2V4Y2Vzcy4gQ29tcGxldGlvbjogMjAyNi0wMS0xMy4NCkJpbmRpbmcgY29uc3RyYWludDogcmV0dXJuIGNhbm5vdCBleGNlZWQgaXNzdWVkIGxlc3MgY29uc3VtZWQgYW5kIG11c3QgcHJlc2VydmUgcHJvamVjdCBvd25lcnNoaXA7IHNjcmFwLCBjb25zdW1lZCwgb3IgdW52ZXJpZmllZCBjb3BwZXIgPSAxMyBLRzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTcuMCBLRy4NCkFsdGVybmF0aXZlczogcmV0dXJuX3ZlcmlmaWVkX2V4Y2Vzczogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGxlYXZlX21hdGVyaWFsX2luX3dpcDogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IGFkanVzdF9mdWxsX2lzc3VlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwMTIuIEFwcHJvdmFsOiBBUC0wMDEyLiBDYXNlOiBDQVNFLTAxMi4NCg",
         "threadId": "thread-012",
         "userId": "me"
@@ -2801,6 +2890,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "gmail.messages.send"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "sent-012",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -2857,6 +2956,67 @@
         "WorkOrderId": 100012
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H14",
+            "spreadsheetId": "sheet-012",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H14"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H14"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-012",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-012",
+            "threadId": "thread-012"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-012",
+        "threadId": "thread-012"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -3977,10 +4137,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000012 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4267,13 +4429,31 @@
         "tool_name": "google_sheets.spreadsheets.values.update"
       },
       {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H14\",\"spreadsheetId\":\"sheet-012\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-012-call-29",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H14\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-012\",\"OBS-0012-1\",24,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"physically counted unconsumed copper\"],[\"CASE-012\",\"OBS-0012-2\",23,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"physically counted unconsumed copper\"],[\"CASE-012\",\"OBS-0012-3\",23,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"physically counted unconsumed copper\"],[\"CASE-012\",\"OBS-0012-4\",23,\"\",\"KG\",\"R6\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"physically counted unconsumed copper\"],[\"CASE-012\",\"EXCL-0012-1\",\"\",7,\"KG\",\"R6\",\"SEA\",\"EXCLUDE\",\"scrap, consumed, or unverified copper\"],[\"CASE-012\",\"EXCL-0012-2\",\"\",6,\"KG\",\"R6\",\"SEA\",\"EXCLUDE\",\"scrap, consumed, or unverified copper\"],[\"CASE-013\",\"DISTRACTOR-CASE\",32,\"\",\"KG\",\"R6\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-012\",\"DISTRACTOR-REVISION\",24,\"\",\"KG\",\"R8\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-012\",\"DISTRACTOR-PLANT\",19,\"\",\"KG\",\"R6\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
+        "task_id": "factorybench-012",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
         "arguments_json": "{\"raw\":\"RnJvbTogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogc2hpZnQuc3VwZXJ2aXNvckBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMTIg4oCUIENvbXBsZXRlZCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogcmV0dXJuX3ZlcmlmaWVkX2V4Y2Vzcy4gQ29tcGxldGlvbjogMjAyNi0wMS0xMy4NCkJpbmRpbmcgY29uc3RyYWludDogcmV0dXJuIGNhbm5vdCBleGNlZWQgaXNzdWVkIGxlc3MgY29uc3VtZWQgYW5kIG11c3QgcHJlc2VydmUgcHJvamVjdCBvd25lcnNoaXA7IHNjcmFwLCBjb25zdW1lZCwgb3IgdW52ZXJpZmllZCBjb3BwZXIgPSAxMyBLRzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTcuMCBLRy4NCkFsdGVybmF0aXZlczogcmV0dXJuX3ZlcmlmaWVkX2V4Y2Vzczogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGxlYXZlX21hdGVyaWFsX2luX3dpcDogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IGFkanVzdF9mdWxsX2lzc3VlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwMTIuIEFwcHJvdmFsOiBBUC0wMDEyLiBDYXNlOiBDQVNFLTAxMi4NCg\",\"threadId\":\"thread-012\",\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogc2hpZnQuc3VwZXJ2aXNvckBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMTIg4oCUIENvbXBsZXRlZCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogcmV0dXJuX3ZlcmlmaWVkX2V4Y2Vzcy4gQ29tcGxldGlvbjogMjAyNi0wMS0xMy4NCkJpbmRpbmcgY29uc3RyYWludDogcmV0dXJuIGNhbm5vdCBleGNlZWQgaXNzdWVkIGxlc3MgY29uc3VtZWQgYW5kIG11c3QgcHJlc2VydmUgcHJvamVjdCBvd25lcnNoaXA7IHNjcmFwLCBjb25zdW1lZCwgb3IgdW52ZXJpZmllZCBjb3BwZXIgPSAxMyBLRzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMTcuMCBLRy4NCkFsdGVybmF0aXZlczogcmV0dXJuX3ZlcmlmaWVkX2V4Y2Vzczogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGxlYXZlX21hdGVyaWFsX2luX3dpcDogb3V0Y29tZSAyMDI2LTAxLTE0LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IGFkanVzdF9mdWxsX2lzc3VlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwMTIuIEFwcHJvdmFsOiBBUC0wMDEyLiBDYXNlOiBDQVNFLTAxMi4NCg\\\",\\\"threadId\\\":\\\"thread-012\\\",\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-012-mutation-03\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-012\"}",
-        "fixture_id": "factorybench-012-call-29",
+        "fixture_id": "factorybench-012-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"sent-012\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-012\"}",
         "task_id": "factorybench-012",
         "tool_name": "gmail.messages.send"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"sent-012\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-012-call-31",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-012\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0xMkBub3J0aHN0YXIuZXhhbXBsZQpUbzogc2hvcC5mbG9vci5jb250cm9sbGVyQG5vcnRoc3Rhci5leGFtcGxlCkNjOiBjb250cm9sc0Bub3J0aHN0YXIuZXhhbXBsZSwgY2FzY2FkZS5pbmR1c3RyaWFsQHN1cHBsaWVyLmV4YW1wbGUKRGF0ZTogMjAyNi0wMS0xMgpNZXNzYWdlLUlEOiA8bXNnLTAxMkBub3J0aHN0YXIuZXhhbXBsZT4KU3ViamVjdDogQ0FTRS0wMTIg4oCUIGRlY2lzaW9uIG5lZWRlZCBmb3IgdW51c2VkIGNvcHBlciBvbiBjYW5jZWxlZCBvcGVyYXRpb24gMjAKTUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04CgpPcGVyYXRpb24gMjAgd2FzIGNhbmNlbGVkIGFuZCB0aGVyZSBpcyBjb3BwZXIgbGVmdCBhdCB0aGUgd29yayBjZW50ZXIuIEVzdGFibGlzaCBob3cgbXVjaCB3YXMgZ2VudWluZWx5IGlzc3VlZCwgY29uc3VtZWQsIHNjcmFwcGVkLCBhbmQgc3RpbGwgcGh5c2ljYWxseSBwcmVzZW50LCB0aGVuIGRlY2lkZSB3aGF0IGNhbiByZXR1cm4gdG8gc3RvcmVzIHdpdGhvdXQgbG9zaW5nIGl0cyBwcm9qZWN0IG93bmVyc2hpcC4gUG9zdCB0aGUgYm91bmRlZCByZXR1cm4gYW5kIGxlYXZlIHRoZSBzaGlmdCB3aXRoIHRoZSBkaXNjcmVwYW5jeSwgaWYgYW55LgoKUGxlYXNlIHVzZSB0aGUgaW1tdXRhYmxlIHJlZmVyZW5jZXMgaW4gdGhlIGF0dGFjaGVkIHNvdXJjZSByZWNvcmQ7IHRoZSBzaW1pbGFybHkgbmFtZWQgYXJjaGl2ZSBiZWxvbmdzIHRvIGFub3RoZXIgY2FzZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGV4dGVybmFsIG9wZXJhdGlvbnMgZGVzayAtLS0KRGF0ZTogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljCnJlY291bnQgYW5kIGRpc2NyZXBhbmN5IHJlc29sdXRpb246IHRoZSBpbmRlcGVuZGVudCBzb3VyY2UgY29uZmlybXMgcmVhZGluZXNzIGZvciBsZWF2ZV9tYXRlcmlhbF9pbl93aXAgb24gMjAyNi0wMS0xMjsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDEtMTQgd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDEyIGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDEyIC8gUjYuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpTaGlmdCBzdXBlcnZpc29yIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciB1bnVzZWQgY29wcGVyIG9uIGNhbmNlbGVkIG9wZXJhdGlvbiAyMCBieSAyMDI2LTAxLTEzOyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSByZXR1cm4gY2Fubm90IGV4Y2VlZCBpc3N1ZWQgbGVzcyBjb25zdW1lZCBhbmQgbXVzdCBwcmVzZXJ2ZSBwcm9qZWN0IG93bmVyc2hpcC4KVGhlIGRhdGUgaW4gdGhlIHByaW9yIENBU0UtMDEzIHRocmVhZCBpcyBub3Qgb3VyIGNvbnRyb2wgZGF0ZS4KCi0tLSBFYXJsaWVyIG1lc3NhZ2U6IGNvbnRyb2xsZXIgLS0tCkRhdGU6IDIwMjYtMDEtMTEgMTY6NDAgUGFjaWZpYwpSZWNvbmNpbGUgdGhlIHJhdyByb3dzIGJlZm9yZSBhY3RpbmcuIFNjcmFwLCBjb25zdW1lZCwgb3IgdW52ZXJpZmllZCBjb3BwZXIgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1828},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-012 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-012\",\"size\":1024},\"filename\":\"source-transaction-document.pdf\"}]},\"snippet\":\"Operation 20 was canceled and there is copper left at the work center. Establish how much was genuinely issued, consumed, scrapped, and stil\",\"threadId\":\"thread-012\"}",
+        "task_id": "factorybench-012",
+        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-012\",\"userId\":\"me\"}",
@@ -4716,7 +4896,7 @@
       }
     ]
   },
-  "sequence_signature": "918ba8577a5bb6e16478cb28855eaaaf4128b2bb740e9c9357ae2f948dc129bc",
+  "sequence_signature": "24fde02e214d57e841b2c627499f0545b8461be8f22bfbb2b17d5ea44e0f76ce",
   "task_id": "factorybench-012",
   "title": "Return unused copper from a canceled operation",
   "variant": null,

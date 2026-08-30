@@ -119,6 +119,12 @@
         },
         "tool": "gmail.messages.send"
       },
+      "payload_email_to": "receiving.and.quality.teams@northstar.example",
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
+      },
       "payload_text_any_of": [
         [
           "CASE-036",
@@ -128,7 +134,8 @@
       ],
       "payload_text_contains": [
         "2026-01-13",
-        "receive_supported_lot_quantity"
+        "receive_supported_lot_quantity",
+        "receiving.and.quality.teams@northstar.example"
       ],
       "table": "resource_state",
       "values": {
@@ -149,8 +156,18 @@
       "milestone_id": "state.collaboration",
       "payload_contains": {
         "arguments": {
+          "includeValuesInResponse": true,
           "range": "Control!H38",
-          "spreadsheetId": "sheet-036"
+          "requestBody": {
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "CASE-036 | receive_supported_lot_quantity | 2026-01-13 | NS-000036 | PO line, receipt organization, lot, certificate, and dock count must reconcile; overage, wrong lot, or uncertified units = 16 EA; uncovered or unsupported scope = 7.0 EA | AP-0036"
+              ]
+            ]
+          },
+          "spreadsheetId": "sheet-036",
+          "valueInputOption": "RAW"
         },
         "tool": "google_sheets.spreadsheets.values.update"
       },
@@ -792,6 +809,67 @@
         "HeaderInterfaceId": 700036
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-036",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-036",
+            "threadId": "thread-036"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-036",
+        "threadId": "thread-036"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H38",
+            "spreadsheetId": "sheet-036",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H38"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H38"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
     }
   ]
 }

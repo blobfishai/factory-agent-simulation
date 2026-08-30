@@ -904,7 +904,7 @@
       "description": "Read NS-000022 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000022 back through the documented Oracle maintenance work orders.get operation after the mutation and confirmed the resource-specific changed fields ['LastUpdateDate', 'PlannedCompletionDate', 'WorkOrderStatusCode'], including the effective update at 2026-01-22, rather than relying on the write acknowledgement.",
@@ -924,9 +924,43 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "google_drive.comments.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 25,
+                  "tool": "gmail.messages.get"
+                },
+                {
+                  "index": 31,
+                  "tool": "gmail.messages.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1053,7 +1087,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 46,
+  "passed_atomic_checks": 48,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1270,7 +1304,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-022",
-  "total_atomic_checks": 46,
+  "total_atomic_checks": 48,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -2733,11 +2767,27 @@
     },
     {
       "arguments": {
+        "commentId": "comment-022",
+        "fields": "id,content,resolved,createdTime",
+        "fileId": "drive-022"
+      },
+      "index": 29,
+      "result": {
+        "content": "CASE-022: expedite_seal_housing recorded on Oracle record NS-000022; completion 2026-01-22; constraint approved scope change, part readiness, and qualified repair window; seal housings quarantined or reserved, plus damage outside the approved scope = 2 EA; uncovered or unsupported scope = 1.0 EA; approval AP-0022.",
+        "createdTime": "2026-01-12T16:00:00Z",
+        "id": "comment-022",
+        "resolved": false
+      },
+      "success": true,
+      "tool": "google_drive.comments.get"
+    },
+    {
+      "arguments": {
         "raw": "RnJvbTogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHByb2R1Y3Rpb24ub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMjIg4oCUIENvbXBsZXRlZCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogZXhwZWRpdGVfc2VhbF9ob3VzaW5nLiBDb21wbGV0aW9uOiAyMDI2LTAxLTIyLg0KQmluZGluZyBjb25zdHJhaW50OiBhcHByb3ZlZCBzY29wZSBjaGFuZ2UsIHBhcnQgcmVhZGluZXNzLCBhbmQgcXVhbGlmaWVkIHJlcGFpciB3aW5kb3c7IHNlYWwgaG91c2luZ3MgcXVhcmFudGluZWQgb3IgcmVzZXJ2ZWQsIHBsdXMgZGFtYWdlIG91dHNpZGUgdGhlIGFwcHJvdmVkIHNjb3BlID0gMiBFQTsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMS4wIEVBLg0KQWx0ZXJuYXRpdmVzOiBzdGFuZGFyZF9yZXBhaXJfcGxhbjogb3V0Y29tZSAyMDI2LTAxLTI1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IGV4cGVkaXRlX3NlYWxfaG91c2luZzogb3V0Y29tZSAyMDI2LTAxLTIyLCBlY29ub21pYyBpbXBhY3QgVVNEIDE0ODAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IG1vdmVfdG9fb3ZlcnRpbWVfcmVwYWlyOiBvdXRjb21lIDIwMjYtMDEtMjEsIGVjb25vbWljIGltcGFjdCBVU0QgMjEwMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAyMi4gQXBwcm92YWw6IEFQLTAwMjIuIENhc2U6IENBU0UtMDIyLg0K",
         "threadId": "thread-022",
         "userId": "me"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "id": "sent-022",
         "labelIds": [
@@ -2747,6 +2797,31 @@
       },
       "success": true,
       "tool": "gmail.messages.send"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "sent-022",
+        "userId": "me"
+      },
+      "index": 31,
+      "result": {
+        "id": "sent-022",
+        "labelIds": [
+          "SENT"
+        ],
+        "payload": {
+          "body": {
+            "data": "RnJvbTogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHByb2R1Y3Rpb24ub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMjIg4oCUIENvbXBsZXRlZCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogZXhwZWRpdGVfc2VhbF9ob3VzaW5nLiBDb21wbGV0aW9uOiAyMDI2LTAxLTIyLg0KQmluZGluZyBjb25zdHJhaW50OiBhcHByb3ZlZCBzY29wZSBjaGFuZ2UsIHBhcnQgcmVhZGluZXNzLCBhbmQgcXVhbGlmaWVkIHJlcGFpciB3aW5kb3c7IHNlYWwgaG91c2luZ3MgcXVhcmFudGluZWQgb3IgcmVzZXJ2ZWQsIHBsdXMgZGFtYWdlIG91dHNpZGUgdGhlIGFwcHJvdmVkIHNjb3BlID0gMiBFQTsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMS4wIEVBLg0KQWx0ZXJuYXRpdmVzOiBzdGFuZGFyZF9yZXBhaXJfcGxhbjogb3V0Y29tZSAyMDI2LTAxLTI1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IGV4cGVkaXRlX3NlYWxfaG91c2luZzogb3V0Y29tZSAyMDI2LTAxLTIyLCBlY29ub21pYyBpbXBhY3QgVVNEIDE0ODAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IG1vdmVfdG9fb3ZlcnRpbWVfcmVwYWlyOiBvdXRjb21lIDIwMjYtMDEtMjEsIGVjb25vbWljIGltcGFjdCBVU0QgMjEwMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAyMi4gQXBwcm92YWw6IEFQLTAwMjIuIENhc2U6IENBU0UtMDIyLg0K",
+            "size": 1128
+          }
+        },
+        "raw": "RnJvbTogbWFpbnRlbmFuY2UucGxhbm5lckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IHByb2R1Y3Rpb24ub3BlcmF0aW9uc0Bub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wMjIg4oCUIENvbXBsZXRlZCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogZXhwZWRpdGVfc2VhbF9ob3VzaW5nLiBDb21wbGV0aW9uOiAyMDI2LTAxLTIyLg0KQmluZGluZyBjb25zdHJhaW50OiBhcHByb3ZlZCBzY29wZSBjaGFuZ2UsIHBhcnQgcmVhZGluZXNzLCBhbmQgcXVhbGlmaWVkIHJlcGFpciB3aW5kb3c7IHNlYWwgaG91c2luZ3MgcXVhcmFudGluZWQgb3IgcmVzZXJ2ZWQsIHBsdXMgZGFtYWdlIG91dHNpZGUgdGhlIGFwcHJvdmVkIHNjb3BlID0gMiBFQTsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMS4wIEVBLg0KQWx0ZXJuYXRpdmVzOiBzdGFuZGFyZF9yZXBhaXJfcGxhbjogb3V0Y29tZSAyMDI2LTAxLTI1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIEZFQVNJQkxFX1dJVEhfSU5GRVJJT1JfVFJBREVPRkY7IGV4cGVkaXRlX3NlYWxfaG91c2luZzogb3V0Y29tZSAyMDI2LTAxLTIyLCBlY29ub21pYyBpbXBhY3QgVVNEIDE0ODAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IG1vdmVfdG9fb3ZlcnRpbWVfcmVwYWlyOiBvdXRjb21lIDIwMjYtMDEtMjEsIGVjb25vbWljIGltcGFjdCBVU0QgMjEwMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDAyMi4gQXBwcm92YWw6IEFQLTAwMjIuIENhc2U6IENBU0UtMDIyLg0K",
+        "sizeEstimate": 1128,
+        "threadId": "thread-022"
+      },
+      "success": true,
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -2771,7 +2846,7 @@
         "standard_external_readiness": "2026-01-23",
         "usable_coverage_quantity": 0
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

@@ -1499,7 +1499,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1832,8 +1832,18 @@
         "milestone_id": "state.collaboration",
         "payload_contains": {
           "arguments": {
+            "includeValuesInResponse": true,
             "range": "Control!H31",
-            "spreadsheetId": "sheet-029"
+            "requestBody": {
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "CASE-029 | create_scoped_program | 2026-01-16 | NS-000029 | signed standard, asset criticality, and quality approval define the program; inactive, non-contact, or already covered assets = 5 ASSETS; uncovered or unsupported scope = 5.0 ASSETS | AP-0029"
+                ]
+              ]
+            },
+            "spreadsheetId": "sheet-029",
+            "valueInputOption": "RAW"
           },
           "tool": "google_sheets.spreadsheets.values.update"
         },
@@ -1865,6 +1875,12 @@
           },
           "tool": "gmail.messages.send"
         },
+        "payload_email_to": "reliability.operations@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-029",
@@ -1874,7 +1890,8 @@
         ],
         "payload_text_contains": [
           "2026-01-16",
-          "create_scoped_program"
+          "create_scoped_program",
+          "reliability.operations@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -2494,6 +2511,67 @@
           "MaintenanceProgramId": 500029
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_sheets.spreadsheets.values.update",
+        "any_of": [
+          {
+            "arguments": {
+              "majorDimension": "ROWS",
+              "range": "Control!H31",
+              "spreadsheetId": "sheet-029",
+              "valueRenderOption": "UNFORMATTED_VALUE"
+            },
+            "expected_result_contains": {
+              "majorDimension": "ROWS",
+              "range": "Control!H31"
+            },
+            "match": "result_contains",
+            "tool": "google_sheets.spreadsheets.values.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "majorDimension": "ROWS",
+          "range": "Control!H31"
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.values"
+        ]
+      },
+      {
+        "after_tool": "gmail.messages.send",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "sent-029",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "sent-029",
+              "threadId": "thread-029"
+            },
+            "match": "result_contains",
+            "tool": "gmail.messages.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "sent-029",
+          "threadId": "thread-029"
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "raw"
+        ]
       }
     ]
   },
@@ -2786,6 +2864,17 @@
     },
     {
       "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!H31",
+        "spreadsheetId": "sheet-029",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
         "raw": "RnJvbTogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZWxpYWJpbGl0eS5vcGVyYXRpb25zQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAyOSDigJQgQ29tcGxldGVkIG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBjcmVhdGVfc2NvcGVkX3Byb2dyYW0uIENvbXBsZXRpb246IDIwMjYtMDEtMTYuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHNpZ25lZCBzdGFuZGFyZCwgYXNzZXQgY3JpdGljYWxpdHksIGFuZCBxdWFsaXR5IGFwcHJvdmFsIGRlZmluZSB0aGUgcHJvZ3JhbTsgaW5hY3RpdmUsIG5vbi1jb250YWN0LCBvciBhbHJlYWR5IGNvdmVyZWQgYXNzZXRzID0gNSBBU1NFVFM7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDUuMCBBU1NFVFMuDQpBbHRlcm5hdGl2ZXM6IGNyZWF0ZV9zY29wZWRfcHJvZ3JhbTogb3V0Y29tZSAyMDI2LTAxLTE2LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGNvcHlfZXhpc3RpbmdfZ2VuZXJpY19wcm9ncmFtOiBvdXRjb21lIDIwMjYtMDItMjYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBpbmNsdWRlX2FsbF9wbGFudF9hc3NldHM6IG91dGNvbWUgMjAyNi0wMS0xNywgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDI5LiBBcHByb3ZhbDogQVAtMDAyOS4gQ2FzZTogQ0FTRS0wMjkuDQo",
         "threadId": "thread-029",
         "userId": "me"
@@ -2793,6 +2882,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "gmail.messages.send"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "sent-029",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.messages.get"
     },
     {
       "arguments": {
@@ -2864,6 +2963,67 @@
         "MaintenanceProgramId": 500029
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H31",
+            "spreadsheetId": "sheet-029",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H31"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H31"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-029",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-029",
+            "threadId": "thread-029"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-029",
+        "threadId": "thread-029"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -3937,10 +4097,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000029 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4227,13 +4389,31 @@
         "tool_name": "google_sheets.spreadsheets.values.update"
       },
       {
+        "arguments_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H31\",\"spreadsheetId\":\"sheet-029\",\"valueRenderOption\":\"UNFORMATTED_VALUE\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-029-call-29",
+        "read_only": 1,
+        "response_json": "{\"majorDimension\":\"ROWS\",\"range\":\"Control!H31\",\"values\":[[\"case\",\"source_row\",\"observed\",\"excluded\",\"unit\",\"source_revision\",\"organization\",\"control_status\",\"control_note\"],[\"CASE-029\",\"OBS-0029-1\",5,\"\",\"ASSETS\",\"R2\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"active food-contact assets with approved frequencies\"],[\"CASE-029\",\"OBS-0029-2\",5,\"\",\"ASSETS\",\"R2\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"active food-contact assets with approved frequencies\"],[\"CASE-029\",\"OBS-0029-3\",4,\"\",\"ASSETS\",\"R2\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"active food-contact assets with approved frequencies\"],[\"CASE-029\",\"OBS-0029-4\",4,\"\",\"ASSETS\",\"R2\",\"SEA\",\"OBSERVED_NOT_NETTED\",\"active food-contact assets with approved frequencies\"],[\"CASE-029\",\"EXCL-0029-1\",\"\",3,\"ASSETS\",\"R2\",\"SEA\",\"EXCLUDE\",\"inactive, non-contact, or already covered assets\"],[\"CASE-029\",\"EXCL-0029-2\",\"\",2,\"ASSETS\",\"R2\",\"SEA\",\"EXCLUDE\",\"inactive, non-contact, or already covered assets\"],[\"CASE-030\",\"DISTRACTOR-CASE\",6,\"\",\"ASSETS\",\"R2\",\"SEA\",\"OTHER_CASE\",\"do not include\"],[\"CASE-029\",\"DISTRACTOR-REVISION\",4,\"\",\"ASSETS\",\"R10\",\"SEA\",\"SUPERSEDED\",\"do not include\"],[\"CASE-029\",\"DISTRACTOR-PLANT\",3,\"\",\"ASSETS\",\"R2\",\"PDX\",\"OTHER_PLANT\",\"do not include\"]]}",
+        "task_id": "factorybench-029",
+        "tool_name": "google_sheets.spreadsheets.values.get"
+      },
+      {
         "arguments_json": "{\"raw\":\"RnJvbTogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZWxpYWJpbGl0eS5vcGVyYXRpb25zQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAyOSDigJQgQ29tcGxldGVkIG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBjcmVhdGVfc2NvcGVkX3Byb2dyYW0uIENvbXBsZXRpb246IDIwMjYtMDEtMTYuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHNpZ25lZCBzdGFuZGFyZCwgYXNzZXQgY3JpdGljYWxpdHksIGFuZCBxdWFsaXR5IGFwcHJvdmFsIGRlZmluZSB0aGUgcHJvZ3JhbTsgaW5hY3RpdmUsIG5vbi1jb250YWN0LCBvciBhbHJlYWR5IGNvdmVyZWQgYXNzZXRzID0gNSBBU1NFVFM7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDUuMCBBU1NFVFMuDQpBbHRlcm5hdGl2ZXM6IGNyZWF0ZV9zY29wZWRfcHJvZ3JhbTogb3V0Y29tZSAyMDI2LTAxLTE2LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGNvcHlfZXhpc3RpbmdfZ2VuZXJpY19wcm9ncmFtOiBvdXRjb21lIDIwMjYtMDItMjYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBpbmNsdWRlX2FsbF9wbGFudF9hc3NldHM6IG91dGNvbWUgMjAyNi0wMS0xNywgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDI5LiBBcHByb3ZhbDogQVAtMDAyOS4gQ2FzZTogQ0FTRS0wMjkuDQo\",\"threadId\":\"thread-029\",\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-16\",\"payload_json\":\"{\\\"arguments\\\":{\\\"raw\\\":\\\"RnJvbTogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUNClRvOiByZWxpYWJpbGl0eS5vcGVyYXRpb25zQG5vcnRoc3Rhci5leGFtcGxlDQpTdWJqZWN0OiBDQVNFLTAyOSDigJQgQ29tcGxldGVkIG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBjcmVhdGVfc2NvcGVkX3Byb2dyYW0uIENvbXBsZXRpb246IDIwMjYtMDEtMTYuDQpCaW5kaW5nIGNvbnN0cmFpbnQ6IHNpZ25lZCBzdGFuZGFyZCwgYXNzZXQgY3JpdGljYWxpdHksIGFuZCBxdWFsaXR5IGFwcHJvdmFsIGRlZmluZSB0aGUgcHJvZ3JhbTsgaW5hY3RpdmUsIG5vbi1jb250YWN0LCBvciBhbHJlYWR5IGNvdmVyZWQgYXNzZXRzID0gNSBBU1NFVFM7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDUuMCBBU1NFVFMuDQpBbHRlcm5hdGl2ZXM6IGNyZWF0ZV9zY29wZWRfcHJvZ3JhbTogb3V0Y29tZSAyMDI2LTAxLTE2LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGNvcHlfZXhpc3RpbmdfZ2VuZXJpY19wcm9ncmFtOiBvdXRjb21lIDIwMjYtMDItMjYsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgRkFJTFNfQ1VSUkVOVF9DT05UUk9MOyBpbmNsdWRlX2FsbF9wbGFudF9hc3NldHM6IG91dGNvbWUgMjAyNi0wMS0xNywgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBTRVBBUkFURV9BUFBST1ZBTF9PUl9QT0xJQ1lfRVhDRVBUSU9OX1JFUVVJUkVELg0KT3JhY2xlIHJlY29yZDogTlMtMDAwMDI5LiBBcHByb3ZhbDogQVAtMDAyOS4gQ2FzZTogQ0FTRS0wMjkuDQo\\\",\\\"threadId\\\":\\\"thread-029\\\",\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.messages.send\\\"}\",\"resource_id\":\"factorybench-029-mutation-03\",\"resource_type\":\"gmail.messages\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-029\"}",
-        "fixture_id": "factorybench-029-call-29",
+        "fixture_id": "factorybench-029-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"sent-029\",\"labelIds\":[\"SENT\"],\"threadId\":\"thread-029\"}",
         "task_id": "factorybench-029",
         "tool_name": "gmail.messages.send"
+      },
+      {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"sent-029\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-029-call-31",
+        "read_only": 1,
+        "response_json": "{\"id\":\"msg-029\",\"labelIds\":[\"INBOX\"],\"payload\":{\"body\":{\"data\":\"RnJvbTogb3BlcmF0aW9ucy0yOUBub3J0aHN0YXIuZXhhbXBsZQpUbzogcmVsaWFiaWxpdHkuZW5naW5lZXJAbm9ydGhzdGFyLmV4YW1wbGUKQ2M6IGNvbnRyb2xzQG5vcnRoc3Rhci5leGFtcGxlLCBvbHltcGljLm1ldHJvbG9neUBzdXBwbGllci5leGFtcGxlCkRhdGU6IDIwMjYtMDEtMTIKTWVzc2FnZS1JRDogPG1zZy0wMjlAbm9ydGhzdGFyLmV4YW1wbGU-ClN1YmplY3Q6IENBU0UtMDI5IOKAlCBkZWNpc2lvbiBuZWVkZWQgZm9yIGNvbnRhbWluYXRpb24tY29udHJvbCBtYWludGVuYW5jZSBwcm9ncmFtCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOAoKUXVhbGl0eSBoYXMgYXBwcm92ZWQgYSBuZXcgY29udGFtaW5hdGlvbi1jb250cm9sIHN0YW5kYXJkLCBidXQgaXQgZG9lcyBub3QgYXBwbHkgdG8gZXZlcnkgYXNzZXQgaW4gdGhlIHBsYW50LiBEZWZpbmUgdGhlIGFjdGl2ZSBmb29kLWNvbnRhY3QgZXF1aXBtZW50IHRoYXQgcmVhbGx5IGJlbG9uZ3MgaW4gdGhlIHByb2dyYW0sIHRoZSBmaXJzdCB3b3JrYWJsZSBjbGVhbmluZyB3aW5kb3dzLCBhbmQgdGhlIGNvbnNlcXVlbmNlIG9mIGNvcHlpbmcgdGhlIGdlbmVyaWMgcHJvZ3JhbSBvciBpbmNsdWRpbmcgZXZlcnl0aGluZy4gQ3JlYXRlIHRoZSBzY29wZWQgcHJvZ3JhbSBpZiBjb3ZlcmFnZSBhbmQgYXBwcm92YWwgYXJlIHN1ZmZpY2llbnQuCgpQbGVhc2UgdXNlIHRoZSBpbW11dGFibGUgcmVmZXJlbmNlcyBpbiB0aGUgYXR0YWNoZWQgc291cmNlIHJlY29yZDsgdGhlIHNpbWlsYXJseSBuYW1lZCBhcmNoaXZlIGJlbG9uZ3MgdG8gYW5vdGhlciBjYXNlLgoKLS0tIEVhcmxpZXIgbWVzc2FnZTogZXh0ZXJuYWwgb3BlcmF0aW9ucyBkZXNrIC0tLQpEYXRlOiAyMDI2LTAxLTEyIDExOjI1IFBhY2lmaWMKc2FuaXRhdGlvbiBjb250cmFjdG9yIGNhcGFjaXR5OiB0aGUgaW5kZXBlbmRlbnQgc291cmNlIGNvbmZpcm1zIHJlYWRpbmVzcyBmb3IgY29weV9leGlzdGluZ19nZW5lcmljX3Byb2dyYW0gb24gMjAyNi0wMi0yMzsgZmluaXRlLWNhcGFjaXR5IHNjaGVkdWxpbmcgcHJvZHVjZXMgdGhlIHNlcGFyYXRlIG9wZXJhdGluZyBvdXRjb21lIDIwMjYtMDItMjYgd2l0aCBubyBzZXBhcmF0ZWx5IGRvY3VtZW50ZWQgc3BlbmQ7IHRoYXQgc291cmNlIGFsb25lIGRvZXMgbm90IHByb3ZlIGVsaWdpYmlsaXR5LCBpZGVudGl0eSwgb3IgYXBwcm92YWwuCkNvbmZpcm1hdGlvbiBDTkYtMDAwMDI5IGlzIHZhbGlkIG9ubHkgZm9yIE5TLUNPTVAtMDI5IC8gUjIuCgotLS0gRWFybGllciBtZXNzYWdlOiBvcGVyYXRpb25zIGxlYWQgLS0tCkRhdGU6IDIwMjYtMDEtMTIgMDk6MTAgUGFjaWZpYwpSZWxpYWJpbGl0eSBvcGVyYXRpb25zIG5lZWRzIG9uZSBkZWZlbnNpYmxlIGRlY2lzaW9uIGZvciBjb250YW1pbmF0aW9uLWNvbnRyb2wgbWFpbnRlbmFuY2UgcHJvZ3JhbSBieSAyMDI2LTAxLTE2OyBhIGZhc3RlciBvciBicm9hZGVyIGFjdGlvbiBoYXMgdmFsdWUgb25seSBpZiBpdCByZW1haW5zIGluc2lkZSBzaWduZWQgc3RhbmRhcmQsIGFzc2V0IGNyaXRpY2FsaXR5LCBhbmQgcXVhbGl0eSBhcHByb3ZhbCBkZWZpbmUgdGhlIHByb2dyYW0uClRoZSBkYXRlIGluIHRoZSBwcmlvciBDQVNFLTAzMCB0aHJlYWQgaXMgbm90IG91ciBjb250cm9sIGRhdGUuCgotLS0gRWFybGllciBtZXNzYWdlOiBjb250cm9sbGVyIC0tLQpEYXRlOiAyMDI2LTAxLTExIDE2OjQwIFBhY2lmaWMKUmVjb25jaWxlIHRoZSByYXcgcm93cyBiZWZvcmUgYWN0aW5nLiBJbmFjdGl2ZSwgbm9uLWNvbnRhY3QsIG9yIGFscmVhZHkgY292ZXJlZCBhc3NldHMgbXVzdCByZW1haW4gb3V0c2lkZSB0aGUgdHJhbnNhY3Rpb24sIGV2ZW4gaWYgdGhlIGhlYWRlciB0b3RhbCBhcHBlYXJzIHRvIGZpdC4K\",\"size\":1906},\"headers\":[{\"name\":\"Subject\",\"value\":\"CASE-029 \\u2014 operating question and external reply\"}],\"parts\":[{\"body\":{\"attachmentId\":\"att-029\",\"size\":1024},\"filename\":\"meter-or-calendar-source-report.pdf\"}]},\"snippet\":\"Quality has approved a new contamination-control standard, but it does not apply to every asset in the plant. Define the active food-contact\",\"threadId\":\"thread-029\"}",
+        "task_id": "factorybench-029",
+        "tool_name": "gmail.messages.get"
       },
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-029\",\"userId\":\"me\"}",
@@ -4685,7 +4865,7 @@
       }
     ]
   },
-  "sequence_signature": "18d609da6c246ca52838d380ddcac42d2cd34ad03019fe63891fdfb780d1b5d6",
+  "sequence_signature": "83cd50e7625261becf5ad5ce122c9644b49e6561c2522f341156531214e16e4c",
   "task_id": "factorybench-029",
   "title": "Create a contamination-control program",
   "variant": null,

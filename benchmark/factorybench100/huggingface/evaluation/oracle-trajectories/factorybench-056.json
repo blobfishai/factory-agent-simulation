@@ -860,7 +860,7 @@
       "description": "Read NS-000056 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "earned_weight": 6.0,
       "evidence": {
-        "passed_criteria": 1,
+        "passed_criteria": 3,
         "subchecks": [
           {
             "description": "Read NS-000056 back through the documented Oracle inventory onhand balances.list operation after the mutation and confirmed the resource-specific changed fields ['AvailableToTransact', 'LastUpdateDate', 'LotNumber', 'PrimaryQuantity', 'SubinventoryCode'], including the effective update at 2026-01-15, rather than relying on the write acknowledgement.",
@@ -880,9 +880,39 @@
             "id": "verify_primary_oracle_state",
             "passed": true,
             "weight": 2.0
+          },
+          {
+            "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 29,
+                  "tool": "google_sheets.spreadsheets.values.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_01",
+            "passed": true,
+            "weight": 1.0
+          },
+          {
+            "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+            "evidence": {
+              "missing": [],
+              "satisfied_by": [
+                {
+                  "index": 31,
+                  "tool": "gmail.drafts.get"
+                }
+              ]
+            },
+            "id": "verify_collaboration_02",
+            "passed": true,
+            "weight": 1.0
           }
         ],
-        "total_criteria": 1
+        "total_criteria": 3
       },
       "id": "verification.readback",
       "passed": true,
@@ -1009,7 +1039,7 @@
     }
   ],
   "metric": "FactoryScore",
-  "passed_atomic_checks": 42,
+  "passed_atomic_checks": 44,
   "passed_checks": 14,
   "passed_weight": 100.0,
   "policy": "oracle",
@@ -1211,7 +1241,7 @@
   },
   "strict_pass": true,
   "task_id": "factorybench-056",
-  "total_atomic_checks": 42,
+  "total_atomic_checks": 44,
   "total_checks": 14,
   "total_weight": 100.0,
   "trace": [
@@ -3048,13 +3078,33 @@
     },
     {
       "arguments": {
+        "majorDimension": "ROWS",
+        "range": "Control!H18",
+        "spreadsheetId": "sheet-056",
+        "valueRenderOption": "UNFORMATTED_VALUE"
+      },
+      "index": 29,
+      "result": {
+        "majorDimension": "ROWS",
+        "range": "Control!H18",
+        "values": [
+          [
+            "CASE-056 | transfer_supported_quantity | 2026-01-15 | NS-000056 | lot, ownership, transit, and destination reservation must remain valid; quarantined, project-owned, or safety-stock quantity = 11 EA; uncovered or unsupported scope = 10.0 EA | AP-0056"
+          ]
+        ]
+      },
+      "success": true,
+      "tool": "google_sheets.spreadsheets.values.get"
+    },
+    {
+      "arguments": {
         "message": {
           "raw": "RnJvbTogaW52ZW50b3J5LmNvbnRyb2wubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG1hdGVyaWFsLmNvbnRyb2xAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDU2IOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogdHJhbnNmZXJfc3VwcG9ydGVkX3F1YW50aXR5LiBDb21wbGV0aW9uOiAyMDI2LTAxLTE1Lg0KQmluZGluZyBjb25zdHJhaW50OiBsb3QsIG93bmVyc2hpcCwgdHJhbnNpdCwgYW5kIGRlc3RpbmF0aW9uIHJlc2VydmF0aW9uIG11c3QgcmVtYWluIHZhbGlkOyBxdWFyYW50aW5lZCwgcHJvamVjdC1vd25lZCwgb3Igc2FmZXR5LXN0b2NrIHF1YW50aXR5ID0gMTEgRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDEwLjAgRUEuDQpBbHRlcm5hdGl2ZXM6IHRyYW5zZmVyX3N1cHBvcnRlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGRyYWluX3NvdXJjZV9zYWZldHlfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBidXlfbmV3X3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTE3LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwNTYuIEFwcHJvdmFsOiBBUC0wMDU2LiBDYXNlOiBDQVNFLTA1Ni4NCg",
           "threadId": "thread-056"
         },
         "userId": "me"
       },
-      "index": 29,
+      "index": 30,
       "result": {
         "id": "draft-056",
         "message": {
@@ -3067,6 +3117,34 @@
       },
       "success": true,
       "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "draft-056",
+        "userId": "me"
+      },
+      "index": 31,
+      "result": {
+        "id": "draft-056",
+        "message": {
+          "id": "draft-msg-056",
+          "labelIds": [
+            "DRAFT"
+          ],
+          "payload": {
+            "body": {
+              "data": "RnJvbTogaW52ZW50b3J5LmNvbnRyb2wubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG1hdGVyaWFsLmNvbnRyb2xAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDU2IOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogdHJhbnNmZXJfc3VwcG9ydGVkX3F1YW50aXR5LiBDb21wbGV0aW9uOiAyMDI2LTAxLTE1Lg0KQmluZGluZyBjb25zdHJhaW50OiBsb3QsIG93bmVyc2hpcCwgdHJhbnNpdCwgYW5kIGRlc3RpbmF0aW9uIHJlc2VydmF0aW9uIG11c3QgcmVtYWluIHZhbGlkOyBxdWFyYW50aW5lZCwgcHJvamVjdC1vd25lZCwgb3Igc2FmZXR5LXN0b2NrIHF1YW50aXR5ID0gMTEgRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDEwLjAgRUEuDQpBbHRlcm5hdGl2ZXM6IHRyYW5zZmVyX3N1cHBvcnRlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGRyYWluX3NvdXJjZV9zYWZldHlfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBidXlfbmV3X3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTE3LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwNTYuIEFwcHJvdmFsOiBBUC0wMDU2LiBDYXNlOiBDQVNFLTA1Ni4NCg",
+              "size": 1102
+            }
+          },
+          "raw": "RnJvbTogaW52ZW50b3J5LmNvbnRyb2wubWFuYWdlckBub3J0aHN0YXIuZXhhbXBsZQ0KVG86IG1hdGVyaWFsLmNvbnRyb2xAbm9ydGhzdGFyLmV4YW1wbGUNClN1YmplY3Q6IENBU0UtMDU2IOKAlCBEcmFmdCBvcGVyYXRpbmcgZGVjaXNpb24NCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD1VVEYtOA0KDQpEZWNpc2lvbjogdHJhbnNmZXJfc3VwcG9ydGVkX3F1YW50aXR5LiBDb21wbGV0aW9uOiAyMDI2LTAxLTE1Lg0KQmluZGluZyBjb25zdHJhaW50OiBsb3QsIG93bmVyc2hpcCwgdHJhbnNpdCwgYW5kIGRlc3RpbmF0aW9uIHJlc2VydmF0aW9uIG11c3QgcmVtYWluIHZhbGlkOyBxdWFyYW50aW5lZCwgcHJvamVjdC1vd25lZCwgb3Igc2FmZXR5LXN0b2NrIHF1YW50aXR5ID0gMTEgRUE7IHVuY292ZXJlZCBvciB1bnN1cHBvcnRlZCBzY29wZSA9IDEwLjAgRUEuDQpBbHRlcm5hdGl2ZXM6IHRyYW5zZmVyX3N1cHBvcnRlZF9xdWFudGl0eTogb3V0Y29tZSAyMDI2LTAxLTE1LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IGRyYWluX3NvdXJjZV9zYWZldHlfc3RvY2s6IG91dGNvbWUgMjAyNi0wMS0xNiwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGRUFTSUJMRV9XSVRIX0lORkVSSU9SX1RSQURFT0ZGOyBidXlfbmV3X3N1cHBseTogb3V0Y29tZSAyMDI2LTAxLTE3LCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNFUEFSQVRFX0FQUFJPVkFMX09SX1BPTElDWV9FWENFUFRJT05fUkVRVUlSRUQuDQpPcmFjbGUgcmVjb3JkOiBOUy0wMDAwNTYuIEFwcHJvdmFsOiBBUC0wMDU2LiBDYXNlOiBDQVNFLTA1Ni4NCg",
+          "sizeEstimate": 1102,
+          "threadId": "thread-056"
+        }
+      },
+      "success": true,
+      "tool": "gmail.drafts.get"
     },
     {
       "arguments": {
@@ -3088,7 +3166,7 @@
         "supported_quantity": 73,
         "transaction_quantity": 73
       },
-      "index": 30,
+      "index": 32,
       "result": {
         "accepted": true,
         "fields": {

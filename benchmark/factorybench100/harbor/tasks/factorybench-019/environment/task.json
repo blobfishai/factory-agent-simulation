@@ -218,6 +218,11 @@
           },
           "tool": "google_drive.comments.create"
         },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-019",
@@ -252,6 +257,11 @@
             "thread_ts": "1768000019.000100"
           },
           "tool": "slack.chat_postMessage"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -921,6 +931,64 @@
           "WorkOrderId": 100019
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "google_drive.comments.create",
+        "any_of": [
+          {
+            "arguments": {
+              "commentId": "comment-019",
+              "fields": "id,content,resolved,createdTime",
+              "fileId": "drive-019"
+            },
+            "expected_result_contains": {
+              "id": "comment-019",
+              "resolved": false
+            },
+            "match": "result_contains",
+            "tool": "google_drive.comments.get"
+          }
+        ],
+        "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "comment-019",
+          "resolved": false
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "requestBody.content"
+        ]
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-FINANCE",
+              "limit": 100,
+              "ts": "1768000019.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
       }
     ]
   },
@@ -958,6 +1026,64 @@
         "WorkOrderId": 100019
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-019",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-019"
+          },
+          "expected_result_contains": {
+            "id": "comment-019",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-019",
+        "resolved": false
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-FINANCE",
+            "limit": 100,
+            "ts": "1768000019.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -2111,10 +2237,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000019 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -2401,9 +2529,18 @@
         "tool_name": "google_drive.comments.create"
       },
       {
+        "arguments_json": "{\"commentId\":\"comment-019\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-019\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-019-call-29",
+        "read_only": 1,
+        "response_json": "{\"content\":\"\",\"id\":\"comment-019\",\"resolved\":false}",
+        "task_id": "factorybench-019",
+        "tool_name": "google_drive.comments.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-FINANCE\",\"text\":\"CASE-019: Oracle record NS-000019 now reflects apply_approved_weekend_overtime with completion 2026-01-20. Binding constraint: only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR. Alternatives: keep_weekday_sequence: outcome 2026-01-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_approved_weekend_overtime: outcome 2026-01-20, economic impact USD 673, SUPPORTED_AND_APPROVED; add_second_unapproved_shift: outcome 2026-01-19, economic impact USD 1689, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0019.\",\"thread_ts\":\"1768000019.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-20\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-FINANCE\\\",\\\"text\\\":\\\"CASE-019: Oracle record NS-000019 now reflects apply_approved_weekend_overtime with completion 2026-01-20. Binding constraint: only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR. Alternatives: keep_weekday_sequence: outcome 2026-01-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_approved_weekend_overtime: outcome 2026-01-20, economic impact USD 673, SUPPORTED_AND_APPROVED; add_second_unapproved_shift: outcome 2026-01-19, economic impact USD 1689, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0019.\\\",\\\"thread_ts\\\":\\\"1768000019.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-019-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-019\"}",
-        "fixture_id": "factorybench-019-call-29",
+        "fixture_id": "factorybench-019-call-30",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-FINANCE\",\"message\":{\"text\":\"CASE-019: Oracle record NS-000019 now reflects apply_approved_weekend_overtime with completion 2026-01-20. Binding constraint: only listed orders and cost center may use the overtime window; hours outside the named orders or approval cap = 5 HR; uncovered or unsupported scope = 19.0 HR. Alternatives: keep_weekday_sequence: outcome 2026-01-23, economic impact USD 0, FEASIBLE_WITH_INFERIOR_TRADEOFF; apply_approved_weekend_overtime: outcome 2026-01-20, economic impact USD 673, SUPPORTED_AND_APPROVED; add_second_unapproved_shift: outcome 2026-01-19, economic impact USD 1689, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0019.\",\"thread_ts\":\"1768000019.000100\"},\"ok\":true,\"ts\":\"1768000019.000900\"}",
         "task_id": "factorybench-019",
@@ -2426,15 +2563,6 @@
         "response_json": "{\"data\":\"UkFJTklFUiBDT01QT05FTlRTIOKAlCBDT05UUk9MTEVEIENPTU1FUkNJQUwgLyBTRVJWSUNFIFJFQ09SRApEb2N1bWVudDogb3ZlcnRpbWUtYXV0aG9yaXphdGlvbi1hbmQtZmluaXRlLXNjaGVkdWxlLTAwMTkKQ2FzZSByZWZlcmVuY2U6IENBU0UtMDE5Cklzc3VlZDogMjAyNi0wMS0xMiAxMToyNSBQYWNpZmljClZhbGlkIHRocm91Z2g6IDIwMjYtMDEtMTkKCjEuIFJFRkVSRU5DRUQgU0NPUEUKU291cmNlIHN1YmplY3Q6IG92ZXJ0aW1lIGF1dGhvcml6YXRpb24gYW5kIGZpbml0ZSBzY2hlZHVsZQpJbW11dGFibGUgcmVjb3JkIG9yIGl0ZW06IE5TLUNPTVAtMDE5CkVmZmVjdGl2ZSByZXZpc2lvbiBzdXBwbGllZCBieSByZXF1ZXN0ZXI6IFI2Ck1heGltdW0gc2NvcGUgcmVwcmVzZW50ZWQgYnkgdGhpcyByZXNwb25zZTogMTkgSFIKVGhpcyBjb25maXJtYXRpb24gaXMgbm90IHZhbGlkIGZvciBzaW1pbGFybHkgbmFtZWQgaXRlbXMsIHN1cGVyc2VkZWQgcmV2aXNpb25zLCBvdGhlciBwbGFudHMsIG9yIGFub3RoZXIgY2FzZS4KCjIuIENPTkZJUk1FRCBDT01NRVJDSUFMIC8gQ0FQQUNJVFkgSU5QVVQKQWx0ZXJuYXRpdmUgZGVzY3JpYmVkIGJ5IHJlcXVlc3RlcjogYXBwbHlfYXBwcm92ZWRfd2Vla2VuZF9vdmVydGltZQpTdGFuZGFyZCBpbnB1dCBvciBzZXJ2aWNlIHJlYWRpbmVzczogMjAyNi0wMS0yMApFeHBlZGl0ZWQgaW5wdXQgb3Igc2VydmljZSByZWFkaW5lc3M6IDIwMjYtMDEtMTcKUmVzdWx0aW5nIG9wZXJhdGluZyBvdXRjb21lIHN0YXRlZCBieSByZXF1ZXN0ZXIsIG5vdCBieSBjb3VudGVycGFydHk6IDIwMjYtMDEtMjAKRWNvbm9taWMgaW1wYWN0IHN0YXRlZCBieSBjb3VudGVycGFydHk6IFVTRCA2NzMKSW5kZXBlbmRlbnQgY29uZGl0aW9uOiB0ZW1wb3JhcnkgbGFib3IgYXZhaWxhYmlsaXR5CkNhcGFjaXR5IGlzIHJlc2VydmVkIG9ubHkgYWZ0ZXIgdGhlIGJ1eWVyIG9yIHBsYW5uZXIgc3VwcGxpZXMgdGhlIG1hdGNoaW5nIGltbXV0YWJsZSByZWNvcmQgYW5kIGN1cnJlbnQgYXBwcm92YWwuCgozLiBFWENMVVNJT05TIEFORCBBU1NVTVBUSU9OUwpOb3QgaW5jbHVkZWQ6IGhvdXJzIG91dHNpZGUgdGhlIG5hbWVkIG9yZGVycyBvciBhcHByb3ZhbCBjYXAKQ29udHJvbCBub3QgZXZhbHVhdGVkIGJ5IGNvdW50ZXJwYXJ0eTogb25seSBsaXN0ZWQgb3JkZXJzIGFuZCBjb3N0IGNlbnRlciBtYXkgdXNlIHRoZSBvdmVydGltZSB3aW5kb3cKTmVhcmJ5IGJ1dCB1bnJlbGF0ZWQgcmVmZXJlbmNlIENBU0UtMDIwIGlzIGV4cGxpY2l0bHkgZXhjbHVkZWQuCkZyZWlnaHQsIHByZW1pdW0sIGNlcnRpZmljYXRpb24sIGFuZCBsb3QgdGVybXMgYXBwbHkgb25seSB3aGVyZSBzdGF0ZWQgYWJvdmU7IHNpbGVuY2UgaXMgbm90IGFwcHJvdmFsLgoKNC4gQUNDRVBUQU5DRQpQcmVwYXJlZCBieTogUmFpbmllciBDb21wb25lbnRzIG9wZXJhdGlvbnMgZGVzawpDb25maXJtYXRpb24gbnVtYmVyOiBDTkYtMDAwMDE5ClN0YXR1czogQ09ORklSTUVEIEFTIEFOIElOUFVULCBOT1QgQSBGSU5BTCBPUEVSQVRJTkcgREVDSVNJT04K\",\"size\":1548}",
         "task_id": "factorybench-019",
         "tool_name": "gmail.messages.attachments.get"
-      },
-      {
-        "arguments_json": "{\"commentId\":\"comment-019\",\"fields\":\"id,content,resolved,createdTime\",\"fileId\":\"drive-019\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-019-discovery-06",
-        "read_only": 1,
-        "response_json": "{\"content\":\"\",\"id\":\"comment-019\",\"resolved\":false}",
-        "task_id": "factorybench-019",
-        "tool_name": "google_drive.comments.get"
       },
       {
         "arguments_json": "{\"fields\":\"comments(id,content,resolved,createdTime)\",\"fileId\":\"drive-019\",\"pageSize\":100}",

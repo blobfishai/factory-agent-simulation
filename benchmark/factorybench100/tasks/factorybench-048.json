@@ -1484,7 +1484,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1824,6 +1824,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "procurement.leadership@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-048",
@@ -1833,7 +1839,8 @@
         ],
         "payload_text_contains": [
           "2026-01-13",
-          "suspend_matched_orders"
+          "suspend_matched_orders",
+          "procurement.leadership@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -2510,6 +2517,70 @@
           "POHeaderId": 2000048
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "slack.reactions_add",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-PRODUCTION",
+              "limit": 100,
+              "ts": "1768000048.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "name"
+        ]
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-048",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-048",
+              "message": {
+                "id": "draft-msg-048",
+                "threadId": "thread-048"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-048",
+          "message": {
+            "id": "draft-msg-048",
+            "threadId": "thread-048"
+          }
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
       }
     ]
   },
@@ -2789,6 +2860,16 @@
     },
     {
       "arguments": {
+        "channel": "C-PRODUCTION",
+        "limit": 100,
+        "ts": "1768000048.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
+    },
+    {
+      "arguments": {
         "message": {
           "raw": "RnJvbTogc3VwcGxpZXIucXVhbGl0eS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogcHJvY3VyZW1lbnQubGVhZGVyc2hpcEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wNDgg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBzdXNwZW5kX21hdGNoZWRfb3JkZXJzLiBDb21wbGV0aW9uOiAyMDI2LTAxLTEzLg0KQmluZGluZyBjb25zdHJhaW50OiBsZWdhbCBlbnRpdHksIGFkZHJlc3MsIG93bmVyc2hpcCwgc2NyZWVuaW5nIGxpc3QsIGFuZCBsZWdhbCBkaXJlY3Rpb24gbXVzdCBjb3JyZWxhdGU7IGZhbHNlIHBvc2l0aXZlcyBhbmQgdW5yZWxhdGVkIGFmZmlsaWF0ZXMgPSAyIE9SREVSUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMi4wIE9SREVSUy4NCkFsdGVybmF0aXZlczogc3VzcGVuZF9tYXRjaGVkX29yZGVyczogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHN1c3BlbmRfYWxsX3NpbWlsYXJfbmFtZXM6IG91dGNvbWUgMjAyNi0wMS0xMiwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGQUlMU19DVVJSRU5UX0NPTlRST0w7IGNvbnRpbnVlX3BlbmRpbmdfcmV2aWV3OiBvdXRjb21lIDIwMjYtMDEtMTgsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA0OC4gQXBwcm92YWw6IEFQLTAwNDguIENhc2U6IENBU0UtMDQ4Lg0K",
           "threadId": "thread-048"
@@ -2798,6 +2879,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "gmail.drafts.create"
+    },
+    {
+      "arguments": {
+        "format": "full",
+        "id": "draft-048",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.drafts.get"
     },
     {
       "arguments": {
@@ -2863,6 +2954,70 @@
         "POHeaderId": 2000048
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "slack.reactions_add",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-PRODUCTION",
+            "limit": 100,
+            "ts": "1768000048.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.reactions_add result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "name"
+      ]
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-048",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-048",
+            "message": {
+              "id": "draft-msg-048",
+              "threadId": "thread-048"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-048",
+        "message": {
+          "id": "draft-msg-048",
+          "threadId": "thread-048"
+        }
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4046,10 +4201,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000048 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4336,9 +4493,18 @@
         "tool_name": "slack.reactions_add"
       },
       {
+        "arguments_json": "{\"channel\":\"C-PRODUCTION\",\"limit\":100,\"ts\":\"1768000048.000100\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-048-call-29",
+        "read_only": 1,
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Procurement leadership needs one defensible decision for sanctions-screening match by 2026-01-15; a faster or broader action has value only if it remains inside legal entity, address, ownership, screening list, and legal direction must correlate.\",\"ts\":\"1768000048.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 3 ORDERS on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000048.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000048\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-048 approval and impact note\"}],\"text\":\"Approval AP-0048 permits one control-compliant action on NS-000048 up to 1 ORDERS, provided legal entity, address, ownership, screening list, and legal direction must correlate. It does not select an option in advance and does not authorize broader records or continue_pending_review.\",\"ts\":\"1768000048.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for replacement-source readiness is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000048.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-049 record are visible in search but are not applicable to CASE-048.\",\"ts\":\"1768000048.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: mark the existing operations thread complete with the approved check reaction; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000048.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
+        "task_id": "factorybench-048",
+        "tool_name": "slack.conversations_replies"
+      },
+      {
         "arguments_json": "{\"message\":{\"raw\":\"RnJvbTogc3VwcGxpZXIucXVhbGl0eS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogcHJvY3VyZW1lbnQubGVhZGVyc2hpcEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wNDgg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBzdXNwZW5kX21hdGNoZWRfb3JkZXJzLiBDb21wbGV0aW9uOiAyMDI2LTAxLTEzLg0KQmluZGluZyBjb25zdHJhaW50OiBsZWdhbCBlbnRpdHksIGFkZHJlc3MsIG93bmVyc2hpcCwgc2NyZWVuaW5nIGxpc3QsIGFuZCBsZWdhbCBkaXJlY3Rpb24gbXVzdCBjb3JyZWxhdGU7IGZhbHNlIHBvc2l0aXZlcyBhbmQgdW5yZWxhdGVkIGFmZmlsaWF0ZXMgPSAyIE9SREVSUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMi4wIE9SREVSUy4NCkFsdGVybmF0aXZlczogc3VzcGVuZF9tYXRjaGVkX29yZGVyczogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHN1c3BlbmRfYWxsX3NpbWlsYXJfbmFtZXM6IG91dGNvbWUgMjAyNi0wMS0xMiwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGQUlMU19DVVJSRU5UX0NPTlRST0w7IGNvbnRpbnVlX3BlbmRpbmdfcmV2aWV3OiBvdXRjb21lIDIwMjYtMDEtMTgsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA0OC4gQXBwcm92YWw6IEFQLTAwNDguIENhc2U6IENBU0UtMDQ4Lg0K\",\"threadId\":\"thread-048\"},\"userId\":\"me\"}",
         "effect_json": "{\"effective_at\":\"2026-01-13\",\"payload_json\":\"{\\\"arguments\\\":{\\\"message\\\":{\\\"raw\\\":\\\"RnJvbTogc3VwcGxpZXIucXVhbGl0eS5tYW5hZ2VyQG5vcnRoc3Rhci5leGFtcGxlDQpUbzogcHJvY3VyZW1lbnQubGVhZGVyc2hpcEBub3J0aHN0YXIuZXhhbXBsZQ0KU3ViamVjdDogQ0FTRS0wNDgg4oCUIERyYWZ0IG9wZXJhdGluZyBkZWNpc2lvbg0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PVVURi04DQoNCkRlY2lzaW9uOiBzdXNwZW5kX21hdGNoZWRfb3JkZXJzLiBDb21wbGV0aW9uOiAyMDI2LTAxLTEzLg0KQmluZGluZyBjb25zdHJhaW50OiBsZWdhbCBlbnRpdHksIGFkZHJlc3MsIG93bmVyc2hpcCwgc2NyZWVuaW5nIGxpc3QsIGFuZCBsZWdhbCBkaXJlY3Rpb24gbXVzdCBjb3JyZWxhdGU7IGZhbHNlIHBvc2l0aXZlcyBhbmQgdW5yZWxhdGVkIGFmZmlsaWF0ZXMgPSAyIE9SREVSUzsgdW5jb3ZlcmVkIG9yIHVuc3VwcG9ydGVkIHNjb3BlID0gMi4wIE9SREVSUy4NCkFsdGVybmF0aXZlczogc3VzcGVuZF9tYXRjaGVkX29yZGVyczogb3V0Y29tZSAyMDI2LTAxLTEzLCBlY29ub21pYyBpbXBhY3QgVVNEIDAsIFNVUFBPUlRFRF9BTkRfQVBQUk9WRUQ7IHN1c3BlbmRfYWxsX3NpbWlsYXJfbmFtZXM6IG91dGNvbWUgMjAyNi0wMS0xMiwgZWNvbm9taWMgaW1wYWN0IFVTRCAwLCBGQUlMU19DVVJSRU5UX0NPTlRST0w7IGNvbnRpbnVlX3BlbmRpbmdfcmV2aWV3OiBvdXRjb21lIDIwMjYtMDEtMTgsIGVjb25vbWljIGltcGFjdCBVU0QgMCwgU0VQQVJBVEVfQVBQUk9WQUxfT1JfUE9MSUNZX0VYQ0VQVElPTl9SRVFVSVJFRC4NCk9yYWNsZSByZWNvcmQ6IE5TLTAwMDA0OC4gQXBwcm92YWw6IEFQLTAwNDguIENhc2U6IENBU0UtMDQ4Lg0K\\\",\\\"threadId\\\":\\\"thread-048\\\"},\\\"userId\\\":\\\"me\\\"},\\\"tool\\\":\\\"gmail.drafts.create\\\"}\",\"resource_id\":\"factorybench-048-mutation-03\",\"resource_type\":\"gmail.drafts\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"gmail\",\"task_id\":\"factorybench-048\"}",
-        "fixture_id": "factorybench-048-call-29",
+        "fixture_id": "factorybench-048-call-30",
         "read_only": 0,
         "response_json": "{\"id\":\"draft-048\",\"message\":{\"id\":\"draft-msg-048\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-048\"}}",
         "task_id": "factorybench-048",
@@ -4347,7 +4513,7 @@
       {
         "arguments_json": "{\"format\":\"full\",\"id\":\"draft-048\",\"userId\":\"me\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-048-discovery-01",
+        "fixture_id": "factorybench-048-call-31",
         "read_only": 1,
         "response_json": "{\"id\":\"draft-048\",\"message\":{\"id\":\"draft-msg-048\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-048\"}}",
         "task_id": "factorybench-048",
@@ -4424,15 +4590,6 @@
         "response_json": "{\"BusinessRelationship\":\"SPEND_AUTHORIZED\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"Status\":\"ACTIVE\",\"Supplier\":\"Cascade Industrial\",\"SupplierId\":600048,\"SupplierNumber\":\"SUP-00048\",\"TaxOrganizationType\":\"CORPORATION\"}",
         "task_id": "factorybench-048",
         "tool_name": "oracle_fusion.suppliers.get"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-PRODUCTION\",\"limit\":100,\"ts\":\"1768000048.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-048-discovery-23",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Procurement leadership needs one defensible decision for sanctions-screening match by 2026-01-15; a faster or broader action has value only if it remains inside legal entity, address, ownership, screening list, and legal direction must correlate.\",\"ts\":\"1768000048.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 3 ORDERS on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000048.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000048\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-048 approval and impact note\"}],\"text\":\"Approval AP-0048 permits one control-compliant action on NS-000048 up to 1 ORDERS, provided legal entity, address, ownership, screening list, and legal direction must correlate. It does not select an option in advance and does not authorize broader records or continue_pending_review.\",\"ts\":\"1768000048.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for replacement-source readiness is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000048.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-049 record are visible in search but are not applicable to CASE-048.\",\"ts\":\"1768000048.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: mark the existing operations thread complete with the approved check reaction; and prepare the reply in the existing email thread and leave it as a draft for review; do not send it. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000048.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-048",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000048\"}",
@@ -4803,7 +4960,7 @@
       }
     ]
   },
-  "sequence_signature": "5f5e56d4ce029a32854f32c56e9871e9dc38f51772818a094f81d8b576acce26",
+  "sequence_signature": "7a787bed2d1ea39a526a59eb6cf48146fd3e03ada1e82d00d1daf97bfcd4d7d2",
   "task_id": "factorybench-048",
   "title": "Suspend orders after a sanctions-screening hit",
   "variant": null,

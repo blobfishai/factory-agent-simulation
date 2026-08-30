@@ -17,21 +17,24 @@ or gold state.
 |---|---:|---:|
 | Oracle | 100.00 | 100/100 |
 | Noop | 6.00 | 0/100 |
-| Shortcut | 43.00 | 0/100 |
+| Shortcut | 40.51 | 0/100 |
 | State Only | 66.00 | 0/100 |
-| Incomplete Read | 94.07 | 0/100 |
+| Incomplete Read | 97.04 | 0/100 |
 | Write Before Read | 67.33 | 0/100 |
 | Missing Readback | 94.00 | 0/100 |
 | Unauthorized Write | 98.00 | 0/100 |
 | Wrong Value | 98.01 | 0/100 |
 | Wrong Decision | 94.02 | 0/100 |
 | Wrong Evidence | 97.57 | 0/100 |
+| Wrong Target | 96.85 | 0/100 |
+| Keyword Stuffing | 97.00 | 0/100 |
 
-The oracle is a solvability reference, not a model result. The ten negative
+The oracle is a solvability reference, not a model result. The 12 negative
 controls cover no-op and shortcut behavior, missing handoff or evidence,
 write-before-read, missing readback, unauthorized mutation, incorrect values,
-incorrect operating choice, and substitution of stale or irrelevant evidence.
-All 1000 adversarial executions are rejected.
+incorrect operating choice, substitution of stale or irrelevant evidence, a correct
+write made to the wrong existing destination, and keyword-only collaboration output.
+All 1200 adversarial executions are rejected.
 
 Release qualification also removes every reference mutation individually. All
 300 of 300 omissions reduce the score and fail strict completion.

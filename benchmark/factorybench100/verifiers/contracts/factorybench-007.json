@@ -100,8 +100,24 @@
       "milestone_id": "state.collaboration",
       "payload_contains": {
         "arguments": {
+          "insertDataOption": "INSERT_ROWS",
           "range": "Audit!A:G",
-          "spreadsheetId": "sheet-007"
+          "requestBody": {
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "2026-01-12",
+                "CASE-007",
+                "production_planner",
+                "move_burn_in_forward",
+                "2026-01-18",
+                "NS-000007",
+                "AP-0007"
+              ]
+            ]
+          },
+          "spreadsheetId": "sheet-007",
+          "valueInputOption": "RAW"
         },
         "tool": "google_sheets.spreadsheets.values.append"
       },
@@ -131,6 +147,11 @@
           "fileId": "drive-007"
         },
         "tool": "google_drive.comments.create"
+      },
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
       },
       "payload_text_any_of": [
         [
@@ -783,6 +804,67 @@
         "WorkOrderId": 100007
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.append",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G",
+            "spreadsheetId": "sheet-007",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Audit!A:G"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.append result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Audit!A:G"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "google_drive.comments.create",
+      "any_of": [
+        {
+          "arguments": {
+            "commentId": "comment-007",
+            "fields": "id,content,resolved,createdTime",
+            "fileId": "drive-007"
+          },
+          "expected_result_contains": {
+            "id": "comment-007",
+            "resolved": false
+          },
+          "match": "result_contains",
+          "tool": "google_drive.comments.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_drive.comments.create result through google_drive.comments.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "comment-007",
+        "resolved": false
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.content"
+      ]
     }
   ]
 }

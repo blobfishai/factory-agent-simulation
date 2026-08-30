@@ -1504,7 +1504,7 @@
     }
   ],
   "benchmark": "FactoryBench-100",
-  "benchmark_version": "3.3.2",
+  "benchmark_version": "3.3.3",
   "decision_model": {
     "calculations": [
       {
@@ -1854,6 +1854,12 @@
           },
           "tool": "gmail.drafts.create"
         },
+        "payload_email_to": "cell.lead@northstar.example",
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
+        },
         "payload_text_any_of": [
           [
             "CASE-006",
@@ -1863,7 +1869,8 @@
         ],
         "payload_text_contains": [
           "2026-01-21",
-          "release_complete_build"
+          "release_complete_build",
+          "cell.lead@northstar.example"
         ],
         "table": "resource_state",
         "values": {
@@ -1888,6 +1895,11 @@
             "thread_ts": "1768000006.000100"
           },
           "tool": "slack.chat_postMessage"
+        },
+        "payload_narrative": {
+          "minimum_punctuation": 2,
+          "minimum_words": 30,
+          "reject_serialized": true
         },
         "payload_text_any_of": [
           [
@@ -2588,6 +2600,70 @@
           "WorkOrderId": 100006
         },
         "weight": 2.0
+      },
+      {
+        "after_tool": "gmail.drafts.create",
+        "any_of": [
+          {
+            "arguments": {
+              "format": "full",
+              "id": "draft-006",
+              "userId": "me"
+            },
+            "expected_result_contains": {
+              "id": "draft-006",
+              "message": {
+                "id": "draft-msg-006",
+                "threadId": "thread-006"
+              }
+            },
+            "match": "result_contains",
+            "tool": "gmail.drafts.get"
+          }
+        ],
+        "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "id": "draft-006",
+          "message": {
+            "id": "draft-msg-006",
+            "threadId": "thread-006"
+          }
+        },
+        "id": "verify_collaboration_01",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "message.raw"
+        ]
+      },
+      {
+        "after_tool": "slack.chat_postMessage",
+        "any_of": [
+          {
+            "arguments": {
+              "channel": "C-QUALITY",
+              "limit": 100,
+              "ts": "1768000006.000100"
+            },
+            "expected_result_contains": {
+              "ok": true
+            },
+            "match": "result_contains",
+            "tool": "slack.conversations_replies"
+          }
+        ],
+        "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+        "expected_result_contains": {
+          "ok": true
+        },
+        "id": "verify_collaboration_02",
+        "materializes_new_record": true,
+        "milestone_id": "verification.readback",
+        "weight": 1.0,
+        "write_argument_projection_paths": [
+          "text"
+        ]
       }
     ]
   },
@@ -2880,6 +2956,16 @@
     },
     {
       "arguments": {
+        "format": "full",
+        "id": "draft-006",
+        "userId": "me"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "gmail.drafts.get"
+    },
+    {
+      "arguments": {
         "channel": "C-QUALITY",
         "text": "CASE-006: Oracle record NS-000006 now reflects release_complete_build with completion 2026-01-21. Binding constraint: drawing, deviation, material, and dispatch release gates; parts on quality hold or at the wrong revision = 12 EA; uncovered or unsupported scope = 0.0 EA. Alternatives: release_complete_build: outcome 2026-01-21, economic impact USD 0, SUPPORTED_AND_APPROVED; release_partial_build: outcome 2026-01-17, economic impact USD 452, FEASIBLE_WITH_INFERIOR_TRADEOFF; keep_order_unreleased: outcome 2026-01-16, economic impact USD 1286, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0006.",
         "thread_ts": "1768000006.000100"
@@ -2887,6 +2973,16 @@
       "control": false,
       "phase": "collaboration_mutation",
       "tool": "slack.chat_postMessage"
+    },
+    {
+      "arguments": {
+        "channel": "C-QUALITY",
+        "limit": 100,
+        "ts": "1768000006.000100"
+      },
+      "control": false,
+      "phase": "post_write_verification",
+      "tool": "slack.conversations_replies"
     },
     {
       "arguments": {
@@ -2960,6 +3056,70 @@
         "WorkOrderId": 100006
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "gmail.drafts.create",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "draft-006",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "draft-006",
+            "message": {
+              "id": "draft-msg-006",
+              "threadId": "thread-006"
+            }
+          },
+          "match": "result_contains",
+          "tool": "gmail.drafts.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.drafts.create result through gmail.drafts.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "draft-006",
+        "message": {
+          "id": "draft-msg-006",
+          "threadId": "thread-006"
+        }
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "message.raw"
+      ]
+    },
+    {
+      "after_tool": "slack.chat_postMessage",
+      "any_of": [
+        {
+          "arguments": {
+            "channel": "C-QUALITY",
+            "limit": 100,
+            "ts": "1768000006.000100"
+          },
+          "expected_result_contains": {
+            "ok": true
+          },
+          "match": "result_contains",
+          "tool": "slack.conversations_replies"
+        }
+      ],
+      "description": "Reopened the task-scoped slack.chat_postMessage result through slack.conversations_replies and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "ok": true
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "text"
+      ]
     }
   ],
   "reference_read_calls": [
@@ -4125,10 +4285,12 @@
       "weight": 6.0
     },
     {
-      "atomic_weight": 2.0,
+      "atomic_weight": 4.0,
       "category": "verification",
       "criterion_ids": [
-        "verify_primary_oracle_state"
+        "verify_primary_oracle_state",
+        "verify_collaboration_01",
+        "verify_collaboration_02"
       ],
       "description": "Read NS-000006 back after the primary mutation and verify the persisted provider state rather than trusting the write acknowledgement.",
       "id": "verification.readback",
@@ -4415,22 +4577,31 @@
         "tool_name": "gmail.drafts.create"
       },
       {
+        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-006\",\"userId\":\"me\"}",
+        "effect_json": null,
+        "fixture_id": "factorybench-006-call-29",
+        "read_only": 1,
+        "response_json": "{\"id\":\"draft-006\",\"message\":{\"id\":\"draft-msg-006\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-006\"}}",
+        "task_id": "factorybench-006",
+        "tool_name": "gmail.drafts.get"
+      },
+      {
         "arguments_json": "{\"channel\":\"C-QUALITY\",\"text\":\"CASE-006: Oracle record NS-000006 now reflects release_complete_build with completion 2026-01-21. Binding constraint: drawing, deviation, material, and dispatch release gates; parts on quality hold or at the wrong revision = 12 EA; uncovered or unsupported scope = 0.0 EA. Alternatives: release_complete_build: outcome 2026-01-21, economic impact USD 0, SUPPORTED_AND_APPROVED; release_partial_build: outcome 2026-01-17, economic impact USD 452, FEASIBLE_WITH_INFERIOR_TRADEOFF; keep_order_unreleased: outcome 2026-01-16, economic impact USD 1286, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0006.\",\"thread_ts\":\"1768000006.000100\"}",
         "effect_json": "{\"effective_at\":\"2026-01-21\",\"payload_json\":\"{\\\"arguments\\\":{\\\"channel\\\":\\\"C-QUALITY\\\",\\\"text\\\":\\\"CASE-006: Oracle record NS-000006 now reflects release_complete_build with completion 2026-01-21. Binding constraint: drawing, deviation, material, and dispatch release gates; parts on quality hold or at the wrong revision = 12 EA; uncovered or unsupported scope = 0.0 EA. Alternatives: release_complete_build: outcome 2026-01-21, economic impact USD 0, SUPPORTED_AND_APPROVED; release_partial_build: outcome 2026-01-17, economic impact USD 452, FEASIBLE_WITH_INFERIOR_TRADEOFF; keep_order_unreleased: outcome 2026-01-16, economic impact USD 1286, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0006.\\\",\\\"thread_ts\\\":\\\"1768000006.000100\\\"},\\\"tool\\\":\\\"slack.chat_postMessage\\\"}\",\"resource_id\":\"factorybench-006-mutation-03\",\"resource_type\":\"slack\",\"revision\":1,\"status\":\"Recorded\",\"system\":\"slack\",\"task_id\":\"factorybench-006\"}",
-        "fixture_id": "factorybench-006-call-29",
+        "fixture_id": "factorybench-006-call-30",
         "read_only": 0,
         "response_json": "{\"channel\":\"C-QUALITY\",\"message\":{\"text\":\"CASE-006: Oracle record NS-000006 now reflects release_complete_build with completion 2026-01-21. Binding constraint: drawing, deviation, material, and dispatch release gates; parts on quality hold or at the wrong revision = 12 EA; uncovered or unsupported scope = 0.0 EA. Alternatives: release_complete_build: outcome 2026-01-21, economic impact USD 0, SUPPORTED_AND_APPROVED; release_partial_build: outcome 2026-01-17, economic impact USD 452, FEASIBLE_WITH_INFERIOR_TRADEOFF; keep_order_unreleased: outcome 2026-01-16, economic impact USD 1286, SEPARATE_APPROVAL_OR_POLICY_EXCEPTION_REQUIRED. Approval AP-0006.\",\"thread_ts\":\"1768000006.000100\"},\"ok\":true,\"ts\":\"1768000006.000900\"}",
         "task_id": "factorybench-006",
         "tool_name": "slack.chat_postMessage"
       },
       {
-        "arguments_json": "{\"format\":\"full\",\"id\":\"draft-006\",\"userId\":\"me\"}",
+        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000006.000100\"}",
         "effect_json": null,
-        "fixture_id": "factorybench-006-discovery-01",
+        "fixture_id": "factorybench-006-call-31",
         "read_only": 1,
-        "response_json": "{\"id\":\"draft-006\",\"message\":{\"id\":\"draft-msg-006\",\"labelIds\":[\"DRAFT\"],\"threadId\":\"thread-006\"}}",
+        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Cell lead needs one defensible decision for flight-test controller work order by 2026-01-20; a faster or broader action has value only if it remains inside drawing, deviation, material, and dispatch release gates.\",\"ts\":\"1768000006.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 114 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000006.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000006\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-006 approval and impact note\"}],\"text\":\"Approval AP-0006 permits one control-compliant action on NS-000006 up to 114 EA, provided drawing, deviation, material, and dispatch release gates. It does not select an option in advance and does not authorize broader records or keep_order_unreleased.\",\"ts\":\"1768000006.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for qualified flight-test assembly window is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000006.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-007 record are visible in search but are not applicable to CASE-006.\",\"ts\":\"1768000006.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000006.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
         "task_id": "factorybench-006",
-        "tool_name": "gmail.drafts.get"
+        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"id\":\"att-006\",\"messageId\":\"msg-006-1\",\"userId\":\"me\"}",
@@ -4494,15 +4665,6 @@
         "response_json": "{\"ItemNumber\":\"NS-COMP-006\",\"ItemRevision\":\"R7\",\"LastUpdateDate\":\"2026-01-12T08:00:00-08:00\",\"LastUpdatedBy\":\"FACTORY.PLANNER\",\"OrganizationCode\":\"SEA\",\"PlannedCompletionDate\":\"2026-01-13\",\"PlannedStartDate\":\"2026-01-12\",\"PlannedStartQuantity\":114,\"SourceHeaderReference\":\"CASE-006\",\"WorkOrderDescription\":\"CASE-006: Release the flight-test controller build\",\"WorkOrderId\":100006,\"WorkOrderNumber\":\"WO-0006\",\"WorkOrderStatusCode\":\"ORA_RELEASED\"}",
         "task_id": "factorybench-006",
         "tool_name": "oracle_fusion.work_orders.get"
-      },
-      {
-        "arguments_json": "{\"channel\":\"C-QUALITY\",\"limit\":100,\"ts\":\"1768000006.000100\"}",
-        "effect_json": null,
-        "fixture_id": "factorybench-006-discovery-22",
-        "read_only": 1,
-        "response_json": "{\"has_more\":false,\"messages\":[{\"text\":\"Cell lead needs one defensible decision for flight-test controller work order by 2026-01-20; a faster or broader action has value only if it remains inside drawing, deviation, material, and dispatch release gates.\",\"ts\":\"1768000006.000100\",\"user\":\"U-OPS-LEAD\"},{\"text\":\"I found 114 EA on the header, but the workbook has separate observation and exclusion rows. Please do not net from this message.\",\"ts\":\"1768000006.000150\",\"user\":\"U-PLANNER\"},{\"files\":[{\"id\":\"F-000006\",\"mimetype\":\"application/pdf\",\"name\":\"approval-and-impact-note.pdf\",\"title\":\"CASE-006 approval and impact note\"}],\"text\":\"Approval AP-0006 permits one control-compliant action on NS-000006 up to 114 EA, provided drawing, deviation, material, and dispatch release gates. It does not select an option in advance and does not authorize broader records or keep_order_unreleased.\",\"ts\":\"1768000006.000200\",\"user\":\"U-APPROVER\"},{\"text\":\"Protected load remains non-displaceable. The calendar for qualified flight-test assembly window is the source for internal windows; the supplier response covers only its stated alternative.\",\"ts\":\"1768000006.000240\",\"user\":\"U-SCHEDULER\"},{\"text\":\"Revision R8 and the CASE-007 record are visible in search but are not applicable to CASE-006.\",\"ts\":\"1768000006.000270\",\"user\":\"U-QUALITY\"},{\"text\":\"Required closeout records: prepare the reply in the existing email thread and leave it as a draft for review; do not send it; and post the decided option, date, constraint, alternatives, and Oracle reference in the existing operations thread. Verify the persisted record after the Oracle call.\",\"ts\":\"1768000006.000300\",\"user\":\"U-CONTROLLER\"}],\"ok\":true,\"response_metadata\":{\"next_cursor\":\"\"}}",
-        "task_id": "factorybench-006",
-        "tool_name": "slack.conversations_replies"
       },
       {
         "arguments_json": "{\"file\":\"F-000006\"}",
@@ -4873,7 +5035,7 @@
       }
     ]
   },
-  "sequence_signature": "431d1a06613a9c3d199ec2943db1488d5d3c41c0d6a03fa261aefd77b3d181d6",
+  "sequence_signature": "4b073778db63ecc70f641721f1abc42649a18f5b41a7a46c9488f192bf397674",
   "task_id": "factorybench-006",
   "title": "Release the flight-test controller build",
   "variant": null,

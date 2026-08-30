@@ -182,15 +182,28 @@ def missing_post_write_verifications(
     successful = [entry for entry in trace if entry.get("success")]
     missing: list[dict[str, Any]] = []
     for verification in task.get("post_write_verifications", []):
-        mutation_indexes = [
-            entry["index"]
+        mutations = [
+            entry
             for entry in successful
             if entry["tool"] == verification["after_tool"]
         ]
-        if not mutation_indexes:
+        if not mutations:
             missing.append(verification)
             continue
-        mutation_index = min(mutation_indexes)
+        mutation = min(mutations, key=lambda entry: entry["index"])
+        mutation_index = mutation["index"]
+
+        def projected_values_persisted(entry: dict[str, Any]) -> bool:
+            for path in verification.get("write_argument_projection_paths", []):
+                value: Any = mutation.get("arguments", {})
+                for component in path.split("."):
+                    if not isinstance(value, dict) or component not in value:
+                        return False
+                    value = value[component]
+                if not _contains_nested_value(entry.get("result"), value):
+                    return False
+            return True
+
         matched = any(
             entry["index"] > mutation_index
             and _investigation_requirement_matches(entry, requirement)
@@ -198,12 +211,25 @@ def missing_post_write_verifications(
                 entry.get("result"),
                 verification.get("expected_result_contains", {}),
             )
+            and projected_values_persisted(entry)
             for requirement in verification.get("any_of", [])
             for entry in successful
         )
         if not matched:
             missing.append(verification)
     return missing
+
+
+def _contains_nested_value(actual: Any, expected: Any) -> bool:
+    """Return whether an exact projected write value occurs in a read result."""
+
+    if _result_contains(actual, expected):
+        return True
+    if isinstance(actual, dict):
+        return any(_contains_nested_value(value, expected) for value in actual.values())
+    if isinstance(actual, list):
+        return any(_contains_nested_value(value, expected) for value in actual)
+    return False
 
 
 def _nested_subset_mismatches(
@@ -293,6 +319,8 @@ def payload_assertion_mismatches(
             "payload_contains",
             "payload_text_contains",
             "payload_text_any_of",
+            "payload_narrative",
+            "payload_email_to",
             "payload_allowed_argument_paths",
         )
     ):
@@ -351,6 +379,77 @@ def payload_assertion_mismatches(
         ]
         if missing_groups:
             evidence["missing_payload_text_any_of"] = missing_groups
+    expected_email_to = assertion.get("payload_email_to")
+    if expected_email_to is not None:
+        arguments = payload.get("arguments", {})
+        envelope = arguments.get("message", arguments)
+        raw = str(envelope.get("raw", ""))
+        try:
+            padded = raw + "=" * (-len(raw) % 4)
+            decoded_email = base64.urlsafe_b64decode(padded).decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            decoded_email = ""
+        to_headers = [
+            line.removeprefix("To: ").strip()
+            for line in decoded_email.splitlines()
+            if line.startswith("To: ")
+        ]
+        if to_headers != [expected_email_to]:
+            evidence["payload_email_to_mismatch"] = {
+                "expected": expected_email_to,
+                "actual": to_headers,
+            }
+    narrative = assertion.get("payload_narrative")
+    if narrative:
+        arguments = payload.get("arguments", {})
+        tool = payload.get("tool")
+        if tool in {"gmail.drafts.create", "gmail.messages.send"}:
+            envelope = arguments.get("message", arguments)
+            raw = str(envelope.get("raw", ""))
+            try:
+                padded = raw + "=" * (-len(raw) % 4)
+                narrative_text = base64.urlsafe_b64decode(padded).decode("utf-8")
+            except (ValueError, UnicodeDecodeError):
+                narrative_text = ""
+            narrative_text = narrative_text.split("\r\n\r\n", 1)[-1]
+        elif tool == "google_drive.comments.create":
+            narrative_text = str(arguments.get("requestBody", {}).get("content", ""))
+        elif tool == "slack.chat_postMessage":
+            narrative_text = str(arguments.get("text", ""))
+        else:
+            narrative_text = _decoded_text(arguments)
+        word_count = len(re.findall(r"\b[\w][\w'-]*\b", narrative_text))
+        punctuation_count = sum(narrative_text.count(mark) for mark in ".;:!?")
+        serialized = narrative_text.lstrip().startswith(("{", "["))
+        narrative_mismatches = {
+            key: value
+            for key, value in {
+                "minimum_words": (
+                    {
+                        "expected": narrative.get("minimum_words", 0),
+                        "actual": word_count,
+                    }
+                    if word_count < narrative.get("minimum_words", 0)
+                    else None
+                ),
+                "minimum_punctuation": (
+                    {
+                        "expected": narrative.get("minimum_punctuation", 0),
+                        "actual": punctuation_count,
+                    }
+                    if punctuation_count < narrative.get("minimum_punctuation", 0)
+                    else None
+                ),
+                "serialized": (
+                    {"expected": False, "actual": True}
+                    if narrative.get("reject_serialized") and serialized
+                    else None
+                ),
+            }.items()
+            if value is not None
+        }
+        if narrative_mismatches:
+            evidence["payload_narrative_mismatches"] = narrative_mismatches
     allowed_paths = assertion.get("payload_allowed_argument_paths")
     if allowed_paths is not None:
         actual_paths = _leaf_paths(payload.get("arguments", {}))
@@ -711,7 +810,23 @@ class FactoryWorld:
         if tool == "slack.conversations_history":
             identity_keys = {"channel"}
         elif tool == "slack.conversations_replies":
-            identity_keys = {"channel", "ts"}
+            identity_keys = {"channel"}
+            expected_ts = str(expected.get("ts", ""))
+            actual_ts = str(arguments.get("ts", ""))
+            if actual_ts != expected_ts:
+                ordinal = int(self.task["task_id"].rsplit("-", 1)[1])
+                created_root_ts = f"1768{ordinal:06d}.000900"
+                root_exists = any(
+                    mutation.get("channel") == arguments.get("channel")
+                    and not mutation.get("thread_ts")
+                    for mutation in self._mutation_arguments(
+                        "slack.chat_postMessage"
+                    )
+                )
+                if actual_ts != created_root_ts or not root_exists:
+                    raise ValueError(
+                        f"{tool} record not found for ts={arguments.get('ts')!r}"
+                    )
         elif tool == "slack.files_info":
             identity_keys = {"file"}
         elif tool in {
@@ -755,6 +870,25 @@ class FactoryWorld:
             "timestamp",
             "file",
         }
+        if tool == "google_drive.comments.create":
+            target_keys.remove("fileId")
+            self._drive_file_response(
+                "google_drive.files.get",
+                str(arguments.get("fileId", "")),
+            )
+        if tool.startswith("google_sheets.spreadsheets.values."):
+            target_keys.remove("range")
+            actual_range = str(arguments.get("range", ""))
+            expected_range = str(expected.get("range", ""))
+            if "!" not in actual_range or actual_range.split("!", 1)[0] not in {
+                "Control",
+                "Audit",
+            }:
+                raise ValueError(f"{tool} targets a range outside the mounted workbook")
+            if "!" not in expected_range:
+                raise ValueError(f"{tool} fixture range is invalid")
+        if tool == "slack.chat_postMessage":
+            target_keys.remove("thread_ts")
         for key in target_keys:
             if key in expected and arguments.get(key) != expected[key]:
                 raise ValueError(f"{tool} targets the wrong {key}")
@@ -976,6 +1110,76 @@ class FactoryWorld:
                 }
         return None
 
+    def _seeded_sheet_value_range(
+        self,
+        spreadsheet_id: str,
+        requested_range: str,
+    ) -> dict[str, Any] | None:
+        """Resolve a valid alternate range from the mounted workbook fixture.
+
+        A task may use ``batchGet`` for its investigation and ``values.get``
+        only for a post-write cell readback. Real Sheets clients can still call
+        ``values.get`` for another range in that mounted workbook, so do not
+        accidentally treat the narrow readback fixture as the whole sheet.
+        """
+
+        requested_sheet = requested_range.split("!", 1)[0]
+        candidates: list[dict[str, Any]] = []
+        for tool in (
+            "google_sheets.spreadsheets.values.get",
+            "google_sheets.spreadsheets.values.batchGet",
+        ):
+            for row in self._fixture_rows(tool):
+                fixture_arguments = json.loads(row["arguments_json"])
+                if str(fixture_arguments.get("spreadsheetId")) != spreadsheet_id:
+                    continue
+                response = json.loads(row["response_json"])
+                value_ranges = (
+                    response.get("valueRanges", [])
+                    if tool.endswith("batchGet")
+                    else [response]
+                )
+                candidates.extend(
+                    value_range
+                    for value_range in value_ranges
+                    if str(value_range.get("range", "")).split("!", 1)[0]
+                    == requested_sheet
+                )
+        if not candidates:
+            return None
+
+        a1 = re.compile(
+            r"^(?:(?P<sheet>[^!]+)!)?(?P<column>[A-Z]+)(?P<row>\d+)"
+        )
+        requested_start = a1.match(requested_range)
+
+        def column_number(letters: str) -> int:
+            value = 0
+            for letter in letters:
+                value = value * 26 + ord(letter) - ord("A") + 1
+            return value
+
+        def source_rank(value_range: dict[str, Any]) -> tuple[bool, int]:
+            source_start = a1.match(str(value_range.get("range", "")))
+            covers_requested_start = bool(
+                requested_start
+                and source_start
+                and int(source_start.group("row"))
+                <= int(requested_start.group("row"))
+                and column_number(source_start.group("column"))
+                <= column_number(requested_start.group("column"))
+            )
+            return (
+                covers_requested_start,
+                sum(len(row) for row in value_range.get("values", [])),
+            )
+
+        source = max(
+            candidates,
+            key=source_rank,
+        )
+        return self._slice_value_range(source, requested_range)
+
     @staticmethod
     def _slice_value_range(
         value_range: dict[str, Any],
@@ -1125,22 +1329,61 @@ class FactoryWorld:
             }
 
         if tool == "slack.conversations_replies":
-            messages = [*response.get("messages", [])]
+            root_ts = f"1768{ordinal:06d}.000900"
+            messages = (
+                []
+                if arguments.get("ts") == root_ts
+                else [*response.get("messages", [])]
+            )
             for index, mutation in enumerate(
                 self._mutation_arguments("slack.chat_postMessage"),
                 start=1,
             ):
+                mutation_target = mutation.get("thread_ts") or root_ts
                 if (
                     mutation.get("channel") == arguments["channel"]
-                    and mutation.get("thread_ts") == arguments["ts"]
+                    and mutation_target == arguments["ts"]
                 ):
                     messages.append(
                         {
                             "type": "message",
-                            "ts": f"1768{ordinal:06d}.{900 + index:06d}",
-                            "thread_ts": mutation["thread_ts"],
+                            "ts": (
+                                root_ts
+                                if not mutation.get("thread_ts")
+                                else f"1768{ordinal:06d}.{900 + index:06d}"
+                            ),
+                            **(
+                                {"thread_ts": mutation["thread_ts"]}
+                                if mutation.get("thread_ts")
+                                else {}
+                            ),
                             "text": mutation["text"],
                             "user": "U-FACTORY-AGENT",
+                        }
+                    )
+            for mutation in self._mutation_arguments("slack.reactions_add"):
+                if mutation.get("channel") != arguments["channel"]:
+                    continue
+                target = next(
+                    (
+                        message
+                        for message in messages
+                        if message.get("ts") == mutation.get("timestamp")
+                    ),
+                    None,
+                )
+                if target is None:
+                    continue
+                reactions = target.setdefault("reactions", [])
+                if not any(
+                    reaction.get("name") == mutation.get("name")
+                    for reaction in reactions
+                ):
+                    reactions.append(
+                        {
+                            "name": mutation["name"],
+                            "count": 1,
+                            "users": ["U-FACTORY-AGENT"],
                         }
                     )
             response["messages"] = messages
@@ -1361,6 +1604,17 @@ class FactoryWorld:
             (self.task["task_id"], tool, _canonical_json(arguments)),
         ).fetchone()
         if row is None:
+            if tool == "google_sheets.spreadsheets.values.get":
+                seeded = self._seeded_sheet_value_range(
+                    str(arguments["spreadsheetId"]),
+                    str(arguments["range"]),
+                )
+                if seeded is not None:
+                    return self._reflect_collaboration_state(
+                        tool,
+                        arguments,
+                        seeded,
+                    )
             rows = self._fixture_rows(tool)
             if not rows:
                 if tool.startswith("oracle_fusion.") and tool.endswith(".list"):

@@ -101,8 +101,18 @@
       "milestone_id": "state.collaboration",
       "payload_contains": {
         "arguments": {
+          "includeValuesInResponse": true,
           "range": "Control!H31",
-          "spreadsheetId": "sheet-029"
+          "requestBody": {
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "CASE-029 | create_scoped_program | 2026-01-16 | NS-000029 | signed standard, asset criticality, and quality approval define the program; inactive, non-contact, or already covered assets = 5 ASSETS; uncovered or unsupported scope = 5.0 ASSETS | AP-0029"
+              ]
+            ]
+          },
+          "spreadsheetId": "sheet-029",
+          "valueInputOption": "RAW"
         },
         "tool": "google_sheets.spreadsheets.values.update"
       },
@@ -134,6 +144,12 @@
         },
         "tool": "gmail.messages.send"
       },
+      "payload_email_to": "reliability.operations@northstar.example",
+      "payload_narrative": {
+        "minimum_punctuation": 2,
+        "minimum_words": 30,
+        "reject_serialized": true
+      },
       "payload_text_any_of": [
         [
           "CASE-029",
@@ -143,7 +159,8 @@
       ],
       "payload_text_contains": [
         "2026-01-16",
-        "create_scoped_program"
+        "create_scoped_program",
+        "reliability.operations@northstar.example"
       ],
       "table": "resource_state",
       "values": {
@@ -763,6 +780,67 @@
         "MaintenanceProgramId": 500029
       },
       "weight": 2.0
+    },
+    {
+      "after_tool": "google_sheets.spreadsheets.values.update",
+      "any_of": [
+        {
+          "arguments": {
+            "majorDimension": "ROWS",
+            "range": "Control!H31",
+            "spreadsheetId": "sheet-029",
+            "valueRenderOption": "UNFORMATTED_VALUE"
+          },
+          "expected_result_contains": {
+            "majorDimension": "ROWS",
+            "range": "Control!H31"
+          },
+          "match": "result_contains",
+          "tool": "google_sheets.spreadsheets.values.get"
+        }
+      ],
+      "description": "Reopened the task-scoped google_sheets.spreadsheets.values.update result through google_sheets.spreadsheets.values.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "majorDimension": "ROWS",
+        "range": "Control!H31"
+      },
+      "id": "verify_collaboration_01",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "requestBody.values"
+      ]
+    },
+    {
+      "after_tool": "gmail.messages.send",
+      "any_of": [
+        {
+          "arguments": {
+            "format": "full",
+            "id": "sent-029",
+            "userId": "me"
+          },
+          "expected_result_contains": {
+            "id": "sent-029",
+            "threadId": "thread-029"
+          },
+          "match": "result_contains",
+          "tool": "gmail.messages.get"
+        }
+      ],
+      "description": "Reopened the task-scoped gmail.messages.send result through gmail.messages.get and confirmed the agent's actual written value persisted instead of trusting the mutation acknowledgement.",
+      "expected_result_contains": {
+        "id": "sent-029",
+        "threadId": "thread-029"
+      },
+      "id": "verify_collaboration_02",
+      "materializes_new_record": true,
+      "milestone_id": "verification.readback",
+      "weight": 1.0,
+      "write_argument_projection_paths": [
+        "raw"
+      ]
     }
   ]
 }
