@@ -1,3 +1,1 @@
 Period close is approaching and this order is physically unfinished despite an in-period completion date. Establish what work is actually complete, the first qualified next-period slot, and the customer and accounting effect of moving it. Revise the dates without falsely completing or reversing valid current-period activity.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

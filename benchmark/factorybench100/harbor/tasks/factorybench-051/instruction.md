@@ -1,3 +1,1 @@
 Plated busbars have arrived and quality must decide what inspection applies before production can use them. Identify the current plan for this supplier, item, and lot, tell the floor what quantity can be tested now and when a result is possible, and create the inspection record only for the supported receipt.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

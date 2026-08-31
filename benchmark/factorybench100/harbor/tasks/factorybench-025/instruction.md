@@ -1,3 +1,1 @@
 Reliability wants to know whether the repeated bearing alarm has crossed the threshold for planned maintenance or is still noise. Determine what events genuinely count, when the work can be done without disrupting protected production, and how a recurring program compares with one-time repair or continued monitoring. Record the approved decision.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

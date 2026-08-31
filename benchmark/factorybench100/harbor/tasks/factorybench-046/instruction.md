@@ -1,3 +1,1 @@
 The incumbent molded-parts source is constrained and procurement wants to use an alternate under conditions. Decide whether the alternate has cleared the necessary risk and quality evidence, how much demand the trial approval can cover, and what remains exposed if it is not used. Create only the supply allowed by the conditional approval.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

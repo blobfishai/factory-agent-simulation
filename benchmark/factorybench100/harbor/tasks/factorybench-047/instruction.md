@@ -1,3 +1,1 @@
 Our open commitments to one supplier may have crossed the concentration threshold. Establish the real exposure after exclusions, compare the approved mitigation with doing nothing or moving spend immediately, and explain the operational consequence of each. Record the supplier acknowledgment that is actually supported and escalate the remaining risk.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

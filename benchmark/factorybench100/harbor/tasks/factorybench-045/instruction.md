@@ -1,3 +1,1 @@
 Metrology submitted an invoice without a purchase order and needs a payment decision before the close. Determine whether the service, coding, approval, supplier site, and amount support a legitimate non-PO entry, and identify the safest fallback if they do not. Enter only the approved invoice rather than inventing purchasing support.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

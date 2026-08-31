@@ -1,3 +1,1 @@
 The line is down for a component shortage and planners need to know what supply action actually restores it. Calculate the uncovered need and the first usable arrival, compare emergency buying with transfer or waiting for firm inbound, and show which option protects the next production window. Create supply only for the net gap.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

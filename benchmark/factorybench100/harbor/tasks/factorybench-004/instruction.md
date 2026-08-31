@@ -1,3 +1,1 @@
 The controller configuration on an open customer order is obsolete, but several similar replacement records are circulating. Determine which open units are genuinely covered by the released change, explain what cannot be touched, and decide whether substitution, waiting for the old part, or asking the customer for a deviation is the safest path. Apply the authorized choice.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

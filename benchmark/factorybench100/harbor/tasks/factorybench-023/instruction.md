@@ -1,3 +1,1 @@
 The current shop cannot finish the electrical portion of this repair, while another internal shop and a contractor both claim availability. Determine which destination is actually qualified and free, what each option does to return-to-service, and whether moving the work is within authority. Reroute the operation to the best approved shop.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

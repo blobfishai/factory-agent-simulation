@@ -1,3 +1,1 @@
 The primary assembly cell is down after a spindle failure and the customer order is exposed. Find the earliest qualified recovery plan that does not displace protected work, compare it with waiting for repair and adding an extra shift, and show operations the cost and completion impact. Reroute the operation if the best choice is already approved.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

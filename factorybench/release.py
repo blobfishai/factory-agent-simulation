@@ -45,6 +45,14 @@ LEADERBOARD_POLICIES = (
     "wrong_evidence",
     "wrong_decision",
 )
+HARBOR_MCP_SERVERS = (
+    "factorybench",
+    "gmail",
+    "google_drive",
+    "google_sheets",
+    "oracle_fusion",
+    "slack",
+)
 
 def _write_text(path: Path, value: str, *, executable: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -744,6 +752,7 @@ def _harbor_task(root: Path, task: dict[str, Any]) -> None:
         environment / "task.json",
         {
             "task_id": task["task_id"],
+            "benchmark_version": BENCHMARK_VERSION,
             "title": task["title"],
             "instruction": task["instruction"],
             "family": task["family"],
@@ -801,14 +810,14 @@ CMD ["python3", "/opt/factorybench/service.py"]
         """services:
   main:
     depends_on:
-      erp:
+      world:
         condition: service_healthy
     environment:
-      FACTORYBENCH_SERVICE_URL: http://erp:8765/call
+      FACTORYBENCH_MCP_BASE: http://world:8765/mcp
     networks: [agent-egress, factorybench]
     volumes:
       - factorybench-evidence:/var/lib/factorybench-evidence:ro
-  erp:
+  world:
     build:
       context: .
       dockerfile: Dockerfile.service
@@ -832,10 +841,17 @@ volumes:
     )
     _write_text(
         task_dir / "instruction.md",
-        task["instruction"]
-        + "\n\nThe isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.\n",
+        task["instruction"] + "\n",
     )
     description = json.dumps(task["instruction"])
+    mcp_servers = "\n".join(
+        f'''[[environment.mcp_servers]]
+name = "{server}"
+transport = "streamable-http"
+url = "http://world:8765/mcp/{server}"
+'''
+        for server in HARBOR_MCP_SERVERS
+    )
     _write_text(
         task_dir / "task.toml",
         f'''schema_version = "1.4"
@@ -862,6 +878,7 @@ memory_mb = 1024
 storage_mb = 2048
 gpus = 0
 
+{mcp_servers}
 [metadata]
 benchmark = "FactoryBench-100"
 world_id = "{WORLD_ID}"
