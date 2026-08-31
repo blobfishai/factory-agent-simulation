@@ -1,3 +1,1 @@
 A safety interlock was bypassed and production is asking when the asset can run again. Establish the actual equipment exposure and repair scope, compare qualified internal and external recovery options, and identify the earliest safe return-to-service. Open the corrective work without releasing the asset beyond the safety approval.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

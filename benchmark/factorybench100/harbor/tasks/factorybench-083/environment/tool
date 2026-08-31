@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Agent-facing CLI for the protected Harbor tool service."""
+"""Terminal-friendly client for the protected Harbor MCP service."""
 
 from __future__ import annotations
 
@@ -13,19 +13,45 @@ from pathlib import Path
 from typing import Any
 
 
-def _call_service(tool: str, arguments: dict[str, Any]) -> dict[str, Any]:
-    url = os.environ.get("FACTORYBENCH_SERVICE_URL", "http://127.0.0.1:8765/call")
+def _call_service(
+    definition: dict[str, Any], arguments: dict[str, Any]
+) -> tuple[dict[str, Any], bool]:
+    base = os.environ.get("FACTORYBENCH_MCP_BASE", "http://127.0.0.1:8765/mcp")
+    server = definition["_meta"]["factorybench"]["server"]
+    url = f"{base.rstrip('/')}/{server}"
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {"name": definition["name"], "arguments": arguments},
+    }
     request = urllib.request.Request(
         url,
-        data=json.dumps({"tool": tool, "arguments": arguments}).encode(),
-        headers={"Content-Type": "application/json"},
+        data=json.dumps(payload).encode(),
+        headers={
+            "Accept": "application/json, text/event-stream",
+            "Content-Type": "application/json",
+            "MCP-Protocol-Version": "2025-06-18",
+        },
         method="POST",
     )
     last_error: Exception | None = None
     for attempt in range(20):
         try:
             with urllib.request.urlopen(request, timeout=5) as response:
-                return json.loads(response.read())
+                rpc = json.loads(response.read())
+                if "error" in rpc:
+                    return {"error": str(rpc["error"])}, True
+                result = rpc.get("result") or {}
+                content = result.get("content") or []
+                text = content[0].get("text", "{}") if content else "{}"
+                try:
+                    parsed = json.loads(text)
+                except json.JSONDecodeError:
+                    parsed = {"result": text}
+                if not isinstance(parsed, dict):
+                    parsed = {"result": parsed}
+                return parsed, bool(result.get("isError"))
         except (urllib.error.URLError, TimeoutError) as exc:
             last_error = exc
             if attempt < 19:
@@ -58,9 +84,9 @@ def main() -> None:
         raise SystemExit(f"arguments must be valid JSON: {exc}") from exc
     if not isinstance(arguments, dict):
         raise SystemExit("arguments must be a JSON object")
-    result = _call_service(name, arguments)
+    result, is_error = _call_service(definition, arguments)
     print(json.dumps(result, indent=2, sort_keys=True))
-    if "error" in result:
+    if is_error or "error" in result:
         raise SystemExit(1)
 
 

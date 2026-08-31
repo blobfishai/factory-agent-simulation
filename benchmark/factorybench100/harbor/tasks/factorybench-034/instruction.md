@@ -1,3 +1,1 @@
 The calibration-services PO looks complete, but the close must not hide an unaccepted service or unmatched invoice. Determine whether every dollar is received, accepted, invoiced, and approved, explain the remaining exposure if any, and decide whether closing now or leaving it open is correct. Apply the supported close action.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

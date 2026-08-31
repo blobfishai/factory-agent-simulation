@@ -1,3 +1,1 @@
 The pump teardown found more damage than we expected, and operations needs it for next week's run. When can we credibly return it to service, what is actually holding that date, and would expediting the part or moving the repair help enough to justify it? If the approved scope covers the best plan, update the commitment and let operations know.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

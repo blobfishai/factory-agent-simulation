@@ -7,7 +7,8 @@ import zipfile
 from pathlib import Path
 
 from factorybench.catalog import WORLD_ID, build_catalog
-from factorybench.release import HARBOR_PYTHON_IMAGE, _write_xlsx
+from factorybench.harbor_service import grouped_tool_definitions, mcp_response
+from factorybench.release import HARBOR_MCP_SERVERS, HARBOR_PYTHON_IMAGE, _write_xlsx
 from factorybench.server import handle_request, tool_definitions
 from factorybench.world import FactoryWorld
 
@@ -149,6 +150,9 @@ def test_harbor_tasks_protect_authoritative_state() -> None:
     dockerfile = (task_dir / "environment" / "Dockerfile").read_text()
     service_dockerfile = (task_dir / "environment" / "Dockerfile.service").read_text()
     compose = (task_dir / "environment" / "docker-compose.yaml").read_text()
+    service = (task_dir / "environment" / "service.py").read_text()
+    tool_client = (task_dir / "environment" / "tool").read_text()
+    instruction = (task_dir / "instruction.md").read_text()
     environment_task = json.loads((task_dir / "environment" / "task.json").read_text())
     verifier = (task_dir / "tests" / "verify.py").read_text()
 
@@ -156,15 +160,27 @@ def test_harbor_tasks_protect_authoritative_state() -> None:
     assert "contracts.py" in environment_files
     assert definition["agent"]["user"] == "agent"
     assert definition["verifier"]["user"] == "root"
+    assert [server["name"] for server in definition["environment"]["mcp_servers"]] == list(
+        HARBOR_MCP_SERVERS
+    )
+    assert all(
+        server["transport"] == "streamable-http"
+        and server["url"] == f"http://world:8765/mcp/{server['name']}"
+        for server in definition["environment"]["mcp_servers"]
+    )
     assert f"FROM {HARBOR_PYTHON_IMAGE}" in dockerfile
     assert "runtime.py" not in dockerfile
     assert "task.json" not in dockerfile
     assert f"FROM {HARBOR_PYTHON_IMAGE}" in service_dockerfile
     assert "COPY runtime.py contracts.py schema.sql service.py task.json" in service_dockerfile
     assert "0700 /var/lib/factorybench" in service_dockerfile
-    assert "http://erp:8765/call" in compose
+    assert "FACTORYBENCH_MCP_BASE: http://world:8765/mcp" in compose
+    assert 'self.path != "/call"' not in service
+    assert 'self.path.startswith("/mcp/")' in service
+    assert '"method": "tools/call"' in tool_client
     assert "factorybench-evidence:/var/lib/factorybench-evidence:ro" in compose
     assert environment_task["world"]["id"] == WORLD_ID
+    assert instruction == environment_task["instruction"] + "\n"
     assert len(environment_task["seed_tables"]["evidence_files"]) == 28
     assert environment_task["answer_schema"]["additionalProperties"] is False
     assert "urlopen" not in verifier
@@ -196,10 +212,70 @@ def test_mcp_initialize_and_tool_list(tmp_path: Path) -> None:
     with FactoryWorld.fresh(task, tmp_path / "world.db") as world:
         initialized = handle_request(world, {"jsonrpc": "2.0", "id": 1, "method": "initialize"})
         listed = handle_request(world, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
-    assert initialized["result"]["serverInfo"] == {"name": "factorybench", "version": "3.3.4"}
+    assert initialized["result"]["serverInfo"] == {"name": "factorybench", "version": "3.3.5"}
     assert len(listed["result"]["tools"]) == len(tool_definitions())
     submit = next(tool for tool in listed["result"]["tools"] if tool["name"] == "factorybench.submit_answer")
     assert submit["inputSchema"] == task["answer_schema"]
+
+
+def test_harbor_streamable_http_mcp_contract_is_provider_scoped(tmp_path: Path) -> None:
+    task = build_catalog()[0]
+    with FactoryWorld.fresh(task, tmp_path / "world.db") as world:
+        grouped = grouped_tool_definitions(task)
+        initialized = mcp_response(
+            world,
+            grouped,
+            "oracle_fusion",
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {"protocolVersion": "2025-06-18"},
+            },
+        )
+        listed = mcp_response(
+            world,
+            grouped,
+            "oracle_fusion",
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
+        )
+        context = mcp_response(
+            world,
+            grouped,
+            "factorybench",
+            {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "tools/call",
+                "params": {"name": "factorybench.context.get", "arguments": {}},
+            },
+        )
+        wrong_server = mcp_response(
+            world,
+            grouped,
+            "gmail",
+            {
+                "jsonrpc": "2.0",
+                "id": 4,
+                "method": "tools/call",
+                "params": {"name": "oracle_fusion.invoices.get", "arguments": {}},
+            },
+        )
+
+    assert set(grouped) == set(HARBOR_MCP_SERVERS)
+    assert initialized["result"]["protocolVersion"] == "2025-06-18"
+    assert initialized["result"]["serverInfo"] == {
+        "name": "factorybench-oracle_fusion",
+        "version": "3.3.5",
+    }
+    assert len(listed["result"]["tools"]) == 67
+    assert all(
+        tool["_meta"]["factorybench"]["server"] == "oracle_fusion"
+        for tool in listed["result"]["tools"]
+    )
+    assert context["result"]["isError"] is False
+    assert context["result"]["structuredContent"]["task"]["task_id"] == "factorybench-001"
+    assert wrong_server["result"]["isError"] is True
 
 
 def test_environment_context_exposes_evidence_and_mounted_systems(tmp_path: Path) -> None:

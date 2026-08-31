@@ -1,3 +1,1 @@
 The original relay will miss the install window and engineering says a substitute may be available. Work out how much remaining demand the substitute can legally cover, what stock or orders fall outside its effectivity, and whether using it beats waiting or reducing the build. Change only the supported material requirement.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

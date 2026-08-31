@@ -19,8 +19,8 @@ It ships no Oracle code, proprietary UI, or customer data.
 - High-level employee requests that leave the investigation path to the agent
 - Scored discovery-before-mutation evidence, persisted provider payloads, and post-write readback
 - Task-specific calculations, decisions, state, answer, containment, and tool-validity checks
-- Replayed oracle trajectories, exact deterministic replay, and ten measured negative controls
-- Harbor isolation with the ERP state and trace in a private root-owned sidecar
+- Replayed oracle trajectories, exact deterministic replay, and twelve measured negative controls
+- Harbor isolation with six Streamable HTTP MCP endpoints backed by ERP state and a trace in a private root-owned sidecar
 - Upload-ready Hugging Face and Harbor distributions
 - Website data for the public task, asset, environment, and trajectory explorer
 
@@ -34,9 +34,10 @@ The v3.3 release executes 1,400 canonical trials:
 
 - 100/100 reference-oracle strict passes at 100.00 FactoryScore
 - 100/100 exact deterministic replay matches
-- 1,000/1,000 correct rejections across no-op, shortcut, state-only,
+- 1,200/1,200 correct rejections across no-op, shortcut, state-only,
   incomplete-read, write-before-read, missing-readback, unauthorized-write,
-  wrong-value, wrong-decision, and wrong-evidence controls
+  wrong-value, wrong-decision, wrong-evidence, wrong-target, and
+  keyword-stuffing controls
 - 300/300 supplemental single-mutation omissions detected
 
 Every decision mode grades the outcome date of all three alternatives, not only
@@ -82,7 +83,8 @@ factorybench-mcp \
 ```
 
 The server accepts `initialize`, `tools/list`, and `tools/call` JSON-RPC messages
-on stdin. The generated Harbor tasks also expose a terminal-friendly `tool` CLI.
+on stdin. Generated Harbor tasks declare six Streamable HTTP MCP endpoints; the
+terminal-friendly `tool` client sends the same MCP `tools/call` requests.
 Inside Harbor, the agent container has no database, runtime, verifier, or gold
 state; it can reach the private ERP sidecar only through the declared tools.
 The checked-in `benchmark/factorybench100/environment/mcp.json` can be copied

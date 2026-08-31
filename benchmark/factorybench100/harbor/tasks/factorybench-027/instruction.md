@@ -1,3 +1,1 @@
 Reliability is preparing the quarterly compressor plan and wants a clean forecast rather than every row in the asset roster. Determine which active compressors are genuinely due, which rows are duplicates or fall in blackout periods, and whether the available shutdown capacity can absorb them. Generate only the supported forecast horizon.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

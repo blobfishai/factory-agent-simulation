@@ -1,3 +1,1 @@
 A supplier incident damaged plant equipment and operations needs a repair plan plus a defensible vendor record. Determine the affected asset and supported damage scope, the earliest credible recovery, and whether internal repair or vendor recovery is better. Open the bounded maintenance work and preserve the supplier impact.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

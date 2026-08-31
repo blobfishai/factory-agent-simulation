@@ -1,3 +1,1 @@
 Operations has weekend-overtime approval for part of the backlog, but not every open order belongs in that scope. Determine which work actually benefits, whether qualified inspection and work-center coverage are available, and how the approved weekend changes completion versus the weekday plan. Schedule only the authorized recovery.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.

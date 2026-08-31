@@ -1,3 +1,1 @@
 Quality has issued a disposition for failed units on the active order, but we must not rework units already accepted or scrapped. Decide exactly which material the disposition covers, whether rework is preferable to scrap or a use-as-is request, and when the work can finish. Add the rework step only if the released disposition supports it.
-
-The isolated world is available through `tool list`, `tool schema NAME`, and `tool call NAME JSON`. Investigate as needed; the benchmark does not prescribe a call order. Record the structured decision through `factorybench.submit_answer` when the business work is complete.
