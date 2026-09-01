@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 import factorybench.release as release_module
 from factorybench.catalog import build_catalog, catalog_fingerprint, task_fingerprint
 from factorybench.harbor_results import import_harbor_job
@@ -17,9 +19,9 @@ def test_harbor_import_pins_each_trial_and_the_complete_catalog(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    task = build_catalog()[0]
+    tasks = build_catalog()
+    task = tasks[0]
     job = tmp_path / "job"
-    trial = job / "trial-001"
     _write_json(
         job / "result.json",
         {
@@ -29,33 +31,38 @@ def test_harbor_import_pins_each_trial_and_the_complete_catalog(
             "stats": {"n_errored_trials": 0},
         },
     )
-    _write_json(
-        trial / "result.json",
-        {
-            "started_at": "2026-01-12T08:00:00Z",
-            "finished_at": "2026-01-12T08:05:00Z",
-            "task_checksum": "harbor-task-sha",
-            "exception_info": None,
-        },
-    )
-    _write_json(
-        trial / "verifier" / "verdict.json",
-        {
-            "task_id": task["task_id"],
-            "strict_pass": True,
-            "factory_score": 100.0,
-            "passed_weight": 1.0,
-            "total_weight": 1.0,
-        },
-    )
-    _write_json(trial / "verifier" / "trace.json", {"trace": [{"success": True}]})
-    _write_json(
-        trial / "agent" / "trajectory.json",
-        {
-            "agent": {"model_name": "test-model", "version": "1.0.0"},
-            "final_metrics": {},
-        },
-    )
+    for index, catalog_task in enumerate(tasks, start=1):
+        trial = job / f"trial-{index:03d}"
+        _write_json(
+            trial / "result.json",
+            {
+                "started_at": "2026-01-12T08:00:00Z",
+                "finished_at": "2026-01-12T08:05:00Z",
+                "task_checksum": f"harbor-task-sha-{index:03d}",
+                "exception_info": None,
+            },
+        )
+        _write_json(
+            trial / "verifier" / "verdict.json",
+            {
+                "task_id": catalog_task["task_id"],
+                "strict_pass": True,
+                "factory_score": 100.0,
+                "passed_weight": 1.0,
+                "total_weight": 1.0,
+            },
+        )
+        _write_json(
+            trial / "verifier" / "trace.json",
+            {"trace": [{"success": True}]},
+        )
+        _write_json(
+            trial / "agent" / "trajectory.json",
+            {
+                "agent": {"model_name": "test-model", "version": "1.0.0"},
+                "final_metrics": {},
+            },
+        )
 
     output = tmp_path / "model-runs"
     manifest = import_harbor_job(
@@ -68,6 +75,7 @@ def test_harbor_import_pins_each_trial_and_the_complete_catalog(
     )
 
     assert manifest["catalog_sha256"] == catalog_fingerprint(build_catalog())
+    assert manifest["aggregate"]["tasks"] == 100
     assert manifest["trials"][0]["benchmark_task_sha256"] == task_fingerprint(task)
     trial_artifact = json.loads(
         (output / manifest["trials"][0]["artifact"]).read_text(encoding="utf-8")
@@ -80,3 +88,17 @@ def test_harbor_import_pins_each_trial_and_the_complete_catalog(
     manifest["trials"][0]["benchmark_task_sha256"] = "stale-contract"
     _write_json(output / "contract-pinned-run.json", manifest)
     assert release_module._load_model_runs() == []
+
+    missing_result = job / "trial-100" / "result.json"
+    missing_result.rename(missing_result.with_suffix(".missing"))
+    partial_output = tmp_path / "partial-model-runs"
+    with pytest.raises(ValueError, match="complete current FactoryBench catalog"):
+        import_harbor_job(
+            job,
+            partial_output,
+            run_slug="partial-run",
+            selection="incomplete test run",
+            reasoning_effort="max",
+            harbor_version="test",
+        )
+    assert not partial_output.exists()

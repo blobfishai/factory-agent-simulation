@@ -74,6 +74,7 @@ def import_harbor_job(
 
     tasks = {task["task_id"]: task for task in build_catalog()}
     trials: list[dict[str, Any]] = []
+    trial_artifacts: list[tuple[Path, dict[str, Any]]] = []
     for trial_dir in _trial_dirs(job_dir):
         result = _read_json(trial_dir / "result.json")
         if result.get("exception_info") is not None:
@@ -110,7 +111,8 @@ def import_harbor_job(
             "verdict": verdict,
             "trace": trace,
         }
-        _write_json(output / run_slug / "trials" / f"{task_id}.json", trial_record)
+        artifact_path = output / run_slug / "trials" / f"{task_id}.json"
+        trial_artifacts.append((artifact_path, trial_record))
         trials.append(
             {
                 key: value
@@ -124,6 +126,17 @@ def import_harbor_job(
         raise ValueError("Harbor job contains no completed trials")
     if len({trial["task_id"] for trial in trials}) != len(trials):
         raise ValueError("Harbor job contains duplicate task trials")
+    observed_task_ids = {trial["task_id"] for trial in trials}
+    expected_task_ids = set(tasks)
+    if observed_task_ids != expected_task_ids:
+        missing = sorted(expected_task_ids - observed_task_ids)
+        unexpected = sorted(observed_task_ids - expected_task_ids)
+        raise ValueError(
+            "Harbor job must contain the complete current FactoryBench catalog; "
+            f"missing={missing}, unexpected={unexpected}"
+        )
+    for artifact_path, trial_record in trial_artifacts:
+        _write_json(artifact_path, trial_record)
 
     scores = [trial["score"] for trial in trials]
     calls = [trial["tool_calls"] for trial in trials]
