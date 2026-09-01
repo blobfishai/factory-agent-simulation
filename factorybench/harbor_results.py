@@ -540,6 +540,8 @@ def _validate_runtime_overlay(
         "semantic_file_count",
         "semantic_tree_sha256",
         "unchanged_contract",
+        "purpose",
+        "modified_path_per_task",
         "runtime",
         "runtime_mount",
     }
@@ -561,6 +563,9 @@ def _validate_runtime_overlay(
         or overlay["semantic_tree_sha256"] != semantic_tree_sha256
         or not isinstance(overlay.get("unchanged_contract"), str)
         or not overlay["unchanged_contract"].strip()
+        or not isinstance(overlay.get("purpose"), str)
+        or not overlay["purpose"].strip()
+        or overlay.get("modified_path_per_task") is not None
     ):
         raise ValueError("runtime overlay does not bind the complete current release")
     if "/Users/" in json.dumps(overlay, sort_keys=True):

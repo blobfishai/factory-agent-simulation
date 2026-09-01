@@ -260,6 +260,8 @@ def test_harbor_import_pins_each_trial_and_the_complete_catalog(
             "semantic_file_count": semantic_file_count,
             "semantic_tree_sha256": semantic_tree_sha256,
             "unchanged_contract": "Every released semantic file is unchanged.",
+            "purpose": "Mount one sealed runtime without changing task semantics.",
+            "modified_path_per_task": None,
             "runtime": {
                 "codex": "1.0.0",
                 "node": "22.23.2",
@@ -361,6 +363,23 @@ def test_harbor_import_pins_each_trial_and_the_complete_catalog(
             runtime_overlay_path=unsafe_overlay_path,
         )
     assert not unsafe_overlay_output.exists()
+
+    modified_overlay = json.loads(runtime_overlay.read_text(encoding="utf-8"))
+    modified_overlay["modified_path_per_task"] = "environment/Dockerfile"
+    modified_overlay_path = tmp_path / "modified-runtime-overlay.json"
+    _write_json(modified_overlay_path, modified_overlay)
+    modified_overlay_output = tmp_path / "modified-overlay-run"
+    with pytest.raises(ValueError, match="complete current release"):
+        import_harbor_job(
+            job,
+            modified_overlay_output,
+            run_slug="modified-overlay-run",
+            selection="semantic modification rejection test run",
+            reasoning_effort="max",
+            harbor_version="test",
+            runtime_overlay_path=modified_overlay_path,
+        )
+    assert not modified_overlay_output.exists()
 
     tampered_overlay = json.loads(runtime_overlay.read_text(encoding="utf-8"))
     tampered_overlay["runtime_mount"]["tree_sha256"] = "0" * 64

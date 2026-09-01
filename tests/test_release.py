@@ -49,6 +49,17 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
     assert website["benchmark"]["taskCount"] == 100
     assert len(website["benchmark"]["categories"]) == 20
     assert website["benchmark"]["world"]["documents"] == 2800
+    assert website["scoring"] == {
+        "categories": [
+            {
+                "description": "100 × passed task-specific deterministic criterion weight / available criterion weight, averaged over tasks.",
+                "key": "factory_score",
+                "label": "FactoryScore",
+                "weight": 100,
+            }
+        ],
+        "strictPassTracked": False,
+    }
     assert len(hf_rows) == 100
     assert len(harbor_tasks) == 100
     assert len(harbor_manifest["tasks"]) == 100
@@ -57,28 +68,37 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
     assert not {"approve_invoice", "hold_invoice"} & {tool["name"] for tool in website["tools"]}
 
     model_rows = [row for row in website["leaderboard"] if row["kind"] == "model"]
-    assert all(row["tasks"] == 100 for row in model_rows)
+    assert len(model_rows) == 1
+    model_row = model_rows[0]
+    assert model_row["name"] == "gpt-5.6-luna"
+    assert model_row["rank"] == 1
+    assert model_row["tasks"] == 100
+    assert model_row["score"] == 76.2
+    assert model_row["categoryScores"] == {"factory_score": 76.2}
+    assert "one attempt per task, zero retries" in model_row["note"]
     harbor_dataset_files = harbor_manifest.get("files") or []
-    if model_rows:
-        assert harbor_dataset_files == [
-            {
-                "path": "model-runs.json",
-                "digest": (
-                    "sha256:"
-                    + hashlib.sha256(
-                        (RELEASE / "harbor" / "model-runs.json").read_bytes()
-                    ).hexdigest()
-                ),
-            }
-        ]
-        harbor_model_runs = json.loads(
-            (RELEASE / "harbor" / "model-runs.json").read_text()
-        )
-        assert harbor_model_runs["schema_version"] == "factorybench.harbor-model-runs.v1"
-        assert harbor_model_runs["benchmark_version"] == website["benchmark"]["version"]
-        assert len(harbor_model_runs["runs"]) == len(model_rows)
-    else:
-        assert harbor_dataset_files == []
+    assert harbor_dataset_files == [
+        {
+            "path": "model-runs.json",
+            "digest": (
+                "sha256:"
+                + hashlib.sha256(
+                    (RELEASE / "harbor" / "model-runs.json").read_bytes()
+                ).hexdigest()
+            ),
+        }
+    ]
+    harbor_model_runs = json.loads(
+        (RELEASE / "harbor" / "model-runs.json").read_text()
+    )
+    assert harbor_model_runs["schema_version"] == "factorybench.harbor-model-runs.v1"
+    assert harbor_model_runs["benchmark_version"] == website["benchmark"]["version"]
+    assert len(harbor_model_runs["runs"]) == 1
+    assert len(harbor_model_runs["runs"][0]["trial_artifacts"]) == 100
+    assert (
+        harbor_model_runs["runs"][0]["runtime_overlay_artifact"]["path"]
+        == "model-runs/gpt-5.6-luna-v3.3.5-full-100/runtime-overlay.json"
+    )
     semantic_rows = []
     harbor_task_root = RELEASE / "harbor" / "tasks"
     for path in sorted(harbor_task_root.rglob("*")):

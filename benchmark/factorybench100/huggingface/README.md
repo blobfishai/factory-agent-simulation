@@ -64,11 +64,13 @@ These rows are measured controls, not claims about frontier models.
 
 ## Pinned model runs
 
-No version-pinned model run is published for this release.
+| Model | Harness | Coverage | FactoryScore | Selection |
+|---|---|---:|---:|---|
+| [gpt-5.6-luna](model-runs/gpt-5.6-luna-v3.3.5-full-100.json) | Harbor 0.21.0 / codex 0.151.0 / max | 100/100 | 76.20 | Full 100/100-task exact-release run; Codex 0.151.0, maximum reasoning, web search disabled, one attempt per task, zero retries. |
 
-Coverage is part of the result. A stratified subset is not presented as a
-100-task score. Full manifests and task-level traces are mirrored under
-`model-runs/`.
+Only exact-release 100/100-task runs are eligible. Full manifests, final model
+responses, deterministic verifier verdicts, and task-level traces are mirrored
+under `model-runs/`.
 
 ## Fields
 

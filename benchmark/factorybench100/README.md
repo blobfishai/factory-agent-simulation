@@ -41,9 +41,11 @@ Release qualification also removes every reference mutation individually. All
 
 ## Pinned model runs
 
-No version-pinned model run is published for this release.
+| Model | Harness | Coverage | FactoryScore | Selection |
+|---|---|---:|---:|---|
+| [gpt-5.6-luna](model-runs/gpt-5.6-luna-v3.3.5-full-100.json) | Harbor 0.21.0 / codex 0.151.0 / max | 100/100 | 76.20 | Full 100/100-task exact-release run; Codex 0.151.0, maximum reasoning, web search disabled, one attempt per task, zero retries. |
 
-Subset coverage is explicit and is never extrapolated to all 100 tasks.
+Only exact-release 100/100-task runs are eligible for the model leaderboard.
 
 ## Layout
 
