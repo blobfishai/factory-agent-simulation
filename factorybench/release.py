@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import html
 import json
+import math
 import shutil
 import statistics
 import tempfile
@@ -25,6 +26,8 @@ from .catalog import (
     task_fingerprint,
 )
 from .evaluation import NEGATIVE_POLICIES, policy_steps, qualify, run_episode
+from .harbor_receipts import harbor_task_digest
+from .harbor_results import _assert_public_value_safe, _validate_runtime_overlay
 from .scenarios import FAMILY_DESCRIPTIONS, FAMILY_LABELS
 from .server import tool_definitions
 from .world import READ_TOOLS
@@ -67,6 +70,16 @@ def _write_json(path: Path, value: Any) -> None:
 
 def _write_jsonl(path: Path, values: list[dict[str, Any]]) -> None:
     _write_text(path, "".join(json.dumps(value, sort_keys=True) + "\n" for value in values))
+
+
+def _canonical_json_sha256(value: Any) -> str:
+    payload = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _write_pdf(path: Path, text: str) -> None:
@@ -199,7 +212,26 @@ def _load_model_runs() -> list[dict[str, Any]]:
     current_task_fingerprints = {
         task["task_id"]: task_fingerprint(task) for task in current_tasks
     }
+    current_task_ids = set(current_task_fingerprints)
     current_catalog_fingerprint = catalog_fingerprint(current_tasks)
+    released_task_digests = {
+        task_id: harbor_task_digest(
+            REPO_ROOT / "benchmark" / "factorybench100" / "harbor" / "tasks" / task_id
+        )[0]
+        for task_id in current_task_ids
+    }
+
+    def artifact_path(relative: Any, *, expected: str) -> Path:
+        if not isinstance(relative, str) or relative != expected:
+            raise ValueError(f"model-run artifact path must be {expected}")
+        path = Path(relative)
+        if path.is_absolute() or ".." in path.parts:
+            raise ValueError(f"model-run artifact escapes its release root: {relative}")
+        resolved = (MODEL_RUNS_ROOT / path).resolve()
+        if not resolved.is_relative_to(MODEL_RUNS_ROOT.resolve()) or not resolved.is_file():
+            raise ValueError(f"missing model-run artifact: {resolved}")
+        return resolved
+
     runs = []
     for path in sorted(MODEL_RUNS_ROOT.glob("*.json")):
         run = _read_json(path)
@@ -209,32 +241,178 @@ def _load_model_runs() -> list[dict[str, Any]]:
             continue
         if run.get("catalog_sha256") != current_catalog_fingerprint:
             continue
+        run_slug = run.get("run_slug")
+        model = run.get("model")
+        if (
+            run.get("benchmark") != BENCHMARK_NAME
+            or not isinstance(run_slug, str)
+            or run_slug != path.stem
+            or not isinstance(run.get("job_id"), str)
+            or not run["job_id"]
+            or not isinstance(run.get("selection"), str)
+            or not run["selection"].strip()
+            or not isinstance(model, dict)
+            or not all(
+                isinstance(model.get(key), str) and model[key]
+                for key in ("name", "provider", "agent", "agent_version", "reasoning_effort")
+            )
+        ):
+            raise ValueError(f"invalid model-run identity: {path}")
         trials = run.get("trials")
-        if not isinstance(trials, list) or len(trials) != run.get("aggregate", {}).get("tasks"):
+        aggregate = run.get("aggregate")
+        if (
+            not isinstance(trials, list)
+            or not isinstance(aggregate, dict)
+            or len(trials) != len(current_task_ids)
+            or aggregate.get("tasks") != len(current_task_ids)
+        ):
             raise ValueError(f"model-run trial count mismatch: {path}")
+        trial_ids = [
+            trial.get("task_id") if isinstance(trial, dict) else None
+            for trial in trials
+        ]
+        if len(set(trial_ids)) != len(trial_ids) or set(trial_ids) != current_task_ids:
+            raise ValueError(f"model-run does not cover the complete catalog: {path}")
         if any(
             trial.get("task_id") not in current_task_fingerprints
             or trial.get("benchmark_task_sha256")
             != current_task_fingerprints[trial.get("task_id")]
+            or trial.get("harbor_task_digest")
+            != released_task_digests[trial.get("task_id")]
             for trial in trials
         ):
             continue
         runtime_overlay = run.get("runtime_overlay")
-        if runtime_overlay is not None:
-            if not isinstance(runtime_overlay, dict):
-                raise ValueError(f"invalid model-run runtime overlay: {path}")
-            if runtime_overlay.get("benchmark_version") != BENCHMARK_VERSION:
-                continue
+        if not isinstance(runtime_overlay, dict):
+            raise ValueError(f"current model run lacks its sealed runtime overlay: {path}")
+        runtime_mount = runtime_overlay.get("runtime_mount")
+        runtime_targets = (
+            runtime_mount.get("targets") if isinstance(runtime_mount, dict) else None
+        )
+        if not isinstance(runtime_targets, list) or not all(
+            isinstance(target, str) for target in runtime_targets
+        ):
+            raise ValueError(f"invalid model-run runtime overlay targets: {path}")
+        _validate_runtime_overlay(
+            runtime_overlay,
+            task_count=len(current_task_ids),
+            mounted_targets=tuple(sorted(runtime_targets)),
+            agent_version=model["agent_version"],
+            verify_source=False,
+        )
+        public_manifest = {
+            key: value for key, value in run.items() if key != "runtime_overlay"
+        }
+        _assert_public_value_safe(public_manifest, location=f"model run {path.name}")
+        overlay_for_safety = json.loads(json.dumps(runtime_overlay))
+        overlay_for_safety["runtime_mount"]["targets"] = [
+            "<sealed-runtime-target>" for _ in runtime_targets
+        ]
+        _assert_public_value_safe(
+            overlay_for_safety,
+            location=f"runtime overlay {path.name}",
+        )
         for trial in trials:
-            artifact = MODEL_RUNS_ROOT / str(trial["artifact"])
-            if not artifact.is_file():
-                raise ValueError(f"missing model-run trial artifact: {artifact}")
-        if runtime_overlay is not None:
-            if not runtime_overlay.get("artifact"):
-                raise ValueError(f"invalid model-run runtime overlay: {path}")
-            overlay_artifact = MODEL_RUNS_ROOT / str(runtime_overlay["artifact"])
-            if not overlay_artifact.is_file():
-                raise ValueError(f"missing model-run runtime overlay: {overlay_artifact}")
+            task_id = trial["task_id"]
+            artifact = artifact_path(
+                trial.get("artifact"),
+                expected=f"{run_slug}/trials/{task_id}.json",
+            )
+            artifact_record = _read_json(artifact)
+            _assert_public_value_safe(
+                artifact_record,
+                location=f"model trial {task_id}",
+            )
+            artifact_summary = {
+                key: value
+                for key, value in artifact_record.items()
+                if key not in {"verdict", "trace"}
+            }
+            if artifact_summary != {
+                key: value for key, value in trial.items() if key != "artifact"
+            }:
+                raise ValueError(f"model-run summary disagrees with its artifact: {artifact}")
+            verdict = artifact_record.get("verdict")
+            trace = artifact_record.get("trace")
+            if (
+                not isinstance(verdict, dict)
+                or verdict.get("task_id") != task_id
+                or not isinstance(verdict.get("strict_pass"), bool)
+                or not isinstance(trial.get("strict_pass"), bool)
+                or verdict.get("strict_pass") is not trial.get("strict_pass")
+                or not isinstance(verdict.get("factory_score"), (int, float))
+                or isinstance(verdict.get("factory_score"), bool)
+                or not math.isclose(
+                    float(verdict["factory_score"]),
+                    float(trial.get("score")),
+                    rel_tol=0,
+                    abs_tol=1e-8,
+                )
+                or not isinstance(trace, list)
+                or not all(
+                    isinstance(entry, dict)
+                    and isinstance(entry.get("tool"), str)
+                    and isinstance(entry.get("arguments"), dict)
+                    and isinstance(entry.get("success"), bool)
+                    and "result" in entry
+                    for entry in trace
+                )
+                or len(trace) != trial.get("tool_calls")
+                or sum(
+                    isinstance(entry, dict) and entry.get("success") is True
+                    for entry in trace
+                )
+                != trial.get("successful_tool_calls")
+                or sum(
+                    isinstance(entry, dict) and entry.get("success") is False
+                    for entry in trace
+                )
+                != trial.get("rejected_tool_calls")
+                or not isinstance(artifact_record.get("final_response"), str)
+                or not artifact_record["final_response"].strip()
+                or artifact_record.get("final_response_sha256")
+                != _canonical_json_sha256(artifact_record["final_response"])
+                or artifact_record.get("public_trace_sha256")
+                != _canonical_json_sha256(trace)
+            ):
+                raise ValueError(f"model-run verifier artifact is internally inconsistent: {artifact}")
+        overlay_artifact = artifact_path(
+            runtime_overlay.get("artifact"),
+            expected=f"{run_slug}/runtime-overlay.json",
+        )
+        if _read_json(overlay_artifact) != runtime_overlay:
+            raise ValueError(f"model-run runtime overlay receipt changed: {path}")
+
+        scores = [trial.get("score") for trial in trials]
+        calls = [trial.get("tool_calls") for trial in trials]
+        if (
+            not all(
+                isinstance(score, (int, float))
+                and not isinstance(score, bool)
+                and math.isfinite(float(score))
+                and 0 <= float(score) <= 100
+                for score in scores
+            )
+            or not any(float(score) > 0 for score in scores)
+            or not all(
+                isinstance(call, int) and not isinstance(call, bool) and call >= 0
+                for call in calls
+            )
+            or aggregate.get("mean_factory_score")
+            != round(statistics.mean(float(score) for score in scores), 2)
+            or aggregate.get("strict_passes")
+            != sum(trial.get("strict_pass") is True for trial in trials)
+            or aggregate.get("strict_pass_rate")
+            != round(
+                sum(trial.get("strict_pass") is True for trial in trials)
+                / len(trials)
+                * 100,
+                2,
+            )
+            or aggregate.get("average_tool_calls")
+            != round(statistics.mean(calls), 2)
+        ):
+            raise ValueError(f"model-run aggregate disagrees with its trials: {path}")
         runs.append(run)
     return runs
 
@@ -262,39 +440,60 @@ def _copy_model_run_artifacts(runs: list[dict[str, Any]], destination: Path) -> 
             shutil.copy2(source, target)
 
 
+def _harbor_model_run_bundle(runs: list[dict[str, Any]]) -> dict[str, Any]:
+    """Flatten the exact public run tree into one Harbor dataset-level file."""
+
+    bundled_runs: list[dict[str, Any]] = []
+    for run in runs:
+        run_slug = str(run["run_slug"])
+        artifacts = []
+        for trial in run["trials"]:
+            relative = str(trial["artifact"])
+            artifacts.append(
+                {
+                    "path": f"model-runs/{relative}",
+                    "record": _read_json(MODEL_RUNS_ROOT / relative),
+                }
+            )
+        runtime_overlay = run.get("runtime_overlay")
+        runtime_artifact = None
+        if runtime_overlay is not None:
+            relative = str(runtime_overlay["artifact"])
+            runtime_artifact = {
+                "path": f"model-runs/{relative}",
+                "record": _read_json(MODEL_RUNS_ROOT / relative),
+            }
+        bundled_runs.append(
+            {
+                "manifest_path": f"model-runs/{run_slug}.json",
+                "manifest": run,
+                "trial_artifacts": artifacts,
+                "runtime_overlay_artifact": runtime_artifact,
+            }
+        )
+    bundle = {
+        "schema_version": "factorybench.harbor-model-runs.v1",
+        "benchmark": BENCHMARK_NAME,
+        "benchmark_version": BENCHMARK_VERSION,
+        "runs": bundled_runs,
+    }
+    _assert_public_value_safe(bundle, location="Harbor model-run bundle")
+    return bundle
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _harbor_task_digest(task_dir: Path) -> str:
     """Match Harbor 0.21's content digest for the generated task shape."""
-
-    files: list[Path] = []
-    for name in ("task.toml", "instruction.md", "README.md"):
-        path = task_dir / name
-        if path.exists():
-            files.append(path)
-    for name in ("environment", "tests", "solution", "steps"):
-        directory = task_dir / name
-        if directory.exists():
-            files.extend(path for path in directory.rglob("*") if path.is_file())
-
-    ignored_suffixes = (".pyc", ".swp", ".swo", "~")
-    files = [
-        path
-        for path in files
-        if "__pycache__" not in path.relative_to(task_dir).parts
-        and path.name != ".DS_Store"
-        and not path.name.endswith(ignored_suffixes)
-    ]
-    outer = hashlib.sha256()
-    for path in sorted(files, key=lambda item: item.relative_to(task_dir).as_posix()):
-        relative = path.relative_to(task_dir).as_posix()
-        outer.update(f"{relative}\0{_sha256(path)}\n".encode())
-    return f"sha256:{outer.hexdigest()}"
+    return harbor_task_digest(task_dir)[0]
 
 
-def _harbor_dataset_manifest(tasks_root: Path) -> str:
+def _harbor_dataset_manifest(
+    tasks_root: Path,
+    dataset_files: tuple[Path, ...] = (),
+) -> str:
     lines = [
         "# Generated FactoryBench-100 Harbor dataset",
         "[dataset]",
@@ -314,6 +513,17 @@ def _harbor_dataset_manifest(tasks_root: Path) -> str:
                 "[[tasks]]",
                 f'name = "{task_config["task"]["name"]}"',
                 f'digest = "{_harbor_task_digest(task_dir)}"',
+            ]
+        )
+    for dataset_file in sorted(dataset_files, key=lambda path: path.name):
+        if dataset_file.parent != tasks_root.parent or "/" in dataset_file.name:
+            raise ValueError("Harbor dataset files must be top-level release files")
+        lines.extend(
+            [
+                "",
+                "[[files]]",
+                f'path = "{dataset_file.name}"',
+                f'digest = "sha256:{_sha256(dataset_file)}"',
             ]
         )
     return "\n".join(lines) + "\n"
@@ -523,7 +733,13 @@ def _website_data(
         trial = _read_json(MODEL_RUNS_ROOT / trial_summary["artifact"])
         task = next(item for item in tasks if item["task_id"] == featured_task_id)
         events: list[dict[str, Any]] = [
-            {"index": 0, "kind": "message", "text": task["instruction"]}
+            {
+                "index": 0,
+                "kind": "message",
+                "role": "employee-request",
+                "stage": "discover",
+                "text": task["instruction"],
+            }
         ]
         for call_number, entry in enumerate(trial["trace"], start=1):
             result = json.dumps(entry["result"], sort_keys=True)
@@ -543,6 +759,17 @@ def _website_data(
             {
                 "index": len(events),
                 "kind": "message",
+                "role": "agent-response",
+                "stage": "communicate",
+                "text": trial["final_response"],
+            }
+        )
+        events.append(
+            {
+                "index": len(events),
+                "kind": "message",
+                "role": "verifier-receipt",
+                "stage": "submit",
                 "text": (
                     f"Verifier: FactoryScore {trial['score']:.2f}; "
                     f"strict pass {'yes' if trial['strict_pass'] else 'no'}."
@@ -584,7 +811,13 @@ def _website_data(
         episode = representative_episodes[family]
         task = next(item for item in tasks if item["task_id"] == episode["task_id"])
         events: list[dict[str, Any]] = [
-            {"index": 0, "kind": "message", "text": task["instruction"]}
+            {
+                "index": 0,
+                "kind": "message",
+                "role": "employee-request",
+                "stage": "discover",
+                "text": task["instruction"],
+            }
         ]
         for call_number, entry in enumerate(episode["trace"], start=1):
             result = json.dumps(entry["result"], sort_keys=True)
@@ -604,6 +837,8 @@ def _website_data(
             {
                 "index": len(events),
                 "kind": "message",
+                "role": "verifier-receipt",
+                "stage": "submit",
                 "text": f"Verifier: {episode['passed_checks']}/{episode['total_checks']} checks passed; FactoryScore {episode['score']:.2f}.",
             }
         )
@@ -676,7 +911,7 @@ def _website_data(
                     "description": "100 × passed task-specific deterministic criterion weight / available criterion weight, averaged over tasks.",
                 }
             ],
-            "strictPassTracked": True,
+            "strictPassTracked": False,
         },
         "leaderboard": leaderboard,
         "tasks": summaries,
@@ -934,22 +1169,26 @@ for step in plan:
     _write_text(solution / "solve.sh", "#!/bin/bash\nset -euo pipefail\npython3 \"$(dirname \"$0\")/solve.py\"\n", executable=True)
 
 
-def _model_run_markdown(model_runs: list[dict[str, Any]]) -> str:
+def _model_run_markdown(
+    model_runs: list[dict[str, Any]],
+    *,
+    artifact_pattern: str = "model-runs/{run_slug}.json",
+) -> str:
     if not model_runs:
         return "No version-pinned model run is published for this release."
     rows = "\n".join(
         (
-            f"| [{run['model']['name']}](model-runs/{run['run_slug']}.json) | "
+            f"| [{run['model']['name']}]({artifact_pattern.format(run_slug=run['run_slug'])}) | "
             f"{run['harness']['name']} {run['harness']['version']} / {run['model']['agent']} "
             f"{run['model']['agent_version']} / {run['model']['reasoning_effort']} | "
             f"{run['aggregate']['tasks']}/100 | {run['aggregate']['mean_factory_score']:.2f} | "
-            f"{run['aggregate']['strict_passes']}/{run['aggregate']['tasks']} | {run['selection']} |"
+            f"{run['selection']} |"
         )
         for run in model_runs
     )
     return (
-        "| Model | Harness | Coverage | FactoryScore | Strict passes | Selection |\n"
-        "|---|---|---:|---:|---:|---|\n"
+        "| Model | Harness | Coverage | FactoryScore | Selection |\n"
+        "|---|---|---:|---:|---|\n"
         f"{rows}"
     )
 
@@ -958,8 +1197,13 @@ def _dataset_card(
     tasks: list[dict[str, Any]],
     qualification: dict[str, Any],
     model_runs: list[dict[str, Any]],
+    *,
+    model_run_artifact_pattern: str = "model-runs/{run_slug}.json",
 ) -> str:
-    model_run_table = _model_run_markdown(model_runs)
+    model_run_table = _model_run_markdown(
+        model_runs,
+        artifact_pattern=model_run_artifact_pattern,
+    )
     return f"""---
 license: cc-by-4.0
 task_categories:
@@ -1028,9 +1272,9 @@ These rows are measured controls, not claims about frontier models.
 
 {model_run_table}
 
-Coverage is part of the result. A stratified subset is not presented as a
-100-task score. Full manifests and task-level traces are mirrored under
-`model-runs/`.
+Only exact-release 100/100-task runs are eligible. Full manifests, final model
+responses, deterministic verifier verdicts, and task-level traces are mirrored
+under `model-runs/`.
 
 ## Fields
 
@@ -1101,7 +1345,7 @@ Release qualification also removes every reference mutation individually. All
 
 {model_run_table}
 
-Subset coverage is explicit and is never extrapolated to all 100 tasks.
+Only exact-release 100/100-task runs are eligible for the model leaderboard.
 
 ## Layout
 
@@ -1123,14 +1367,40 @@ the repository does not distribute Oracle code, proprietary UI, or customer data
 """
 
 
-def build_release(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
+def build_release(
+    output: Path = DEFAULT_OUTPUT,
+    *,
+    _staged: bool = False,
+) -> dict[str, Any]:
+    if not _staged:
+        output = output.resolve()
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(
+            prefix=f".{output.name}-build-",
+            dir=output.parent,
+        ) as temporary:
+            temporary_root = Path(temporary)
+            staged_output = temporary_root / output.name
+            build_report = build_release(staged_output, _staged=True)
+            previous_output = temporary_root / "previous-release"
+            had_previous = output.exists()
+            if had_previous:
+                output.replace(previous_output)
+            try:
+                staged_output.replace(output)
+            except BaseException:
+                if had_previous and previous_output.exists():
+                    previous_output.replace(output)
+                raise
+            return build_report
+
     tasks = build_catalog()
     qualification = qualify(tasks)
     model_runs = _load_model_runs()
     if not qualification["qualification_passed"]:
         raise RuntimeError("qualification failed; release was not emitted")
     if output.exists():
-        shutil.rmtree(output)
+        raise ValueError(f"staged release output already exists: {output}")
     output.mkdir(parents=True)
     tools = tool_definitions()
     grouped_tools = [
@@ -1229,12 +1499,28 @@ shell commands, package installation, or arbitrary paths.
     _copy_model_run_artifacts(model_runs, output / "huggingface" / "model-runs")
     _write_text(output / "huggingface" / ".gitattributes", "*.jsonl filter=lfs diff=lfs merge=lfs -text\n")
 
+    _copy_model_run_artifacts(model_runs, output / "harbor" / "model-runs")
+    harbor_dataset_files: tuple[Path, ...] = ()
+    if model_runs:
+        harbor_model_runs = output / "harbor" / "model-runs.json"
+        _write_json(harbor_model_runs, _harbor_model_run_bundle(model_runs))
+        harbor_dataset_files = (harbor_model_runs,)
     _write_text(
         output / "harbor" / "dataset.toml",
-        _harbor_dataset_manifest(output / "harbor" / "tasks"),
+        _harbor_dataset_manifest(
+            output / "harbor" / "tasks",
+            harbor_dataset_files,
+        ),
     )
-    _write_text(output / "harbor" / "README.md", _dataset_card(tasks, qualification, model_runs))
-    _copy_model_run_artifacts(model_runs, output / "harbor" / "model-runs")
+    _write_text(
+        output / "harbor" / "README.md",
+        _dataset_card(
+            tasks,
+            qualification,
+            model_runs,
+            model_run_artifact_pattern="model-runs.json",
+        ),
+    )
 
     shutil.copy2(REPO_ROOT / "LICENSE", output / "LICENSE")
     shutil.copy2(REPO_ROOT / "NOTICE", output / "NOTICE")

@@ -30,7 +30,7 @@ completion is supporting evidence, not a second benchmark metric.
 
 ## Qualification results
 
-The v3.3 release executes 1,400 canonical trials:
+The v3.3.5 release executes 1,400 canonical trials:
 
 - 100/100 reference-oracle strict passes at 100.00 FactoryScore
 - 100/100 exact deterministic replay matches
@@ -60,6 +60,14 @@ exceptions, tool calls, cost, trajectories, verifier verdicts, reward records,
 and any disclosed runtime overlay. Results are imported directly from Harbor;
 they are never reconstructed from oracle traces or carried forward across a
 benchmark version change.
+
+The published v3.3.5 leaderboard row is a single exact-release Harbor run of
+`gpt-5.6-luna` through Codex 0.151.0 at maximum reasoning: 100/100 tasks,
+76.20 mean FactoryScore, zero exceptions, one attempt per task, and zero
+retries. Sixty-two tasks scored at least 80, 79 scored at least 60, and no task
+scored zero (range 13.50–100.00). The featured Luma-lamp commitment task scored
+88.67 and includes its complete public trajectory, verifier verdict, reward
+record, final response, and source receipts.
 
 ## Run locally
 
