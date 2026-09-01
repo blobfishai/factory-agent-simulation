@@ -49,6 +49,7 @@ def test_harbor_import_pins_each_trial_and_the_complete_catalog(
                     "nodeVersion": "22.23.2",
                     "nvmVersion": "0.40.2",
                     "platform": "test-platform",
+                    "mountTarget": "/home/agent/.nvm",
                     "mountTargets": ["/home/agent/.nvm", "/root/.nvm"],
                     "treeSha256": runtime_tree,
                     "files": runtime_files,

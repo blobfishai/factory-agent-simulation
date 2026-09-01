@@ -38,6 +38,7 @@ RELEASE_DATASET_PATH = REPO_ROOT / "benchmark" / "factorybench100" / "harbor" / 
 RELEASE_TASKS_ROOT = RELEASE_DATASET_PATH.parent / "tasks"
 RUNTIME_LOCKS_PATH = REPO_ROOT / "benchmark" / "model-runtime-locks.json"
 REQUIRED_RUNTIME_TARGETS = frozenset({"/root/.nvm", "/home/agent/.nvm"})
+EFFECTIVE_RUNTIME_TARGET = "/home/agent/.nvm"
 HARBOR_TASK_ID_ALIASES = {
     # Harbor task names share a namespace with dataset names, so the final task
     # cannot itself be published as blobfishai/factorybench-100.
@@ -610,6 +611,7 @@ def _validate_runtime_overlay(
         and lock.get("agentVersion") == agent_version
         and lock.get("nodeVersion") == runtime["node"]
         and lock.get("nvmVersion") == runtime["nvm"]
+        and lock.get("mountTarget") == EFFECTIVE_RUNTIME_TARGET
         and lock.get("mountTargets") == sorted(targets)
     ]
     if len(candidates) != 1:
