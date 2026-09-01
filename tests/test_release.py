@@ -58,6 +58,27 @@ def test_checked_in_release_has_all_distribution_shapes() -> None:
 
     model_rows = [row for row in website["leaderboard"] if row["kind"] == "model"]
     assert all(row["tasks"] == 100 for row in model_rows)
+    harbor_dataset_files = harbor_manifest.get("files") or []
+    if model_rows:
+        assert harbor_dataset_files == [
+            {
+                "path": "model-runs.json",
+                "digest": (
+                    "sha256:"
+                    + hashlib.sha256(
+                        (RELEASE / "harbor" / "model-runs.json").read_bytes()
+                    ).hexdigest()
+                ),
+            }
+        ]
+        harbor_model_runs = json.loads(
+            (RELEASE / "harbor" / "model-runs.json").read_text()
+        )
+        assert harbor_model_runs["schema_version"] == "factorybench.harbor-model-runs.v1"
+        assert harbor_model_runs["benchmark_version"] == website["benchmark"]["version"]
+        assert len(harbor_model_runs["runs"]) == len(model_rows)
+    else:
+        assert harbor_dataset_files == []
     semantic_rows = []
     harbor_task_root = RELEASE / "harbor" / "tasks"
     for path in sorted(harbor_task_root.rglob("*")):

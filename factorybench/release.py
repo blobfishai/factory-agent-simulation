@@ -440,6 +440,47 @@ def _copy_model_run_artifacts(runs: list[dict[str, Any]], destination: Path) -> 
             shutil.copy2(source, target)
 
 
+def _harbor_model_run_bundle(runs: list[dict[str, Any]]) -> dict[str, Any]:
+    """Flatten the exact public run tree into one Harbor dataset-level file."""
+
+    bundled_runs: list[dict[str, Any]] = []
+    for run in runs:
+        run_slug = str(run["run_slug"])
+        artifacts = []
+        for trial in run["trials"]:
+            relative = str(trial["artifact"])
+            artifacts.append(
+                {
+                    "path": f"model-runs/{relative}",
+                    "record": _read_json(MODEL_RUNS_ROOT / relative),
+                }
+            )
+        runtime_overlay = run.get("runtime_overlay")
+        runtime_artifact = None
+        if runtime_overlay is not None:
+            relative = str(runtime_overlay["artifact"])
+            runtime_artifact = {
+                "path": f"model-runs/{relative}",
+                "record": _read_json(MODEL_RUNS_ROOT / relative),
+            }
+        bundled_runs.append(
+            {
+                "manifest_path": f"model-runs/{run_slug}.json",
+                "manifest": run,
+                "trial_artifacts": artifacts,
+                "runtime_overlay_artifact": runtime_artifact,
+            }
+        )
+    bundle = {
+        "schema_version": "factorybench.harbor-model-runs.v1",
+        "benchmark": BENCHMARK_NAME,
+        "benchmark_version": BENCHMARK_VERSION,
+        "runs": bundled_runs,
+    }
+    _assert_public_value_safe(bundle, location="Harbor model-run bundle")
+    return bundle
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -449,7 +490,10 @@ def _harbor_task_digest(task_dir: Path) -> str:
     return harbor_task_digest(task_dir)[0]
 
 
-def _harbor_dataset_manifest(tasks_root: Path) -> str:
+def _harbor_dataset_manifest(
+    tasks_root: Path,
+    dataset_files: tuple[Path, ...] = (),
+) -> str:
     lines = [
         "# Generated FactoryBench-100 Harbor dataset",
         "[dataset]",
@@ -469,6 +513,17 @@ def _harbor_dataset_manifest(tasks_root: Path) -> str:
                 "[[tasks]]",
                 f'name = "{task_config["task"]["name"]}"',
                 f'digest = "{_harbor_task_digest(task_dir)}"',
+            ]
+        )
+    for dataset_file in sorted(dataset_files, key=lambda path: path.name):
+        if dataset_file.parent != tasks_root.parent or "/" in dataset_file.name:
+            raise ValueError("Harbor dataset files must be top-level release files")
+        lines.extend(
+            [
+                "",
+                "[[files]]",
+                f'path = "{dataset_file.name}"',
+                f'digest = "sha256:{_sha256(dataset_file)}"',
             ]
         )
     return "\n".join(lines) + "\n"
@@ -1114,12 +1169,16 @@ for step in plan:
     _write_text(solution / "solve.sh", "#!/bin/bash\nset -euo pipefail\npython3 \"$(dirname \"$0\")/solve.py\"\n", executable=True)
 
 
-def _model_run_markdown(model_runs: list[dict[str, Any]]) -> str:
+def _model_run_markdown(
+    model_runs: list[dict[str, Any]],
+    *,
+    artifact_pattern: str = "model-runs/{run_slug}.json",
+) -> str:
     if not model_runs:
         return "No version-pinned model run is published for this release."
     rows = "\n".join(
         (
-            f"| [{run['model']['name']}](model-runs/{run['run_slug']}.json) | "
+            f"| [{run['model']['name']}]({artifact_pattern.format(run_slug=run['run_slug'])}) | "
             f"{run['harness']['name']} {run['harness']['version']} / {run['model']['agent']} "
             f"{run['model']['agent_version']} / {run['model']['reasoning_effort']} | "
             f"{run['aggregate']['tasks']}/100 | {run['aggregate']['mean_factory_score']:.2f} | "
@@ -1138,8 +1197,13 @@ def _dataset_card(
     tasks: list[dict[str, Any]],
     qualification: dict[str, Any],
     model_runs: list[dict[str, Any]],
+    *,
+    model_run_artifact_pattern: str = "model-runs/{run_slug}.json",
 ) -> str:
-    model_run_table = _model_run_markdown(model_runs)
+    model_run_table = _model_run_markdown(
+        model_runs,
+        artifact_pattern=model_run_artifact_pattern,
+    )
     return f"""---
 license: cc-by-4.0
 task_categories:
@@ -1435,12 +1499,28 @@ shell commands, package installation, or arbitrary paths.
     _copy_model_run_artifacts(model_runs, output / "huggingface" / "model-runs")
     _write_text(output / "huggingface" / ".gitattributes", "*.jsonl filter=lfs diff=lfs merge=lfs -text\n")
 
+    _copy_model_run_artifacts(model_runs, output / "harbor" / "model-runs")
+    harbor_dataset_files: tuple[Path, ...] = ()
+    if model_runs:
+        harbor_model_runs = output / "harbor" / "model-runs.json"
+        _write_json(harbor_model_runs, _harbor_model_run_bundle(model_runs))
+        harbor_dataset_files = (harbor_model_runs,)
     _write_text(
         output / "harbor" / "dataset.toml",
-        _harbor_dataset_manifest(output / "harbor" / "tasks"),
+        _harbor_dataset_manifest(
+            output / "harbor" / "tasks",
+            harbor_dataset_files,
+        ),
     )
-    _write_text(output / "harbor" / "README.md", _dataset_card(tasks, qualification, model_runs))
-    _copy_model_run_artifacts(model_runs, output / "harbor" / "model-runs")
+    _write_text(
+        output / "harbor" / "README.md",
+        _dataset_card(
+            tasks,
+            qualification,
+            model_runs,
+            model_run_artifact_pattern="model-runs.json",
+        ),
+    )
 
     shutil.copy2(REPO_ROOT / "LICENSE", output / "LICENSE")
     shutil.copy2(REPO_ROOT / "NOTICE", output / "NOTICE")
