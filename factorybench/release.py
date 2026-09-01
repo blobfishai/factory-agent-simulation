@@ -911,7 +911,7 @@ def _website_data(
                     "description": "100 × passed task-specific deterministic criterion weight / available criterion weight, averaged over tasks.",
                 }
             ],
-            "strictPassTracked": True,
+            "strictPassTracked": False,
         },
         "leaderboard": leaderboard,
         "tasks": summaries,
@@ -1182,13 +1182,13 @@ def _model_run_markdown(
             f"{run['harness']['name']} {run['harness']['version']} / {run['model']['agent']} "
             f"{run['model']['agent_version']} / {run['model']['reasoning_effort']} | "
             f"{run['aggregate']['tasks']}/100 | {run['aggregate']['mean_factory_score']:.2f} | "
-            f"{run['aggregate']['strict_passes']}/{run['aggregate']['tasks']} | {run['selection']} |"
+            f"{run['selection']} |"
         )
         for run in model_runs
     )
     return (
-        "| Model | Harness | Coverage | FactoryScore | Strict passes | Selection |\n"
-        "|---|---|---:|---:|---:|---|\n"
+        "| Model | Harness | Coverage | FactoryScore | Selection |\n"
+        "|---|---|---:|---:|---|\n"
         f"{rows}"
     )
 
