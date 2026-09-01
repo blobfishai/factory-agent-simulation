@@ -302,6 +302,10 @@ def test_harbor_import_pins_each_trial_and_the_complete_catalog(
 
     monkeypatch.setattr(release_module, "MODEL_RUNS_ROOT", output)
     assert release_module._load_model_runs() == [manifest]
+    harbor_bundle = release_module._harbor_model_run_bundle([manifest])
+    assert harbor_bundle["runs"][0]["manifest"]["runtime_overlay"][
+        "runtime_mount"
+    ]["targets"] == ["/root/.nvm", "/home/agent/.nvm"]
 
     safe_artifact = json.loads(
         (output / manifest["trials"][0]["artifact"]).read_text(encoding="utf-8")

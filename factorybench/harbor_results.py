@@ -119,6 +119,8 @@ def _scrub_public_value(value: Any, key: str = "") -> Any:
     if isinstance(value, list):
         return [_scrub_public_value(child) for child in value]
     if isinstance(value, str):
+        if value in REQUIRED_RUNTIME_TARGETS:
+            return value
         for pattern in SENSITIVE_TEXT_PATTERNS:
             value = pattern.sub(
                 r"\1<redacted>" if pattern.groups else "<redacted>",
